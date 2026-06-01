@@ -1,0 +1,10 @@
+{
+  "component": "LatexFormula",
+  "props": {
+    "title": "Bayesian update",
+    "formula": "P(A \\mid B) = \\frac{P(B \\mid A) \\cdot P(A)}{P(B)}",
+    "displayMode": true,
+    "annotation": "Posterior probability after observing evidence.",
+    "bordered": true
+  }
+}

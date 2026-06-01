@@ -1,0 +1,18 @@
+{
+  "component": "SimpleTable",
+  "props": {
+    "title": "Quarterly pipeline snapshot",
+    "caption": "Active regions and weighted revenue for the current quarter.",
+    "striped": true,
+    "columns": [
+      {"key": "region", "header": "Region"},
+      {"key": "accounts", "header": "Accounts", "align": "end"},
+      {"key": "revenue", "header": "Weighted revenue", "align": "end"}
+    ],
+    "rows": [
+      {"cells": ["North", 14, "$120k"]},
+      {"cells": ["West", 9, "$84k"]},
+      {"cells": ["South", 11, "$97k"]}
+    ]
+  }
+}

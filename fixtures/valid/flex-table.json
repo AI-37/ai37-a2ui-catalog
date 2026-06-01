@@ -1,0 +1,44 @@
+{
+  "component": "FlexTable",
+  "props": {
+    "title": "Operations scorecard",
+    "caption": "Grouped metrics for service quality across support teams.",
+    "headerRows": [
+      {
+        "cells": [
+          {"content": "Team", "rowSpan": 2, "emphasis": "strong"},
+          {"content": "Quality", "colSpan": 2, "emphasis": "strong"},
+          {"content": "Velocity", "colSpan": 2, "emphasis": "strong"}
+        ]
+      },
+      {
+        "cells": [
+          {"content": "CSAT", "emphasis": "strong"},
+          {"content": "Escalations", "emphasis": "strong"},
+          {"content": "Resolution time", "emphasis": "strong"},
+          {"content": "Backlog", "emphasis": "strong"}
+        ]
+      }
+    ],
+    "bodyRows": [
+      {
+        "cells": [
+          {"content": "Alpha"},
+          {"content": "94%", "align": "end"},
+          {"content": "3", "align": "end"},
+          {"content": "4h 12m", "align": "end"},
+          {"content": "21", "align": "end"}
+        ]
+      },
+      {
+        "cells": [
+          {"content": "Beta"},
+          {"content": "91%", "align": "end"},
+          {"content": "5", "align": "end"},
+          {"content": "5h 08m", "align": "end"},
+          {"content": "17", "align": "end"}
+        ]
+      }
+    ]
+  }
+}

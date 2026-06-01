@@ -1,0 +1,34 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://a2ui-schemas.dev.ai37.ru/a2ui/catalogs/ai37-a2ui/v1/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "SimpleTable",
+          "title": "Quarterly pipeline snapshot",
+          "caption": "Active regions and weighted revenue for the current quarter.",
+          "striped": true,
+          "columns": [
+            {"key": "region", "header": "Region"},
+            {"key": "accounts", "header": "Accounts", "align": "end"},
+            {"key": "revenue", "header": "Weighted revenue", "align": "end"}
+          ],
+          "rows": [
+            {"cells": ["North", 14, "$120k"]},
+            {"cells": ["West", 9, "$84k"]},
+            {"cells": ["South", 11, "$97k"]}
+          ]
+        }
+      ]
+    }
+  }
+]

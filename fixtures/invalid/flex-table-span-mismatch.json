@@ -1,0 +1,29 @@
+{
+  "component": "FlexTable",
+  "props": {
+    "headerRows": [
+      {
+        "cells": [
+          {"content": "Team", "rowSpan": 2},
+          {"content": "Quality", "colSpan": 2}
+        ]
+      },
+      {
+        "cells": [
+          {"content": "CSAT"},
+          {"content": "Escalations"},
+          {"content": "Backlog"}
+        ]
+      }
+    ],
+    "bodyRows": [
+      {
+        "cells": [
+          {"content": "Alpha"},
+          {"content": "94%"},
+          {"content": "3"}
+        ]
+      }
+    ]
+  }
+}

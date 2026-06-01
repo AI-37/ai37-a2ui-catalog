@@ -1,0 +1,123 @@
+:root {
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  color: #0f172a;
+  background:
+    radial-gradient(circle at top left, rgba(255, 203, 107, 0.25), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(70, 181, 255, 0.22), transparent 24%),
+    linear-gradient(180deg, #fffaf2 0%, #f8fbff 100%);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+}
+
+.demo-shell {
+  display: grid;
+  gap: 28px;
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.demo-hero {
+  padding: 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.demo-eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a3412;
+}
+
+.demo-hero h1 {
+  margin: 0 0 12px;
+  max-width: 12ch;
+  font-size: clamp(2.2rem, 4vw, 4.8rem);
+  line-height: 0.95;
+}
+
+.demo-hero p {
+  max-width: 64ch;
+  margin: 0;
+  color: #475569;
+  font-size: 1.05rem;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.demo-sidebar {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.demo-example {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.demo-example:hover,
+.demo-example-active {
+  transform: translateY(-2px);
+  border-color: rgba(14, 116, 144, 0.35);
+  box-shadow: 0 20px 48px rgba(14, 116, 144, 0.1);
+}
+
+.demo-example span {
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.demo-stage {
+  display: grid;
+  gap: 16px;
+}
+
+.demo-stage-header h2 {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+}
+
+.demo-stage-header p {
+  margin: 0;
+  color: #475569;
+}
+
+.demo-surface-card {
+  min-height: 420px;
+  padding: 24px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 900px) {
+  .demo-shell {
+    padding: 18px;
+  }
+
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+}

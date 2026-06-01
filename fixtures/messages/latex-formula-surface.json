@@ -1,0 +1,26 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://a2ui-schemas.dev.ai37.ru/a2ui/catalogs/ai37-a2ui/v1/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "LatexFormula",
+          "title": "Bayesian update",
+          "formula": "P(A \\mid B) = \\frac{P(B \\mid A) \\cdot P(A)}{P(B)}",
+          "displayMode": true,
+          "annotation": "Posterior probability after observing evidence.",
+          "bordered": true
+        }
+      ]
+    }
+  }
+]

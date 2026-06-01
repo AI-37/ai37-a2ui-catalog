@@ -1,0 +1,12 @@
+{
+  "component": "SimpleTable",
+  "props": {
+    "columns": [
+      {"key": "region", "header": "Region"},
+      {"key": "accounts", "header": "Accounts"}
+    ],
+    "rows": [
+      {"cells": ["North"]}
+    ]
+  }
+}

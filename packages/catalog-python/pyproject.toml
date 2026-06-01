@@ -1,0 +1,26 @@
+[project]
+name = "ai37-a2ui-catalog"
+version = "0.1.0"
+description = "Pydantic models and validation helpers for the AI37 A2UI catalog"
+readme = "README.md"
+authors = [{ name = "AI37", email = "dev@ai37.ru" }]
+requires-python = ">=3.13,<4.0"
+dependencies = [
+	"pydantic>=2.11.7,<3.0.0"
+]
+
+[tool.poetry.dependencies]
+
+
+[tool.poetry]
+packages = [{ include = "ai37_a2ui_catalog", from = "src" }]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

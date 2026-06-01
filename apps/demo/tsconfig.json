@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "rootDir": "../..",
+    "types": ["vite/client"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "../../packages/catalog-react/src/**/*.ts",
+    "../../packages/catalog-react/src/**/*.tsx",
+    "../../packages/catalog-schemas/src/**/*.ts"
+  ]
+}
