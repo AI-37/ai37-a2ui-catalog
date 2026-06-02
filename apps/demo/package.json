@@ -12,6 +12,7 @@
     "@a2ui/react": "^0.10.0",
     "@a2ui/web_core": "^0.10.0",
     "@ai37-a2ui/catalog-react": "workspace:*",
+    "@assistant-ui/react": "^0.14.13",
     "katex": "^0.16.22",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
