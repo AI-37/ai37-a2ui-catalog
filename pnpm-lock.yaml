@@ -104,6 +104,10 @@ importers:
       zod-to-json-schema:
         specifier: ^3.24.6
         version: 3.25.2(zod@3.25.76)
+    devDependencies:
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
 
 packages:
 
