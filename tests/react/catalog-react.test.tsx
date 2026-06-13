@@ -5,7 +5,7 @@ import {render, screen} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
-import {ai37Catalog} from '@ai37-a2ui/catalog-react';
+import {ai37Catalog} from '@ai37/a2ui-catalog-react';
 
 function readMessages(fileName: string) {
   return JSON.parse(

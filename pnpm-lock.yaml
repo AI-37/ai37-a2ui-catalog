@@ -59,7 +59,7 @@ importers:
       '@a2ui/web_core':
         specifier: ^0.10.0
         version: 0.10.0
-      '@ai37-a2ui/catalog-react':
+      '@ai37/a2ui-catalog-react':
         specifier: workspace:*
         version: link:../../packages/catalog-react
       '@assistant-ui/react':
@@ -83,17 +83,17 @@ importers:
       '@a2ui/web_core':
         specifier: ^0.10.0
         version: 0.10.0
-      '@ai37-a2ui/catalog-schemas':
+      '@ai37/a2ui-catalog-schemas':
         specifier: workspace:*
         version: link:../catalog-schemas
       katex:
         specifier: ^0.16.22
         version: 0.16.47
       react:
-        specifier: ^19.2.0
+        specifier: ^19.0.0
         version: 19.2.6
       react-dom:
-        specifier: ^19.2.0
+        specifier: ^19.0.0
         version: 19.2.6(react@19.2.6)
 
   packages/catalog-schemas:

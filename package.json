@@ -9,14 +9,14 @@
     "pnpm": ">=10.0.0"
   },
   "scripts": {
-    "build": "pnpm -r --filter './packages/**' run build && pnpm --filter @ai37-a2ui/demo run build",
-    "typecheck": "pnpm -r --filter './packages/**' run typecheck && pnpm --filter @ai37-a2ui/demo run typecheck",
+    "build": "pnpm -r --filter './packages/**' run build && pnpm --filter @ai37/a2ui-demo run build",
+    "typecheck": "pnpm -r --filter './packages/**' run typecheck && pnpm --filter @ai37/a2ui-demo run typecheck",
     "test": "vitest run && poetry -C packages/catalog-python run pytest ../../tests/python",
     "test:ts": "vitest run tests/ts tests/react",
     "test:python": "poetry -C packages/catalog-python run pytest ../../tests/python",
     "export:schemas": "tsx packages/catalog-schemas/src/generate-artifacts.ts",
     "lint": "pnpm run typecheck",
-    "demo": "pnpm --filter @ai37-a2ui/demo run dev",
+    "demo": "pnpm --filter @ai37/a2ui-demo run dev",
     "version:bump": "node scripts/bump-version.mjs"
   },
   "devDependencies": {

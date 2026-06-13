@@ -1,7 +1,7 @@
 import React, {useMemo} from 'react';
 import katex from 'katex';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
-import {latexFormulaDefinition} from '@ai37-a2ui/catalog-schemas';
+import {latexFormulaDefinition} from '@ai37/a2ui-catalog-schemas';
 import {useA2uiBaseStyles} from './shared';
 
 export const LatexFormula = createComponentImplementation(latexFormulaDefinition, ({props}) => {

@@ -17,8 +17,8 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
     "paths": {
-      "@ai37-a2ui/catalog-schemas": ["packages/catalog-schemas/src/index.ts"],
-      "@ai37-a2ui/catalog-react": ["packages/catalog-react/src/index.ts"]
+      "@ai37/a2ui-catalog-schemas": ["packages/catalog-schemas/src/index.ts"],
+      "@ai37/a2ui-catalog-react": ["packages/catalog-react/src/index.ts"]
     }
   }
 }

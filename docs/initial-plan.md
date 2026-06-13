@@ -41,4 +41,4 @@
 - Python models: manual, no code generation.
 - Repo artifacts: no committed generated outputs.
 - Publication host: `a2ui-schemas.dev.ai37.ru`.
-- Packaging: npm package `@ai37-a2ui/catalog-schemas`, React package `@ai37-a2ui/catalog-react`, PyPI package `ai37-a2ui-catalog`.
+- Packaging: npm package `@ai37/a2ui-catalog-schemas`, React package `@ai37/a2ui-catalog-react`, PyPI package `ai37-a2ui-catalog`.

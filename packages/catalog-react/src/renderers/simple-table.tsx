@@ -1,6 +1,6 @@
 import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
-import {simpleTableDefinition} from '@ai37-a2ui/catalog-schemas';
+import {simpleTableDefinition} from '@ai37/a2ui-catalog-schemas';
 import {mapAlign, toDisplayValue, useA2uiBaseStyles} from './shared';
 
 export const SimpleTable = createComponentImplementation(simpleTableDefinition, ({props}) => {

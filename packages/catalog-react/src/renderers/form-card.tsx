@@ -1,6 +1,6 @@
 import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
-import {formCardDefinition} from '@ai37-a2ui/catalog-schemas';
+import {formCardDefinition} from '@ai37/a2ui-catalog-schemas';
 import {useA2uiBaseStyles} from './shared';
 
 const inputStyle: React.CSSProperties = {

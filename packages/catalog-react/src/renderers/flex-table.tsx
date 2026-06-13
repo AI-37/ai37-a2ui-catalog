@@ -1,6 +1,6 @@
 import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
-import {flexTableDefinition} from '@ai37-a2ui/catalog-schemas';
+import {flexTableDefinition} from '@ai37/a2ui-catalog-schemas';
 import {mapAlign, useA2uiBaseStyles} from './shared';
 
 export const FlexTable = createComponentImplementation(flexTableDefinition, ({props}) => {
