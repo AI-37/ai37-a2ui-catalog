@@ -8,7 +8,7 @@ import {
   formCardPropsSchema,
   latexFormulaPropsSchema,
   simpleTablePropsSchema,
-} from '@ai37-a2ui/catalog-schemas';
+} from '@ai37/a2ui-catalog-schemas';
 
 const repoRoot = process.cwd();
 

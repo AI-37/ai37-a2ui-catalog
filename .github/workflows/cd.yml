@@ -114,15 +114,15 @@ jobs:
       - name: Build npm packages
         run: pnpm -r --filter './packages/**' run build
 
-      - name: Publish @ai37-a2ui/catalog-schemas
+      - name: Publish @ai37/a2ui-catalog-schemas
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm --filter @ai37-a2ui/catalog-schemas publish --access public --no-git-checks --registry https://registry.npmjs.org/
+        run: pnpm --filter @ai37/a2ui-catalog-schemas publish --access public --no-git-checks --registry https://registry.npmjs.org/
 
-      - name: Publish @ai37-a2ui/catalog-react
+      - name: Publish @ai37/a2ui-catalog-react
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm --filter @ai37-a2ui/catalog-react publish --access public --no-git-checks --registry https://registry.npmjs.org/
+        run: pnpm --filter @ai37/a2ui-catalog-react publish --access public --no-git-checks --registry https://registry.npmjs.org/
 
   publish_pypi:
     name: Publish Python package

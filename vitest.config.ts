@@ -12,8 +12,8 @@ export default defineConfig({
       '@a2ui/react/v0_9': require.resolve('@a2ui/react/v0_9'),
       '@a2ui/web_core/v0_9': require.resolve('@a2ui/web_core/v0_9'),
       '@a2ui/web_core/v0_9/basic_catalog': require.resolve('@a2ui/web_core/v0_9/basic_catalog'),
-      '@ai37-a2ui/catalog-schemas': path.resolve(process.cwd(), 'packages/catalog-schemas/src/index.ts'),
-      '@ai37-a2ui/catalog-react': path.resolve(process.cwd(), 'packages/catalog-react/src/index.ts'),
+      '@ai37/a2ui-catalog-schemas': path.resolve(process.cwd(), 'packages/catalog-schemas/src/index.ts'),
+      '@ai37/a2ui-catalog-react': path.resolve(process.cwd(), 'packages/catalog-react/src/index.ts'),
     },
   },
   test: {

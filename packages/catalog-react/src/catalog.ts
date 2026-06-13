@@ -1,6 +1,6 @@
 import {basicCatalog, type ReactComponentImplementation} from '@a2ui/react/v0_9';
 import {Catalog} from '@a2ui/web_core/v0_9';
-import {CATALOG_ID} from '@ai37-a2ui/catalog-schemas';
+import {CATALOG_ID} from '@ai37/a2ui-catalog-schemas';
 import {SimpleTable} from './renderers/simple-table';
 import {FlexTable} from './renderers/flex-table';
 import {LatexFormula} from './renderers/latex-formula';

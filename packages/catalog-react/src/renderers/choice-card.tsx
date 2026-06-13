@@ -1,6 +1,6 @@
 import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
-import {choiceCardDefinition} from '@ai37-a2ui/catalog-schemas';
+import {choiceCardDefinition} from '@ai37/a2ui-catalog-schemas';
 import {useA2uiBaseStyles} from './shared';
 
 export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({props}) => {
