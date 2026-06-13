@@ -9,12 +9,16 @@ import {
 import {flexTableDefinition} from './components/flex-table';
 import {latexFormulaDefinition} from './components/latex-formula';
 import {simpleTableDefinition} from './components/simple-table';
+import {choiceCardDefinition} from './components/choice-card';
+import {formCardDefinition} from './components/form-card';
 import type {CatalogComponentDefinition, JsonSchema} from './types';
 
 export const componentDefinitions = [
   simpleTableDefinition,
   flexTableDefinition,
   latexFormulaDefinition,
+  choiceCardDefinition,
+  formCardDefinition,
 ] as const satisfies ReadonlyArray<CatalogComponentDefinition<any>>;
 
 export const componentDefinitionMap = new Map(

@@ -1,0 +1,63 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://a2ui-schemas.dev.ai37.ru/a2ui/catalogs/ai37-a2ui/v1/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "FormCard",
+          "title": "Параметры здания и лифтов",
+          "description": "Заполните характеристики объекта, чтобы агент подобрал конфигурацию.",
+          "fields": [
+            {
+              "name": "floors",
+              "label": "Количество этажей",
+              "type": "number",
+              "required": true,
+              "placeholder": "например, 12"
+            },
+            {
+              "name": "lift_count",
+              "label": "Число лифтов",
+              "type": "number",
+              "required": true,
+              "defaultValue": 2
+            },
+            {
+              "name": "lift_type",
+              "label": "Тип лифта",
+              "type": "select",
+              "required": true,
+              "options": ["Пассажирский", "Грузовой", "Больничный"],
+              "defaultValue": "Пассажирский"
+            },
+            {
+              "name": "has_machine_room",
+              "label": "Есть машинное помещение",
+              "type": "boolean",
+              "defaultValue": false
+            },
+            {
+              "name": "building_name",
+              "label": "Название объекта",
+              "type": "text",
+              "placeholder": "БЦ «Север»"
+            }
+          ],
+          "submit": {
+            "label": "Отправить параметры",
+            "action": "submit_building_params"
+          }
+        }
+      ]
+    }
+  }
+]

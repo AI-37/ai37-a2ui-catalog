@@ -15,6 +15,8 @@ import {
 import simpleTableMessages from '../../../fixtures/messages/simple-table-surface.json';
 import flexTableMessages from '../../../fixtures/messages/flex-table-surface.json';
 import latexMessages from '../../../fixtures/messages/latex-formula-surface.json';
+import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.json';
+import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
 
 const examples = [
   {
@@ -34,6 +36,18 @@ const examples = [
     title: 'LaTeX Formula',
     description: 'Математические формулы для объяснений и аналитических выводов.',
     messages: latexMessages as A2uiMessage[],
+  },
+  {
+    key: 'choice-preview',
+    title: 'Choice Card',
+    description: 'Интерактивный выбор варианта для уточняющих HITL-вопросов агента.',
+    messages: choiceCardMessages as A2uiMessage[],
+  },
+  {
+    key: 'form-preview',
+    title: 'Form Card',
+    description: 'Форма типизированных полей для сбора параметров у пользователя.',
+    messages: formCardMessages as A2uiMessage[],
   },
 ] as const;
 

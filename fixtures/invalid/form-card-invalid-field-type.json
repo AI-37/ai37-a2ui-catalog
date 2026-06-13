@@ -1,0 +1,17 @@
+{
+  "component": "FormCard",
+  "props": {
+    "title": "Параметры здания и лифтов",
+    "fields": [
+      {
+        "name": "floors",
+        "label": "Количество этажей",
+        "type": "date"
+      }
+    ],
+    "submit": {
+      "label": "Отправить параметры",
+      "action": "submit_building_params"
+    }
+  }
+}

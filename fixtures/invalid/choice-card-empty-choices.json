@@ -1,0 +1,11 @@
+{
+  "component": "ChoiceCard",
+  "props": {
+    "title": "Выберите стандарт расчёта лифтов",
+    "choices": [],
+    "submit": {
+      "label": "Подтвердить выбор",
+      "action": "submit_standard_choice"
+    }
+  }
+}

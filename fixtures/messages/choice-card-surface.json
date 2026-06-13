@@ -1,0 +1,40 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://a2ui-schemas.dev.ai37.ru/a2ui/catalogs/ai37-a2ui/v1/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "ChoiceCard",
+          "title": "Выберите стандарт расчёта лифтов",
+          "description": "Уточните, по какому нормативу выполнять расчёт перед продолжением.",
+          "multiple": false,
+          "choices": [
+            {
+              "label": "ГОСТ Р 52941",
+              "value": "gost-52941",
+              "description": "Лифты пассажирские. Общие технические требования."
+            },
+            {
+              "label": "ГОСТ 34758",
+              "value": "gost-34758",
+              "description": "Лифты. Общие требования безопасности к устройству и установке."
+            }
+          ],
+          "submit": {
+            "label": "Подтвердить выбор",
+            "action": "submit_standard_choice"
+          }
+        }
+      ]
+    }
+  }
+]
