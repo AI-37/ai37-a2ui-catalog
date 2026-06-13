@@ -46,4 +46,28 @@ describe('catalog-react integration', () => {
     expect(screen.getByText('Bayesian update')).toBeInTheDocument();
     expect(container.querySelector('.katex')).toBeTruthy();
   });
+
+  it('renders the choice card surface', () => {
+    const processor = new MessageProcessor([ai37Catalog]);
+    processor.processMessages(readMessages('choice-card-surface.json'));
+    const surface = processor.model.getSurface('demo-surface');
+
+    render(<A2uiSurface surface={surface as any} />);
+
+    expect(screen.getByText('Выберите стандарт расчёта лифтов')).toBeInTheDocument();
+    expect(screen.getByText('ГОСТ Р 52941')).toBeInTheDocument();
+    expect(screen.getByText('Подтвердить выбор')).toBeInTheDocument();
+  });
+
+  it('renders the form card surface', () => {
+    const processor = new MessageProcessor([ai37Catalog]);
+    processor.processMessages(readMessages('form-card-surface.json'));
+    const surface = processor.model.getSurface('demo-surface');
+
+    render(<A2uiSurface surface={surface as any} />);
+
+    expect(screen.getByText('Параметры здания и лифтов')).toBeInTheDocument();
+    expect(screen.getByText('Количество этажей')).toBeInTheDocument();
+    expect(screen.getByText('Отправить параметры')).toBeInTheDocument();
+  });
 });

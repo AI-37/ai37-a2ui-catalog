@@ -9,7 +9,7 @@ from ai37_a2ui_catalog import get_component_schema
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-COMPONENT_NAMES = ("SimpleTable", "FlexTable", "LatexFormula")
+COMPONENT_NAMES = ("SimpleTable", "FlexTable", "LatexFormula", "ChoiceCard", "FormCard")
 
 
 def load_exported_schema(component: str) -> dict[str, Any]:
