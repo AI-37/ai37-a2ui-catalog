@@ -2,6 +2,7 @@ import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {choiceCardDefinition} from '@ai37/a2ui-catalog-schemas';
 import {useA2uiBaseStyles} from './shared';
+import {tokens} from './tokens';
 
 export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({props}) => {
   useA2uiBaseStyles();
@@ -16,14 +17,15 @@ export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({
         gap: 14,
         padding: 18,
         borderRadius: 18,
-        border: '1px solid rgba(15, 23, 42, 0.12)',
-        background: '#fffdf8',
+        border: `1px solid ${tokens.border}`,
+        background: tokens.surfaceWarm,
+        color: tokens.text,
       }}
     >
       <header style={{display: 'grid', gap: 4}}>
-        <h3 style={{margin: 0, fontSize: '1.05rem'}}>{props.title}</h3>
+        <h3 style={{margin: 0, fontSize: '1.05rem', color: tokens.textStrong}}>{props.title}</h3>
         {props.description ? (
-          <p style={{margin: 0, color: '#475569'}}>{props.description}</p>
+          <p style={{margin: 0, color: tokens.textMuted}}>{props.description}</p>
         ) : null}
       </header>
       <div style={{display: 'grid', gap: 8}}>
@@ -36,7 +38,7 @@ export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({
               alignItems: 'flex-start',
               padding: '10px 12px',
               borderRadius: 12,
-              border: '1px solid rgba(15, 23, 42, 0.1)',
+              border: `1px solid ${tokens.borderSoft}`,
             }}
           >
             <input
@@ -48,7 +50,7 @@ export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({
             <span style={{display: 'grid', gap: 2}}>
               <span style={{fontWeight: 600}}>{choice.label}</span>
               {choice.description ? (
-                <span style={{color: '#64748b', fontSize: '0.9rem'}}>{choice.description}</span>
+                <span style={{color: tokens.textSubtle, fontSize: '0.9rem'}}>{choice.description}</span>
               ) : null}
             </span>
           </label>
@@ -63,8 +65,8 @@ export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({
             padding: '10px 18px',
             borderRadius: 12,
             border: 'none',
-            background: '#1e293b',
-            color: '#ffffff',
+            background: tokens.accent,
+            color: tokens.accentContrast,
             fontWeight: 600,
             cursor: 'pointer',
           }}

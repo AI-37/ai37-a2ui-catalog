@@ -175,6 +175,66 @@ button {
   border: 1px solid rgba(148, 163, 184, 0.22);
 }
 
+/*
+ * Пример тёмной темы каталога: переопределяем токены `--a2ui-*` на обёртке.
+ * Сами рендереры не меняются — они читают цвета через var(--a2ui-*, fallback),
+ * поэтому достаточно объявить новые значения переменных на родителе.
+ */
+.a2ui-theme-dark {
+  --a2ui-color-text-strong: #f1f5f9;
+  --a2ui-color-text: #e2e8f0;
+  --a2ui-color-text-muted: #94a3b8;
+  --a2ui-color-text-subtle: #94a3b8;
+
+  --a2ui-color-surface: #0f172a;
+  --a2ui-color-surface-muted: #1e293b;
+  --a2ui-color-surface-warm: #1c2536;
+  --a2ui-color-surface-header: #1e293b;
+
+  --a2ui-color-border: rgba(226, 232, 240, 0.16);
+  --a2ui-color-border-strong: rgba(226, 232, 240, 0.28);
+  --a2ui-color-border-soft: rgba(226, 232, 240, 0.14);
+  --a2ui-color-border-subtle: rgba(226, 232, 240, 0.1);
+  --a2ui-color-border-faint: rgba(226, 232, 240, 0.06);
+
+  --a2ui-color-accent: #3b82f6;
+  --a2ui-color-accent-contrast: #ffffff;
+  --a2ui-color-danger: #f87171;
+
+  --a2ui-color-formula-from: #1e293b;
+  --a2ui-color-formula-to: #172554;
+}
+
+.message-preview-card.a2ui-theme-dark {
+  background: linear-gradient(180deg, #0b1220, #111c30);
+  border-color: rgba(226, 232, 240, 0.14);
+}
+
+.demo-theme-toggle {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.demo-theme-toggle button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #475569;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.demo-theme-toggle button[aria-pressed='true'] {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
 .chat-footer {
   padding: 0 26px 26px;
 }

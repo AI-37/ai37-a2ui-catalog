@@ -15,4 +15,9 @@ import { ai37Catalog } from "@ai37/a2ui-catalog-react";
 `react` и `react-dom` — peer-зависимости (используется React приложения-хоста). Состав каталога и схемы
 берутся из [`@ai37/a2ui-catalog-schemas`](https://www.npmjs.com/package/@ai37/a2ui-catalog-schemas).
 
+## Темизация
+
+Цвета рендереров заданы через CSS-переменные `--a2ui-*` с дефолтами, поэтому тему можно переопределить без
+правок JS — например, тёмную. Токены и пример тёмной темы: [`docs/theming.md`](../../docs/theming.md).
+
 Лицензия: Apache-2.0.

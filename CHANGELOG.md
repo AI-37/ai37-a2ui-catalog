@@ -4,6 +4,12 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.2.1] - 2026.06.14
+
+### Changed
+
+- Replace hardcoded colors with tokens with further theming support
+
 ## [0.2.0] - 2026-06-13
 
 ### Added
