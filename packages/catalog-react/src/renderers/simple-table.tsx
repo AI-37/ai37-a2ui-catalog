@@ -8,8 +8,8 @@ export const SimpleTable = createComponentImplementation(simpleTableDefinition, 
   useA2uiBaseStyles();
 
   return (
-    <section style={{display: 'grid', gap: 12}}>
-      {props.title ? <h3 style={{margin: 0, fontSize: '1.05rem'}}>{props.title}</h3> : null}
+    <section style={{display: 'grid', gap: 12, color: tokens.text}}>
+      {props.title ? <h3 style={{margin: 0, fontSize: '1.05rem', color: tokens.textStrong}}>{props.title}</h3> : null}
       <div style={{overflowX: 'auto', borderRadius: 18, border: `1px solid ${tokens.border}`}}>
         <table style={{width: '100%', borderCollapse: 'collapse', background: tokens.surface}}>
           {props.caption ? <caption style={{padding: 12, textAlign: 'left', color: tokens.textMuted}}>{props.caption}</caption> : null}
@@ -25,6 +25,7 @@ export const SimpleTable = createComponentImplementation(simpleTableDefinition, 
                     width: column.width,
                     fontWeight: 700,
                     letterSpacing: '0.02em',
+                    color: tokens.textStrong,
                   }}
                 >
                   {column.header}

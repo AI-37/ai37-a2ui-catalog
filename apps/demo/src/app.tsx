@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+import {useMemo, useState} from 'react';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
 import {ai37Catalog} from '@ai37/a2ui-catalog-react';
@@ -101,7 +101,11 @@ const demoChatModel: ChatModelAdapter = {
   },
 };
 
+type CatalogTheme = 'light' | 'dark';
+
 export function App() {
+  const [theme, setTheme] = useState<CatalogTheme>('light');
+
   const previewSurfaces = useMemo(() => {
     return Object.fromEntries(
       examples.map(example => {
@@ -132,6 +136,16 @@ export function App() {
           <div className="demo-hero-note">
             <strong>Local runtime</strong>
             <span>assistant-ui отвечает за thread/composer UX, а A2UI surface по-прежнему рендерит сам контент.</span>
+            <strong>Тема каталога</strong>
+            <span>Переключатель меняет только токены `--a2ui-*` у превью — сами рендереры не трогаем.</span>
+            <div className="demo-theme-toggle" role="group" aria-label="Тема каталога">
+              <button type="button" aria-pressed={theme === 'light'} onClick={() => setTheme('light')}>
+                Светлая
+              </button>
+              <button type="button" aria-pressed={theme === 'dark'} onClick={() => setTheme('dark')}>
+                Тёмная
+              </button>
+            </div>
           </div>
         </section>
 
@@ -148,7 +162,7 @@ export function App() {
                     ? previewSurfaces[message.id as keyof typeof previewSurfaces]
                     : undefined;
 
-                  return <AssistantBubble surface={previewSurface} />;
+                  return <AssistantBubble surface={previewSurface} theme={theme} />;
                 }}
               </ThreadPrimitive.Messages>
             </div>
@@ -189,7 +203,10 @@ function UserBubble() {
   );
 }
 
-function AssistantBubble({surface}: {surface?: unknown}) {
+function AssistantBubble({surface, theme}: {surface?: unknown; theme: CatalogTheme}) {
+  const previewClassName =
+    theme === 'dark' ? 'message-preview-card a2ui-theme-dark' : 'message-preview-card';
+
   return (
     <MessagePrimitive.Root className="message-row message-row-assistant">
       <div className="message-avatar">AI37</div>
@@ -205,7 +222,7 @@ function AssistantBubble({surface}: {surface?: unknown}) {
           }}
         </MessagePrimitive.Parts>
         {surface ? (
-          <div className="message-preview-card">
+          <div className={previewClassName}>
             <A2uiSurface surface={surface as any} />
           </div>
         ) : null}

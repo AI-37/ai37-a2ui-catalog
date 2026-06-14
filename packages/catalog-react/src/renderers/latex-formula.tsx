@@ -29,9 +29,10 @@ export const LatexFormula = createComponentImplementation(latexFormulaDefinition
         borderRadius: 18,
         border: props.bordered ? `1px solid ${tokens.border}` : 'none',
         background: `linear-gradient(135deg, ${tokens.formulaFrom} 0%, ${tokens.formulaTo} 100%)`,
+        color: tokens.text,
       }}
     >
-      {props.title ? <h3 style={{margin: 0, fontSize: '1rem'}}>{props.title}</h3> : null}
+      {props.title ? <h3 style={{margin: 0, fontSize: '1rem', color: tokens.textStrong}}>{props.title}</h3> : null}
       <div dangerouslySetInnerHTML={{__html: rendered}} />
       {props.annotation ? <p style={{margin: 0, color: tokens.textMuted}}>{props.annotation}</p> : null}
     </section>

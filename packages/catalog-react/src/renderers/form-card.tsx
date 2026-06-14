@@ -9,6 +9,8 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 10,
   border: `1px solid ${tokens.borderStrong}`,
   fontSize: '0.95rem',
+  background: tokens.surface,
+  color: tokens.text,
 };
 
 export const FormCard = createComponentImplementation(formCardDefinition, ({props}) => {
@@ -23,10 +25,11 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
         borderRadius: 18,
         border: `1px solid ${tokens.border}`,
         background: tokens.surface,
+        color: tokens.text,
       }}
     >
       <header style={{display: 'grid', gap: 4}}>
-        <h3 style={{margin: 0, fontSize: '1.05rem'}}>{props.title}</h3>
+        <h3 style={{margin: 0, fontSize: '1.05rem', color: tokens.textStrong}}>{props.title}</h3>
         {props.description ? (
           <p style={{margin: 0, color: tokens.textMuted}}>{props.description}</p>
         ) : null}
