@@ -2,11 +2,12 @@ import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {formCardDefinition} from '@ai37/a2ui-catalog-schemas';
 import {useA2uiBaseStyles} from './shared';
+import {tokens} from './tokens';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 10px',
   borderRadius: 10,
-  border: '1px solid rgba(15, 23, 42, 0.18)',
+  border: `1px solid ${tokens.borderStrong}`,
   fontSize: '0.95rem',
 };
 
@@ -20,14 +21,14 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
         gap: 16,
         padding: 18,
         borderRadius: 18,
-        border: '1px solid rgba(15, 23, 42, 0.12)',
-        background: '#ffffff',
+        border: `1px solid ${tokens.border}`,
+        background: tokens.surface,
       }}
     >
       <header style={{display: 'grid', gap: 4}}>
         <h3 style={{margin: 0, fontSize: '1.05rem'}}>{props.title}</h3>
         {props.description ? (
-          <p style={{margin: 0, color: '#475569'}}>{props.description}</p>
+          <p style={{margin: 0, color: tokens.textMuted}}>{props.description}</p>
         ) : null}
       </header>
       <div style={{display: 'grid', gap: 12}}>
@@ -35,7 +36,7 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
           <label key={`${field.name}-${index}`} style={{display: 'grid', gap: 6}}>
             <span style={{fontWeight: 600}}>
               {field.label}
-              {field.required ? <span style={{color: '#dc2626'}}> *</span> : null}
+              {field.required ? <span style={{color: tokens.danger}}> *</span> : null}
             </span>
             {field.type === 'select' ? (
               <select
@@ -76,8 +77,8 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
           padding: '10px 18px',
           borderRadius: 12,
           border: 'none',
-          background: '#1e293b',
-          color: '#ffffff',
+          background: tokens.accent,
+          color: tokens.accentContrast,
           fontWeight: 600,
           cursor: 'pointer',
         }}
