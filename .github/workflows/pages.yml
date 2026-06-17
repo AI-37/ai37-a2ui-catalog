@@ -1,0 +1,85 @@
+name: Publish catalog to GitHub Pages
+
+# Публикует артефакты каталога (catalog.json + JSON Schema компонентов) на GitHub Pages.
+# Итоговый URL совпадает с CATALOG_ID из packages/catalog-schemas/src/constants.ts:
+#   https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json
+# Это резолвимая идентичность каталога, на которую ссылается каждый A2UI-payload
+# (createSurface.catalogId) и content-negotiation вывода (@ai37/agent-sdk).
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/catalog-schemas/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Один деплой Pages за раз; новый отменяет незавершённый старый.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build catalog artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate catalog artifacts into ./public
+        # generate-artifacts.ts кладёт файлы в <output>/a2ui/catalogs/<slug>/<version>/…,
+        # поэтому корень Pages-сайта = ./public, а каталог окажется ровно по CATALOG_BASE_URL.
+        run: pnpm exec tsx packages/catalog-schemas/src/generate-artifacts.ts --output public
+
+      - name: Write index.html (человекочитаемый корень)
+        run: |
+          cat > public/index.html <<'HTML'
+          <!doctype html>
+          <meta charset="utf-8">
+          <title>AI37 A2UI Catalog</title>
+          <h1>AI37 A2UI Catalog</h1>
+          <p>Каталог декларативного UI (A2UI) экосистемы AI37.</p>
+          <ul>
+            <li><a href="./a2ui/catalogs/ai37-a2ui/v1/catalog.json">ai37-a2ui / v1 — catalog.json</a></li>
+          </ul>
+          HTML
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

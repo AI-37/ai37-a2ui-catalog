@@ -51,7 +51,7 @@ describe('catalog-schemas', () => {
   it('builds a catalog artifact with all components', () => {
     const artifact = createCatalogArtifact();
 
-    expect(artifact.catalogId).toContain('a2ui-schemas.dev.ai37.ru');
+    expect(artifact.catalogId).toContain('ai-37.github.io/ai37-a2ui-catalog');
     expect(Object.keys(artifact.components)).toEqual([
       'SimpleTable',
       'FlexTable',
