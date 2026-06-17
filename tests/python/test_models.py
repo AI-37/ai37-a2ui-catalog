@@ -49,7 +49,7 @@ def test_invalid_fixtures(file_name: str, component: str) -> None:
 
 
 def test_component_schemas_are_available() -> None:
-    assert CATALOG_ID.startswith("https://a2ui-schemas.dev.ai37.ru")
+    assert CATALOG_ID.startswith("https://ai-37.github.io/ai37-a2ui-catalog")
     assert get_component_schema("SimpleTable")["type"] == "object"
     assert get_component_schema("FlexTable")["type"] == "object"
     assert get_component_schema("LatexFormula")["type"] == "object"

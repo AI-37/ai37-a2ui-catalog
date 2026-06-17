@@ -4,6 +4,17 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.3.0] - 2026-06-17
+
+### Added
+
+- `A2UI_BASE_CATALOG_ID` — id базового каталога A2UI (`basicCatalog`), для content-negotiation вывода (`@ai37/agent-sdk`): MIME `application/vnd.a2ui+json` → base, `application/vnd.a2ui.ai37+json` → `CATALOG_ID`.
+- Workflow `pages.yml`: публикация артефактов каталога на GitHub Pages.
+
+### Changed
+
+- **BREAKING:** хостинг каталога переехал на GitHub Pages — `CATALOG_BASE_URL`/`CATALOG_ID` теперь `https://ai-37.github.io/ai37-a2ui-catalog/...` (было `a2ui-schemas.dev.ai37.ru`). `catalogId` в каждом A2UI-payload меняется соответственно.
+
 ## [0.2.1] - 2026.06.14
 
 ### Changed

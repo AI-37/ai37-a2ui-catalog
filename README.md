@@ -1,6 +1,6 @@
 # AI37 A2UI Catalog
 
-Monorepo with a custom A2UI catalog, React renderers, Python validation models, shared fixtures, tests, and deployment assets for publishing catalog artifacts on `https://a2ui-schemas.dev.ai37.ru`.
+Monorepo with a custom A2UI catalog, React renderers, Python validation models, shared fixtures, tests, and deployment assets for publishing catalog artifacts on GitHub Pages (`https://ai-37.github.io/ai37-a2ui-catalog/`).
 
 ## Workspace
 
