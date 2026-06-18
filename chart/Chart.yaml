@@ -1,6 +1,0 @@
-apiVersion: v2
-name: ai37-a2ui-catalog
-description: Helm chart for serving the AI37 A2UI schema catalog
-type: application
-version: 0.1.0
-appVersion: "0.1.0"

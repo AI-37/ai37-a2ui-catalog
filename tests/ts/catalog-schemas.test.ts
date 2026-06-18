@@ -48,16 +48,20 @@ describe('catalog-schemas', () => {
     expect(formCardPropsSchema.safeParse(invalidForm.props).success).toBe(false);
   });
 
-  it('builds a catalog artifact with all components', () => {
+  it('builds a superset catalog artifact (base ∪ ai37)', () => {
     const artifact = createCatalogArtifact();
+    const names = Object.keys(artifact.components);
 
     expect(artifact.catalogId).toContain('ai-37.github.io/ai37-a2ui-catalog');
-    expect(Object.keys(artifact.components)).toEqual([
-      'SimpleTable',
-      'FlexTable',
-      'LatexFormula',
-      'ChoiceCard',
-      'FormCard',
-    ]);
+    // доменные ai37-компоненты присутствуют
+    for (const ai37 of ['SimpleTable', 'FlexTable', 'LatexFormula', 'ChoiceCard', 'FormCard']) {
+      expect(names).toContain(ai37);
+    }
+    // базовые компоненты A2UI подмешаны (надмножество — для вложенности и деградации)
+    for (const base of ['Card', 'Column', 'Row', 'Text']) {
+      expect(names).toContain(base);
+    }
+    // надмножество строго больше 5 доменных
+    expect(names.length).toBeGreaterThan(5);
   });
 });

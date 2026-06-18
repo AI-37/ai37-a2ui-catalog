@@ -11,6 +11,7 @@ import {latexFormulaDefinition} from './components/latex-formula';
 import {simpleTableDefinition} from './components/simple-table';
 import {choiceCardDefinition} from './components/choice-card';
 import {formCardDefinition} from './components/form-card';
+import {getBaseComponentEntries} from './base-components';
 import type {CatalogComponentDefinition, JsonSchema} from './types';
 
 export const componentDefinitions = [
@@ -46,8 +47,19 @@ export function createCatalogArtifact() {
     catalogId: CATALOG_ID,
     version: CATALOG_VERSION,
     title: CATALOG_TITLE,
-    components: Object.fromEntries(
-      componentDefinitions.map(definition => [
+    components: Object.fromEntries([
+      // Базовые компоненты A2UI (Card, Column, Text, …) — каталог ai37 является их надмножеством.
+      // Кладутся первыми, чтобы доменные ai37-компоненты перекрывали при совпадении имён.
+      ...getBaseComponentEntries().map(entry => [
+        entry.name,
+        {
+          description: entry.description,
+          schemaPath: `${CATALOG_BASE_URL}/components/${entry.slug}.schema.json`,
+          propsSchema: entry.propsSchema,
+        },
+      ]),
+      // Доменные ai37-компоненты.
+      ...componentDefinitions.map(definition => [
         definition.name,
         {
           description: definition.description,
@@ -55,6 +67,6 @@ export function createCatalogArtifact() {
           propsSchema: getComponentJsonSchema(definition.name as CatalogComponentName),
         },
       ]),
-    ),
+    ]),
   };
 }

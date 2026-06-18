@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createCatalogArtifact, componentDefinitions, getComponentJsonSchema} from './catalog';
+import {getBaseComponentEntries} from './base-components';
 import {CATALOG_COMPONENT_NAMES, CATALOG_SLUG, CATALOG_VERSION, type CatalogComponentName} from './constants';
 
 async function writeJson(filePath: string, value: unknown) {
@@ -58,6 +59,11 @@ async function exportArtifacts(outputRoot: string) {
   for (const definition of componentDefinitions) {
     const schema = getComponentJsonSchema(definition.name as CatalogComponentName);
     await writeJson(path.join(hostingRoot, 'components', `${definition.slug}.schema.json`), schema);
+  }
+
+  // Базовые компоненты A2UI — каталог ai37 является их надмножеством (см. base-components.ts).
+  for (const entry of getBaseComponentEntries()) {
+    await writeJson(path.join(hostingRoot, 'components', `${entry.slug}.schema.json`), entry.propsSchema);
   }
 }
 

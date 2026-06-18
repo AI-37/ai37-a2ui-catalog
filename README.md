@@ -9,15 +9,16 @@ Monorepo with a custom A2UI catalog, React renderers, Python validation models, 
 - `packages/catalog-python` — Pydantic models and Python-side validation helpers.
 - `apps/demo` — Vite demo for manual verification of A2UI messages.
 - `fixtures` — shared valid, invalid, and end-to-end message fixtures.
-- `chart` — Helm chart for serving exported catalog artifacts.
+
+Catalog artifacts (`catalog.json` + component schemas) are published to GitHub Pages by
+`.github/workflows/pages.yml`; the resolvable `catalogId` lives at
+`https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json`.
 
 ## Commands
 
 - `pnpm install`
 - `poetry -C packages/catalog-python install`
 - `pnpm run export:schemas -- --output ./tmp/catalog-public`
-- `docker build -t ai37-a2ui-catalog:local .`
-- `helm template a2ui-catalog ./chart`
 - `pnpm run build`
 - `pnpm run test`
 - `pnpm run demo`
