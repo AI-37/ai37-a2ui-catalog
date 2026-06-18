@@ -60,3 +60,8 @@ jobs:
 
       - name: Run build
         run: pnpm run build
+
+      # Guard: закоммиченный ./public должен совпадать с исходником текущей версии каталога.
+      # Падает, если забыли `pnpm run export:public` + commit после правки компонентов/бампа версии.
+      - name: Verify ./public is up to date with source
+        run: pnpm run verify:public
