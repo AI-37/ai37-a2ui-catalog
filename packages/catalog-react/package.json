@@ -1,6 +1,6 @@
 {
   "name": "@ai37/a2ui-catalog-react",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "React-рендереры A2UI-каталога AI37 для @a2ui/react.",
   "license": "Apache-2.0",
   "type": "module",
@@ -46,7 +46,7 @@
   "dependencies": {
     "@a2ui/react": "^0.10.1",
     "@a2ui/web_core": "^0.10.1",
-    "@ai37/a2ui-catalog-schemas": "workspace:*",
+    "@ai37/a2ui-catalog-schemas": "^0.4.1",
     "katex": "^0.16.22"
   },
   "peerDependencies": {

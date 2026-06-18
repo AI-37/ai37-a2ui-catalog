@@ -88,8 +88,8 @@ importers:
         specifier: 0.10.1
         version: 0.10.1
       '@ai37/a2ui-catalog-schemas':
-        specifier: workspace:*
-        version: link:../catalog-schemas
+        specifier: ^0.4.1
+        version: 0.4.1
       katex:
         specifier: ^0.16.22
         version: 0.16.47
@@ -139,6 +139,10 @@ packages:
 
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
+
+  '@ai37/a2ui-catalog-schemas@0.4.1':
+    resolution: {integrity: sha512-Ih5jhKJN9vwPUcY4VcggszujGqB+h3g1I8DQTEMzk9Tq3ThfRo9bql8uc0J7MaNEmNyZJs/XMp5WgXraJ5T0qQ==}
+    engines: {node: '>=22.0.0'}
 
   '@asamuzakjp/css-color@4.1.2':
     resolution: {integrity: sha512-NfBUvBaYgKIuq6E/RBLY1m0IohzNHAYyaJGuTK79Z23uNwmz2jl1mPsC5ZxCCxylinKhT1Amn5oNTlx1wN8cQg==}
@@ -2501,6 +2505,12 @@ snapshots:
   '@acemir/cssom@0.9.31': {}
 
   '@adobe/css-tools@4.5.0': {}
+
+  '@ai37/a2ui-catalog-schemas@0.4.1':
+    dependencies:
+      '@a2ui/web_core': 0.10.1
+      zod: 3.25.76
+      zod-to-json-schema: 3.25.2(zod@3.25.76)
 
   '@asamuzakjp/css-color@4.1.2':
     dependencies:
