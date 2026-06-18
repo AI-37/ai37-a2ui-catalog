@@ -1,12 +1,44 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {createCatalogArtifact, componentDefinitions, getComponentJsonSchema} from './catalog';
-import {getBaseComponentEntries} from './base-components';
-import {CATALOG_COMPONENT_NAMES, CATALOG_SLUG, CATALOG_VERSION, type CatalogComponentName} from './constants';
+import {createCatalogArtifact, getComponentJsonSchema} from './catalog';
+import {collectCurrentVersionArtifacts} from './artifacts';
+import {CATALOG_COMPONENT_NAMES, CATALOG_SLUG, type CatalogComponentName} from './constants';
 
 async function writeJson(filePath: string, value: unknown) {
   await fs.mkdir(path.dirname(filePath), {recursive: true});
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+/**
+ * index.html со списком ВСЕХ версий, присутствующих в `<outputRoot>/a2ui/catalogs/<slug>/` (текущая
+ * только что записана, старые заморожены в закоммиченном public/). Генерируется явно здесь, а НЕ в
+ * workflow — public/ это источник правды, воркфлоу только деплоит.
+ */
+async function writeIndexHtml(outputRoot: string) {
+  const catalogsRoot = path.join(outputRoot, 'a2ui', 'catalogs', CATALOG_SLUG);
+  const entries = await fs.readdir(catalogsRoot, {withFileTypes: true});
+  const versions = entries
+    .filter(e => e.isDirectory())
+    .map(e => e.name)
+    .sort();
+
+  const items = versions
+    .map(v => `  <li><a href="./a2ui/catalogs/${CATALOG_SLUG}/${v}/catalog.json">${CATALOG_SLUG} / ${v} — catalog.json</a></li>`)
+    .join('\n');
+
+  const html = [
+    '<!doctype html>',
+    '<meta charset="utf-8">',
+    '<title>AI37 A2UI Catalog</title>',
+    '<h1>AI37 A2UI Catalog</h1>',
+    '<p>Каталог декларативного UI (A2UI) экосистемы AI37. Версии иммутабельны.</p>',
+    '<ul>',
+    items,
+    '</ul>',
+    '',
+  ].join('\n');
+
+  await fs.writeFile(path.join(outputRoot, 'index.html'), html, 'utf8');
 }
 
 function parseArgs(argv: string[]) {
@@ -50,21 +82,13 @@ function parseArgs(argv: string[]) {
 }
 
 async function exportArtifacts(outputRoot: string) {
-  const hostingRoot = path.join(outputRoot, 'a2ui', 'catalogs', CATALOG_SLUG, CATALOG_VERSION);
-
-  const catalogArtifact = createCatalogArtifact();
-
-  await writeJson(path.join(hostingRoot, 'catalog.json'), catalogArtifact);
-
-  for (const definition of componentDefinitions) {
-    const schema = getComponentJsonSchema(definition.name as CatalogComponentName);
-    await writeJson(path.join(hostingRoot, 'components', `${definition.slug}.schema.json`), schema);
+  // Пишем ТОЛЬКО текущую версию (catalog.json + схемы компонентов, ai37 + базовые). Старые версии в
+  // outputRoot не трогаются (заморожены), поэтому генерация поверх закоммиченного public/ накапливает.
+  for (const [relPath, value] of collectCurrentVersionArtifacts()) {
+    await writeJson(path.join(outputRoot, relPath), value);
   }
 
-  // Базовые компоненты A2UI — каталог ai37 является их надмножеством (см. base-components.ts).
-  for (const entry of getBaseComponentEntries()) {
-    await writeJson(path.join(hostingRoot, 'components', `${entry.slug}.schema.json`), entry.propsSchema);
-  }
+  await writeIndexHtml(outputRoot);
 }
 
 async function main() {

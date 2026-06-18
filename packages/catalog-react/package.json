@@ -1,6 +1,6 @@
 {
   "name": "@ai37/a2ui-catalog-react",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "React-рендереры A2UI-каталога AI37 для @a2ui/react.",
   "license": "Apache-2.0",
   "type": "module",

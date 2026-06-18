@@ -46,23 +46,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate catalog artifacts into ./public
-        # generate-artifacts.ts кладёт файлы в <output>/a2ui/catalogs/<slug>/<version>/…,
-        # поэтому корень Pages-сайта = ./public, а каталог окажется ровно по CATALOG_BASE_URL.
-        run: pnpm exec tsx packages/catalog-schemas/src/generate-artifacts.ts --output public
-
-      - name: Write index.html (человекочитаемый корень)
-        run: |
-          cat > public/index.html <<'HTML'
-          <!doctype html>
-          <meta charset="utf-8">
-          <title>AI37 A2UI Catalog</title>
-          <h1>AI37 A2UI Catalog</h1>
-          <p>Каталог декларативного UI (A2UI) экосистемы AI37.</p>
-          <ul>
-            <li><a href="./a2ui/catalogs/ai37-a2ui/v1/catalog.json">ai37-a2ui / v1 — catalog.json</a></li>
-          </ul>
-          HTML
+      # ./public — ИСТОЧНИК ПРАВДЫ: закоммичен и содержит ВСЕ версии (старые заморожены, текущая
+      # сгенерирована и закоммичена локально через `pnpm run export:public`). Воркфлоу НЕ генерирует —
+      # только проверяет актуальность текущей версии и деплоит как есть (deploy-pages заливает ./public
+      # как весь сайт, поэтому накопленные версии сохраняются).
+      - name: Verify ./public is up to date with source
+        run: pnpm run verify:public
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

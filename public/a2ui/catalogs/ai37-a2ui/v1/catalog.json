@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json",
+  "catalogId": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json",
+  "version": "v1",
+  "title": "AI37 Custom A2UI Catalog",
+  "components": {
+    "SimpleTable": {
+      "description": "A simple data table with a single header row. Use it for straightforward tabular datasets where each row follows the same column structure.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/components/simple-table.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/SimpleTable",
+        "definitions": {
+          "SimpleTable": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "caption": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "compact": {
+                "type": "boolean"
+              },
+              "striped": {
+                "type": "boolean"
+              },
+              "columns": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "header": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "align": {
+                      "type": "string",
+                      "enum": [
+                        "start",
+                        "center",
+                        "end"
+                      ]
+                    },
+                    "width": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "header"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cells": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "string",
+                          "number",
+                          "boolean",
+                          "null"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "cells"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "columns",
+              "rows"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "FlexTable": {
+      "description": "A flexible table with multi-row headers and row or column spans. Use it for grouped metrics, matrix reports, or any dataset that requires composite headers.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/components/flex-table.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/FlexTable",
+        "definitions": {
+          "FlexTable": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "caption": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "dense": {
+                "type": "boolean"
+              },
+              "headerRows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cells": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "content": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "align": {
+                            "type": "string",
+                            "enum": [
+                              "start",
+                              "center",
+                              "end"
+                            ]
+                          },
+                          "colSpan": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "rowSpan": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "emphasis": {
+                            "type": "string",
+                            "enum": [
+                              "normal",
+                              "muted",
+                              "strong"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "content"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "cells"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "bodyRows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "cells": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "content": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "align": {
+                            "type": "string",
+                            "enum": [
+                              "start",
+                              "center",
+                              "end"
+                            ]
+                          },
+                          "colSpan": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "rowSpan": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "emphasis": {
+                            "type": "string",
+                            "enum": [
+                              "normal",
+                              "muted",
+                              "strong"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "content"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "cells"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "headerRows",
+              "bodyRows"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "LatexFormula": {
+      "description": "A KaTeX-rendered LaTeX formula block for mathematical notation. Use it for equations, derivations, and expressions that must be visually typeset.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/components/latex-formula.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/LatexFormula",
+        "definitions": {
+          "LatexFormula": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "formula": {
+                "type": "string",
+                "minLength": 1
+              },
+              "displayMode": {
+                "type": "boolean"
+              },
+              "annotation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "bordered": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "formula"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "ChoiceCard": {
+      "description": "An interactive single- or multi-select choice card for human-in-the-loop prompts. Use it when the agent must ask the user to pick one or more options before continuing, with an optional submit action returned to the agent.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/components/choice-card.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/ChoiceCard",
+        "definitions": {
+          "ChoiceCard": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "multiple": {
+                "type": "boolean"
+              },
+              "choices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 240
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "submit": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "label",
+                  "action"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "choices"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "FormCard": {
+      "description": "An interactive form card with typed fields for human-in-the-loop prompts. Use it when the agent must collect structured parameters (text, number, select, or boolean) from the user and return them via a submit action.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/components/form-card.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/FormCard",
+        "definitions": {
+          "FormCard": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "number",
+                        "select",
+                        "boolean"
+                      ]
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1
+                    },
+                    "placeholder": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "defaultValue": {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "label",
+                    "type"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "submit": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "label",
+                  "action"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "fields",
+              "submit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    }
+  }
+}

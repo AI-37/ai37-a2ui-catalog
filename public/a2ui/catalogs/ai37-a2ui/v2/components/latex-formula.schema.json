@@ -1,0 +1,35 @@
+{
+  "$ref": "#/definitions/LatexFormula",
+  "definitions": {
+    "LatexFormula": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "formula": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayMode": {
+          "type": "boolean"
+        },
+        "annotation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "bordered": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "formula"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2019-09/schema#"
+}
