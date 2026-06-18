@@ -15,6 +15,10 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
 
 - **BREAKING:** хостинг каталога переехал на GitHub Pages — `CATALOG_BASE_URL`/`CATALOG_ID` теперь `https://ai-37.github.io/ai37-a2ui-catalog/...` (было `a2ui-schemas.dev.ai37.ru`). `catalogId` в каждом A2UI-payload меняется соответственно.
 
+### Removed
+
+- Старый способ хостинга артефактов: `Dockerfile`, `.dockerignore`, `chart/` (Helm) и CD-джобы `publish_container`/`deploy` — заменены публикацией на GitHub Pages.
+
 ## [0.2.1] - 2026.06.14
 
 ### Changed

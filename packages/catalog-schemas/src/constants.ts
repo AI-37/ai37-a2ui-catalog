@@ -1,5 +1,7 @@
 export const CATALOG_SLUG = 'ai37-a2ui';
-export const CATALOG_VERSION = 'v1';
+// v2: каталог расширен до НАДМНОЖЕСТВА базового A2UI (см. base-components.ts). Ломающее изменение
+// набора → новый сегмент URL (v1 был только 5 доменных компонентов). CATALOG_ID/BASE_URL — ниже.
+export const CATALOG_VERSION = 'v2';
 /**
  * Хостинг каталога — GitHub Pages проекта `AI-37/ai37-a2ui-catalog`
  * (`https://ai-37.github.io/ai37-a2ui-catalog/`). Артефакты генерит
@@ -18,14 +20,16 @@ export const CATALOG_ID = `${CATALOG_BASE_URL}/catalog.json`;
  * надмножество базового). См. negotiateOutput в @ai37/agent-sdk.
  *
  * ВНИМАНИЕ к версии каталога A2UI (это НЕ версия npm-пакета `@a2ui`):
- *  - `@a2ui` ≤ 0.10.0 регистрирует базовый каталог под `…/v0_9/basic_catalog.json`;
- *  - `@a2ui` ≥ 0.10.1 переехал на `…/v0_9/catalogs/basic/catalog.json` (актуальный путь, ниже).
- * Наш рантайм базовый каталог пока не регистрирует (UI поднимает только ai37Catalog под
- * CATALOG_ID), поэтому константа декларативная; при апгрейде `@a2ui` сверять с фактическим
- * `basicCatalog.id` установленной версии.
+ *  - `@a2ui` ≤ 0.10.0 регистрирует базовый каталог под `…/v0_9/basic_catalog.json` (наша установленная
+ *    версия — 0.10.0, значение ниже соответствует ей);
+ *  - `@a2ui` ≥ 0.10.1 переехал на `…/v0_9/catalogs/basic/catalog.json`.
+ * Источник истины — `basicCatalog.id` из `@a2ui/react` установленной версии; но эта константа нужна и на
+ * сервере (агент объявляет каталог в `createAgentHost({ catalogId })`), а сервер не тянет `@a2ui/react`
+ * (React), поэтому фиксируем здесь. ПРИ АПГРЕЙДЕ `@a2ui` сверять с `basicCatalog.id`; на клиенте, где
+ * реальный `basicCatalog` доступен, имеет смысл ассертить равенство (ловит дрейф версий в точке регистрации).
  */
 export const A2UI_BASE_CATALOG_ID =
-  'https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json';
+  'https://a2ui.org/specification/v0_9/basic_catalog.json';
 export const CATALOG_TITLE = 'AI37 Custom A2UI Catalog';
 export const CATALOG_COMPONENT_NAMES = [
   'SimpleTable',
