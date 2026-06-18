@@ -20,16 +20,16 @@ export const CATALOG_ID = `${CATALOG_BASE_URL}/catalog.json`;
  * надмножество базового). См. negotiateOutput в @ai37/agent-sdk.
  *
  * ВНИМАНИЕ к версии каталога A2UI (это НЕ версия npm-пакета `@a2ui`):
- *  - `@a2ui` ≤ 0.10.0 регистрирует базовый каталог под `…/v0_9/basic_catalog.json` (наша установленная
- *    версия — 0.10.0, значение ниже соответствует ей);
- *  - `@a2ui` ≥ 0.10.1 переехал на `…/v0_9/catalogs/basic/catalog.json`.
- * Источник истины — `basicCatalog.id` из `@a2ui/react` установленной версии; но эта константа нужна и на
- * сервере (агент объявляет каталог в `createAgentHost({ catalogId })`), а сервер не тянет `@a2ui/react`
- * (React), поэтому фиксируем здесь. ПРИ АПГРЕЙДЕ `@a2ui` сверять с `basicCatalog.id`; на клиенте, где
- * реальный `basicCatalog` доступен, имеет смысл ассертить равенство (ловит дрейф версий в точке регистрации).
+ *  - `@a2ui` ≤ 0.10.0 регистрировал базовый каталог под `…/v0_9/basic_catalog.json` (эта ссылка отдаёт
+ *    404 — устаревший путь);
+ *  - `@a2ui` ≥ 0.10.1 — канонический `…/v0_9/catalogs/basic/catalog.json` (резолвится, 200; значение ниже).
+ * Мы на `@a2ui` 0.10.1, поэтому используем канонический id. Источник истины — `basicCatalog.id` из
+ * `@a2ui/react` установленной версии; но эта константа нужна и на сервере (агент объявляет каталог в
+ * `createAgentHost({ catalogId })`), а сервер не тянет `@a2ui/react` (React), поэтому фиксируем здесь.
+ * ПРИ АПГРЕЙДЕ `@a2ui` сверять с `basicCatalog.id`; catalog-react ассертит это равенство (drift-guard).
  */
 export const A2UI_BASE_CATALOG_ID =
-  'https://a2ui.org/specification/v0_9/basic_catalog.json';
+  'https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json';
 export const CATALOG_TITLE = 'AI37 Custom A2UI Catalog';
 export const CATALOG_COMPONENT_NAMES = [
   'SimpleTable',
