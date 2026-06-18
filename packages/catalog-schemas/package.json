@@ -1,6 +1,6 @@
 {
   "name": "@ai37/a2ui-catalog-schemas",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Каноничные Zod-схемы и метаданные A2UI-каталога AI37 (+ экспорт JSON Schema).",
   "license": "Apache-2.0",
   "type": "module",

@@ -1,0 +1,89 @@
+{
+  "$ref": "#/definitions/SimpleTable",
+  "definitions": {
+    "SimpleTable": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "caption": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "compact": {
+          "type": "boolean"
+        },
+        "striped": {
+          "type": "boolean"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "header": {
+                "type": "string",
+                "minLength": 1
+              },
+              "align": {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ]
+              },
+              "width": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "key",
+              "header"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cells": {
+                "type": "array",
+                "items": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "cells"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "columns",
+        "rows"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2019-09/schema#"
+}

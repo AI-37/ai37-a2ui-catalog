@@ -47,22 +47,28 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate catalog artifacts into ./public
-        # generate-artifacts.ts кладёт файлы в <output>/a2ui/catalogs/<slug>/<version>/…,
-        # поэтому корень Pages-сайта = ./public, а каталог окажется ровно по CATALOG_BASE_URL.
+        # ИММУТАБЕЛЬНОСТЬ: ./public закоммичен в репо и содержит ВСЕ опубликованные версии (старые —
+        # заморожены, см. public/a2ui/catalogs/ai37-a2ui/v1). generate-artifacts пишет ТОЛЬКО текущую
+        # версию (CATALOG_VERSION) и не трогает остальные, поэтому деплой накапливает версии, а не
+        # затирает (actions/deploy-pages заливает ./public как весь сайт).
+        # При бампе версии: локально `tsx …/generate-artifacts.ts --output public` + коммит public/.
         run: pnpm exec tsx packages/catalog-schemas/src/generate-artifacts.ts --output public
 
-      - name: Write index.html (человекочитаемый корень)
+      - name: Write index.html (список всех версий)
         run: |
-          cat > public/index.html <<'HTML'
-          <!doctype html>
-          <meta charset="utf-8">
-          <title>AI37 A2UI Catalog</title>
-          <h1>AI37 A2UI Catalog</h1>
-          <p>Каталог декларативного UI (A2UI) экосистемы AI37.</p>
-          <ul>
-            <li><a href="./a2ui/catalogs/ai37-a2ui/v1/catalog.json">ai37-a2ui / v1 — catalog.json</a></li>
-          </ul>
-          HTML
+          CATDIR=public/a2ui/catalogs/ai37-a2ui
+          {
+            echo '<!doctype html>'
+            echo '<meta charset="utf-8">'
+            echo '<title>AI37 A2UI Catalog</title>'
+            echo '<h1>AI37 A2UI Catalog</h1>'
+            echo '<p>Каталог декларативного UI (A2UI) экосистемы AI37. Версии иммутабельны.</p>'
+            echo '<ul>'
+            for d in $(ls "$CATDIR" | sort); do
+              echo "  <li><a href=\"./a2ui/catalogs/ai37-a2ui/$d/catalog.json\">ai37-a2ui / $d — catalog.json</a></li>"
+            done
+            echo '</ul>'
+          } > public/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

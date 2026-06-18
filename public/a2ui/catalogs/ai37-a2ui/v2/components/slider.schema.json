@@ -1,0 +1,334 @@
+{
+  "$ref": "#/definitions/Slider",
+  "definitions": {
+    "Slider": {
+      "type": "object",
+      "properties": {
+        "accessibility": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "description": "A JSON Pointer path to a value in the data model."
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "additionalProperties": false,
+                  "description": "REF:common_types.json#/$defs/DataBinding|A JSON Pointer path to a value in the data model."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "call": {
+                      "type": "string",
+                      "description": "The name of the function to call."
+                    },
+                    "args": {
+                      "type": "object",
+                      "additionalProperties": {},
+                      "description": "Arguments passed to the function."
+                    },
+                    "returnType": {
+                      "type": "string",
+                      "enum": [
+                        "string",
+                        "number",
+                        "boolean",
+                        "array",
+                        "object",
+                        "any",
+                        "void"
+                      ],
+                      "default": "boolean"
+                    }
+                  },
+                  "required": [
+                    "call",
+                    "args"
+                  ],
+                  "additionalProperties": false,
+                  "description": "REF:common_types.json#/$defs/FunctionCall|Invokes a named function on the client."
+                }
+              ],
+              "description": "REF:common_types.json#/$defs/DynamicString|A short string used by assistive technologies to convey the purpose of an element."
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "description": "A JSON Pointer path to a value in the data model."
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "additionalProperties": false,
+                  "description": "REF:common_types.json#/$defs/DataBinding|A JSON Pointer path to a value in the data model."
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "call": {
+                      "type": "string",
+                      "description": "The name of the function to call."
+                    },
+                    "args": {
+                      "type": "object",
+                      "additionalProperties": {},
+                      "description": "Arguments passed to the function."
+                    },
+                    "returnType": {
+                      "type": "string",
+                      "enum": [
+                        "string",
+                        "number",
+                        "boolean",
+                        "array",
+                        "object",
+                        "any",
+                        "void"
+                      ],
+                      "default": "boolean"
+                    }
+                  },
+                  "required": [
+                    "call",
+                    "args"
+                  ],
+                  "additionalProperties": false,
+                  "description": "REF:common_types.json#/$defs/FunctionCall|Invokes a named function on the client."
+                }
+              ],
+              "description": "REF:common_types.json#/$defs/DynamicString|Additional information provided by assistive technologies about an element."
+            }
+          },
+          "additionalProperties": false,
+          "description": "REF:common_types.json#/$defs/AccessibilityAttributes|Attributes to enhance accessibility."
+        },
+        "weight": {
+          "type": "number",
+          "description": "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property. Note: this may ONLY be set when the component is a direct descendant of a Row or Column."
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "A JSON Pointer path to a value in the data model."
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:common_types.json#/$defs/DataBinding|A JSON Pointer path to a value in the data model."
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "description": "The name of the function to call."
+                },
+                "args": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Arguments passed to the function."
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "array",
+                    "object",
+                    "any",
+                    "void"
+                  ],
+                  "default": "boolean"
+                }
+              },
+              "required": [
+                "call",
+                "args"
+              ],
+              "additionalProperties": false,
+              "description": "REF:common_types.json#/$defs/FunctionCall|Invokes a named function on the client."
+            }
+          ],
+          "description": "The label for the slider."
+        },
+        "min": {
+          "type": "number",
+          "default": 0,
+          "description": "The minimum value of the slider."
+        },
+        "max": {
+          "type": "number",
+          "description": "The maximum value of the slider."
+        },
+        "step": {
+          "type": "number",
+          "description": "The granularity or step size of the slider."
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "A JSON Pointer path to a value in the data model."
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false,
+              "description": "REF:common_types.json#/$defs/DataBinding|A JSON Pointer path to a value in the data model."
+            },
+            {
+              "type": "object",
+              "properties": {
+                "call": {
+                  "type": "string",
+                  "description": "The name of the function to call."
+                },
+                "args": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Arguments passed to the function."
+                },
+                "returnType": {
+                  "type": "string",
+                  "enum": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "array",
+                    "object",
+                    "any",
+                    "void"
+                  ],
+                  "default": "boolean"
+                }
+              },
+              "required": [
+                "call",
+                "args"
+              ],
+              "additionalProperties": false,
+              "description": "REF:common_types.json#/$defs/FunctionCall|Invokes a named function on the client."
+            }
+          ],
+          "description": "The current value of the slider."
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "description": "A JSON Pointer path to a value in the data model."
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": false,
+                    "description": "REF:common_types.json#/$defs/DataBinding|A JSON Pointer path to a value in the data model."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "call": {
+                        "type": "string",
+                        "description": "The name of the function to call."
+                      },
+                      "args": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "Arguments passed to the function."
+                      },
+                      "returnType": {
+                        "type": "string",
+                        "enum": [
+                          "string",
+                          "number",
+                          "boolean",
+                          "array",
+                          "object",
+                          "any",
+                          "void"
+                        ],
+                        "default": "boolean"
+                      }
+                    },
+                    "required": [
+                      "call",
+                      "args"
+                    ],
+                    "additionalProperties": false,
+                    "description": "REF:common_types.json#/$defs/FunctionCall|Invokes a named function on the client."
+                  }
+                ],
+                "description": "REF:common_types.json#/$defs/DynamicBoolean|A boolean value that can be a literal, a path, or a function call returning a boolean."
+              },
+              "message": {
+                "type": "string",
+                "description": "The error message to display if the check fails."
+              }
+            },
+            "required": [
+              "condition",
+              "message"
+            ],
+            "additionalProperties": false,
+            "description": "REF:common_types.json#/$defs/CheckRule|A check rule consisting of a condition and an error message."
+          },
+          "description": "A list of checks to perform."
+        }
+      },
+      "required": [
+        "max",
+        "value"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2019-09/schema#"
+}
