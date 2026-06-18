@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@a2ui/react': 0.10.1
+  '@a2ui/web_core': 0.10.1
+
 importers:
 
   .:
@@ -54,11 +58,11 @@ importers:
   apps/demo:
     dependencies:
       '@a2ui/react':
-        specifier: ^0.10.0
-        version: 0.10.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
+        specifier: 0.10.1
+        version: 0.10.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
       '@a2ui/web_core':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: 0.10.1
+        version: 0.10.1
       '@ai37/a2ui-catalog-react':
         specifier: workspace:*
         version: link:../../packages/catalog-react
@@ -78,11 +82,11 @@ importers:
   packages/catalog-react:
     dependencies:
       '@a2ui/react':
-        specifier: ^0.10.0
-        version: 0.10.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
+        specifier: 0.10.1
+        version: 0.10.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
       '@a2ui/web_core':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: 0.10.1
+        version: 0.10.1
       '@ai37/a2ui-catalog-schemas':
         specifier: workspace:*
         version: link:../catalog-schemas
@@ -99,8 +103,8 @@ importers:
   packages/catalog-schemas:
     dependencies:
       '@a2ui/web_core':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: 0.10.1
+        version: 0.10.1
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -117,18 +121,18 @@ packages:
   '@a2ui/markdown-it@0.0.4':
     resolution: {integrity: sha512-uaYNywdiHDH4i//pHpyckFnApvOshiUNT2Xl8awceNjL1XAX/gqtki9GRUJQ26RE7id2+aPNgOy1W6mXNBxriQ==}
     peerDependencies:
-      '@a2ui/web_core': ^0.9.2
+      '@a2ui/web_core': 0.10.1
 
-  '@a2ui/react@0.10.0':
-    resolution: {integrity: sha512-LeyrHUv7lNkLqrxr+qM2XybCB5ok/8gm5fVcs2foPiPV0KN6XtZGDKk23Kt3oitRHJp7vFOeyDD9y+UYWh4Y3A==}
+  '@a2ui/react@0.10.1':
+    resolution: {integrity: sha512-m7rBhOKA2PNwrD9Q7kaJn+l2u0WLAmd/n0RmaUNkTRdzCTcSfEbcet5sbCHGpT7xu4TSp+ABWfowG+mcL7HAnQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-      zod: ^3.23.8
+      react: ^19.2.7
+      react-dom: ^19.2.7
+      zod: ^3.25.76
 
-  '@a2ui/web_core@0.10.0':
-    resolution: {integrity: sha512-pSieKxaB6aZWBL2LjZfKo4/1v4xMWylczpzte1ehuGH0kfNGf/iTd73PKsIKYx3b0FNWTbD8gAloOM4JCVqUig==}
+  '@a2ui/web_core@0.10.1':
+    resolution: {integrity: sha512-SWwiTqlYQICIj8dM0hDnh1YNz/f6WucrFN6s2Egc5ldlZ48Xxd5D574pfb9n4CMeFxe4zl8XhfgxP+DJzA4pvA==}
 
   '@acemir/cssom@0.9.31':
     resolution: {integrity: sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA==}
@@ -2471,23 +2475,23 @@ packages:
 
 snapshots:
 
-  '@a2ui/markdown-it@0.0.4(@a2ui/web_core@0.10.0)':
+  '@a2ui/markdown-it@0.0.4(@a2ui/web_core@0.10.1)':
     dependencies:
-      '@a2ui/web_core': 0.10.0
+      '@a2ui/web_core': 0.10.1
       dompurify: 3.4.7
       markdown-it: 14.2.0
 
-  '@a2ui/react@0.10.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)':
+  '@a2ui/react@0.10.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)':
     dependencies:
-      '@a2ui/markdown-it': 0.0.4(@a2ui/web_core@0.10.0)
-      '@a2ui/web_core': 0.10.0
+      '@a2ui/markdown-it': 0.0.4(@a2ui/web_core@0.10.1)
+      '@a2ui/web_core': 0.10.1
       clsx: 2.1.1
       markdown-it: 14.2.0
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
       zod: 4.4.3
 
-  '@a2ui/web_core@0.10.0':
+  '@a2ui/web_core@0.10.1':
     dependencies:
       '@preact/signals-core': 1.14.2
       date-fns: 4.4.0

@@ -9,8 +9,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@a2ui/react": "^0.10.0",
-    "@a2ui/web_core": "^0.10.0",
+    "@a2ui/react": "^0.10.1",
+    "@a2ui/web_core": "^0.10.1",
     "@ai37/a2ui-catalog-react": "workspace:*",
     "@assistant-ui/react": "^0.14.13",
     "katex": "^0.16.22",
