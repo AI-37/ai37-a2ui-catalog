@@ -13,11 +13,42 @@ const inputStyle: React.CSSProperties = {
   color: tokens.text,
 };
 
-export const FormCard = createComponentImplementation(formCardDefinition, ({props}) => {
+export const FormCard = createComponentImplementation(formCardDefinition, ({props, context}) => {
   useA2uiBaseStyles();
 
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formEl = formRef.current;
+    if (!formEl) return;
+
+    // Значения собираем в пределах СВОЕЙ формы (ref-scoped querySelector, не
+    // global document) — чтобы несколько FormCard на surface не конфликтовали.
+    // Коэрс типов НЕ делаем — агент коэрсит. boolean → checked, остальное → value.
+    const values: Record<string, string | boolean> = {};
+    for (const field of props.fields) {
+      const el = formEl.querySelector<HTMLInputElement | HTMLSelectElement>(
+        `[name="${field.name}"]`,
+      );
+      if (!el) continue;
+      if (field.type === 'boolean') {
+        values[field.name] = (el as HTMLInputElement).checked;
+      } else {
+        values[field.name] = el.value;
+      }
+    }
+
+    // Канон A2UI v0.9: { event: { name, context } } → userAction.name/.context → onAction.
+    void context.dispatchAction({
+      event: {name: props.submit.action, context: values},
+    });
+  };
+
   return (
-    <section
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
       style={{
         display: 'grid',
         gap: 16,
@@ -73,8 +104,7 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
         ))}
       </div>
       <button
-        type="button"
-        data-action={props.submit.action}
+        type="submit"
         style={{
           justifySelf: 'start',
           padding: '10px 18px',
@@ -88,6 +118,6 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
       >
         {props.submit.label}
       </button>
-    </section>
+    </form>
   );
 });

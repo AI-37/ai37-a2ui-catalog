@@ -4,6 +4,16 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.3.1] - 2026-06-21
+
+### Fixed
+
+- `@ai37/a2ui-catalog-react` FormCard: submit-кнопка теперь канонически диспатчит
+  action со значениями полей через `context.dispatchAction({event:{name, context}})`
+  → значения долетают агенту в `userAction.context`. Раньше кнопка ставила
+  `data-action`-атрибут без обработчика — action не отправлялся (требовал костыля
+  у потребителя). Схема FormCard не изменена. `catalog-react` 0.4.2 → 0.4.3.
+
 ## [0.3.0] - 2026-06-17
 
 ### Added
