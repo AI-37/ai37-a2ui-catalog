@@ -1,6 +1,6 @@
 {
   "name": "@ai37/lift-calc-schemas",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Каноничные Zod-схемы полей расчёта лифтов по ГОСТ Р 52941-2008 и ГОСТ 34758-2021 (+ экспорт JSON Schema для skillsIo).",
   "license": "Apache-2.0",
   "type": "module",

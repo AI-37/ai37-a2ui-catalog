@@ -37,12 +37,13 @@ export const FIELDS_52941: readonly FieldDescriptor[] = [
 ];
 
 /**
- * Реестр полей ГОСТ 34758-2021 (жилые / гостиницы / офисы). Одна лифтовая группа (`Nl` одинаковых
- * лифтов). `buildingType` — дискриминатор нежилых типов, влияет на авто-`tOst` (Прил. Е). Обязательны
- * тип здания, N1/A/Nl, скорость и ширина двери; `tOst`/`Pk` производятся автоматически.
+ * Реестр полей ГОСТ 34758-2021 — ТОЛЬКО НЕжилые здания (гостиницы / офисы). Жилые считаются по
+ * ГОСТ Р 52941-2008 (продуктовое разделение: одна методика на тип здания, без пересечения). Одна
+ * лифтовая группа (`Nl` одинаковых лифтов). `buildingType` (hotel/office) влияет на авто-`tOst`
+ * (Прил. Е.2). Обязательны тип здания, N1/A/Nl, скорость и ширина двери; `tOst`/`Pk` — авто.
  */
 export const FIELDS_34758: readonly FieldDescriptor[] = [
-  { key: 'buildingType', section: 'building', kind: 'enum-string', allowed: ['residential', 'hotel', 'office'], label: 'Тип здания', describe: 'Тип здания: residential (жилое) / hotel (гостиница) / office (офис)' },
+  { key: 'buildingType', section: 'building', kind: 'enum-string', allowed: ['hotel', 'office'], label: 'Тип здания', describe: 'Тип НЕжилого здания: hotel (гостиница) / office (офис). Жилые здания считаются по ГОСТ Р 52941-2008 (методика calc-lifts-52941).' },
   { key: 'N1', section: 'building', kind: 'int', min: 2, label: 'Число обслуживаемых этажей', describe: 'Число обслуживаемых лифтом этажей' },
   { key: 'A', section: 'building', kind: 'int', min: 1, label: 'Заселённость здания, чел.', describe: 'Расчётная заселённость здания, чел.' },
   { key: 'Nl', section: 'building', kind: 'int', min: 1, label: 'Число лифтов в группе', describe: 'Число одинаковых лифтов в группе' },

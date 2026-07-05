@@ -53,7 +53,7 @@ describe('lift-calc-schemas: реестр → zod/JSON Schema/missing', () => {
       properties: Record<string, { enum?: unknown[] }>;
     };
     expect(js.properties.doorWidth).toBeTruthy();
-    expect(js.properties.buildingType?.enum).toEqual(['residential', 'hotel', 'office']);
+    expect(js.properties.buildingType?.enum).toEqual(['hotel', 'office']);
   });
 
   it('collectMissing отдаёт allowed для enum-полей', () => {
