@@ -1,0 +1,54 @@
+{
+  "name": "@ai37/lift-calc-schemas",
+  "version": "0.1.0",
+  "description": "Каноничные Zod-схемы полей расчёта лифтов по ГОСТ Р 52941-2008 и ГОСТ 34758-2021 (+ экспорт JSON Schema для skillsIo).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ai37",
+    "gost",
+    "lifts",
+    "zod",
+    "json-schema"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AI-37/ai37-catalog.git",
+    "directory": "packages/lift-calc-schemas"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "zod": "^4.4.3"
+  }
+}

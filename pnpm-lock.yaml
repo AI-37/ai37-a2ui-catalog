@@ -116,6 +116,15 @@ importers:
         specifier: ^8.5.0
         version: 8.5.1(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
 
+  packages/lift-calc-schemas:
+    devDependencies:
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+
 packages:
 
   '@a2ui/markdown-it@0.0.4':
