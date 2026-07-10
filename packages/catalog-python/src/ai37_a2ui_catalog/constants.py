@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 CATALOG_SLUG = "ai37-a2ui"
-CATALOG_VERSION = "v1"
+CATALOG_VERSION = "v2"
 # Хостинг каталога — GitHub Pages проекта AI-37/ai37-a2ui-catalog (см. constants.ts).
 CATALOG_BASE_URL = (
     f"https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/{CATALOG_SLUG}/{CATALOG_VERSION}"
