@@ -4,14 +4,36 @@ import {choiceCardDefinition} from '@ai37/a2ui-catalog-schemas';
 import {useA2uiBaseStyles} from './shared';
 import {tokens} from './tokens';
 
-export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({props}) => {
+export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({props, context}) => {
   useA2uiBaseStyles();
 
   const multiple = props.multiple ?? false;
   const groupName = `choice-${props.submit?.action ?? props.title}`;
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formEl = formRef.current;
+    if (!formEl || !props.submit) return;
+
+    // Выбранное собираем в пределах СВОЕЙ формы (ref-scoped, не global document) — чтобы
+    // несколько ChoiceCard на surface не конфликтовали по одинаковой radio-группе.
+    const selected = Array.from(
+      formEl.querySelectorAll<HTMLInputElement>(`input[name="${groupName}"]:checked`),
+    ).map(el => el.value);
+    if (selected.length === 0) return; // ничего не выбрано — не отправляем пустое действие
+
+    // Канон: single → { value }, multiple → { values }. Агент читает context.value/.values.
+    const payload = multiple ? {values: selected} : {value: selected[0]};
+    void context.dispatchAction({
+      event: {name: props.submit.action, context: payload},
+    });
+  };
 
   return (
-    <section
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
       style={{
         display: 'grid',
         gap: 14,
@@ -58,7 +80,7 @@ export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({
       </div>
       {props.submit ? (
         <button
-          type="button"
+          type="submit"
           data-action={props.submit.action}
           style={{
             justifySelf: 'start',
@@ -74,6 +96,6 @@ export const ChoiceCard = createComponentImplementation(choiceCardDefinition, ({
           {props.submit.label}
         </button>
       ) : null}
-    </section>
+    </form>
   );
 });
