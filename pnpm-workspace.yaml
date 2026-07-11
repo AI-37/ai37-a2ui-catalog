@@ -1,3 +1,9 @@
 packages:
   - packages/*
   - apps/*
+
+# pnpm ≥10 по умолчанию не линкует workspace-пакеты по semver-диапазону
+# (link-workspace-packages: false), из-за чего catalog-react собирался против
+# реестрового catalog-schemas. Включаем линковку; в publish при этом уходит
+# обычный semver-диапазон (см. fix/catalog-react-publishable-dep).
+linkWorkspacePackages: true

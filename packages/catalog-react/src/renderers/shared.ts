@@ -6,9 +6,22 @@
  * подключается переопределением этих переменных на родителе. Хук оставлен как
  * место для будущих side-эффектов (например, инъекции `defaultThemeCss`).
  */
+import type React from 'react';
+import {tokens} from './tokens';
+
 export function useA2uiBaseStyles() {
   return undefined;
 }
+
+/** Общий стиль текстовых инпутов/селектов форм каталога. */
+export const inputStyle: React.CSSProperties = {
+  padding: '8px 10px',
+  borderRadius: 10,
+  border: `1px solid ${tokens.borderStrong}`,
+  fontSize: '0.95rem',
+  background: tokens.surface,
+  color: tokens.text,
+};
 
 export function toDisplayValue(value: unknown) {
   if (value === null || value === undefined) {
