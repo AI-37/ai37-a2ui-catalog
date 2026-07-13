@@ -5045,7 +5045,7 @@
       }
     },
     "FormCard": {
-      "description": "An interactive form card with typed fields for human-in-the-loop prompts. Use it when the agent must collect structured parameters (text, number, select, or boolean) from the user and return them via a submit action.",
+      "description": "An interactive form card with typed fields for human-in-the-loop prompts. Use it when the agent must collect structured parameters (text, number, select, boolean, or lookup with reference-backed autocomplete) from the user and return them via a submit action.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/form-card.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/FormCard",
@@ -5084,7 +5084,8 @@
                         "text",
                         "number",
                         "select",
-                        "boolean"
+                        "boolean",
+                        "lookup"
                       ]
                     },
                     "required": {
@@ -5097,16 +5098,48 @@
                       },
                       "minItems": 1
                     },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "minChars": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
                     "placeholder": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 120
                     },
                     "defaultValue": {
-                      "type": [
-                        "string",
-                        "number",
-                        "boolean"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "label"
+                          ],
+                          "additionalProperties": false
+                        }
                       ]
                     }
                   },

@@ -35,7 +35,8 @@
                   "text",
                   "number",
                   "select",
-                  "boolean"
+                  "boolean",
+                  "lookup"
                 ]
               },
               "required": {
@@ -48,16 +49,48 @@
                 },
                 "minItems": 1
               },
+              "referenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minChars": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
               "placeholder": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120
               },
               "defaultValue": {
-                "type": [
-                  "string",
-                  "number",
-                  "boolean"
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  }
                 ]
               }
             },
