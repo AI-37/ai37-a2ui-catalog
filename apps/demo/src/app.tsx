@@ -17,6 +17,7 @@ import flexTableMessages from '../../../fixtures/messages/flex-table-surface.jso
 import latexMessages from '../../../fixtures/messages/latex-formula-surface.json';
 import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.json';
 import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
+import {attachDemoLookupHost} from './demo-lookup-host';
 
 const examples = [
   {
@@ -111,6 +112,9 @@ export function App() {
       examples.map(example => {
         const processor = new MessageProcessor([ai37Catalog]);
         processor.processMessages(example.messages);
+        if (example.key === 'form-preview') {
+          attachDemoLookupHost(processor, 'demo-surface');
+        }
         return [example.key, processor.model.getSurface('demo-surface')];
       }),
     ) as Record<(typeof examples)[number]['key'], unknown>;
