@@ -1,0 +1,19 @@
+{
+  "component": "FormCard",
+  "props": {
+    "title": "Параметры здания и лифтов",
+    "fields": [
+      {
+        "name": "city",
+        "label": "Город строительства",
+        "type": "lookup",
+        "referenceId": "cities",
+        "suggestMode": "poll"
+      }
+    ],
+    "submit": {
+      "label": "Отправить параметры",
+      "action": "submit_building_params"
+    }
+  }
+}

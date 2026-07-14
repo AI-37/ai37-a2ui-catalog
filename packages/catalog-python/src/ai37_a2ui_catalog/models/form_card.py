@@ -8,6 +8,9 @@ from .shared import StrictModel
 
 FormFieldType = Literal["text", "number", "select", "boolean", "lookup"]
 
+# lookup: канал подсказок — 'action' (default, применяет рендерер) или 'fetch'.
+LookupSuggestMode = Literal["action", "fetch"]
+
 
 class FormFieldLookupValue(StrictModel):
     value: str
@@ -22,6 +25,7 @@ class FormField(StrictModel):
     options: list[str] = Field(default=None, min_length=1)
     referenceId: str = Field(default=None, min_length=1, max_length=80)
     minChars: int = Field(default=None, ge=1, le=10)
+    suggestMode: LookupSuggestMode = None
     placeholder: str = Field(default=None, min_length=1, max_length=120)
     defaultValue: str | int | float | bool | FormFieldLookupValue = None
 

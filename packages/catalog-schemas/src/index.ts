@@ -7,4 +7,6 @@ export * from './components/choice-card';
 export * from './components/form-card';
 export * from './components/form-card-lookup';
 export * from './components/form-card-lookup.types';
+export * from './components/form-card-lookup-fetch';
+export * from './components/form-card-lookup-fetch.types';
 export * from './catalog';
