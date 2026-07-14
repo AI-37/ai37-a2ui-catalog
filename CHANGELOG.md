@@ -4,6 +4,28 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.6.0] - 2026-07-14
+
+### Added
+
+- FormCard lookup: второй режим подсказок `suggestMode: 'fetch'` (change
+  `form-card-lookup-fetch-e2e`). Поле с `suggestMode: 'fetch'` запрашивает
+  опции само — debounced `GET /api/reference-suggest?referenceId=&query=`
+  (same-origin, через BFF потребителя → оркестратор → REST-ручка
+  агента-владельца справочника) с отменой in-flight (`AbortController`) и
+  тихим fallback на любой сбой. Дефолт (`suggestMode` не задан) — прежний
+  action-канал `lookup:suggest`, поведение существующих сообщений не
+  меняется.
+- `@ai37/a2ui-catalog-schemas`: `lookupSuggestModeSchema`,
+  `LOOKUP_SUGGEST_ROUTE`, `LOOKUP_DEBOUNCE_MS`, тип `LookupSuggestResponse` —
+  единый источник контракта fetch-канала для BFF/оркестратора/агентов.
+- `@ai37/a2ui-catalog-react`: рендерер lookup разобран на диспетчер
+  (`lookup-field`), `lookup-field-action`, `lookup-field-fetch` и общий
+  презентационный `lookup-combobox`.
+- Python-модель (`ai37-a2ui-catalog`): `LookupSuggestMode`,
+  `FormField.suggestMode` — зеркало zod-схемы.
+- Демо: dev-middleware `/api/reference-suggest` (vite) и превью fetch-режима.
+
 ## [0.3.1] - 2026-06-21
 
 ### Fixed
