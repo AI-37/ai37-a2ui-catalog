@@ -59,6 +59,13 @@
                 "minimum": 1,
                 "maximum": 10
               },
+              "suggestMode": {
+                "type": "string",
+                "enum": [
+                  "action",
+                  "fetch"
+                ]
+              },
               "placeholder": {
                 "type": "string",
                 "minLength": 1,

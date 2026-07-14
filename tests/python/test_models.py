@@ -40,6 +40,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("latex-formula-empty.json", "LatexFormula"),
         ("choice-card-empty-choices.json", "ChoiceCard"),
         ("form-card-invalid-field-type.json", "FormCard"),
+        ("form-card-invalid-suggest-mode.json", "FormCard"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:

@@ -3,6 +3,10 @@ import {type CatalogComponentDefinition} from '../types';
 
 export const formFieldTypeSchema = z.enum(['text', 'number', 'select', 'boolean', 'lookup']);
 
+// lookup: канал подсказок — 'action' (lookup:suggest через агента) или
+// 'fetch' (same-origin GET LOOKUP_SUGGEST_ROUTE); default 'action' применяет рендерер.
+export const lookupSuggestModeSchema = z.enum(['action', 'fetch']);
+
 export const formFieldSchema = z
   .object({
     name: z.string().min(1).max(80),
@@ -14,6 +18,7 @@ export const formFieldSchema = z
     referenceId: z.string().min(1).max(80).optional(),
     // lookup: порог начала поиска; default 3 применяет рендерер.
     minChars: z.number().int().min(1).max(10).optional(),
+    suggestMode: lookupSuggestModeSchema.optional(),
     placeholder: z.string().min(1).max(120).optional(),
     defaultValue: z
       .union([
@@ -48,6 +53,7 @@ export const formCardPropsSchema = z
   .strict();
 
 export type FormFieldType = z.infer<typeof formFieldTypeSchema>;
+export type LookupSuggestMode = z.infer<typeof lookupSuggestModeSchema>;
 export type FormField = z.infer<typeof formFieldSchema>;
 export type FormCardSubmit = z.infer<typeof formCardSubmitSchema>;
 export type FormCardProps = z.infer<typeof formCardPropsSchema>;

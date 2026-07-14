@@ -91,7 +91,7 @@ importers:
         specifier: 0.10.1
         version: 0.10.1
       '@ai37/a2ui-catalog-schemas':
-        specifier: ^0.5.0
+        specifier: workspace:^
         version: link:../catalog-schemas
       katex:
         specifier: ^0.16.22

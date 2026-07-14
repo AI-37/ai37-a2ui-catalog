@@ -17,6 +17,7 @@ import flexTableMessages from '../../../fixtures/messages/flex-table-surface.jso
 import latexMessages from '../../../fixtures/messages/latex-formula-surface.json';
 import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.json';
 import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
+import formCardLookupFetchMessages from '../../../fixtures/messages/form-card-lookup-fetch-surface.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 
 const examples = [
@@ -49,6 +50,12 @@ const examples = [
     title: 'Form Card',
     description: 'Форма типизированных полей для сбора параметров у пользователя.',
     messages: formCardMessages as A2uiMessage[],
+  },
+  {
+    key: 'form-fetch-preview',
+    title: 'Form Card — lookup fetch',
+    description: 'Lookup-поле с подсказками через same-origin fetch (dev-middleware, только dev-сервер).',
+    messages: formCardLookupFetchMessages as A2uiMessage[],
   },
 ] as const;
 

@@ -1,6 +1,13 @@
 from .choice_card import ChoiceCardProps, ChoiceCardSubmit, ChoiceOption
 from .flex_table import FlexTableCell, FlexTableProps, FlexTableRow
-from .form_card import FormCardProps, FormCardSubmit, FormField, FormFieldLookupValue, FormFieldType
+from .form_card import (
+    FormCardProps,
+    FormCardSubmit,
+    FormField,
+    FormFieldLookupValue,
+    FormFieldType,
+    LookupSuggestMode,
+)
 from .latex_formula import LatexFormulaProps
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
@@ -28,6 +35,7 @@ __all__ = [
     "FormFieldLookupValue",
     "FormFieldType",
     "LatexFormulaProps",
+    "LookupSuggestMode",
     "SimpleTableColumn",
     "SimpleTableProps",
     "SimpleTableRow",

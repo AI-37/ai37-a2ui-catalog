@@ -1,0 +1,45 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "FormCard",
+          "title": "Параметры здания и лифтов",
+          "description": "Заполните характеристики объекта, чтобы агент подобрал конфигурацию.",
+          "fields": [
+            {
+              "name": "floors",
+              "label": "Количество этажей",
+              "type": "number",
+              "required": true,
+              "placeholder": "например, 12"
+            },
+            {
+              "name": "city",
+              "label": "Город строительства",
+              "type": "lookup",
+              "referenceId": "cities",
+              "suggestMode": "fetch",
+              "required": true,
+              "placeholder": "Начните вводить название (мин. 3 символа)"
+            }
+          ],
+          "submit": {
+            "label": "Отправить параметры",
+            "action": "submit_building_params"
+          }
+        }
+      ]
+    }
+  }
+]

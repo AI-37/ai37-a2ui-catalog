@@ -2,8 +2,10 @@ packages:
   - packages/*
   - apps/*
 
-# pnpm ≥10 по умолчанию не линкует workspace-пакеты по semver-диапазону
-# (link-workspace-packages: false), из-за чего catalog-react собирался против
-# реестрового catalog-schemas. Включаем линковку; в publish при этом уходит
-# обычный semver-диапазон (см. fix/catalog-react-publishable-dep).
+# Межпакетные зависимости внутри workspace объявляются протоколом `workspace:`
+# (catalog-react → catalog-schemas: `workspace:^`): линковка не зависит от
+# semver-диапазона и не ломается при version:bump (диапазон `^0.5.0` после
+# бампа схем на 0.6.0 переставал матчиться → CI собирал react без схем).
+# В publish pnpm сам переписывает `workspace:^` в `^{версия}`.
+# linkWorkspacePackages оставлен для semver-зависимостей на всякий случай.
 linkWorkspacePackages: true

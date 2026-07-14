@@ -40,12 +40,14 @@ describe('catalog-schemas', () => {
     const invalidLatex = readFixture('invalid', 'latex-formula-empty.json');
     const invalidChoice = readFixture('invalid', 'choice-card-empty-choices.json');
     const invalidForm = readFixture('invalid', 'form-card-invalid-field-type.json');
+    const invalidSuggestMode = readFixture('invalid', 'form-card-invalid-suggest-mode.json');
 
     expect(simpleTablePropsSchema.safeParse(invalidSimple.props).success).toBe(false);
     expect(flexTablePropsSchema.safeParse(invalidFlex.props).success).toBe(false);
     expect(latexFormulaPropsSchema.safeParse(invalidLatex.props).success).toBe(false);
     expect(choiceCardPropsSchema.safeParse(invalidChoice.props).success).toBe(false);
     expect(formCardPropsSchema.safeParse(invalidForm.props).success).toBe(false);
+    expect(formCardPropsSchema.safeParse(invalidSuggestMode.props).success).toBe(false);
   });
 
   it('builds a superset catalog artifact (base ∪ ai37)', () => {
