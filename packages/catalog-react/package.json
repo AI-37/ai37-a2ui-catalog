@@ -46,7 +46,7 @@
   "dependencies": {
     "@a2ui/react": "^0.10.1",
     "@a2ui/web_core": "^0.10.1",
-    "@ai37/a2ui-catalog-schemas": "^0.5.0",
+    "@ai37/a2ui-catalog-schemas": "workspace:^",
     "katex": "^0.16.22"
   },
   "peerDependencies": {
