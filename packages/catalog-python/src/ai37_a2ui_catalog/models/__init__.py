@@ -8,6 +8,7 @@ from .form_card import (
     FormFieldType,
     LookupSuggestMode,
 )
+from .html_table import HtmlTableProps
 from .latex_formula import LatexFormulaProps
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
@@ -15,6 +16,7 @@ from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
 COMPONENT_MODELS = {
     "SimpleTable": SimpleTableProps,
     "FlexTable": FlexTableProps,
+    "HtmlTable": HtmlTableProps,
     "LatexFormula": LatexFormulaProps,
     "ChoiceCard": ChoiceCardProps,
     "FormCard": FormCardProps,
@@ -34,6 +36,7 @@ __all__ = [
     "FormField",
     "FormFieldLookupValue",
     "FormFieldType",
+    "HtmlTableProps",
     "LatexFormulaProps",
     "LookupSuggestMode",
     "SimpleTableColumn",

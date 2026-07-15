@@ -1,0 +1,26 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "HtmlTable",
+          "title": "Таблица 2",
+          "caption": "Минимальные противопожарные расстояния между зданиями",
+          "sourceCode": "СП 4.13130.2013",
+          "sourceTitle": "Системы противопожарной защиты. Ограничение распространения пожара",
+          "html": "<table><caption>Противопожарные расстояния</caption><thead><tr><th rowspan=\"2\">Степень огнестойкости здания</th><th colspan=\"3\">Расстояния при степени огнестойкости, м</th></tr><tr><th>I, II</th><th>III</th><th>IV, V</th></tr></thead><tbody><tr><td>I, II</td><td>6</td><td>8</td><td>10</td></tr><tr><td>III</td><td>8</td><td>8</td><td>10</td></tr><tr><td>IV, V</td><td>10</td><td>10</td><td>15<sup>*</sup></td></tr></tbody></table>"
+        }
+      ]
+    }
+  }
+]

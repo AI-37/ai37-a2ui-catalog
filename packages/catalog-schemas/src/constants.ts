@@ -34,6 +34,7 @@ export const CATALOG_TITLE = 'AI37 Custom A2UI Catalog';
 export const CATALOG_COMPONENT_NAMES = [
   'SimpleTable',
   'FlexTable',
+  'HtmlTable',
   'LatexFormula',
   'ChoiceCard',
   'FormCard',

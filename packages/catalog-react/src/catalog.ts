@@ -13,6 +13,7 @@ if (basicCatalog.id !== A2UI_BASE_CATALOG_ID) {
 }
 import {SimpleTable} from './renderers/simple-table';
 import {FlexTable} from './renderers/flex-table';
+import {HtmlTable} from './renderers/html-table';
 import {LatexFormula} from './renderers/latex-formula';
 import {ChoiceCard} from './renderers/choice-card';
 import {FormCard} from './renderers/form-card';
@@ -20,6 +21,7 @@ import {FormCard} from './renderers/form-card';
 const customComponents: ReactComponentImplementation[] = [
   SimpleTable,
   FlexTable,
+  HtmlTable,
   LatexFormula,
   ChoiceCard,
   FormCard,

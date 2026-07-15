@@ -1,0 +1,10 @@
+{
+  "component": "HtmlTable",
+  "props": {
+    "title": "Таблица 2",
+    "caption": "Минимальные противопожарные расстояния между зданиями",
+    "sourceCode": "СП 4.13130.2013",
+    "sourceTitle": "Системы противопожарной защиты. Ограничение распространения пожара",
+    "html": "<table><caption>Противопожарные расстояния</caption><thead><tr><th rowspan=\"2\">Степень огнестойкости здания</th><th colspan=\"3\">Расстояния при степени огнестойкости, м</th></tr><tr><th>I, II</th><th>III</th><th>IV, V</th></tr></thead><tbody><tr><td>I, II</td><td>6</td><td>8</td><td>10</td></tr><tr><td>III</td><td>8</td><td>8</td><td>10</td></tr><tr><td>IV, V</td><td>10</td><td>10</td><td>15<sup>*</sup></td></tr></tbody><tfoot><tr><td colspan=\"4\"><sup>*</sup> Для зданий классов Ф1.1, Ф4.1 — по расчёту.</td></tr></tfoot></table>"
+  }
+}

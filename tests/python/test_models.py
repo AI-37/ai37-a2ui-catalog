@@ -21,6 +21,7 @@ def load_fixture(group: str, name: str):
     [
         ("simple-table.json", "SimpleTable"),
         ("flex-table.json", "FlexTable"),
+        ("html-table.json", "HtmlTable"),
         ("latex-formula.json", "LatexFormula"),
         ("choice-card.json", "ChoiceCard"),
         ("form-card.json", "FormCard"),
@@ -37,6 +38,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
     [
         ("simple-table-row-length.json", "SimpleTable"),
         ("flex-table-span-mismatch.json", "FlexTable"),
+        ("html-table-empty.json", "HtmlTable"),
         ("latex-formula-empty.json", "LatexFormula"),
         ("choice-card-empty-choices.json", "ChoiceCard"),
         ("form-card-invalid-field-type.json", "FormCard"),
@@ -53,6 +55,7 @@ def test_component_schemas_are_available() -> None:
     assert CATALOG_ID.startswith("https://ai-37.github.io/ai37-a2ui-catalog")
     assert get_component_schema("SimpleTable")["type"] == "object"
     assert get_component_schema("FlexTable")["type"] == "object"
+    assert get_component_schema("HtmlTable")["type"] == "object"
     assert get_component_schema("LatexFormula")["type"] == "object"
     assert get_component_schema("ChoiceCard")["type"] == "object"
     assert get_component_schema("FormCard")["type"] == "object"

@@ -1,0 +1,7 @@
+{
+  "component": "HtmlTable",
+  "props": {
+    "title": "Пустая таблица",
+    "html": ""
+  }
+}

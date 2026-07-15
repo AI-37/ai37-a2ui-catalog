@@ -4,6 +4,26 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.7.0] - 2026-07-15
+
+### Added
+
+- Новый компонент `HtmlTable` — доверенный рендер таблицы, хранимой как HTML
+  (нормативные документы: СП/ГОСТ). В отличие от `FlexTable` (строковые ячейки)
+  сохраняет полную верность исходной таблицы: объединённые ячейки
+  (rowspan/colspan), вложенный контент, сноски — за счёт нативного `<table>`.
+  HTML санитизируется рендерером (DOMPurify: вырезаются script/on*/style/embeds,
+  стили документа не протекают в приложение); тема задаётся через `--a2ui-*`
+  токены (scoped по `.a2ui-html-table`). Рассчитан на HTML из доверенного
+  индекса документов, НЕ на произвольный HTML от LLM.
+  - `@ai37/a2ui-catalog-schemas`: `htmlTablePropsSchema`, `htmlTableDefinition`,
+    тип `HtmlTableProps`; `'HtmlTable'` в `CATALOG_COMPONENT_NAMES`.
+  - `@ai37/a2ui-catalog-react`: рендерер `HtmlTable` (зависимость `dompurify`).
+  - `ai37_a2ui_catalog` (Python): модель `HtmlTableProps`.
+- Изменение аддитивное — `CATALOG_ID` остаётся `v2` (набор компонентов —
+  строгое надмножество). Существующие сообщения и негоциация не меняются;
+  потребители получают компонент, бампнув версию пакета.
+
 ## [0.6.0] - 2026-07-14
 
 ### Added

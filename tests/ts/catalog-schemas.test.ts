@@ -6,6 +6,7 @@ import {
   createCatalogArtifact,
   flexTablePropsSchema,
   formCardPropsSchema,
+  htmlTablePropsSchema,
   latexFormulaPropsSchema,
   simpleTablePropsSchema,
 } from '@ai37/a2ui-catalog-schemas';
@@ -23,12 +24,14 @@ describe('catalog-schemas', () => {
   it('validates valid fixtures', () => {
     const simple = readFixture('valid', 'simple-table.json');
     const flex = readFixture('valid', 'flex-table.json');
+    const html = readFixture('valid', 'html-table.json');
     const latex = readFixture('valid', 'latex-formula.json');
     const choice = readFixture('valid', 'choice-card.json');
     const form = readFixture('valid', 'form-card.json');
 
     expect(simpleTablePropsSchema.safeParse(simple.props).success).toBe(true);
     expect(flexTablePropsSchema.safeParse(flex.props).success).toBe(true);
+    expect(htmlTablePropsSchema.safeParse(html.props).success).toBe(true);
     expect(latexFormulaPropsSchema.safeParse(latex.props).success).toBe(true);
     expect(choiceCardPropsSchema.safeParse(choice.props).success).toBe(true);
     expect(formCardPropsSchema.safeParse(form.props).success).toBe(true);
@@ -37,6 +40,7 @@ describe('catalog-schemas', () => {
   it('rejects invalid fixtures', () => {
     const invalidSimple = readFixture('invalid', 'simple-table-row-length.json');
     const invalidFlex = readFixture('invalid', 'flex-table-span-mismatch.json');
+    const invalidHtml = readFixture('invalid', 'html-table-empty.json');
     const invalidLatex = readFixture('invalid', 'latex-formula-empty.json');
     const invalidChoice = readFixture('invalid', 'choice-card-empty-choices.json');
     const invalidForm = readFixture('invalid', 'form-card-invalid-field-type.json');
@@ -44,6 +48,7 @@ describe('catalog-schemas', () => {
 
     expect(simpleTablePropsSchema.safeParse(invalidSimple.props).success).toBe(false);
     expect(flexTablePropsSchema.safeParse(invalidFlex.props).success).toBe(false);
+    expect(htmlTablePropsSchema.safeParse(invalidHtml.props).success).toBe(false);
     expect(latexFormulaPropsSchema.safeParse(invalidLatex.props).success).toBe(false);
     expect(choiceCardPropsSchema.safeParse(invalidChoice.props).success).toBe(false);
     expect(formCardPropsSchema.safeParse(invalidForm.props).success).toBe(false);
@@ -56,7 +61,7 @@ describe('catalog-schemas', () => {
 
     expect(artifact.catalogId).toContain('ai-37.github.io/ai37-a2ui-catalog');
     // доменные ai37-компоненты присутствуют
-    for (const ai37 of ['SimpleTable', 'FlexTable', 'LatexFormula', 'ChoiceCard', 'FormCard']) {
+    for (const ai37 of ['SimpleTable', 'FlexTable', 'HtmlTable', 'LatexFormula', 'ChoiceCard', 'FormCard']) {
       expect(names).toContain(ai37);
     }
     // базовые компоненты A2UI подмешаны (надмножество — для вложенности и деградации)

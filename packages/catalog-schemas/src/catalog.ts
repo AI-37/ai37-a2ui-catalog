@@ -7,6 +7,7 @@ import {
   type CatalogComponentName,
 } from './constants';
 import {flexTableDefinition} from './components/flex-table';
+import {htmlTableDefinition} from './components/html-table';
 import {latexFormulaDefinition} from './components/latex-formula';
 import {simpleTableDefinition} from './components/simple-table';
 import {choiceCardDefinition} from './components/choice-card';
@@ -17,6 +18,7 @@ import type {CatalogComponentDefinition, JsonSchema} from './types';
 export const componentDefinitions = [
   simpleTableDefinition,
   flexTableDefinition,
+  htmlTableDefinition,
   latexFormulaDefinition,
   choiceCardDefinition,
   formCardDefinition,

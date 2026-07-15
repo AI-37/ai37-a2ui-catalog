@@ -36,6 +36,26 @@ describe('catalog-react integration', () => {
     expect(screen.getByText('Resolution time')).toBeInTheDocument();
   });
 
+  it('renders the html table surface with sanitized merged cells', () => {
+    const processor = new MessageProcessor([ai37Catalog]);
+    processor.processMessages(readMessages('html-table-surface.json'));
+    const surface = processor.model.getSurface('demo-surface');
+
+    const {container} = render(<A2uiSurface surface={surface as any} />);
+
+    // заголовок карточки + атрибуция
+    expect(screen.getByText('Таблица 2')).toBeInTheDocument();
+    expect(
+      screen.getByText(/СП 4\.13130\.2013 — Системы противопожарной защиты/),
+    ).toBeInTheDocument();
+    // санитизированный <table> с объединёнными ячейками отрисован нативно
+    const table = container.querySelector('.a2ui-html-table table');
+    expect(table).toBeTruthy();
+    expect(table?.querySelector('th[rowspan="2"]')).toBeTruthy();
+    expect(table?.querySelector('th[colspan="3"]')).toBeTruthy();
+    expect(screen.getByText('Степень огнестойкости здания')).toBeInTheDocument();
+  });
+
   it('renders the latex formula surface', () => {
     const processor = new MessageProcessor([ai37Catalog]);
     processor.processMessages(readMessages('latex-formula-surface.json'));

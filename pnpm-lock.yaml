@@ -93,6 +93,9 @@ importers:
       '@ai37/a2ui-catalog-schemas':
         specifier: workspace:^
         version: link:../catalog-schemas
+      dompurify:
+        specifier: ^3.2.4
+        version: 3.4.7
       katex:
         specifier: ^0.16.22
         version: 0.16.47
