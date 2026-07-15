@@ -30,7 +30,10 @@ function sanitize(html: string): string {
   return DOMPurify.sanitize(html, SANITIZE_CONFIG);
 }
 
-/** Тема вложенного <table> — скоуп по .a2ui-html-table, инъекция один раз. */
+/**
+ * Тема вложенного <table> — скоуп по .a2ui-html-table, инъекция один раз.
+ * Только токены --a2ui-* → работает и в светлой, и в тёмной теме из коробки.
+ */
 function useHtmlTableStyles() {
   useEffect(() => {
     if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) {
@@ -39,36 +42,50 @@ function useHtmlTableStyles() {
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent = `
-.${SCOPE_CLASS} { overflow-x: auto; }
+.${SCOPE_CLASS} { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .${SCOPE_CLASS} table {
   width: 100%;
   border-collapse: collapse;
   background: ${tokens.surface};
   color: ${tokens.text};
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 .${SCOPE_CLASS} caption {
-  padding: 10px 12px;
+  padding: 10px 16px;
   text-align: left;
   color: ${tokens.textMuted};
+  font-size: 0.85rem;
   caption-side: top;
 }
 .${SCOPE_CLASS} th,
 .${SCOPE_CLASS} td {
-  padding: 10px 14px;
-  border: 1px solid ${tokens.borderSubtle};
+  padding: 9px 14px;
+  border-bottom: 1px solid ${tokens.borderSubtle};
+  border-right: 1px solid ${tokens.borderFaint};
   text-align: left;
   vertical-align: top;
 }
-.${SCOPE_CLASS} thead th,
-.${SCOPE_CLASS} th {
+.${SCOPE_CLASS} th:last-child,
+.${SCOPE_CLASS} td:last-child { border-right: none; }
+.${SCOPE_CLASS} thead th {
+  position: sticky;
+  top: 0;
   background: ${tokens.surfaceHeader};
   color: ${tokens.textStrong};
-  font-weight: 700;
+  font-weight: 600;
+  border-bottom: 2px solid ${tokens.borderStrong};
+  white-space: nowrap;
 }
-.${SCOPE_CLASS} tbody tr:nth-child(even) td {
+.${SCOPE_CLASS} tbody th {
   background: ${tokens.surfaceMuted};
+  color: ${tokens.textStrong};
+  font-weight: 600;
 }
+.${SCOPE_CLASS} tbody tr:nth-child(even) > td { background: ${tokens.surfaceMuted}; }
+.${SCOPE_CLASS} tbody tr:hover > td { background: ${tokens.surfaceHeader}; }
+.${SCOPE_CLASS} tbody tr:last-child > th,
+.${SCOPE_CLASS} tbody tr:last-child > td { border-bottom: none; }
 `;
     document.head.appendChild(style);
   }, []);
@@ -80,22 +97,50 @@ export const HtmlTable = createComponentImplementation(htmlTableDefinition, ({pr
 
   const safeHtml = useMemo(() => sanitize(props.html), [props.html]);
   const attribution = [props.sourceCode, props.sourceTitle].filter(Boolean).join(' — ');
+  const hasHeader = Boolean(props.title || props.caption);
 
   return (
-    <section style={{display: 'grid', gap: 10, color: tokens.text}}>
-      {props.title ? (
-        <h3 style={{margin: 0, fontSize: '1.05rem', color: tokens.textStrong}}>{props.title}</h3>
+    <section
+      style={{
+        overflow: 'hidden',
+        borderRadius: 16,
+        border: `1px solid ${tokens.border}`,
+        background: tokens.surface,
+        color: tokens.text,
+        boxShadow: `0 1px 2px ${tokens.borderFaint}`,
+      }}
+    >
+      {hasHeader ? (
+        <header
+          style={{
+            padding: '13px 16px 11px',
+            borderBottom: `1px solid ${tokens.borderSubtle}`,
+          }}
+        >
+          {props.title ? (
+            <h3 style={{margin: 0, fontSize: '1rem', fontWeight: 700, color: tokens.textStrong}}>
+              {props.title}
+            </h3>
+          ) : null}
+          {props.caption ? (
+            <p style={{margin: props.title ? '4px 0 0' : 0, fontSize: '0.85rem', color: tokens.textMuted}}>
+              {props.caption}
+            </p>
+          ) : null}
+        </header>
       ) : null}
-      {props.caption ? (
-        <p style={{margin: 0, color: tokens.textMuted, fontSize: '0.9rem'}}>{props.caption}</p>
-      ) : null}
-      <div
-        style={{borderRadius: 18, border: `1px solid ${tokens.border}`, overflow: 'hidden'}}
-      >
-        <div className={SCOPE_CLASS} dangerouslySetInnerHTML={{__html: safeHtml}} />
-      </div>
+      <div className={SCOPE_CLASS} dangerouslySetInnerHTML={{__html: safeHtml}} />
       {attribution ? (
-        <p style={{margin: 0, color: tokens.textSubtle, fontSize: '0.85rem'}}>{attribution}</p>
+        <footer
+          style={{
+            padding: '9px 16px',
+            borderTop: `1px solid ${tokens.borderSubtle}`,
+            fontSize: '0.8rem',
+            color: tokens.textSubtle,
+          }}
+        >
+          {attribution}
+        </footer>
       ) : null}
     </section>
   );
