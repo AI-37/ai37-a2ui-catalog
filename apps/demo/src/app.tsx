@@ -14,6 +14,7 @@ import {
 } from '@assistant-ui/react';
 import simpleTableMessages from '../../../fixtures/messages/simple-table-surface.json';
 import flexTableMessages from '../../../fixtures/messages/flex-table-surface.json';
+import htmlTableMessages from '../../../fixtures/messages/html-table-surface.json';
 import latexMessages from '../../../fixtures/messages/latex-formula-surface.json';
 import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.json';
 import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
@@ -32,6 +33,12 @@ const examples = [
     title: 'Flex Table',
     description: 'Многоуровневые заголовки для сравнительных отчетов и матриц.',
     messages: flexTableMessages as A2uiMessage[],
+  },
+  {
+    key: 'html-preview',
+    title: 'Html Table',
+    description: 'Документная таблица (СП/ГОСТ) как санитизированный HTML — merged-ячейки и сноски 1:1.',
+    messages: htmlTableMessages as A2uiMessage[],
   },
   {
     key: 'latex-preview',
