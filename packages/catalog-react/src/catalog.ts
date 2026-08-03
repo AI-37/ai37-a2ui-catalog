@@ -16,6 +16,7 @@ import {FlexTable} from './renderers/flex-table';
 import {LatexFormula} from './renderers/latex-formula';
 import {ChoiceCard} from './renderers/choice-card';
 import {FormCard} from './renderers/form-card';
+import {ConstructionsEditor} from './renderers/constructions-editor';
 
 const customComponents: ReactComponentImplementation[] = [
   SimpleTable,
@@ -23,6 +24,7 @@ const customComponents: ReactComponentImplementation[] = [
   LatexFormula,
   ChoiceCard,
   FormCard,
+  ConstructionsEditor,
 ];
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(

@@ -37,6 +37,7 @@ export const CATALOG_COMPONENT_NAMES = [
   'LatexFormula',
   'ChoiceCard',
   'FormCard',
+  'ConstructionsEditor',
 ] as const;
 
 export type CatalogComponentName = (typeof CATALOG_COMPONENT_NAMES)[number];

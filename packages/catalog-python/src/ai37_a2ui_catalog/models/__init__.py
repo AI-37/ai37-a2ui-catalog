@@ -1,4 +1,13 @@
 from .choice_card import ChoiceCardProps, ChoiceCardSubmit, ChoiceOption
+from .constructions_editor import (
+    CherdachnyeSubtype,
+    ConstructionEntry,
+    ConstructionLayer,
+    ConstructionLayerKind,
+    ConstructionType,
+    ConstructionTypeConfig,
+    ConstructionsEditorProps,
+)
 from .flex_table import FlexTableCell, FlexTableProps, FlexTableRow
 from .form_card import (
     FormCardProps,
@@ -18,14 +27,22 @@ COMPONENT_MODELS = {
     "LatexFormula": LatexFormulaProps,
     "ChoiceCard": ChoiceCardProps,
     "FormCard": FormCardProps,
+    "ConstructionsEditor": ConstructionsEditorProps,
 }
 
 __all__ = [
     "COMPONENT_MODELS",
     "CellPrimitive",
+    "CherdachnyeSubtype",
     "ChoiceCardProps",
     "ChoiceCardSubmit",
     "ChoiceOption",
+    "ConstructionEntry",
+    "ConstructionLayer",
+    "ConstructionLayerKind",
+    "ConstructionType",
+    "ConstructionTypeConfig",
+    "ConstructionsEditorProps",
     "FlexTableCell",
     "FlexTableProps",
     "FlexTableRow",

@@ -1,0 +1,65 @@
+from __future__ import annotations
+
+from typing import Annotated, Any, Literal
+
+from pydantic import Field
+
+from .shared import StrictModel
+
+# Вид строки слоя: материал или воздушный зазор (вент./невент.); зазоры в
+# live-Rпр клиента пропускаются, их Rs считает сервер.
+ConstructionLayerKind = Literal["material", "vent-gap", "closed-gap"]
+
+ConstructionType = Literal[
+    "steny", "pokrytiya", "cherdachnye_podval_grunt", "okna", "fonari", "dver"
+]
+
+CherdachnyeSubtype = Literal["cherdak", "podval_vent", "podval_nevent", "pol_po_gruntu"]
+
+PositiveFloat = Annotated[float, Field(gt=0)]
+
+
+class ConstructionLayer(StrictModel):
+    material: str = Field(min_length=1, max_length=200)
+    # None — незаполненная строка (черновик до submit).
+    thicknessMm: PositiveFloat | None
+    kind: ConstructionLayerKind = None
+    materialKey: str = None
+    lambdaA: float = Field(default=None, gt=0)
+    lambdaB: float = Field(default=None, gt=0)
+    lambdaManual: float = Field(default=None, gt=0)
+
+
+class ConstructionEntry(StrictModel):
+    # Ключ React-списка; клиентский, агент его игнорирует.
+    id: str = Field(min_length=1)
+    type: ConstructionType
+    subtype: CherdachnyeSubtype = None
+    name: str = Field(default=None, max_length=200)
+    layers: list[ConstructionLayer] = Field(max_length=50)
+    rprPassport: float = Field(default=None, gt=0)
+
+
+class ConstructionTypeConfig(StrictModel):
+    type: ConstructionType
+    label: str
+    hasLayers: bool
+    rnorm: float = Field(default=None, gt=0)
+    alphaV: float = Field(default=None, gt=0)
+    # Число или record по subtype; subtype без записи (пол по грунту) —
+    # член 1/αн в live-Rпр опускается.
+    alphaN: PositiveFloat | dict[CherdachnyeSubtype, PositiveFloat] = None
+
+
+class ConstructionsEditorProps(StrictModel):
+    constructions: list[ConstructionEntry]
+    typeConfigs: list[ConstructionTypeConfig] = Field(min_length=1)
+    condition: Literal["А", "Б"] = None
+    materialsReferenceId: str = Field(min_length=1, max_length=80)
+    minChars: int = Field(default=None, ge=1, le=10)
+    addLabel: str = Field(min_length=1, max_length=80)
+    submitLabel: str = Field(min_length=1, max_length=80)
+    submitAction: str = Field(min_length=1, max_length=120)
+    backLabel: str = Field(min_length=1, max_length=80)
+    backAction: str = Field(min_length=1, max_length=120)
+    backActionContext: dict[str, Any] = None

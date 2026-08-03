@@ -18,6 +18,7 @@ import latexMessages from '../../../fixtures/messages/latex-formula-surface.json
 import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.json';
 import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
 import formCardLookupFetchMessages from '../../../fixtures/messages/form-card-lookup-fetch-surface.json';
+import constructionsEditorMessages from '../../../fixtures/messages/constructions-editor-surface.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 
 const examples = [
@@ -56,6 +57,13 @@ const examples = [
     title: 'Form Card — lookup fetch',
     description: 'Lookup-поле с подсказками через same-origin fetch (dev-middleware, только dev-сервер).',
     messages: formCardLookupFetchMessages as A2uiMessage[],
+  },
+  {
+    key: 'constructions-preview',
+    title: 'Constructions Editor',
+    description:
+      'Редактор конструкций одним сообщением: слои, lookup материалов (dev-middleware), live Rпр и один submit.',
+    messages: constructionsEditorMessages as A2uiMessage[],
   },
 ] as const;
 

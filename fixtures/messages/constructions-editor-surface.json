@@ -1,0 +1,114 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "ConstructionsEditor",
+          "constructions": [
+            {
+              "id": "c-wall-1",
+              "type": "steny",
+              "name": "Наружная стена (кирпич + минвата)",
+              "layers": [
+                {
+                  "material": "Кладка из глиняного обыкновенного кирпича",
+                  "thicknessMm": 380,
+                  "kind": "material",
+                  "materialKey": "m-kirpich-glina",
+                  "lambdaA": 0.7,
+                  "lambdaB": 0.81
+                },
+                {
+                  "material": "Плиты минераловатные",
+                  "thicknessMm": 150,
+                  "materialKey": "m-minvata-plity",
+                  "lambdaA": 0.045,
+                  "lambdaB": 0.048
+                },
+                {
+                  "material": "Воздушный зазор невентилируемый",
+                  "thicknessMm": 20,
+                  "kind": "closed-gap"
+                },
+                {
+                  "material": "Фибролит (нестандартный)",
+                  "thicknessMm": 30,
+                  "lambdaManual": 0.09
+                }
+              ]
+            },
+            {
+              "id": "c-floor-1",
+              "type": "cherdachnye_podval_grunt",
+              "subtype": "pol_po_gruntu",
+              "name": "Пол по грунту",
+              "layers": [
+                {
+                  "material": "Железобетон",
+                  "thicknessMm": 200,
+                  "materialKey": "m-zhelezobeton",
+                  "lambdaA": 1.92,
+                  "lambdaB": 2.04
+                }
+              ]
+            },
+            {
+              "id": "c-window-1",
+              "type": "okna",
+              "name": "Окно двухкамерное",
+              "layers": [],
+              "rprPassport": 0.56
+            }
+          ],
+          "typeConfigs": [
+            {
+              "type": "steny",
+              "label": "Наружные стены",
+              "hasLayers": true,
+              "rnorm": 3.19,
+              "alphaV": 8.7,
+              "alphaN": 23
+            },
+            {
+              "type": "cherdachnye_podval_grunt",
+              "label": "Чердачные и цокольные перекрытия, полы",
+              "hasLayers": true,
+              "rnorm": 4.2,
+              "alphaV": 8.7,
+              "alphaN": {
+                "cherdak": 12,
+                "podval_vent": 17,
+                "podval_nevent": 6
+              }
+            },
+            {
+              "type": "okna",
+              "label": "Окна и балконные двери",
+              "hasLayers": false,
+              "rnorm": 0.54
+            }
+          ],
+          "condition": "Б",
+          "materialsReferenceId": "sp50-materials",
+          "minChars": 2,
+          "addLabel": "Добавить конструкцию",
+          "submitLabel": "Рассчитать",
+          "submitAction": "constructions:apply",
+          "backLabel": "Назад",
+          "backAction": "navigate",
+          "backActionContext": {"target": "climate"}
+        }
+      ]
+    }
+  }
+]
