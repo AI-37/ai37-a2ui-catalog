@@ -109,6 +109,48 @@ describe('catalog-schemas', () => {
     expect(constructionsEditorPropsSchema.safeParse(invalidDraft.props).success).toBe(false);
   });
 
+  it('general: пустой блок валиден, неизвестный ключ отклоняется', () => {
+    const valid = readFixture('valid', 'constructions-editor.json');
+    const props = valid.props as Record<string, unknown>;
+
+    const emptyGeneral = {
+      buildingType: null,
+      city: null,
+      tot: null,
+      zot: null,
+      tn: null,
+      tv: null,
+      condition: null,
+    };
+    expect(
+      constructionsEditorPropsSchema.safeParse({...props, general: emptyGeneral}).success,
+    ).toBe(true);
+
+    const unknownKey = readFixture('invalid', 'constructions-editor-unknown-general-key.json');
+    expect(constructionsEditorPropsSchema.safeParse(unknownKey.props).success).toBe(false);
+  });
+
+  it('back-кнопка и general опциональны (объединённый экран и путь отката)', () => {
+    const valid = readFixture('valid', 'constructions-editor.json');
+    const props = valid.props as Record<string, unknown>;
+
+    // Фикстура объединённого экрана — уже без backLabel/backAction.
+    expect(props.backLabel).toBeUndefined();
+    expect(constructionsEditorPropsSchema.safeParse(props).success).toBe(true);
+
+    // Прежние эмитенты: кнопка возврата на месте, general не прислан.
+    const {general: _omitted, ...withoutGeneral} = props;
+    expect(
+      constructionsEditorPropsSchema.safeParse({
+        ...withoutGeneral,
+        condition: 'Б',
+        backLabel: 'Назад',
+        backAction: 'navigate',
+        backActionContext: {target: 'climate'},
+      }).success,
+    ).toBe(true);
+  });
+
   it('builds a superset catalog artifact (base ∪ ai37)', () => {
     const artifact = createCatalogArtifact();
     const names = Object.keys(artifact.components);

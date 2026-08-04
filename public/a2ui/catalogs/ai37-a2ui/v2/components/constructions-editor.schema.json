@@ -175,6 +175,121 @@
           },
           "minItems": 1
         },
+        "general": {
+          "type": "object",
+          "properties": {
+            "buildingType": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "city": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "label"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tot": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "zot": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "tn": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "tv": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "condition": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "А",
+                    "Б"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "buildingType",
+            "city",
+            "tot",
+            "zot",
+            "tn",
+            "tv",
+            "condition"
+          ],
+          "additionalProperties": false
+        },
+        "buildingTypeOptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 50
+        },
+        "cityReferenceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "generalTabLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "constructionsTabLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
         "condition": {
           "type": "string",
           "enum": [
@@ -233,9 +348,7 @@
         "materialsReferenceId",
         "addLabel",
         "submitLabel",
-        "submitAction",
-        "backLabel",
-        "backAction"
+        "submitAction"
       ],
       "additionalProperties": false
     }

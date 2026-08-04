@@ -89,15 +89,26 @@
         "rnorm": 0.54
       }
     ],
-    "condition": "Б",
+    "general": {
+      "buildingType": "Жилое многоквартирное",
+      "city": {"value": "moskva", "label": "Москва"},
+      "tot": -2.2,
+      "zot": 205,
+      "tn": -25,
+      "tv": 20,
+      "condition": "Б"
+    },
+    "buildingTypeOptions": [
+      "Жилое многоквартирное",
+      "Общественное",
+      "Административное"
+    ],
+    "cityReferenceId": "cities",
     "materialsReferenceId": "sp50-materials",
     "minChars": 2,
     "addLabel": "Добавить конструкцию",
     "submitLabel": "Рассчитать",
     "submitAction": "constructions:apply",
-    "backLabel": "Назад",
-    "backAction": "navigate",
-    "backActionContext": {"target": "climate"},
     "draftAction": "constructions:draft"
   }
 }

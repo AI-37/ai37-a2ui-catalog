@@ -1,6 +1,6 @@
 [project]
 name = "ai37-a2ui-catalog"
-version = "0.8.0"
+version = "0.9.0"
 description = "Pydantic models and validation helpers for the AI37 A2UI catalog"
 readme = "README.md"
 authors = [{ name = "AI37", email = "dev@ai37.ru" }]

@@ -3,35 +3,65 @@ import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {
   constructionsEditorDefinition,
   type ConstructionEntry,
+  type ConstructionsGeneral,
 } from '@ai37/a2ui-catalog-schemas';
+import {climateKey} from './climate-key';
 import {computeLiveRpr} from './compute-live-rpr';
 import {ConstructionsEditorCard} from './constructions-editor-card';
+import {ConstructionsEditorGeneral} from './constructions-editor-general';
+import {ConstructionsEditorTabs} from './constructions-editor-tabs';
+import type {ConstructionsEditorTab} from './constructions-editor.types';
+import {createGeneralState} from './create-general-state';
 import {createLocalId} from './create-local-id';
 import {tokens} from './tokens';
 import {useA2uiBaseStyles} from './shared';
-import {validateConstructions} from './validate-constructions';
+
+const GENERAL_TAB_LABEL = 'Общие данные';
+const CONSTRUCTIONS_TAB_LABEL = 'Конструкции';
 
 /**
- * Редактор конструкций одним сообщением (паттерн FormCard, Решения 1, 5, 6
- * design.md): рабочая копия конструкций — локальный state из props, все
- * правки на клиенте; наружу уходят один submit с полным массивом в context
- * (после клиентской валидации с подсветкой) и back без валидации. При заданном
- * `draftAction` структурные правки (add/remove конструкции и слоя) дополнительно
- * уезжают агенту черновиком — на локальный state это никак не влияет.
+ * Объединённый экран теплотехнического расчёта одним сообщением: вкладки
+ * «Общие данные» и «Конструкции» с общим локальным состоянием (Решения 1—6
+ * design.md). Переключение вкладок — чисто клиентское, ввод обеих переживает
+ * его. Наружу уходит один submit с `{general, constructions}` как есть —
+ * клиентской блокировки и подсветки нет, о недостающем сообщает агент. При
+ * заданном `draftAction` структурные правки списка конструкций дополнительно
+ * уезжают черновиком с тем же payload'ом.
+ *
+ * Без пропа `general` компонент работает как прежде: одна вкладка конструкций
+ * (переключателя нет) и submit с `{constructions}` — путь отката.
  */
 export const ConstructionsEditor = createComponentImplementation(
   constructionsEditorDefinition,
   ({props, context}) => {
     useA2uiBaseStyles();
 
+    const hasGeneral = props.general !== undefined;
+
     const [constructions, setConstructions] = React.useState<ConstructionEntry[]>(() =>
       props.constructions.map(entry => ({...entry, layers: entry.layers.map(layer => ({...layer}))})),
     );
     const [closedIds, setClosedIds] = React.useState<ReadonlySet<string>>(new Set());
-    const [submitAttempted, setSubmitAttempted] = React.useState(false);
+    const [activeTab, setActiveTab] = React.useState<ConstructionsEditorTab>(
+      hasGeneral ? 'general' : 'constructions',
+    );
+    const [general, setGeneral] = React.useState<ConstructionsGeneral>(() =>
+      createGeneralState(props.general, props.condition),
+    );
+
+    // Снимок климата, из которого агент посчитал `rnorm`. Новые props (ответ
+    // агента с пересчитанным Rнорм) — новый снимок и свежее состояние вкладки.
+    const propsClimate = climateKey(props.general);
+    const [baseClimate, setBaseClimate] = React.useState(propsClimate);
+    if (propsClimate !== baseClimate) {
+      setBaseClimate(propsClimate);
+      setGeneral(createGeneralState(props.general, props.condition));
+    }
+    const climateDirty = climateKey(general) !== baseClimate;
 
     const typeConfigs = props.typeConfigs;
-    const validation = validateConstructions(constructions, typeConfigs);
+    // `condition` из вкладки; нет значения — λБ, как на сервере (Решение 6).
+    const condition = general.condition ?? undefined;
 
     const comparable = constructions.filter(entry => {
       const config = typeConfigs.find(candidate => candidate.type === entry.type);
@@ -39,7 +69,7 @@ export const ConstructionsEditor = createComponentImplementation(
     });
     const passing = comparable.filter(entry => {
       const config = typeConfigs.find(candidate => candidate.type === entry.type);
-      const rpr = computeLiveRpr(entry, config, props.condition);
+      const rpr = computeLiveRpr(entry, config, condition);
       return rpr !== null && config?.rnorm !== undefined && rpr >= config.rnorm;
     });
 
@@ -55,12 +85,17 @@ export const ConstructionsEditor = createComponentImplementation(
       });
     };
 
-    // Автосейв черновика: тот же payload, что у submit'а, без валидации и без
-    // чтения ответа агента (Решения 4, 5 design.md). Нет пропа — no-op.
+    // Полное состояние экрана: `general` — только когда агент его прислал,
+    // иначе payload прежний (путь отката).
+    const buildContext = (entries: ConstructionEntry[]) =>
+      hasGeneral ? {general, constructions: entries} : {constructions: entries};
+
+    // Автосейв черновика: тот же payload, что у submit'а, без чтения ответа
+    // агента. Нет пропа — no-op.
     const sendDraft = (next: ConstructionEntry[]) => {
       if (!props.draftAction) return;
       void context.dispatchAction({
-        event: {name: props.draftAction, context: {constructions: next}},
+        event: {name: props.draftAction, context: buildContext(next)},
       });
     };
 
@@ -91,23 +126,22 @@ export const ConstructionsEditor = createComponentImplementation(
       sendDraft(updated);
     };
 
+    // Ничего не блокируем и не подсвечиваем: единственный компетентный
+    // валидатор — агент (Решение 3 design.md).
     const handleSubmit = () => {
-      if (!validation.valid) {
-        setSubmitAttempted(true);
-        return;
-      }
-      // Один action с полным массивом состояния — включая клиентские id
-      // (агент их игнорирует) и все λ-поля (Решение 6 design.md).
       void context.dispatchAction({
-        event: {name: props.submitAction, context: {constructions}},
+        event: {name: props.submitAction, context: buildContext(constructions)},
       });
     };
 
     const handleBack = () => {
+      if (!props.backAction) return;
       void context.dispatchAction({
         event: {name: props.backAction, context: props.backActionContext ?? {}},
       });
     };
+
+    const showConstructions = !hasGeneral || activeTab === 'constructions';
 
     return (
       <div
@@ -121,53 +155,78 @@ export const ConstructionsEditor = createComponentImplementation(
           color: tokens.text,
         }}
       >
-        {constructions.map(entry => (
-          <ConstructionsEditorCard
-            key={entry.id}
-            entry={entry}
-            typeConfigs={typeConfigs}
-            condition={props.condition}
-            materialsReferenceId={props.materialsReferenceId}
-            minChars={props.minChars}
-            open={!closedIds.has(entry.id)}
-            errors={submitAttempted ? validation.byEntryId.get(entry.id) : undefined}
-            onToggle={() => handleToggle(entry.id)}
-            onChange={handleEntryChange}
-            onRemove={() => handleEntryRemove(entry.id)}
+        {hasGeneral ? (
+          <ConstructionsEditorTabs
+            active={activeTab}
+            generalLabel={props.generalTabLabel ?? GENERAL_TAB_LABEL}
+            constructionsLabel={props.constructionsTabLabel ?? CONSTRUCTIONS_TAB_LABEL}
+            onSelect={setActiveTab}
           />
-        ))}
-        <button
-          type="button"
-          onClick={handleAdd}
-          style={{
-            justifySelf: 'start',
-            padding: '8px 14px',
-            borderRadius: 12,
-            border: `1px dashed ${tokens.borderStrong}`,
-            background: 'transparent',
-            color: tokens.text,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          + {props.addLabel}
-        </button>
+        ) : null}
+        {hasGeneral && activeTab === 'general' ? (
+          <div role="tabpanel">
+            <ConstructionsEditorGeneral
+              general={general}
+              buildingTypeOptions={props.buildingTypeOptions}
+              cityReferenceId={props.cityReferenceId}
+              minChars={props.minChars}
+              onChange={setGeneral}
+            />
+          </div>
+        ) : null}
+        {showConstructions ? (
+          <div role={hasGeneral ? 'tabpanel' : undefined} style={{display: 'grid', gap: 12}}>
+            {constructions.map(entry => (
+              <ConstructionsEditorCard
+                key={entry.id}
+                entry={entry}
+                typeConfigs={typeConfigs}
+                condition={condition}
+                materialsReferenceId={props.materialsReferenceId}
+                minChars={props.minChars}
+                open={!closedIds.has(entry.id)}
+                showRnorm={!climateDirty}
+                onToggle={() => handleToggle(entry.id)}
+                onChange={handleEntryChange}
+                onRemove={() => handleEntryRemove(entry.id)}
+              />
+            ))}
+            <button
+              type="button"
+              onClick={handleAdd}
+              style={{
+                justifySelf: 'start',
+                padding: '8px 14px',
+                borderRadius: 12,
+                border: `1px dashed ${tokens.borderStrong}`,
+                background: 'transparent',
+                color: tokens.text,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              + {props.addLabel}
+            </button>
+          </div>
+        ) : null}
         <footer style={{display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'}}>
-          <button
-            type="button"
-            onClick={handleBack}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 12,
-              border: `1px solid ${tokens.borderStrong}`,
-              background: 'transparent',
-              color: tokens.text,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            {props.backLabel}
-          </button>
+          {props.backLabel && props.backAction ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              style={{
+                padding: '10px 18px',
+                borderRadius: 12,
+                border: `1px solid ${tokens.borderStrong}`,
+                background: 'transparent',
+                color: tokens.text,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {props.backLabel}
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={handleSubmit}
@@ -183,14 +242,13 @@ export const ConstructionsEditor = createComponentImplementation(
           >
             {props.submitLabel}
           </button>
-          <span style={{color: tokens.textMuted, fontSize: '0.9rem'}}>
-            проходит {passing.length} из {comparable.length}
-          </span>
-          {submitAttempted && !validation.valid ? (
-            <span style={{color: tokens.danger, fontSize: '0.9rem'}}>
-              Заполните подсвеченные поля
+          {/* Климат тронут → присланный Rнорм протух, сводка молчит до
+              следующих props (Решение 4 design.md). */}
+          {climateDirty ? null : (
+            <span style={{color: tokens.textMuted, fontSize: '0.9rem'}}>
+              проходит {passing.length} из {comparable.length}
             </span>
-          ) : null}
+          )}
         </footer>
       </div>
     );

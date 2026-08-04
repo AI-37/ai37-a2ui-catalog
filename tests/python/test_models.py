@@ -46,6 +46,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("constructions-editor-negative-thickness.json", "ConstructionsEditor"),
         ("constructions-editor-unknown-type.json", "ConstructionsEditor"),
         ("constructions-editor-empty-draft-action.json", "ConstructionsEditor"),
+        ("constructions-editor-unknown-general-key.json", "ConstructionsEditor"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:
@@ -79,3 +80,27 @@ def test_constructions_editor_round_trip() -> None:
                 dumped_layer["thicknessMm"] = None
 
     assert dumped == fixture["props"]
+
+
+def test_constructions_editor_general_accepts_empty_block() -> None:
+    fixture = load_fixture("valid", "constructions-editor.json")
+    empty_general = {key: None for key in fixture["props"]["general"]}
+    props = {**fixture["props"], "general": empty_general}
+
+    model = validate_component_payload("ConstructionsEditor", props)
+
+    assert model.general is not None
+    assert model.general.model_dump() == empty_general
+
+
+def test_constructions_editor_without_back_button() -> None:
+    # Объединённый экран кнопку возврата не шлёт; прежние эмитенты — шлют.
+    fixture = load_fixture("valid", "constructions-editor.json")
+    assert "backAction" not in fixture["props"]
+
+    model = validate_component_payload(
+        "ConstructionsEditor",
+        {**fixture["props"], "backLabel": "Назад", "backAction": "navigate"},
+    )
+
+    assert model.backAction == "navigate"

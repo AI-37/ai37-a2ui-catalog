@@ -3,28 +3,32 @@ import type {
   ConstructionLayer,
   ConstructionTypeConfig,
   ConstructionsEditorProps,
+  ConstructionsGeneral,
 } from '@ai37/a2ui-catalog-schemas';
 
 /** Условие эксплуатации ограждающих конструкций (выбор λА/λБ). */
 export type OperatingCondition = ConstructionsEditorProps['condition'];
 
-/** Ошибки клиентской валидации одной строки слоя (подсветка при submit). */
-export type LayerRowErrors = {
-  material: boolean;
-  thickness: boolean;
-  lambda: boolean;
+/** Вкладка объединённого экрана. */
+export type ConstructionsEditorTab = 'general' | 'constructions';
+
+/** Климат, вычитанный из опции справочника городов; нет поля — нет ключа. */
+export type ConstructionsClimatePatch = Partial<Pick<ConstructionsGeneral, 'tot' | 'zot' | 'tn'>>;
+
+export type ConstructionsEditorTabsProps = {
+  active: ConstructionsEditorTab;
+  generalLabel: string;
+  constructionsLabel: string;
+  onSelect: (tab: ConstructionsEditorTab) => void;
 };
 
-/** Ошибки одной конструкции: паспортное Rпр и строки слоёв по индексу. */
-export type ConstructionErrors = {
-  rprPassport: boolean;
-  layers: Map<number, LayerRowErrors>;
-};
-
-/** Итог клиентской валидации всех конструкций перед submit. */
-export type ConstructionsValidation = {
-  valid: boolean;
-  byEntryId: Map<string, ConstructionErrors>;
+export type ConstructionsEditorGeneralProps = {
+  general: ConstructionsGeneral;
+  buildingTypeOptions?: string[] | undefined;
+  /** Без справочника поле города остаётся обычным вводом без подсказок. */
+  cityReferenceId?: string | undefined;
+  minChars?: number | undefined;
+  onChange: (general: ConstructionsGeneral) => void;
 };
 
 export type ConstructionsEditorCardProps = {
@@ -34,8 +38,8 @@ export type ConstructionsEditorCardProps = {
   materialsReferenceId: string;
   minChars?: number | undefined;
   open: boolean;
-  /** undefined — ошибки не показываются (submit ещё не нажимался или всё валидно). */
-  errors?: ConstructionErrors | undefined;
+  /** false — климат тронут, Rнорм протух: чип показывает Rпр без сравнения. */
+  showRnorm: boolean;
   onToggle: () => void;
   onChange: (entry: ConstructionEntry) => void;
   onRemove: () => void;
@@ -48,7 +52,6 @@ export type ConstructionsEditorLayerRowProps = {
   condition: OperatingCondition;
   materialsReferenceId: string;
   minChars?: number | undefined;
-  errors?: LayerRowErrors | undefined;
   onChange: (layer: ConstructionLayer) => void;
   onRemove: () => void;
 };

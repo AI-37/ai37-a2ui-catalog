@@ -6,7 +6,9 @@ from .constructions_editor import (
     ConstructionLayerKind,
     ConstructionType,
     ConstructionTypeConfig,
+    ConstructionsCity,
     ConstructionsEditorProps,
+    ConstructionsGeneral,
 )
 from .flex_table import FlexTableCell, FlexTableProps, FlexTableRow
 from .form_card import (
@@ -42,7 +44,9 @@ __all__ = [
     "ConstructionLayerKind",
     "ConstructionType",
     "ConstructionTypeConfig",
+    "ConstructionsCity",
     "ConstructionsEditorProps",
+    "ConstructionsGeneral",
     "FlexTableCell",
     "FlexTableProps",
     "FlexTableRow",

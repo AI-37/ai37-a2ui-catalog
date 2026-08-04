@@ -5192,7 +5192,7 @@
       }
     },
     "ConstructionsEditor": {
-      "description": "A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables. The user edits construction cards and material layers entirely on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, live reduced thermal resistance (R) feedback against the normative value — and submits the full array back to the agent in a single action.",
+      "description": "A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables, optionally paired with a general-data tab for climate and building inputs. The user edits both tabs entirely on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, city lookup that fills climate values, live reduced thermal resistance (R) feedback against the normative value — and submits the whole state back to the agent in a single action, without client-side blocking.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/constructions-editor.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/ConstructionsEditor",
@@ -5371,6 +5371,121 @@
                 },
                 "minItems": 1
               },
+              "general": {
+                "type": "object",
+                "properties": {
+                  "buildingType": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "city": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "tot": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "zot": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "tn": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "tv": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "condition": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "А",
+                          "Б"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "buildingType",
+                  "city",
+                  "tot",
+                  "zot",
+                  "tn",
+                  "tv",
+                  "condition"
+                ],
+                "additionalProperties": false
+              },
+              "buildingTypeOptions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "maxItems": 50
+              },
+              "cityReferenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "generalTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "constructionsTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
               "condition": {
                 "type": "string",
                 "enum": [
@@ -5429,9 +5544,7 @@
               "materialsReferenceId",
               "addLabel",
               "submitLabel",
-              "submitAction",
-              "backLabel",
-              "backAction"
+              "submitAction"
             ],
             "additionalProperties": false
           }

@@ -23,6 +23,25 @@ export const inputStyle: React.CSSProperties = {
   color: tokens.text,
 };
 
+/** Ширина колонки полей: анкета читается лучше узкой, чем во всю карточку. */
+export const FIELD_COLUMN_WIDTH = 420;
+
+/** Поле формы в столбик: подпись над контролом. */
+export const fieldStyle: React.CSSProperties = {display: 'grid', gap: 4};
+
+/** Подпись поля формы. */
+export const fieldLabelStyle: React.CSSProperties = {
+  fontSize: '0.85rem',
+  color: tokens.textMuted,
+};
+
+// border-box: иначе padding инпута вылезает за колонку.
+export const controlStyle: React.CSSProperties = {
+  ...inputStyle,
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
 export function toDisplayValue(value: unknown) {
   if (value === null || value === undefined) {
     return '—';

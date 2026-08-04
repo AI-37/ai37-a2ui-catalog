@@ -64,7 +64,7 @@ const examples = [
     key: 'constructions-preview',
     title: 'Constructions Editor',
     description:
-      'Редактор конструкций одним сообщением: слои, lookup материалов (dev-middleware), live Rпр, автосейв черновика на структурных правках (в консоли) и один submit.',
+      'Объединённый экран одним сообщением: вкладка общих данных (город из справочника подставляет климат) и вкладка конструкций со слоями, lookup материалов (dev-middleware) и live Rпр; автосейв черновика на структурных правках (в консоли) и один submit без клиентской блокировки.',
     messages: withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
   },
 ] as const;

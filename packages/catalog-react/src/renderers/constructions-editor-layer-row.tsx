@@ -4,14 +4,14 @@ import type {ConstructionsEditorLayerRowProps} from './constructions-editor.type
 import {LookupCombobox} from './lookup-combobox';
 import {readOptionLambda} from './read-option-lambda';
 import {resolveLayerLambda} from './resolve-layer-lambda';
-import {inputStyle} from './shared';
+import {controlStyle, fieldLabelStyle, fieldStyle, FIELD_COLUMN_WIDTH} from './shared';
 import {tokens} from './tokens';
 import {useLookupSuggest} from './use-lookup-suggest';
 
 /**
  * Строка слоя: lookup материала (fetch-канал справочника прил. М), толщина и
  * λ. Выбор опции с λА/λБ заполняет `materialKey` и λ строки («авто»); опция
- * без λ или свободный текст — обязательный ручной ввод `lambdaManual`.
+ * без λ или свободный текст — ручной ввод `lambdaManual`.
  * Строки-зазоры λ не требуют: их Rs считает сервер в итоговом расчёте.
  */
 export function ConstructionsEditorLayerRow({
@@ -20,7 +20,6 @@ export function ConstructionsEditorLayerRow({
   condition,
   materialsReferenceId,
   minChars,
-  errors,
   onChange,
   onRemove,
 }: ConstructionsEditorLayerRowProps) {
@@ -78,68 +77,45 @@ export function ConstructionsEditorLayerRow({
     onChange({...layer, lambdaManual: Number.isFinite(parsed) ? parsed : undefined});
   };
 
-  const invalidStyle = {border: `1px solid ${tokens.danger}`};
   const resolvedLambda = resolveLayerLambda(layer, condition);
 
   return (
-    <tr>
-      <td style={{padding: '4px 6px', minWidth: 220}}>
-        <LookupCombobox
-          name={rowName}
-          placeholder="Материал из справочника или свой"
-          inputText={layer.material}
-          selected={selected}
-          options={options}
-          onInputChange={handleMaterialInput}
-          onPick={handleMaterialPick}
-          onClose={closeOptions}
-        />
-        {errors?.material ? (
-          <span style={{color: tokens.danger, fontSize: '0.8rem'}}>Укажите материал</span>
-        ) : null}
-      </td>
-      <td style={{padding: '4px 6px', width: 110}}>
-        <input
-          type="number"
-          min={1}
-          step="any"
-          aria-label="Толщина, мм"
-          aria-invalid={errors?.thickness || undefined}
-          value={layer.thicknessMm ?? ''}
-          onChange={handleThicknessChange}
-          style={{...inputStyle, width: '100%', ...(errors?.thickness ? invalidStyle : null)}}
-        />
-      </td>
-      <td style={{padding: '4px 6px', width: 160}}>
-        {isGap ? (
-          <span style={{color: tokens.textMuted, fontSize: '0.85rem'}}>
-            Rs — в итоговом расчёте
-          </span>
-        ) : hasReferenceLambda ? (
-          <span style={{color: tokens.text}}>
-            {resolvedLambda}
-            <span style={{color: tokens.textSubtle, fontSize: '0.8rem'}}> авто</span>
-          </span>
-        ) : (
-          <input
-            type="number"
-            min={0.001}
-            step="any"
-            aria-label="λ, Вт/(м·°C), вручную"
-            aria-invalid={errors?.lambda || undefined}
-            placeholder="λ вручную"
-            value={layer.lambdaManual ?? ''}
-            onChange={handleLambdaManualChange}
-            style={{...inputStyle, width: '100%', ...(errors?.lambda ? invalidStyle : null)}}
+    // Материал — своя строка на всю ширину (названия из справочника длинные),
+    // толщина и λ — следующей, парой.
+    <div
+      style={{
+        display: 'grid',
+        gap: 8,
+        padding: '10px 12px',
+        borderRadius: 12,
+        border: `1px solid ${tokens.borderSubtle}`,
+        background: tokens.surface,
+        // Та же колонка, что у полей шапки и вкладки общих данных;
+        // border-box — чтобы 420 были внешней шириной при любом reset'е хоста.
+        maxWidth: FIELD_COLUMN_WIDTH,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{display: 'flex', alignItems: 'end', gap: 8}}>
+        <label style={{...fieldStyle, flex: 1, minWidth: 0}}>
+          <span style={fieldLabelStyle}>Материал</span>
+          <LookupCombobox
+            name={rowName}
+            placeholder="Материал из справочника или свой"
+            inputText={layer.material}
+            selected={selected}
+            options={options}
+            onInputChange={handleMaterialInput}
+            onPick={handleMaterialPick}
+            onClose={closeOptions}
           />
-        )}
-      </td>
-      <td style={{padding: '4px 6px', width: 40}}>
+        </label>
         <button
           type="button"
           aria-label="Удалить слой"
           onClick={onRemove}
           style={{
+            padding: '8px 6px',
             border: 'none',
             background: 'transparent',
             color: tokens.textSubtle,
@@ -149,7 +125,44 @@ export function ConstructionsEditorLayerRow({
         >
           ✕
         </button>
-      </td>
-    </tr>
+      </div>
+      <div style={{display: 'flex', flexWrap: 'wrap', gap: 12}}>
+        <label style={{...fieldStyle, width: 140}}>
+          <span style={fieldLabelStyle}>Толщина, мм</span>
+          <input
+            type="number"
+            min={1}
+            step="any"
+            value={layer.thicknessMm ?? ''}
+            onChange={handleThicknessChange}
+            style={controlStyle}
+          />
+        </label>
+        <div style={{...fieldStyle, width: 200}}>
+          <span style={fieldLabelStyle}>λ, Вт/(м·°C)</span>
+          {isGap ? (
+            <span style={{color: tokens.textMuted, fontSize: '0.85rem', alignSelf: 'center'}}>
+              Rs — в итоговом расчёте
+            </span>
+          ) : hasReferenceLambda ? (
+            <span style={{color: tokens.text, alignSelf: 'center'}}>
+              {resolvedLambda}
+              <span style={{color: tokens.textSubtle, fontSize: '0.8rem'}}> авто</span>
+            </span>
+          ) : (
+            <input
+              type="number"
+              min={0.001}
+              step="any"
+              aria-label="λ, Вт/(м·°C), вручную"
+              placeholder="λ вручную"
+              value={layer.lambdaManual ?? ''}
+              onChange={handleLambdaManualChange}
+              style={controlStyle}
+            />
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

@@ -8,7 +8,13 @@ import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
 import {computeLiveRpr} from './compute-live-rpr';
 import {ConstructionsEditorLayerRow} from './constructions-editor-layer-row';
 import type {ConstructionsEditorCardProps} from './constructions-editor.types';
-import {inputStyle} from './shared';
+import {
+  controlStyle,
+  fieldLabelStyle,
+  fieldStyle,
+  inputStyle,
+  FIELD_COLUMN_WIDTH,
+} from './shared';
 import {tokens} from './tokens';
 
 const SUBTYPED_TYPE: ConstructionType = 'cherdachnye_podval_grunt';
@@ -16,8 +22,8 @@ const SUBTYPED_TYPE: ConstructionType = 'cherdachnye_podval_grunt';
 /**
  * Карточка-аккордеон одной конструкции: тип/subtype/название, таблица слоёв с
  * add/remove строк (или паспортное Rпр для типов без слоёв) и live-чип Rпр
- * против Rнорм. Состоянием владеет редактор; карточка поднимает правки через
- * `onChange` целой конструкцией.
+ * против Rнорм (сравнение — только при `showRnorm`). Состоянием владеет
+ * редактор; карточка поднимает правки через `onChange` целой конструкцией.
  */
 export function ConstructionsEditorCard({
   entry,
@@ -26,7 +32,7 @@ export function ConstructionsEditorCard({
   materialsReferenceId,
   minChars,
   open,
-  errors,
+  showRnorm,
   onToggle,
   onChange,
   onRemove,
@@ -100,7 +106,7 @@ export function ConstructionsEditorCard({
           <span aria-hidden="true">{open ? '▾' : '▸'}</span>
           {title}
         </button>
-        <RprChip rpr={rpr} rnorm={config?.rnorm} />
+        <RprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />
         <button
           type="button"
           aria-label="Удалить конструкцию"
@@ -118,10 +124,11 @@ export function ConstructionsEditorCard({
       </header>
       {open ? (
         <div style={{display: 'grid', gap: 10, padding: '0 12px 12px'}}>
-          <div style={{display: 'flex', flexWrap: 'wrap', gap: 10}}>
-            <label style={{display: 'grid', gap: 4}}>
-              <span style={{fontSize: '0.85rem', color: tokens.textMuted}}>Тип конструкции</span>
-              <select value={entry.type} onChange={handleTypeChange} style={inputStyle}>
+          {/* Поля шапки в столбик — как на вкладке общих данных. */}
+          <div style={{display: 'grid', gap: 10, maxWidth: FIELD_COLUMN_WIDTH}}>
+            <label style={fieldStyle}>
+              <span style={fieldLabelStyle}>Тип конструкции</span>
+              <select value={entry.type} onChange={handleTypeChange} style={controlStyle}>
                 {typeConfigs.map(typeConfig => (
                   <option key={typeConfig.type} value={typeConfig.type}>
                     {typeConfig.label}
@@ -130,12 +137,12 @@ export function ConstructionsEditorCard({
               </select>
             </label>
             {entry.type === SUBTYPED_TYPE ? (
-              <label style={{display: 'grid', gap: 4}}>
-                <span style={{fontSize: '0.85rem', color: tokens.textMuted}}>Разновидность</span>
+              <label style={fieldStyle}>
+                <span style={fieldLabelStyle}>Разновидность</span>
                 <select
                   value={entry.subtype ?? ''}
                   onChange={handleSubtypeChange}
-                  style={inputStyle}
+                  style={controlStyle}
                 >
                   <option value="">—</option>
                   {Object.entries(CHERDACHNYE_SUBTYPE_LABELS).map(([value, label]) => (
@@ -146,72 +153,42 @@ export function ConstructionsEditorCard({
                 </select>
               </label>
             ) : null}
-            <label style={{display: 'grid', gap: 4, flex: 1, minWidth: 180}}>
-              <span style={{fontSize: '0.85rem', color: tokens.textMuted}}>Название</span>
+            <label style={fieldStyle}>
+              <span style={fieldLabelStyle}>Название</span>
               <input
                 type="text"
                 value={entry.name ?? ''}
                 onChange={handleNameChange}
-                style={inputStyle}
+                style={controlStyle}
               />
             </label>
           </div>
           {config && !config.hasLayers ? (
-            <label style={{display: 'grid', gap: 4, justifySelf: 'start'}}>
-              <span style={{fontSize: '0.85rem', color: tokens.textMuted}}>
-                Rпр по паспорту, м²·°C/Вт
-              </span>
+            <label style={{...fieldStyle, justifySelf: 'start'}}>
+              <span style={fieldLabelStyle}>Rпр по паспорту, м²·°C/Вт</span>
               <input
                 type="number"
                 min={0.01}
                 step="any"
-                aria-invalid={errors?.rprPassport || undefined}
                 value={entry.rprPassport ?? ''}
                 onChange={handleRprPassportChange}
-                style={{
-                  ...inputStyle,
-                  width: 160,
-                  ...(errors?.rprPassport ? {border: `1px solid ${tokens.danger}`} : null),
-                }}
+                style={{...inputStyle, width: 160}}
               />
             </label>
           ) : (
             <div style={{display: 'grid', gap: 8}}>
-              <table style={{borderCollapse: 'collapse', width: '100%'}}>
-                <thead>
-                  <tr>
-                    {['Материал', 'Толщина, мм', 'λ, Вт/(м·°C)', ''].map((heading, index) => (
-                      <th
-                        key={index}
-                        style={{
-                          padding: '4px 6px',
-                          textAlign: 'left',
-                          fontSize: '0.8rem',
-                          color: tokens.textSubtle,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {heading}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {entry.layers.map((layer, index) => (
-                    <ConstructionsEditorLayerRow
-                      key={index}
-                      layer={layer}
-                      rowName={`material-${entry.id}-${index}`}
-                      condition={condition}
-                      materialsReferenceId={materialsReferenceId}
-                      minChars={minChars}
-                      errors={errors?.layers.get(index)}
-                      onChange={next => handleLayerChange(index, next)}
-                      onRemove={() => handleLayerRemove(index)}
-                    />
-                  ))}
-                </tbody>
-              </table>
+              {entry.layers.map((layer, index) => (
+                <ConstructionsEditorLayerRow
+                  key={index}
+                  layer={layer}
+                  rowName={`material-${entry.id}-${index}`}
+                  condition={condition}
+                  materialsReferenceId={materialsReferenceId}
+                  minChars={minChars}
+                  onChange={next => handleLayerChange(index, next)}
+                  onRemove={() => handleLayerRemove(index)}
+                />
+              ))}
               <button
                 type="button"
                 onClick={handleLayerAdd}

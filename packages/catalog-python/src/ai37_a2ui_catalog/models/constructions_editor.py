@@ -51,17 +51,51 @@ class ConstructionTypeConfig(StrictModel):
     alphaN: PositiveFloat | dict[CherdachnyeSubtype, PositiveFloat] = None
 
 
+class ConstructionsCity(StrictModel):
+    value: str = Field(min_length=1, max_length=200)
+    label: str = Field(min_length=1, max_length=200)
+
+
+class ConstructionsGeneral(StrictModel):
+    """Общие данные (климат СП 131 и здание); незаполненное значение — None."""
+
+    buildingType: Annotated[str, Field(max_length=200)] | None
+    city: ConstructionsCity | None
+    # tот — средняя температура отопительного периода, °C (бывает < 0).
+    tot: float | None
+    # zот — продолжительность отопительного периода, сут.
+    zot: float | None
+    # tн — температура наиболее холодной пятидневки, °C.
+    tn: float | None
+    # tв — расчётная температура внутреннего воздуха, °C.
+    tv: float | None
+    # Условие эксплуатации А/Б; None → λБ (как на сервере).
+    condition: Literal["А", "Б"] | None
+
+
 class ConstructionsEditorProps(StrictModel):
     constructions: list[ConstructionEntry]
     typeConfigs: list[ConstructionTypeConfig] = Field(min_length=1)
+    # Общие данные первой вкладки; без них вкладок нет и submit шлёт
+    # только `{constructions}`.
+    general: ConstructionsGeneral = None
+    buildingTypeOptions: list[Annotated[str, Field(min_length=1, max_length=200)]] = Field(
+        default=None, max_length=50
+    )
+    # Справочник городов для lookup'а; опция может нести tot/zot/tn.
+    cityReferenceId: str = Field(default=None, min_length=1, max_length=80)
+    generalTabLabel: str = Field(default=None, min_length=1, max_length=80)
+    constructionsTabLabel: str = Field(default=None, min_length=1, max_length=80)
+    # DEPRECATED: начальное значение general.condition; правится во вкладке.
     condition: Literal["А", "Б"] = None
     materialsReferenceId: str = Field(min_length=1, max_length=80)
     minChars: int = Field(default=None, ge=1, le=10)
     addLabel: str = Field(min_length=1, max_length=80)
     submitLabel: str = Field(min_length=1, max_length=80)
     submitAction: str = Field(min_length=1, max_length=120)
-    backLabel: str = Field(min_length=1, max_length=80)
-    backAction: str = Field(min_length=1, max_length=120)
+    # Кнопка возврата опциональна: на объединённом экране её нет.
+    backLabel: str = Field(default=None, min_length=1, max_length=80)
+    backAction: str = Field(default=None, min_length=1, max_length=120)
     backActionContext: dict[str, Any] = None
     # Имя action'а автосохранения черновика; без него автосейва нет.
     draftAction: str = Field(default=None, min_length=1, max_length=120)

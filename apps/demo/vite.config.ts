@@ -8,8 +8,9 @@ import {DEMO_MATERIALS} from './src/demo-materials';
 /**
  * Dev-имитация suggest-роута fetch-режима lookup (контракт
  * form-card-lookup-fetch-e2e): same-origin GET, справочники `cities`
- * (lookup-поле FormCard) и `sp50-materials` (строки ConstructionsEditor,
- * опции с λА/λБ), неизвестный referenceId → 404 unknown_reference. Только
+ * (lookup-поле FormCard и вкладка «Общие данные» ConstructionsEditor, опции с
+ * климатом) и `sp50-materials` (строки ConstructionsEditor, опции с λА/λБ),
+ * неизвестный referenceId → 404 unknown_reference. Только
  * dev — в собранной статике роута нет (fetch-режим тихо деградирует).
  */
 function referenceSuggestMiddleware(): Plugin {
@@ -23,9 +24,9 @@ function referenceSuggestMiddleware(): Plugin {
 
         res.setHeader('content-type', 'application/json');
         if (referenceId === 'cities') {
-          const options = DEMO_CITIES.filter(city => city.toLowerCase().includes(query)).map(
-            city => ({value: city, label: city}),
-          );
+          // Опции отдаются целиком, вместе с климатом: FormCard лишние поля
+          // игнорирует, вкладка «Общие данные» подставляет tot/zot/tn.
+          const options = DEMO_CITIES.filter(city => city.label.toLowerCase().includes(query));
           res.end(JSON.stringify({options}));
           return;
         }
