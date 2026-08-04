@@ -92,6 +92,8 @@ class ConstructionsEditorProps(StrictModel):
     minChars: int = Field(default=None, ge=1, le=10)
     addLabel: str = Field(min_length=1, max_length=80)
     submitLabel: str = Field(min_length=1, max_length=80)
+    # Подпись кнопки перехода на вкладку конструкций (submit там же).
+    nextLabel: str = Field(default=None, min_length=1, max_length=80)
     submitAction: str = Field(min_length=1, max_length=120)
     # Кнопка возврата опциональна: на объединённом экране её нет.
     backLabel: str = Field(default=None, min_length=1, max_length=80)

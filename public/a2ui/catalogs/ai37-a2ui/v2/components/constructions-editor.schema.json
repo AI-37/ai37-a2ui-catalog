@@ -317,6 +317,11 @@
           "minLength": 1,
           "maxLength": 80
         },
+        "nextLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
         "submitAction": {
           "type": "string",
           "minLength": 1,

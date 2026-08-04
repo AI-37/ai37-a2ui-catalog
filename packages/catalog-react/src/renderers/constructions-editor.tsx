@@ -18,12 +18,24 @@ import {useA2uiBaseStyles} from './shared';
 
 const GENERAL_TAB_LABEL = 'Общие данные';
 const CONSTRUCTIONS_TAB_LABEL = 'Конструкции';
+const NEXT_LABEL = 'Далее';
+
+const primaryButtonStyle: React.CSSProperties = {
+  padding: '10px 18px',
+  borderRadius: 12,
+  border: 'none',
+  background: tokens.accent,
+  color: tokens.accentContrast,
+  fontWeight: 600,
+  cursor: 'pointer',
+};
 
 /**
  * Объединённый экран теплотехнического расчёта одним сообщением: вкладки
  * «Общие данные» и «Конструкции» с общим локальным состоянием (Решения 1—6
  * design.md). Переключение вкладок — чисто клиентское, ввод обеих переживает
- * его. Наружу уходит один submit с `{general, constructions}` как есть —
+ * его: на вкладке общих данных кнопка «Далее» просто ведёт к конструкциям,
+ * submit живёт там. Наружу уходит один submit с `{general, constructions}` как есть —
  * клиентской блокировки и подсветки нет, о недостающем сообщает агент. При
  * заданном `draftAction` структурные правки списка конструкций дополнительно
  * уезжают черновиком с тем же payload'ом.
@@ -227,27 +239,30 @@ export const ConstructionsEditor = createComponentImplementation(
               {props.backLabel}
             </button>
           ) : null}
-          <button
-            type="button"
-            onClick={handleSubmit}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 12,
-              border: 'none',
-              background: tokens.accent,
-              color: tokens.accentContrast,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            {props.submitLabel}
-          </button>
-          {/* Климат тронут → присланный Rнорм протух, сводка молчит до
-              следующих props (Решение 4 design.md). */}
-          {climateDirty ? null : (
-            <span style={{color: tokens.textMuted, fontSize: '0.9rem'}}>
-              проходит {passing.length} из {comparable.length}
-            </span>
+          {activeTab === 'general' && hasGeneral ? (
+            // «Далее» — та же локальная смена вкладки, что и клик по табу:
+            // введённое остаётся в state, агенту ничего не уходит. Сводка по
+            // конструкциям здесь не к месту — она про соседнюю вкладку.
+            <button
+              type="button"
+              onClick={() => setActiveTab('constructions')}
+              style={primaryButtonStyle}
+            >
+              {props.nextLabel ?? NEXT_LABEL}
+            </button>
+          ) : (
+            <>
+              <button type="button" onClick={handleSubmit} style={primaryButtonStyle}>
+                {props.submitLabel}
+              </button>
+              {/* Климат тронут → присланный Rнорм протух, сводка молчит до
+                  следующих props (Решение 4 design.md). */}
+              {climateDirty ? null : (
+                <span style={{color: tokens.textMuted, fontSize: '0.9rem'}}>
+                  проходит {passing.length} из {comparable.length}
+                </span>
+              )}
+            </>
           )}
         </footer>
       </div>

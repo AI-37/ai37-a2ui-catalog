@@ -262,6 +262,39 @@ describe('ConstructionsEditor', () => {
       expect(actions).toHaveLength(0);
     });
 
+    it('«Далее» ведёт на конструкции, ввод общих данных не теряется', () => {
+      const {surface} = renderSurface();
+      const actions = subscribeActions(surface);
+
+      fireEvent.change(screen.getByLabelText('tв, °C'), {target: {value: '22'}});
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      // Вкладка конструкций открыта, submit — здесь.
+      expect(screen.getByRole('tab', {name: 'Конструкции'})).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByRole('button', {name: 'Рассчитать'})).toBeInTheDocument();
+      expect(actions).toHaveLength(0);
+
+      openTab('Общие данные');
+      expect(screen.getByLabelText('tв, °C')).toHaveValue(22);
+    });
+
+    it('на общих данных нет submit\'а и сводки по конструкциям', () => {
+      renderSurface();
+
+      expect(screen.getByRole('button', {name: 'Далее'})).toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: 'Рассчитать'})).not.toBeInTheDocument();
+      expect(screen.queryByText(/проходит/)).not.toBeInTheDocument();
+    });
+
+    it('подпись кнопки перехода берётся из nextLabel', () => {
+      renderSurface({nextLabel: 'К конструкциям'});
+
+      expect(screen.getByRole('button', {name: 'К конструкциям'})).toBeInTheDocument();
+    });
+
     it('без пропа general вкладок нет — прежний экран конструкций', () => {
       renderSurface({general: undefined});
 
@@ -431,6 +464,7 @@ describe('ConstructionsEditor', () => {
     it('полное состояние обеих вкладок уходит одним action\'ом', async () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
+      openTab('Конструкции');
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
@@ -459,6 +493,7 @@ describe('ConstructionsEditor', () => {
     it('пустая форма уходит как есть, ничего не подсвечивается', async () => {
       const {surface} = renderSurface({constructions: [], general: EMPTY_GENERAL});
       const actions = subscribeActions(surface);
+      openTab('Конструкции');
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
@@ -493,6 +528,7 @@ describe('ConstructionsEditor', () => {
       const actions = subscribeActions(surface);
 
       fireEvent.change(screen.getByLabelText('tв, °C'), {target: {value: '22'}});
+      openTab('Конструкции');
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
       });

@@ -115,6 +115,8 @@ export const constructionsEditorPropsSchema = z
     minChars: z.number().int().min(1).max(10).optional(),
     addLabel: z.string().min(1).max(80),
     submitLabel: z.string().min(1).max(80),
+    // Подпись кнопки перехода на вкладку конструкций (submit там же).
+    nextLabel: z.string().min(1).max(80).optional(),
     submitAction: z.string().min(1).max(120),
     // Кнопка возврата опциональна: на объединённом экране её нет, у прежних
     // эмитентов поведение не меняется.

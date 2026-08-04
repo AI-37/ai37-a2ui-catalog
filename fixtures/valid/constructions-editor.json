@@ -108,6 +108,7 @@
     "minChars": 2,
     "addLabel": "Добавить конструкцию",
     "submitLabel": "Рассчитать",
+    "nextLabel": "Далее",
     "submitAction": "constructions:apply",
     "draftAction": "constructions:draft"
   }
