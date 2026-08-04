@@ -56,6 +56,11 @@ function openTab(name: 'Общие данные' | 'Конструкции') {
   fireEvent.click(screen.getByRole('tab', {name}));
 }
 
+/** Карточки на старте свёрнуты — раскрываем ту, что нужна тесту. */
+function openCard(name: RegExp | string) {
+  fireEvent.click(screen.getByRole('button', {name}));
+}
+
 function getMaterialInputs() {
   return screen.getAllByPlaceholderText('Материал из справочника или свой');
 }
@@ -116,17 +121,20 @@ describe('ConstructionsEditor', () => {
     openTab('Конструкции');
 
     // Три карточки с чипами: стена проходит, пол по грунту (без 1/αн) — нет,
-    // окно по паспортному Rпр — проходит.
+    // окно по паспортному Rпр — проходит. Всё это видно свёрнутым.
     expect(screen.getByText('Наружная стена (кирпич + минвата)')).toBeInTheDocument();
     expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
     expect(screen.getByText('Rпр 0.21 < 4.20')).toBeInTheDocument();
     expect(screen.getByText('Rпр 0.56 ≥ 0.54')).toBeInTheDocument();
     expect(screen.getByText('проходит 2 из 3')).toBeInTheDocument();
+    expect(screen.queryAllByPlaceholderText('Материал из справочника или свой')).toHaveLength(0);
 
     // Тип без слоёв — поле паспортного Rпр вместо таблицы.
+    openCard(/Окно двухкамерное/);
     expect(screen.getByRole('spinbutton', {name: /Rпр по паспорту/})).toHaveValue(0.56);
 
     // Зазор — без ввода λ, подсказка про серверный Rs.
+    openCard(/Наружная стена/);
     expect(screen.getByText('Rs — в итоговом расчёте')).toBeInTheDocument();
   });
 
@@ -154,6 +162,7 @@ describe('ConstructionsEditor', () => {
     const {surface} = renderSurface();
     const actions = subscribeActions(surface);
     openTab('Конструкции');
+    openCard(/Наружная стена/);
 
     // Толщина минваты (2-я строка стены): 150 → 10 — Rпр падает ниже Rнорм.
     fireEvent.change(getThicknessInputs()[1]!, {target: {value: '10'}});
@@ -167,6 +176,7 @@ describe('ConstructionsEditor', () => {
     const {surface} = renderSurface();
     const actions = subscribeActions(surface);
     openTab('Конструкции');
+    openCard(/Наружная стена/);
     const initialRows = getMaterialInputs().length;
 
     fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
@@ -184,13 +194,15 @@ describe('ConstructionsEditor', () => {
     openTab('Конструкции');
 
     fireEvent.click(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
-    // Новая карточка первого типа из typeConfigs ("Наружные стены").
+    // Новая карточка первого типа из typeConfigs ("Наружные стены"), сразу
+    // раскрытая — её добавили, чтобы заполнить.
     expect(screen.getAllByRole('button', {name: 'Удалить конструкцию'})).toHaveLength(4);
+    const typeSelects = screen.getAllByRole('combobox', {name: 'Тип конструкции'});
+    expect(typeSelects).toHaveLength(1);
 
     // Смена типа новой карточки на окна (hasLayers: false) → поле паспорта.
-    const typeSelects = screen.getAllByRole('combobox', {name: 'Тип конструкции'});
-    fireEvent.change(typeSelects[typeSelects.length - 1]!, {target: {value: 'okna'}});
-    expect(screen.getAllByRole('spinbutton', {name: /Rпр по паспорту/})).toHaveLength(2);
+    fireEvent.change(typeSelects[0]!, {target: {value: 'okna'}});
+    expect(screen.getAllByRole('spinbutton', {name: /Rпр по паспорту/})).toHaveLength(1);
 
     const removeButtons = screen.getAllByRole('button', {name: 'Удалить конструкцию'});
     fireEvent.click(removeButtons[removeButtons.length - 1]!);
@@ -208,6 +220,7 @@ describe('ConstructionsEditor', () => {
     );
     renderSurface();
     openTab('Конструкции');
+    openCard(/Наружная стена/);
 
     fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
     const materialInput = getMaterialInputs()[4]!; // новая 5-я строка стены
@@ -230,6 +243,7 @@ describe('ConstructionsEditor', () => {
   it('свободный текст без выбора опции — ручная λ', async () => {
     renderSurface();
     openTab('Конструкции');
+    openCard(/Наружная стена/);
 
     fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
     const materialInput = getMaterialInputs()[4]!;
@@ -240,14 +254,21 @@ describe('ConstructionsEditor', () => {
     expect(screen.getAllByRole('spinbutton', {name: /λ.*вручную/})).toHaveLength(2);
   });
 
-  it('аккордеон: сворачивание карточки прячет таблицу, чип остаётся', () => {
+  it('аккордеон: карточки свёрнуты, раскрытие показывает слои, чип виден всегда', () => {
     renderSurface();
     openTab('Конструкции');
-    const initialRows = getMaterialInputs().length;
 
-    fireEvent.click(screen.getByRole('button', {name: /Наружная стена/}));
+    const materialInputs = () =>
+      screen.queryAllByPlaceholderText('Материал из справочника или свой');
 
-    expect(getMaterialInputs().length).toBeLessThan(initialRows);
+    expect(materialInputs()).toHaveLength(0);
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+
+    openCard(/Наружная стена/);
+    expect(materialInputs()).toHaveLength(4);
+
+    openCard(/Наружная стена/);
+    expect(materialInputs()).toHaveLength(0);
     expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
   });
 
@@ -260,6 +281,7 @@ describe('ConstructionsEditor', () => {
       expect(getCityInput()).toHaveValue('Москва');
 
       openTab('Конструкции');
+      openCard(/Наружная стена/);
       fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});
 
       openTab('Общие данные');
@@ -425,6 +447,7 @@ describe('ConstructionsEditor', () => {
     it('климат не тронут — сравнение и сводка на месте', () => {
       renderSurface();
       openTab('Конструкции');
+      openCard(/Наружная стена/);
 
       fireEvent.change(getThicknessInputs()[1]!, {target: {value: '160'}});
 
@@ -535,6 +558,7 @@ describe('ConstructionsEditor', () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
       openTab('Конструкции');
+      openCard(/Наружная стена/);
 
       fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
       await act(async () => {
@@ -634,6 +658,7 @@ describe('ConstructionsEditor', () => {
 
     it('добавление и удаление слоя шлют черновик с актуальным набором слоёв', async () => {
       const {actions} = draftSurface();
+      openCard(/Наружная стена/);
 
       await clickAndFlush(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
       expect(actions).toHaveLength(1);
@@ -650,6 +675,7 @@ describe('ConstructionsEditor', () => {
 
     it('правки полей и аккордеон сами по себе черновик не шлют', async () => {
       const {actions} = draftSurface();
+      openCard(/Наружная стена/);
 
       await act(async () => {
         fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});

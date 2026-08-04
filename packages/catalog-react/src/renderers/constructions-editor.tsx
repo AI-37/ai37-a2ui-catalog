@@ -53,7 +53,9 @@ export const ConstructionsEditor = createComponentImplementation(
     const [constructions, setConstructions] = React.useState<ConstructionEntry[]>(() =>
       props.constructions.map(entry => ({...entry, layers: entry.layers.map(layer => ({...layer}))})),
     );
-    const [closedIds, setClosedIds] = React.useState<ReadonlySet<string>>(new Set());
+    // Раскрытые карточки. Пустое множество на старте: десяток конструкций по
+    // три слоя развёрнутыми — простыня, в которой не найти нужную.
+    const [openIds, setOpenIds] = React.useState<ReadonlySet<string>>(new Set());
     const [activeTab, setActiveTab] = React.useState<ConstructionsEditorTab>(
       hasGeneral ? 'general' : 'constructions',
     );
@@ -91,7 +93,7 @@ export const ConstructionsEditor = createComponentImplementation(
     });
 
     const handleToggle = (id: string) => {
-      setClosedIds(prev => {
+      setOpenIds(prev => {
         const next = new Set(prev);
         if (next.has(id)) {
           next.delete(id);
@@ -135,11 +137,11 @@ export const ConstructionsEditor = createComponentImplementation(
     const handleAdd = () => {
       const firstType = typeConfigs[0];
       if (!firstType) return;
-      const updated = [
-        ...constructions,
-        {id: createLocalId(), type: firstType.type, layers: []} as ConstructionEntry,
-      ];
+      const entry = {id: createLocalId(), type: firstType.type, layers: []} as ConstructionEntry;
+      const updated = [...constructions, entry];
       setConstructions(updated);
+      // Новую карточку раскрываем: её добавили, чтобы сразу заполнить.
+      setOpenIds(prev => new Set(prev).add(entry.id));
       sendDraft(updated);
     };
 
@@ -201,7 +203,7 @@ export const ConstructionsEditor = createComponentImplementation(
                 condition={condition}
                 materialsReferenceId={props.materialsReferenceId}
                 minChars={props.minChars}
-                open={!closedIds.has(entry.id)}
+                open={openIds.has(entry.id)}
                 showRnorm={!climateDirty}
                 onToggle={() => handleToggle(entry.id)}
                 onChange={handleEntryChange}

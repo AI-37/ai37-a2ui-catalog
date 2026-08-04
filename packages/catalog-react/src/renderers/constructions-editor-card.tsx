@@ -92,8 +92,12 @@ export function ConstructionsEditorCard({
           style={{
             flex: 1,
             display: 'flex',
+            // justifyContent явно: UA-стиль кнопки центрирует flex-содержимое,
+            // и заголовок уезжал от левого края.
+            justifyContent: 'flex-start',
             alignItems: 'center',
             gap: 8,
+            padding: 0,
             border: 'none',
             background: 'transparent',
             color: tokens.textStrong,
@@ -103,7 +107,7 @@ export function ConstructionsEditorCard({
             cursor: 'pointer',
           }}
         >
-          <span aria-hidden="true">{open ? '▾' : '▸'}</span>
+          <Chevron open={open} />
           {title}
         </button>
         <RprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />
@@ -209,6 +213,34 @@ export function ConstructionsEditorCard({
         </div>
       ) : null}
     </section>
+  );
+}
+
+/** Шеврон аккордеона: вправо — свёрнуто, вниз (поворот) — раскрыто. */
+function Chevron({open}: {open: boolean}) {
+  return (
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      aria-hidden="true"
+      focusable="false"
+      style={{
+        flexShrink: 0,
+        color: tokens.textSubtle,
+        transform: open ? 'rotate(90deg)' : 'none',
+        transition: 'transform 120ms ease',
+      }}
+    >
+      <path
+        d="M3.5 1.5 L7 5 L3.5 8.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
