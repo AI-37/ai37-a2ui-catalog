@@ -9,7 +9,14 @@ from ai37_a2ui_catalog import get_component_schema
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-COMPONENT_NAMES = ("SimpleTable", "FlexTable", "LatexFormula", "ChoiceCard", "FormCard")
+COMPONENT_NAMES = (
+    "SimpleTable",
+    "FlexTable",
+    "LatexFormula",
+    "ChoiceCard",
+    "FormCard",
+    "ConstructionsEditor",
+)
 
 
 def load_exported_schema(component: str) -> dict[str, Any]:
@@ -55,6 +62,19 @@ def normalize_schema(schema: Any, root: dict[str, Any] | None = None) -> Any:
             if key in {"$schema", "$id", "definitions", "$defs", "title", "description", "default"}:
                 continue
             normalized[key] = normalize_schema(value, root)
+
+        # zod-to-json-schema кодирует positive() в стиле draft-4
+        # (`exclusiveMinimum: true` + `minimum: N`), pydantic — числом
+        # (`exclusiveMinimum: N`); канонизируем к числовой форме.
+        if normalized.get("exclusiveMinimum") is True and "minimum" in normalized:
+            normalized["exclusiveMinimum"] = normalized.pop("minimum")
+        if normalized.get("exclusiveMaximum") is True and "maximum" in normalized:
+            normalized["exclusiveMaximum"] = normalized.pop("maximum")
+
+        # Пустая схема `{}` и `true` эквивалентны (zod: unknown → {},
+        # pydantic: Any → true); канонизируем к `true`.
+        if normalized.get("additionalProperties") == {}:
+            normalized["additionalProperties"] = True
 
         if "required" in normalized and isinstance(normalized["required"], list):
             normalized["required"] = sorted(normalized["required"])

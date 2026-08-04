@@ -5190,6 +5190,372 @@
         },
         "$schema": "https://json-schema.org/draft/2019-09/schema#"
       }
+    },
+    "ConstructionsEditor": {
+      "description": "A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables, optionally paired with a general-data tab for climate and building inputs. The user edits both tabs entirely on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, city lookup that fills climate values, live reduced thermal resistance (R) feedback against the normative value — and submits the whole state back to the agent in a single action, without client-side blocking.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/constructions-editor.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/ConstructionsEditor",
+        "definitions": {
+          "ConstructionsEditor": {
+            "type": "object",
+            "properties": {
+              "constructions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "steny",
+                        "pokrytiya",
+                        "cherdachnye_podval_grunt",
+                        "okna",
+                        "fonari",
+                        "dver"
+                      ]
+                    },
+                    "subtype": {
+                      "type": "string",
+                      "enum": [
+                        "cherdak",
+                        "podval_vent",
+                        "podval_nevent",
+                        "pol_po_gruntu"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "layers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "material": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "thicknessMm": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "exclusiveMinimum": true,
+                                "minimum": 0
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "material",
+                              "vent-gap",
+                              "closed-gap"
+                            ]
+                          },
+                          "materialKey": {
+                            "type": "string"
+                          },
+                          "lambdaA": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "lambdaB": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "lambdaManual": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "material",
+                          "thicknessMm"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 50
+                    },
+                    "rprPassport": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "layers"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "typeConfigs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "steny",
+                        "pokrytiya",
+                        "cherdachnye_podval_grunt",
+                        "okna",
+                        "fonari",
+                        "dver"
+                      ]
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "hasLayers": {
+                      "type": "boolean"
+                    },
+                    "rnorm": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0
+                    },
+                    "alphaV": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0
+                    },
+                    "alphaN": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "exclusiveMinimum": true,
+                          "minimum": 0
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "propertyNames": {
+                            "enum": [
+                              "cherdak",
+                              "podval_vent",
+                              "podval_nevent",
+                              "pol_po_gruntu"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "label",
+                    "hasLayers"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "general": {
+                "type": "object",
+                "properties": {
+                  "buildingType": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "city": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "tot": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "zot": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "tn": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "tv": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "condition": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "А",
+                          "Б"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "buildingType",
+                  "city",
+                  "tot",
+                  "zot",
+                  "tn",
+                  "tv",
+                  "condition"
+                ],
+                "additionalProperties": false
+              },
+              "buildingTypeOptions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "maxItems": 50
+              },
+              "cityReferenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "generalTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "constructionsTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "condition": {
+                "type": "string",
+                "enum": [
+                  "А",
+                  "Б"
+                ]
+              },
+              "materialsReferenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minChars": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "addLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "submitLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "nextLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "submitAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "backLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "backAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "backActionContext": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "draftAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "constructions",
+              "typeConfigs",
+              "materialsReferenceId",
+              "addLabel",
+              "submitLabel",
+              "submitAction"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
     }
   }
 }

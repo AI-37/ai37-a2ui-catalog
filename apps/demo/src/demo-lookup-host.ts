@@ -29,8 +29,8 @@ export function attachDemoLookupHost(
 
     const needle = query.trim().toLowerCase();
     const options: LookupOption[] = DEMO_CITIES.filter(city =>
-      city.toLowerCase().includes(needle),
-    ).map(city => ({value: city, label: city}));
+      city.label.toLowerCase().includes(needle),
+    ).map(city => ({value: city.value, label: city.label}));
 
     processor.processMessages([
       {

@@ -1,0 +1,21 @@
+{
+  "component": "ConstructionsEditor",
+  "props": {
+    "constructions": [
+      {
+        "id": "c-1",
+        "type": "fundament",
+        "layers": []
+      }
+    ],
+    "typeConfigs": [
+      {"type": "steny", "label": "Наружные стены", "hasLayers": true, "alphaV": 8.7, "alphaN": 23}
+    ],
+    "materialsReferenceId": "sp50-materials",
+    "addLabel": "Добавить конструкцию",
+    "submitLabel": "Рассчитать",
+    "submitAction": "constructions:apply",
+    "backLabel": "Назад",
+    "backAction": "navigate"
+  }
+}

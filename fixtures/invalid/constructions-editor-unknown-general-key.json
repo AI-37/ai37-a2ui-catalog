@@ -1,0 +1,31 @@
+{
+  "component": "ConstructionsEditor",
+  "props": {
+    "constructions": [
+      {
+        "id": "c-wall-1",
+        "type": "steny",
+        "layers": [
+          {"material": "Кирпич", "thicknessMm": 380, "lambdaB": 0.81}
+        ]
+      }
+    ],
+    "typeConfigs": [
+      {"type": "steny", "label": "Наружные стены", "hasLayers": true, "alphaV": 8.7, "alphaN": 23}
+    ],
+    "general": {
+      "buildingType": null,
+      "city": null,
+      "tot": null,
+      "zot": null,
+      "tn": null,
+      "tv": null,
+      "condition": null,
+      "gsop": 5000
+    },
+    "materialsReferenceId": "sp50-materials",
+    "addLabel": "Добавить конструкцию",
+    "submitLabel": "Рассчитать",
+    "submitAction": "constructions:apply"
+  }
+}
