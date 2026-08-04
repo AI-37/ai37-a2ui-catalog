@@ -1,5 +1,75 @@
 # AI37 A2UI Catalog
 
+<!-- ai37:card:start (managed by doc-bot — do not edit inside) -->
+# ai37-a2ui-catalog
+
+## Описание
+Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений.
+
+## Стек
+TypeScript, React 19, Zod, @a2ui/react (overrides: 0.10.1), Vite, Vitest, tsup, tsx, Python 3 + Pydantic, Poetry, pnpm (>=10), Node >=22.
+
+## Схема работы
+Workspace состоит из пакетов:
+- packages/catalog-schemas — канонические Zod-схемы, метаданные каталога, генерация JSON Schema и артефактов каталога;
+- packages/catalog-react — React-рендереры и регистрация компонентов в каталоге;
+- packages/catalog-python — Pydantic-модели и валидация на стороне Python;
+- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений;
+- fixtures — общие валидные, невалидные и сквозные фикстуры сообщений.
+
+Поток данных: схемы → generate-artifacts.ts → catalog.json и component schemas → public/a2ui/catalogs → GitHub Pages. React-рендереры и Pydantic-модели подключаются к тем же компонентам; тесты и демо используют фикстуры.
+
+```mermaid
+flowchart LR
+    S[packages/catalog-schemas] --> G[generate-artifacts.ts]
+    G --> P[public/a2ui/catalogs]
+    P --> GH[GitHub Pages]
+    S --> R[packages/catalog-react]
+    S --> Py[packages/catalog-python]
+    F[fixtures] --> T[tests and demo]
+    R --> D[apps/demo]
+```
+
+## Публичные интерфейсы
+Статический A2UI-каталог, публикуемый на GitHub Pages:
+- catalog.json: https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json
+- JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v1/components/*.schema.json и аналогично для v2.
+
+Отдельных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Пакеты workspace (catalog-schemas, catalog-react) и Python-пакет ai37_a2ui_catalog — интерфейсы для кода.
+
+## Зависимости в экосистеме
+### Зависит от
+- npm-пакеты @a2ui/react и @a2ui/web_core (overrides: 0.10.1);
+- React 19, Zod, Vite/Vitest, tsup, tsx;
+- Python 3, Pydantic, Poetry;
+- внешние сервисы (Authentik, LiteLLM, БД, Redis, S3) не используются.
+
+### От него зависят
+По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений).
+
+## Конфигурация
+Явных env-переменных нет. Версии пакетов синхронизируются через pnpm run version:bump <version>; каждый PR также обновляет CHANGELOG.md. Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml.
+
+## Данные и хранилища
+БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2. Фикстуры: fixtures/valid, fixtures/invalid, fixtures/messages.
+
+## Как запускать тесты
+Предварительно: pnpm install и poetry -C packages/catalog-python install.
+- pnpm run test — vitest + pytest;
+- pnpm run test:ts — только TypeScript/React-тесты;
+- pnpm run test:python — только Python-тесты;
+- pnpm run lint — typecheck.
+
+## Деплой
+GitHub Actions: .github/workflows/pages.yml публикует артефакты на GitHub Pages; .github/workflows/ci.yml и cd.yml — CI/CD. Публичный хост: https://ai-37.github.io/ai37-a2ui-catalog/. Terraform/helm не используются.
+
+## Связанные документы
+- ecosystem/v2/10-agui-protocol.md — протокол AG-UI/A2UI, в контексте которого существует каталог;
+- docs/theming.md;
+- docs/initial-plan.md;
+- openspec/changes/form-card-dispatch-action/design.md.
+<!-- ai37:card:end -->
+
 Monorepo with a custom A2UI catalog, React renderers, Python validation models, shared fixtures, tests, and deployment assets for publishing catalog artifacts on GitHub Pages (`https://ai-37.github.io/ai37-a2ui-catalog/`).
 
 ## Workspace
