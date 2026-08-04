@@ -91,6 +91,24 @@ describe('catalog-schemas', () => {
     ).toBe(false);
   });
 
+  it('draftAction опционален, но не пустой', () => {
+    const valid = readFixture('valid', 'constructions-editor.json');
+    const props = valid.props as Record<string, unknown>;
+    const {draftAction: _omitted, ...withoutDraft} = props;
+
+    expect(constructionsEditorPropsSchema.safeParse(withoutDraft).success).toBe(true);
+    expect(
+      constructionsEditorPropsSchema.safeParse({...props, draftAction: 'constructions:draft'})
+        .success,
+    ).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse({...props, draftAction: ''}).success).toBe(
+      false,
+    );
+
+    const invalidDraft = readFixture('invalid', 'constructions-editor-empty-draft-action.json');
+    expect(constructionsEditorPropsSchema.safeParse(invalidDraft.props).success).toBe(false);
+  });
+
   it('builds a superset catalog artifact (base ∪ ai37)', () => {
     const artifact = createCatalogArtifact();
     const names = Object.keys(artifact.components);

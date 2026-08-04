@@ -45,6 +45,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("constructions-editor-missing-reference.json", "ConstructionsEditor"),
         ("constructions-editor-negative-thickness.json", "ConstructionsEditor"),
         ("constructions-editor-unknown-type.json", "ConstructionsEditor"),
+        ("constructions-editor-empty-draft-action.json", "ConstructionsEditor"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:

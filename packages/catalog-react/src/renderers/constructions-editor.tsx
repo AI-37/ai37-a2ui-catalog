@@ -14,9 +14,10 @@ import {validateConstructions} from './validate-constructions';
 /**
  * Редактор конструкций одним сообщением (паттерн FormCard, Решения 1, 5, 6
  * design.md): рабочая копия конструкций — локальный state из props, все
- * правки на клиенте без action'ов; наружу уходят только один submit с полным
- * массивом в context (после клиентской валидации с подсветкой) и back без
- * валидации.
+ * правки на клиенте; наружу уходят один submit с полным массивом в context
+ * (после клиентской валидации с подсветкой) и back без валидации. При заданном
+ * `draftAction` структурные правки (add/remove конструкции и слоя) дополнительно
+ * уезжают агенту черновиком — на локальный state это никак не влияет.
  */
 export const ConstructionsEditor = createComponentImplementation(
   constructionsEditorDefinition,
@@ -54,18 +55,40 @@ export const ConstructionsEditor = createComponentImplementation(
       });
     };
 
+    // Автосейв черновика: тот же payload, что у submit'а, без валидации и без
+    // чтения ответа агента (Решения 4, 5 design.md). Нет пропа — no-op.
+    const sendDraft = (next: ConstructionEntry[]) => {
+      if (!props.draftAction) return;
+      void context.dispatchAction({
+        event: {name: props.draftAction, context: {constructions: next}},
+      });
+    };
+
     const handleEntryChange = (next: ConstructionEntry) => {
-      setConstructions(prev => prev.map(entry => (entry.id === next.id ? next : entry)));
+      const current = constructions.find(entry => entry.id === next.id);
+      // Add/remove слоя приходит сюда же, что и правки полей; отличаем по
+      // длине массива слоёв (Решение 3 design.md).
+      const structural = current !== undefined && current.layers.length !== next.layers.length;
+      const updated = constructions.map(entry => (entry.id === next.id ? next : entry));
+      setConstructions(updated);
+      if (structural) sendDraft(updated);
     };
 
     const handleEntryRemove = (id: string) => {
-      setConstructions(prev => prev.filter(entry => entry.id !== id));
+      const updated = constructions.filter(entry => entry.id !== id);
+      setConstructions(updated);
+      sendDraft(updated);
     };
 
     const handleAdd = () => {
       const firstType = typeConfigs[0];
       if (!firstType) return;
-      setConstructions(prev => [...prev, {id: createLocalId(), type: firstType.type, layers: []}]);
+      const updated = [
+        ...constructions,
+        {id: createLocalId(), type: firstType.type, layers: []} as ConstructionEntry,
+      ];
+      setConstructions(updated);
+      sendDraft(updated);
     };
 
     const handleSubmit = () => {
