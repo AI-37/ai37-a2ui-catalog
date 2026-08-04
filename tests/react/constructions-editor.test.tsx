@@ -14,9 +14,14 @@ function readMessages(fileName: string) {
   ) as A2uiMessage[];
 }
 
-function renderSurface() {
+function renderSurface(propOverrides?: Record<string, unknown>) {
+  const messages = readMessages('constructions-editor-surface.json');
+  if (propOverrides) {
+    const update = messages.find(message => 'updateComponents' in message) as any;
+    Object.assign(update.updateComponents.components[0], propOverrides);
+  }
   const processor = new MessageProcessor([ai37Catalog]);
-  processor.processMessages(readMessages('constructions-editor-surface.json'));
+  processor.processMessages(messages);
   const surface = processor.model.getSurface('demo-surface');
   const utils = render(<A2uiSurface surface={surface as any} />);
   return {surface: surface as any, ...utils};
@@ -237,5 +242,124 @@ describe('ConstructionsEditor', () => {
 
     expect(getMaterialInputs().length).toBeLessThan(initialRows);
     expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+  });
+
+  describe('автосохранение черновика (draftAction)', () => {
+    const withDraft = {draftAction: 'constructions:draft'};
+
+    function draftSurface() {
+      const rendered = renderSurface(withDraft);
+      return {...rendered, actions: subscribeActions(rendered.surface)};
+    }
+
+    // Доставка action'а асинхронна — как в submit/back-тестах выше.
+    async function clickAndFlush(button: HTMLElement) {
+      await act(async () => {
+        fireEvent.click(button);
+      });
+    }
+
+    it('без пропа структурные правки не порождают action', async () => {
+      const {surface} = renderSurface();
+      const actions = subscribeActions(surface);
+
+      await clickAndFlush(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
+      await clickAndFlush(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
+      const removeButtons = screen.getAllByRole('button', {name: 'Удалить конструкцию'});
+      await clickAndFlush(removeButtons[removeButtons.length - 1]!);
+
+      expect(actions).toHaveLength(0);
+    });
+
+    it('добавление конструкции шлёт один черновик с полным массивом', async () => {
+      const {actions} = draftSurface();
+
+      await clickAndFlush(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:draft');
+      const constructions = actions[0]!.context.constructions as Array<Record<string, unknown>>;
+      expect(constructions).toHaveLength(4);
+      expect(constructions[0]).toMatchObject({id: 'c-wall-1', type: 'steny'});
+      // Новая пустая карточка первого типа из typeConfigs.
+      expect(constructions[3]).toMatchObject({type: 'steny', layers: []});
+    });
+
+    it('удаление конструкции шлёт черновик без удалённой записи', async () => {
+      const {actions} = draftSurface();
+
+      await clickAndFlush(screen.getAllByRole('button', {name: 'Удалить конструкцию'})[0]!);
+
+      expect(actions).toHaveLength(1);
+      const constructions = actions[0]!.context.constructions as Array<Record<string, unknown>>;
+      expect(constructions.map(entry => entry.id)).toEqual(['c-floor-1', 'c-window-1']);
+    });
+
+    it('добавление и удаление слоя шлют черновик с актуальным набором слоёв', async () => {
+      const {actions} = draftSurface();
+
+      await clickAndFlush(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
+      expect(actions).toHaveLength(1);
+      expect(
+        (actions[0]!.context.constructions as Array<Record<string, unknown>>)[0]!.layers,
+      ).toHaveLength(5);
+
+      await clickAndFlush(screen.getAllByRole('button', {name: 'Удалить слой'})[0]!);
+      expect(actions).toHaveLength(2);
+      expect(
+        (actions[1]!.context.constructions as Array<Record<string, unknown>>)[0]!.layers,
+      ).toHaveLength(4);
+    });
+
+    it('правки полей и аккордеон сами по себе черновик не шлют', async () => {
+      const {actions} = draftSurface();
+
+      await act(async () => {
+        fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});
+        fireEvent.change(getThicknessInputs()[1]!, {target: {value: '200'}});
+      });
+      await clickAndFlush(screen.getByRole('button', {name: /Стена А/}));
+
+      expect(actions).toHaveLength(0);
+    });
+
+    it('правка поля перед структурным действием уезжает вместе с ним', async () => {
+      const {actions} = draftSurface();
+
+      fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});
+      await clickAndFlush(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
+
+      expect(actions).toHaveLength(1);
+      const constructions = actions[0]!.context.constructions as Array<Record<string, unknown>>;
+      expect(constructions[0]).toMatchObject({name: 'Стена А'});
+    });
+
+    it('невалидное состояние черновик не блокирует и подсветку не включает', async () => {
+      const {actions} = draftSurface();
+
+      // Пустая строка слоя — невалидна, но структурная правка всё равно уезжает.
+      await clickAndFlush(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
+
+      expect(actions).toHaveLength(1);
+      expect(screen.queryByText('Заполните подсвеченные поля')).not.toBeInTheDocument();
+      expect(screen.queryByText('Укажите материал')).not.toBeInTheDocument();
+    });
+
+    it('submit после автосейвов работает как раньше', async () => {
+      const {actions} = draftSurface();
+
+      await clickAndFlush(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
+      const removeButtons = screen.getAllByRole('button', {name: 'Удалить конструкцию'});
+      await clickAndFlush(removeButtons[removeButtons.length - 1]!);
+      expect(actions).toHaveLength(2);
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+
+      expect(actions).toHaveLength(3);
+      expect(actions[2]!.name).toBe('constructions:apply');
+      expect(actions[2]!.context.constructions as unknown[]).toHaveLength(3);
+    });
   });
 });

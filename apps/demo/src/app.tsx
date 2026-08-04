@@ -20,6 +20,8 @@ import formCardMessages from '../../../fixtures/messages/form-card-surface.json'
 import formCardLookupFetchMessages from '../../../fixtures/messages/form-card-lookup-fetch-surface.json';
 import constructionsEditorMessages from '../../../fixtures/messages/constructions-editor-surface.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
+import {attachDemoDraftLogger} from './attach-demo-draft-logger';
+import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 
 const examples = [
   {
@@ -62,8 +64,8 @@ const examples = [
     key: 'constructions-preview',
     title: 'Constructions Editor',
     description:
-      'Редактор конструкций одним сообщением: слои, lookup материалов (dev-middleware), live Rпр и один submit.',
-    messages: constructionsEditorMessages as A2uiMessage[],
+      'Редактор конструкций одним сообщением: слои, lookup материалов (dev-middleware), live Rпр, автосейв черновика на структурных правках (в консоли) и один submit.',
+    messages: withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
   },
 ] as const;
 
@@ -129,6 +131,9 @@ export function App() {
         processor.processMessages(example.messages);
         if (example.key === 'form-preview') {
           attachDemoLookupHost(processor, 'demo-surface');
+        }
+        if (example.key === 'constructions-preview') {
+          attachDemoDraftLogger(processor, 'demo-surface', DEMO_DRAFT_ACTION);
         }
         return [example.key, processor.model.getSurface('demo-surface')];
       }),

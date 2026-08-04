@@ -63,3 +63,5 @@ class ConstructionsEditorProps(StrictModel):
     backLabel: str = Field(min_length=1, max_length=80)
     backAction: str = Field(min_length=1, max_length=120)
     backActionContext: dict[str, Any] = None
+    # Имя action'а автосохранения черновика; без него автосейва нет.
+    draftAction: str = Field(default=None, min_length=1, max_length=120)

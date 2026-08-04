@@ -97,6 +97,7 @@
     "submitAction": "constructions:apply",
     "backLabel": "Назад",
     "backAction": "navigate",
-    "backActionContext": {"target": "climate"}
+    "backActionContext": {"target": "climate"},
+    "draftAction": "constructions:draft"
   }
 }

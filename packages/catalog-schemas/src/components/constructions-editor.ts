@@ -83,6 +83,9 @@ export const constructionsEditorPropsSchema = z
     backLabel: z.string().min(1).max(80),
     backAction: z.string().min(1).max(120),
     backActionContext: z.record(z.string(), z.unknown()).optional(),
+    // Имя action'а автосохранения черновика. Необязательный: без него
+    // компонент ведёт себя как раньше — наружу уходят только submit и back.
+    draftAction: z.string().min(1).max(120).optional(),
   })
   .strict();
 
