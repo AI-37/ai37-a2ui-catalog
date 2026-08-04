@@ -57,17 +57,22 @@ export const ConstructionsEditor = createComponentImplementation(
     const [activeTab, setActiveTab] = React.useState<ConstructionsEditorTab>(
       hasGeneral ? 'general' : 'constructions',
     );
-    const [general, setGeneral] = React.useState<ConstructionsGeneral>(() =>
-      createGeneralState(props.general, props.condition),
+    // Состояние из props, а не сами props: дефолт типа здания подставляется
+    // здесь же и «тронутым климатом» не считается.
+    const initialGeneral = createGeneralState(
+      props.general,
+      props.condition,
+      props.buildingTypeOptions,
     );
+    const [general, setGeneral] = React.useState<ConstructionsGeneral>(initialGeneral);
 
     // Снимок климата, из которого агент посчитал `rnorm`. Новые props (ответ
     // агента с пересчитанным Rнорм) — новый снимок и свежее состояние вкладки.
-    const propsClimate = climateKey(props.general);
+    const propsClimate = climateKey(initialGeneral);
     const [baseClimate, setBaseClimate] = React.useState(propsClimate);
     if (propsClimate !== baseClimate) {
       setBaseClimate(propsClimate);
-      setGeneral(createGeneralState(props.general, props.condition));
+      setGeneral(initialGeneral);
     }
     const climateDirty = climateKey(general) !== baseClimate;
 

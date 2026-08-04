@@ -6,12 +6,21 @@ import {readOptionClimate} from './read-option-climate';
 import {controlStyle, fieldLabelStyle, fieldStyle, FIELD_COLUMN_WIDTH} from './shared';
 import {useLookupSuggest} from './use-lookup-suggest';
 
-/** Числовые поля климата вкладки: подпись → ключ блока `general`. */
-const CLIMATE_FIELDS: Array<{key: 'tot' | 'zot' | 'tn' | 'tv'; label: string}> = [
-  {key: 'tot', label: 'tот, °C'},
-  {key: 'zot', label: 'zот, сут'},
-  {key: 'tn', label: 'tн, °C'},
-  {key: 'tv', label: 'tв, °C'},
+/**
+ * Числовые поля климата: обозначение с индексом (tот, zот, …) и расшифровка
+ * прямо в подписи — плейсхолдер исчез бы после заполнения ровно тогда, когда
+ * форму перечитывают.
+ */
+const CLIMATE_FIELDS: Array<{
+  key: 'tot' | 'zot' | 'tn' | 'tv';
+  symbol: string;
+  index: string;
+  text: string;
+}> = [
+  {key: 'tot', symbol: 't', index: 'от', text: 'средняя темп. отопительного периода, °C'},
+  {key: 'zot', symbol: 'z', index: 'от', text: 'продолжительность отопит. периода, сут/год'},
+  {key: 'tn', symbol: 't', index: 'н', text: 'темп. наиб. холодной пятидневки (0,92), °C'},
+  {key: 'tv', symbol: 't', index: 'в', text: 'расчётная внутренняя температура, °C'},
 ];
 
 /**
@@ -100,7 +109,10 @@ export function ConstructionsEditorGeneral({
       </label>
       {CLIMATE_FIELDS.map(field => (
         <label key={field.key} style={fieldStyle}>
-          <span style={fieldLabelStyle}>{field.label}</span>
+          <span style={fieldLabelStyle}>
+            {field.symbol}
+            <sub>{field.index}</sub> — {field.text}
+          </span>
           <input
             type="number"
             step="any"

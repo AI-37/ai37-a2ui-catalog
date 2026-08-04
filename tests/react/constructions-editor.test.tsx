@@ -68,6 +68,18 @@ function getCityInput() {
   return screen.getByPlaceholderText('Город из справочника');
 }
 
+/** Поля климата ищем по расшифровке в подписи (обозначение идёт с <sub>). */
+const CLIMATE_LABELS = {
+  tot: /средняя темп\. отопительного периода/,
+  zot: /продолжительность отопит\. периода/,
+  tn: /холодной пятидневки/,
+  tv: /расчётная внутренняя температура/,
+} as const;
+
+function climateInput(key: keyof typeof CLIMATE_LABELS) {
+  return screen.getByLabelText(CLIMATE_LABELS[key]);
+}
+
 async function typeAndFlush(input: HTMLElement, value: string) {
   fireEvent.change(input, {target: {value}});
   await act(async () => {
@@ -251,13 +263,13 @@ describe('ConstructionsEditor', () => {
       fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});
 
       openTab('Общие данные');
-      fireEvent.change(screen.getByLabelText('tв, °C'), {target: {value: '22'}});
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
 
       openTab('Конструкции');
       expect(screen.getAllByLabelText('Название')[0]).toHaveValue('Стена А');
 
       openTab('Общие данные');
-      expect(screen.getByLabelText('tв, °C')).toHaveValue(22);
+      expect(climateInput('tv')).toHaveValue(22);
 
       expect(actions).toHaveLength(0);
     });
@@ -266,7 +278,7 @@ describe('ConstructionsEditor', () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
 
-      fireEvent.change(screen.getByLabelText('tв, °C'), {target: {value: '22'}});
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
       fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
 
       // Вкладка конструкций открыта, submit — здесь.
@@ -278,7 +290,7 @@ describe('ConstructionsEditor', () => {
       expect(actions).toHaveLength(0);
 
       openTab('Общие данные');
-      expect(screen.getByLabelText('tв, °C')).toHaveValue(22);
+      expect(climateInput('tv')).toHaveValue(22);
     });
 
     it('на общих данных нет submit\'а и сводки по конструкциям', () => {
@@ -348,13 +360,24 @@ describe('ConstructionsEditor', () => {
       fireEvent.mouseDown(screen.getByRole('option', {name: 'Новосибирск'}));
 
       expect(getCityInput()).toHaveValue('Новосибирск');
-      expect(screen.getByLabelText('tот, °C')).toHaveValue(-6.4);
-      expect(screen.getByLabelText('zот, сут')).toHaveValue(218);
-      expect(screen.getByLabelText('tн, °C')).toHaveValue(-33);
+      expect(climateInput('tot')).toHaveValue(-6.4);
+      expect(climateInput('zot')).toHaveValue(218);
+      expect(climateInput('tn')).toHaveValue(-33);
 
       // Подставленное правится руками.
-      fireEvent.change(screen.getByLabelText('zот, сут'), {target: {value: '250'}});
-      expect(screen.getByLabelText('zот, сут')).toHaveValue(250);
+      fireEvent.change(climateInput('zot'), {target: {value: '250'}});
+      expect(climateInput('zot')).toHaveValue(250);
+    });
+
+    it('тип здания по умолчанию — первый вариант списка', () => {
+      renderSurface({general: EMPTY_GENERAL});
+
+      // Агент прислал пустой buildingType → выбран первый из buildingTypeOptions.
+      expect(screen.getByLabelText('Тип здания')).toHaveValue('Жилое многоквартирное');
+
+      // Пустой выбор остаётся доступным.
+      fireEvent.change(screen.getByLabelText('Тип здания'), {target: {value: ''}});
+      expect(screen.getByLabelText('Тип здания')).toHaveValue('');
     });
 
     it('опция без климата: заполняется только город', async () => {
@@ -365,9 +388,9 @@ describe('ConstructionsEditor', () => {
       fireEvent.mouseDown(screen.getByRole('option', {name: 'Городок'}));
 
       expect(getCityInput()).toHaveValue('Городок');
-      expect(screen.getByLabelText('tот, °C')).toHaveValue(-2.2);
-      expect(screen.getByLabelText('zот, сут')).toHaveValue(205);
-      expect(screen.getByLabelText('tн, °C')).toHaveValue(-25);
+      expect(climateInput('tot')).toHaveValue(-2.2);
+      expect(climateInput('zot')).toHaveValue(205);
+      expect(climateInput('tn')).toHaveValue(-25);
     });
 
     it('смена города перезаписывает климат новой опцией', async () => {
@@ -376,15 +399,15 @@ describe('ConstructionsEditor', () => {
 
       await typeAndFlush(getCityInput(), 'нов');
       fireEvent.mouseDown(screen.getByRole('option', {name: 'Новосибирск'}));
-      expect(screen.getByLabelText('tот, °C')).toHaveValue(-6.4);
+      expect(climateInput('tot')).toHaveValue(-6.4);
 
       await typeAndFlush(getCityInput(), 'соч');
       fireEvent.mouseDown(screen.getByRole('option', {name: 'Сочи'}));
 
       expect(getCityInput()).toHaveValue('Сочи');
-      expect(screen.getByLabelText('tот, °C')).toHaveValue(8.5);
-      expect(screen.getByLabelText('zот, сут')).toHaveValue(92);
-      expect(screen.getByLabelText('tн, °C')).toHaveValue(-2);
+      expect(climateInput('tot')).toHaveValue(8.5);
+      expect(climateInput('zot')).toHaveValue(92);
+      expect(climateInput('tn')).toHaveValue(-2);
     });
 
     it('смена условия эксплуатации пересчитывает live-Rпр по λА', () => {
@@ -412,7 +435,7 @@ describe('ConstructionsEditor', () => {
     it('климат тронут — чипы без сравнения, сводка скрыта', () => {
       renderSurface();
 
-      fireEvent.change(screen.getByLabelText('zот, сут'), {target: {value: '210'}});
+      fireEvent.change(climateInput('zot'), {target: {value: '210'}});
       openTab('Конструкции');
 
       expect(screen.getByText('Rпр 4.09')).toBeInTheDocument();
@@ -423,7 +446,7 @@ describe('ConstructionsEditor', () => {
     it('новые props с пересчитанным Rнорм возвращают чипы', async () => {
       const {processor} = renderSurface();
 
-      fireEvent.change(screen.getByLabelText('zот, сут'), {target: {value: '210'}});
+      fireEvent.change(climateInput('zot'), {target: {value: '210'}});
       openTab('Конструкции');
       expect(screen.queryByText(/проходит/)).not.toBeInTheDocument();
 
@@ -500,7 +523,11 @@ describe('ConstructionsEditor', () => {
       });
 
       expect(actions).toHaveLength(1);
-      expect(actions[0]!.context.general).toEqual(EMPTY_GENERAL);
+      // Тип здания — дефолт из buildingTypeOptions, остальное как есть.
+      expect(actions[0]!.context.general).toEqual({
+        ...EMPTY_GENERAL,
+        buildingType: 'Жилое многоквартирное',
+      });
       expect(actions[0]!.context.constructions).toEqual([]);
     });
 
@@ -527,7 +554,7 @@ describe('ConstructionsEditor', () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
 
-      fireEvent.change(screen.getByLabelText('tв, °C'), {target: {value: '22'}});
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
       openTab('Конструкции');
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
