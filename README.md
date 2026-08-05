@@ -70,28 +70,8 @@ GitHub Actions: .github/workflows/pages.yml публикует артефакт�
 - openspec/changes/form-card-dispatch-action/design.md.
 <!-- ai37:card:end -->
 
-Monorepo with a custom A2UI catalog, React renderers, Python validation models, shared fixtures, tests, and deployment assets for publishing catalog artifacts on GitHub Pages (`https://ai-37.github.io/ai37-a2ui-catalog/`).
-
-## Workspace
-
-- `packages/catalog-schemas` — canonical Zod schemas, catalog metadata, JSON Schema export, and A2UI catalog artifact export.
-- `packages/catalog-react` — React renderers and A2UI catalog for `@a2ui/react/v0_9`.
-- `packages/catalog-python` — Pydantic models and Python-side validation helpers.
-- `apps/demo` — Vite demo for manual verification of A2UI messages.
-- `fixtures` — shared valid, invalid, and end-to-end message fixtures.
-
-Catalog artifacts (`catalog.json` + component schemas) are published to GitHub Pages by
-`.github/workflows/pages.yml`; the resolvable `catalogId` lives at
-`https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json`.
-
-## Commands
-
-- `pnpm install`
-- `poetry -C packages/catalog-python install`
-- `pnpm run export:schemas -- --output ./tmp/catalog-public`
-- `pnpm run build`
-- `pnpm run test`
-- `pnpm run demo`
+<!-- Ниже — только уникальный человеческий контекст (замысел, инварианты, грабли).
+     Не дублируйте сюда «что/как» из карточки выше — её ведёт docs-bot из кода. -->
 
 ## Adding Components
 
