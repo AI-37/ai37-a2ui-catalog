@@ -30,12 +30,25 @@ flowchart LR
     R --> D[apps/demo]
 ```
 
+## Структура каталогов
+- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений; dev-middleware мокает fetch-справочники lookup;
+- packages/catalog-schemas — канонические Zod-схемы, типы и генерация JSON Schema;
+- packages/catalog-react — React-рендереры компонентов каталога (в т.ч. ConstructionsEditor);
+- packages/catalog-python — Pydantic-модели валидации (зеркало zod-схем);
+- fixtures — валидные, невалидные и сквозные фикстуры A2UI-сообщений;
+- tests — тесты (tests/react — Vitest; python-часть — Pytest);
+- public/a2ui/catalogs — статические артефакты каталога (catalog.json, JSON Schema компонентов) для GitHub Pages;
+- .github/workflows — CI/CD (pages.yml, ci.yml, cd.yml);
+- docs, openspec — документация и design-доки.
+
 ## Публичные интерфейсы
 Статический A2UI-каталог, публикуемый на GitHub Pages:
 - catalog.json: https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json
 - JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v1/components/*.schema.json и аналогично для v2.
 
 Отдельных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Пакеты workspace (catalog-schemas, catalog-react) и Python-пакет ai37_a2ui_catalog — интерфейсы для кода.
+
+В составе @ai37/a2ui-catalog-react — рендерер ConstructionsEditor (редактор конструкций): наружу один submit с полным состоянием {general, constructions} (без клиентской блокировки); при заданном пропе draftAction черновик с тем же payload уходит по явным коммитам состояния конструкций — add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя («Применить» без изменений действия не порождает). Слои — строки-сводки («№ · материал · толщина · λ»), форма правки одна на редактор и коммитит локальную копию в state; невалидные конструкции подсвечиваются пометкой «! проверить» — индикация, не блок.
 
 ## Зависимости в экосистеме
 ### Зависит от
@@ -45,13 +58,20 @@ flowchart LR
 - внешние сервисы (Authentik, LiteLLM, БД, Redis, S3) не используются.
 
 ### От него зависят
-По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений).
+По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений). Рендерер ConstructionsEditor рассчитан на агента teplo-calc (приём submit/draftAction с состоянием конструкций).
 
 ## Конфигурация
-Явных env-переменных нет. Версии пакетов синхронизируются через pnpm run version:bump <version>; каждый PR также обновляет CHANGELOG.md. Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml.
+Явных env-переменных нет. Версии пакетов синхронизируются через pnpm run version:bump <version>; каждый PR также обновляет CHANGELOG.md. Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml. Тематизация рендереров — через CSS-переменные (tokens.ts), включая токен --a2ui-color-warning для подсветки невалидных конструкций.
 
 ## Данные и хранилища
 БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2. Фикстуры: fixtures/valid, fixtures/invalid, fixtures/messages.
+
+## Быстрый старт (локально)
+Установка зависимостей:
+- pnpm install — зависимости workspace (pnpm >= 10, Node >= 22);
+- poetry -C packages/catalog-python install — Python-пакет ai37-a2ui-catalog.
+
+.env.example отсутствует — env-переменные не используются. Отдельного health-check нет; smoke-проверка после установки — pnpm run test. Демо-приложение apps/demo (Vite + dev-middleware с мок-справочниками) служит для ручной проверки A2UI-сообщений.
 
 ## Как запускать тесты
 Предварительно: pnpm install и poetry -C packages/catalog-python install.
