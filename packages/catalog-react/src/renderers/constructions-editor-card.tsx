@@ -7,6 +7,7 @@ import type {
 import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
 import {computeLiveRpr} from './compute-live-rpr';
 import {ConstructionsEditorLayerRow} from './constructions-editor-layer-row';
+import {findInvalidLayers} from './find-invalid-layers';
 import type {ConstructionsEditorCardProps} from './constructions-editor.types';
 import {
   controlStyle,
@@ -19,11 +20,18 @@ import {tokens} from './tokens';
 
 const SUBTYPED_TYPE: ConstructionType = 'cherdachnye_podval_grunt';
 
+// Пустой слой формы «+ Слой»: в state редактора не попадает до «Добавить».
+const EMPTY_LAYER: ConstructionLayer = {material: '', thicknessMm: null};
+
 /**
- * Карточка-аккордеон одной конструкции: тип/subtype/название, таблица слоёв с
- * add/remove строк (или паспортное Rпр для типов без слоёв) и live-чип Rпр
- * против Rнорм (сравнение — только при `showRnorm`). Состоянием владеет
- * редактор; карточка поднимает правки через `onChange` целой конструкцией.
+ * Карточка-аккордеон одной конструкции: тип/subtype/название, слои
+ * строками-сводками с единственной раскрытой формой (или паспортное Rпр для
+ * типов без слоёв) и live-чип Rпр против Rнорм (сравнение — только при
+ * `showRnorm`). Состоянием — и конструкций, и открытой формы слоя (она одна
+ * на весь редактор) — владеет редактор; карточка поднимает правки через
+ * `onChange` целой конструкцией, коммиты формы слоя — с `{commit: true}`.
+ * Конструкция с ошибкой в данных подсвечена предупреждающим цветом с пометкой
+ * «проверить» — индикация, не блок (см. `find-invalid-layers`).
  */
 export function ConstructionsEditorCard({
   entry,
@@ -33,12 +41,15 @@ export function ConstructionsEditorCard({
   minChars,
   open,
   showRnorm,
+  editingIndex,
+  onEditingChange,
   onToggle,
   onChange,
   onRemove,
 }: ConstructionsEditorCardProps) {
   const config = typeConfigs.find(candidate => candidate.type === entry.type);
   const rpr = computeLiveRpr(entry, config, condition);
+  const invalidity = findInvalidLayers(entry, config);
   const title = entry.name?.trim() ? entry.name : (config?.label ?? entry.type);
 
   const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -64,23 +75,29 @@ export function ConstructionsEditorCard({
     onChange({...entry, rprPassport: Number.isFinite(parsed) ? parsed : undefined});
   };
 
-  const handleLayerChange = (index: number, layer: ConstructionLayer) => {
-    onChange({...entry, layers: entry.layers.map((prev, i) => (i === index ? layer : prev))});
+  const handleLayerCommit = (index: number, layer: ConstructionLayer) => {
+    onEditingChange(null);
+    onChange(
+      {...entry, layers: entry.layers.map((prev, i) => (i === index ? layer : prev))},
+      {commit: true},
+    );
+  };
+
+  const handleLayerAdd = (layer: ConstructionLayer) => {
+    onEditingChange(null);
+    onChange({...entry, layers: [...entry.layers, layer]}, {commit: true});
   };
 
   const handleLayerRemove = (index: number) => {
-    onChange({...entry, layers: entry.layers.filter((_, i) => i !== index)});
-  };
-
-  const handleLayerAdd = () => {
-    onChange({...entry, layers: [...entry.layers, {material: '', thicknessMm: null}]});
+    onEditingChange(null);
+    onChange({...entry, layers: entry.layers.filter((_, i) => i !== index)}, {commit: true});
   };
 
   return (
     <section
       style={{
         borderRadius: 14,
-        border: `1px solid ${tokens.border}`,
+        border: `1px solid ${invalidity.invalid ? tokens.warning : tokens.border}`,
         background: tokens.surfaceMuted,
       }}
     >
@@ -110,6 +127,18 @@ export function ConstructionsEditorCard({
           <Chevron open={open} />
           {title}
         </button>
+        {invalidity.invalid ? (
+          <span
+            style={{
+              color: tokens.warning,
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ! проверить
+          </span>
+        ) : null}
         <RprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />
         <button
           type="button"
@@ -185,29 +214,49 @@ export function ConstructionsEditorCard({
                 <ConstructionsEditorLayerRow
                   key={index}
                   layer={layer}
+                  index={index}
                   rowName={`material-${entry.id}-${index}`}
                   condition={condition}
                   materialsReferenceId={materialsReferenceId}
                   minChars={minChars}
-                  onChange={next => handleLayerChange(index, next)}
+                  mode={editingIndex === index ? 'edit' : 'summary'}
+                  // Клик по другой строке переводит форму туда: несохранённые
+                  // правки прежней отбрасываются вместе с её формой.
+                  onOpen={() => onEditingChange(index)}
+                  onCommit={next => handleLayerCommit(index, next)}
+                  onCancel={() => onEditingChange(null)}
                   onRemove={() => handleLayerRemove(index)}
                 />
               ))}
-              <button
-                type="button"
-                onClick={handleLayerAdd}
-                style={{
-                  justifySelf: 'start',
-                  padding: '6px 12px',
-                  borderRadius: 10,
-                  border: `1px dashed ${tokens.borderStrong}`,
-                  background: 'transparent',
-                  color: tokens.text,
-                  cursor: 'pointer',
-                }}
-              >
-                + Слой
-              </button>
+              {editingIndex === 'new' ? (
+                <ConstructionsEditorLayerRow
+                  layer={EMPTY_LAYER}
+                  index={entry.layers.length}
+                  rowName={`material-${entry.id}-new`}
+                  condition={condition}
+                  materialsReferenceId={materialsReferenceId}
+                  minChars={minChars}
+                  mode="new"
+                  onCommit={handleLayerAdd}
+                  onCancel={() => onEditingChange(null)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onEditingChange('new')}
+                  style={{
+                    justifySelf: 'start',
+                    padding: '6px 12px',
+                    borderRadius: 10,
+                    border: `1px dashed ${tokens.borderStrong}`,
+                    background: 'transparent',
+                    color: tokens.text,
+                    cursor: 'pointer',
+                  }}
+                >
+                  + Слой
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -4,8 +4,9 @@ import type {ComponentApi, MessageProcessor} from '@a2ui/web_core/v0_9';
  * Логгер черновиков ConstructionsEditor'а для демо.
  *
  * Настоящий агент на `draftAction` кладёт массив в состояние сессии; здесь
- * достаточно вывести payload в консоль — видно, что структурная правка
- * (add/remove конструкции или слоя) шлёт полный массив, а правка поля нет.
+ * достаточно вывести payload в консоль — видно, что каждый коммит (add/remove
+ * конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя) шлёт полный
+ * массив, а правка полей шапки и ввод в незакоммиченной форме — нет.
  */
 export function attachDemoDraftLogger(
   processor: MessageProcessor<ComponentApi>,

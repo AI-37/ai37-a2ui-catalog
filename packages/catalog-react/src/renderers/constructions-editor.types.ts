@@ -40,18 +40,40 @@ export type ConstructionsEditorCardProps = {
   open: boolean;
   /** false — климат тронут, Rнорм протух: чип показывает Rпр без сравнения. */
   showRnorm: boolean;
+  /**
+   * Слой этой карточки, которым владеет форма ('new' — форма нового слоя).
+   * Состояние живёт в редакторе: форма одна на весь редактор, а не на карточку.
+   */
+  editingIndex: number | 'new' | null;
+  onEditingChange: (index: number | 'new' | null) => void;
   onToggle: () => void;
-  onChange: (entry: ConstructionEntry) => void;
+  /**
+   * Правка конструкции. `commit: true` — явный коммит формы слоя
+   * («Применить»/«Добавить»/«Удалить слой»): точка отправки черновика.
+   */
+  onChange: (entry: ConstructionEntry, options?: {commit?: boolean}) => void;
   onRemove: () => void;
 };
 
+/** Режим строки слоя: сводка, форма правки или форма нового слоя. */
+export type ConstructionsEditorLayerRowMode = 'summary' | 'edit' | 'new';
+
 export type ConstructionsEditorLayerRowProps = {
   layer: ConstructionLayer;
+  /** Порядковый номер строки для «№» сводки (с нуля). */
+  index: number;
   /** name скрытого input'а комбобокса; уникален в пределах surface'а. */
   rowName: string;
   condition: OperatingCondition;
   materialsReferenceId: string;
   minChars?: number | undefined;
-  onChange: (layer: ConstructionLayer) => void;
-  onRemove: () => void;
+  mode: ConstructionsEditorLayerRowMode;
+  /** Клик по строке-сводке — открыть форму этого слоя. */
+  onOpen?: () => void;
+  /** Коммит формы: «Применить» с изменёнными полями либо «Добавить». */
+  onCommit: (layer: ConstructionLayer) => void;
+  /** Закрыть форму, отбросив несохранённые правки. */
+  onCancel: () => void;
+  /** «Удалить слой» из формы; у формы нового слоя кнопки нет. */
+  onRemove?: () => void;
 };

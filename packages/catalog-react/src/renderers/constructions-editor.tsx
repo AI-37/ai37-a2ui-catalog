@@ -36,9 +36,11 @@ const primaryButtonStyle: React.CSSProperties = {
  * design.md). Переключение вкладок — чисто клиентское, ввод обеих переживает
  * его: на вкладке общих данных кнопка «Далее» просто ведёт к конструкциям,
  * submit живёт там. Наружу уходит один submit с `{general, constructions}` как есть —
- * клиентской блокировки и подсветки нет, о недостающем сообщает агент. При
- * заданном `draftAction` структурные правки списка конструкций дополнительно
- * уезжают черновиком с тем же payload'ом.
+ * клиентской блокировки нет, о недостающем сообщает агент; подсветка
+ * невалидной конструкции — индикация на данных, не блок. При заданном
+ * `draftAction` коммиты состояния конструкций (add/remove конструкции,
+ * «Применить»/«Добавить»/«Удалить слой» формы слоя) дополнительно уезжают
+ * черновиком с тем же payload'ом.
  *
  * Без пропа `general` компонент работает как прежде: одна вкладка конструкций
  * (переключателя нет) и submit с `{constructions}` — путь отката.
@@ -56,6 +58,13 @@ export const ConstructionsEditor = createComponentImplementation(
     // Раскрытые карточки. Пустое множество на старте: десяток конструкций по
     // три слоя развёрнутыми — простыня, в которой не найти нужную.
     const [openIds, setOpenIds] = React.useState<ReadonlySet<string>>(new Set());
+    // Слой, которым владеет форма редактирования ('new' — форма нового слоя).
+    // Одна на весь редактор: открытие формы в другой карточке закрывает
+    // текущую, несохранённые правки отбрасываются вместе с ней.
+    const [editingLayer, setEditingLayer] = React.useState<{
+      entryId: string;
+      index: number | 'new';
+    } | null>(null);
     const [activeTab, setActiveTab] = React.useState<ConstructionsEditorTab>(
       hasGeneral ? 'general' : 'constructions',
     );
@@ -118,14 +127,13 @@ export const ConstructionsEditor = createComponentImplementation(
       });
     };
 
-    const handleEntryChange = (next: ConstructionEntry) => {
-      const current = constructions.find(entry => entry.id === next.id);
-      // Add/remove слоя приходит сюда же, что и правки полей; отличаем по
-      // длине массива слоёв (Решение 3 design.md).
-      const structural = current !== undefined && current.layers.length !== next.layers.length;
+    const handleEntryChange = (next: ConstructionEntry, options?: {commit?: boolean}) => {
       const updated = constructions.map(entry => (entry.id === next.id ? next : entry));
       setConstructions(updated);
-      if (structural) sendDraft(updated);
+      // Коммит формы слоя («Применить»/«Добавить»/«Удалить слой») — явный
+      // признак от карточки; правки полей шапки приходят без него и уезжают
+      // со следующим коммитом либо submit'ом.
+      if (options?.commit) sendDraft(updated);
     };
 
     const handleEntryRemove = (id: string) => {
@@ -205,6 +213,10 @@ export const ConstructionsEditor = createComponentImplementation(
                 minChars={props.minChars}
                 open={openIds.has(entry.id)}
                 showRnorm={!climateDirty}
+                editingIndex={editingLayer?.entryId === entry.id ? editingLayer.index : null}
+                onEditingChange={index =>
+                  setEditingLayer(index === null ? null : {entryId: entry.id, index})
+                }
                 onToggle={() => handleToggle(entry.id)}
                 onChange={handleEntryChange}
                 onRemove={() => handleEntryRemove(entry.id)}

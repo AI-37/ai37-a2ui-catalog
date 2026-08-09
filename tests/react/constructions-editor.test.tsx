@@ -61,6 +61,16 @@ function openCard(name: RegExp | string) {
   fireEvent.click(screen.getByRole('button', {name}));
 }
 
+/** Клик по строке-сводке слоя раскрывает его форму (имя начинается с «№N»). */
+function openLayerRow(name: RegExp) {
+  fireEvent.click(screen.getByRole('button', {name}));
+}
+
+/** Строки-сводки слоёв всех раскрытых карточек. */
+function layerSummaries() {
+  return screen.queryAllByRole('button', {name: /^№\d/});
+}
+
 function getMaterialInputs() {
   return screen.getAllByPlaceholderText('Материал из справочника или свой');
 }
@@ -133,9 +143,15 @@ describe('ConstructionsEditor', () => {
     openCard(/Окно двухкамерное/);
     expect(screen.getByRole('spinbutton', {name: /Rпр по паспорту/})).toHaveValue(0.56);
 
-    // Зазор — без ввода λ, подсказка про серверный Rs.
+    // Зазор — без ввода λ, подсказка про серверный Rs (в строке-сводке).
     openCard(/Наружная стена/);
     expect(screen.getByText('Rs — в итоговом расчёте')).toBeInTheDocument();
+
+    // Слои раскрытой карточки — строки-сводки с источником λ, ни одной формы.
+    // accessible name склеивает вложенный значок: «λ 0.81авто».
+    expect(screen.getByRole('button', {name: /№1.*380 мм.*λ 0\.81авто/})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: /№4.*Фибролит.*λ 0\.09/})).toBeInTheDocument();
+    expect(screen.queryAllByPlaceholderText('Материал из справочника или свой')).toHaveLength(0);
   });
 
   it('пол по грунту: live-Rпр без члена 1/αн (alphaN-record без записи)', () => {
@@ -158,32 +174,46 @@ describe('ConstructionsEditor', () => {
     expect(resolveLayerLambda({...layer, lambdaManual: 0.05}, 'А')).toBe(0.05);
   });
 
-  it('изменение толщины пересчитывает чип и сводку без action\'ов', () => {
+  it('правка в форме слоя попадает в state по «Применить»; до коммита live-Rпр прежний', () => {
     const {surface} = renderSurface();
     const actions = subscribeActions(surface);
     openTab('Конструкции');
     openCard(/Наружная стена/);
 
-    // Толщина минваты (2-я строка стены): 150 → 10 — Rпр падает ниже Rнорм.
-    fireEvent.change(getThicknessInputs()[1]!, {target: {value: '10'}});
+    // Толщина минваты (2-я строка стены): 150 → 10 — Rпр упадёт ниже Rнорм.
+    openLayerRow(/№2.*минераловатные/);
+    fireEvent.change(getThicknessInputs()[0]!, {target: {value: '10'}});
 
+    // До «Применить» правка живёт только в форме: чип и сводка не тронуты.
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    expect(screen.getByText('проходит 2 из 3')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+
+    // Форма закрыта, строка-сводка и live-Rпр показывают новую толщину.
+    expect(screen.getByRole('button', {name: /№2.*10 мм/})).toBeInTheDocument();
     expect(screen.getByText('Rпр 1.17 < 3.19')).toBeInTheDocument();
     expect(screen.getByText('проходит 1 из 3')).toBeInTheDocument();
     expect(actions).toHaveLength(0);
   });
 
-  it('add/remove слоя — мгновенно, без action\'ов и сети', () => {
+  it('«Добавить» и «Удалить слой» меняют список мгновенно, без action\'ов и сети', () => {
     const {surface} = renderSurface();
     const actions = subscribeActions(surface);
     openTab('Конструкции');
     openCard(/Наружная стена/);
-    const initialRows = getMaterialInputs().length;
+    const initialRows = layerSummaries().length;
 
-    fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
-    expect(getMaterialInputs()).toHaveLength(initialRows + 1);
+    // «+ Слой» открывает форму, state ещё прежний; слой появляется по коммиту.
+    fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
+    expect(layerSummaries()).toHaveLength(initialRows);
+    fireEvent.click(screen.getByRole('button', {name: 'Добавить'}));
+    expect(layerSummaries()).toHaveLength(initialRows + 1);
 
-    fireEvent.click(screen.getAllByRole('button', {name: 'Удалить слой'})[0]!);
-    expect(getMaterialInputs()).toHaveLength(initialRows);
+    // Удаление — из открытой формы слоя.
+    openLayerRow(/№5/);
+    fireEvent.click(screen.getByRole('button', {name: 'Удалить слой'}));
+    expect(layerSummaries()).toHaveLength(initialRows);
 
     expect(actions).toHaveLength(0);
     expect(fetchMock).not.toHaveBeenCalled();
@@ -209,7 +239,7 @@ describe('ConstructionsEditor', () => {
     expect(screen.getAllByRole('button', {name: 'Удалить конструкцию'})).toHaveLength(3);
   });
 
-  it('lookup строки: выбор опции с λ заполняет materialKey и λ («авто»)', async () => {
+  it('lookup формы слоя: выбор опции с λ заполняет materialKey и λ («авто»)', async () => {
     fetchMock.mockImplementation(() =>
       Promise.resolve({
         ok: true,
@@ -222,8 +252,8 @@ describe('ConstructionsEditor', () => {
     openTab('Конструкции');
     openCard(/Наружная стена/);
 
-    fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
-    const materialInput = getMaterialInputs()[4]!; // новая 5-я строка стены
+    fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
+    const materialInput = getMaterialInputs()[0]!; // единственная открытая форма
 
     await typeAndFlush(materialInput, 'бет');
 
@@ -235,9 +265,13 @@ describe('ConstructionsEditor', () => {
     fireEvent.mouseDown(screen.getByRole('option', {name: 'Бетон B25'}));
 
     expect((materialInput as HTMLInputElement).value).toBe('Бетон B25');
-    // condition Б → λБ из опции, ручного ввода λ в строке нет.
+    // condition Б → λБ из опции («авто»), ручного ввода λ в форме нет.
     expect(screen.getByText('1.86')).toBeInTheDocument();
-    expect(screen.queryAllByRole('spinbutton', {name: /λ.*вручную/})).toHaveLength(1); // только фибролит
+    expect(screen.queryAllByRole('spinbutton', {name: /λ.*вручную/})).toHaveLength(0);
+
+    // Коммит «Добавить» переносит выбор в строку-сводку.
+    fireEvent.click(screen.getByRole('button', {name: 'Добавить'}));
+    expect(screen.getByRole('button', {name: /№5.*Бетон B25.*λ 1\.86авто/})).toBeInTheDocument();
   });
 
   it('свободный текст без выбора опции — ручная λ', async () => {
@@ -245,31 +279,136 @@ describe('ConstructionsEditor', () => {
     openTab('Конструкции');
     openCard(/Наружная стена/);
 
-    fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
-    const materialInput = getMaterialInputs()[4]!;
+    fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
 
-    await typeAndFlush(materialInput, 'самодельный утеплитель');
+    await typeAndFlush(getMaterialInputs()[0]!, 'самодельный утеплитель');
 
-    // Строка без λ из справочника → ручной ввод (плюс существующий фибролит).
-    expect(screen.getAllByRole('spinbutton', {name: /λ.*вручную/})).toHaveLength(2);
+    // Строка без λ из справочника → ручной ввод в форме.
+    expect(screen.getAllByRole('spinbutton', {name: /λ.*вручную/})).toHaveLength(1);
   });
 
-  it('аккордеон: карточки свёрнуты, раскрытие показывает слои, чип виден всегда', () => {
+  it('аккордеон: карточки свёрнуты, раскрытие показывает строки слоёв, чип виден всегда', () => {
     renderSurface();
     openTab('Конструкции');
 
-    const materialInputs = () =>
-      screen.queryAllByPlaceholderText('Материал из справочника или свой');
-
-    expect(materialInputs()).toHaveLength(0);
+    expect(layerSummaries()).toHaveLength(0);
     expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
 
     openCard(/Наружная стена/);
-    expect(materialInputs()).toHaveLength(4);
+    expect(layerSummaries()).toHaveLength(4);
 
     openCard(/Наружная стена/);
-    expect(materialInputs()).toHaveLength(0);
+    expect(layerSummaries()).toHaveLength(0);
     expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+  });
+
+  describe('форма слоя', () => {
+    it('раскрыта максимум одна форма; переключение строки отбрасывает правки', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+
+      openLayerRow(/№2.*минераловатные/);
+      fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
+
+      // Клик по другой строке переводит форму туда, правки №2 отброшены.
+      openLayerRow(/№4.*Фибролит/);
+      expect(getMaterialInputs()).toHaveLength(1);
+      expect((getMaterialInputs()[0] as HTMLInputElement).value).toBe('Фибролит (нестандартный)');
+      expect(screen.getByRole('button', {name: /№2.*150 мм/})).toBeInTheDocument();
+      expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    });
+
+    it('форма одна на весь редактор: открытие в другой карточке закрывает первую', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+      openCard(/Пол по грунту/);
+
+      openLayerRow(/№2.*минераловатные/);
+      expect(getMaterialInputs()).toHaveLength(1);
+
+      openLayerRow(/№1.*Железобетон/);
+      expect(getMaterialInputs()).toHaveLength(1);
+      expect((getMaterialInputs()[0] as HTMLInputElement).value).toBe('Железобетон');
+    });
+
+    it('«Отмена» закрывает форму без следа', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+
+      openLayerRow(/№4.*Фибролит/);
+      fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
+      fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
+
+      expect(screen.getByRole('button', {name: /№4.*30 мм/})).toBeInTheDocument();
+      expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    });
+
+    it('«+ Слой» с «Отменой» не оставляет пустой строки', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+
+      fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
+      // Пока форма нового слоя открыта, кнопки «+ Слой» нет.
+      expect(screen.queryByRole('button', {name: '+ Слой'})).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
+
+      expect(layerSummaries()).toHaveLength(4);
+      expect(screen.getByRole('button', {name: '+ Слой'})).toBeInTheDocument();
+    });
+  });
+
+  describe('подсветка невалидной конструкции', () => {
+    it('валидные данные фикстуры — пометки «проверить» нет', () => {
+      renderSurface();
+      openTab('Конструкции');
+
+      expect(screen.queryByText('! проверить')).not.toBeInTheDocument();
+    });
+
+    it('появляется по коммиту слоя без λ и гаснет после исправления, без action\'ов', async () => {
+      const {surface} = renderSurface();
+      const actions = subscribeActions(surface);
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+
+      // Стираем ручную λ фибролита и коммитим — карточка невалидна.
+      openLayerRow(/№4.*Фибролит/);
+      fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
+        target: {value: ''},
+      });
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+
+      expect(screen.getByText('! проверить')).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /№4.*λ не задана/})).toBeInTheDocument();
+
+      // Пометка видна и на свернутой карточке.
+      openCard(/Наружная стена/);
+      expect(screen.getByText('! проверить')).toBeInTheDocument();
+
+      // Исправление гасит подсветку само, никаких action'ов не было.
+      openCard(/Наружная стена/);
+      openLayerRow(/№4.*Фибролит/);
+      fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
+        target: {value: '0.09'},
+      });
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+
+      expect(screen.queryByText('! проверить')).not.toBeInTheDocument();
+      expect(actions).toHaveLength(0);
+    });
+
+    it('тип без слоёв: нет паспортного Rпр — карточка помечена', () => {
+      renderSurface({
+        constructions: [{id: 'w-1', type: 'okna', name: 'Окно без паспорта', layers: []}],
+      });
+      openTab('Конструкции');
+
+      expect(screen.getByText('! проверить')).toBeInTheDocument();
+    });
   });
 
   describe('вкладки', () => {
@@ -449,7 +588,9 @@ describe('ConstructionsEditor', () => {
       openTab('Конструкции');
       openCard(/Наружная стена/);
 
-      fireEvent.change(getThicknessInputs()[1]!, {target: {value: '160'}});
+      openLayerRow(/№2.*минераловатные/);
+      fireEvent.change(getThicknessInputs()[0]!, {target: {value: '160'}});
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
       expect(screen.getByText('Rпр 4.29 ≥ 3.19')).toBeInTheDocument();
       expect(screen.getByText('проходит 2 из 3')).toBeInTheDocument();
@@ -554,13 +695,15 @@ describe('ConstructionsEditor', () => {
       expect(actions[0]!.context.constructions).toEqual([]);
     });
 
-    it('незаполненная строка слоя не блокирует submit', async () => {
+    it('незаполненный закоммиченный слой не блокирует submit', async () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
       openTab('Конструкции');
       openCard(/Наружная стена/);
 
-      fireEvent.click(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
+      // «Добавить» с пустой формой — слой-черновик попадает в state как есть.
+      fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
+      fireEvent.click(screen.getByRole('button', {name: 'Добавить'}));
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
       });
@@ -618,13 +761,14 @@ describe('ConstructionsEditor', () => {
       });
     }
 
-    it('без пропа структурные правки не порождают action', async () => {
+    it('без пропа коммиты не порождают action', async () => {
       const {surface} = renderSurface({draftAction: undefined});
       const actions = subscribeActions(surface);
       openTab('Конструкции');
 
       await clickAndFlush(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
-      await clickAndFlush(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
+      await clickAndFlush(screen.getByRole('button', {name: '+ Слой'}));
+      await clickAndFlush(screen.getByRole('button', {name: 'Добавить'}));
       const removeButtons = screen.getAllByRole('button', {name: 'Удалить конструкцию'});
       await clickAndFlush(removeButtons[removeButtons.length - 1]!);
 
@@ -656,31 +800,69 @@ describe('ConstructionsEditor', () => {
       expect(constructions.map(entry => entry.id)).toEqual(['c-floor-1', 'c-window-1']);
     });
 
-    it('добавление и удаление слоя шлют черновик с актуальным набором слоёв', async () => {
+    it('коммиты «Добавить» и «Удалить слой» шлют черновик с актуальным набором слоёв', async () => {
       const {actions} = draftSurface();
       openCard(/Наружная стена/);
 
-      await clickAndFlush(screen.getAllByRole('button', {name: '+ Слой'})[0]!);
+      // «+ Слой» открывает форму без черновика; черновик — по коммиту.
+      fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
+      expect(actions).toHaveLength(0);
+      await clickAndFlush(screen.getByRole('button', {name: 'Добавить'}));
       expect(actions).toHaveLength(1);
       expect(
         (actions[0]!.context.constructions as Array<Record<string, unknown>>)[0]!.layers,
       ).toHaveLength(5);
 
-      await clickAndFlush(screen.getAllByRole('button', {name: 'Удалить слой'})[0]!);
+      openLayerRow(/№5/);
+      await clickAndFlush(screen.getByRole('button', {name: 'Удалить слой'}));
       expect(actions).toHaveLength(2);
       expect(
         (actions[1]!.context.constructions as Array<Record<string, unknown>>)[0]!.layers,
       ).toHaveLength(4);
     });
 
-    it('правки полей и аккордеон сами по себе черновик не шлют', async () => {
+    it('«Применить» с изменёнными полями шлёт один черновик с введённой λ', async () => {
+      const {actions} = draftSurface();
+      openCard(/Наружная стена/);
+
+      openLayerRow(/№4.*Фибролит/);
+      fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
+        target: {value: '0.05'},
+      });
+      expect(actions).toHaveLength(0); // ввод в форме черновика не порождает
+      await clickAndFlush(screen.getByRole('button', {name: 'Применить'}));
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:draft');
+      const layers = (actions[0]!.context.constructions as Array<Record<string, unknown>>)[0]!
+        .layers as Array<Record<string, unknown>>;
+      expect(layers[3]).toMatchObject({lambdaManual: 0.05});
+    });
+
+    it('«Применить» без изменений черновик не шлёт', async () => {
+      const {actions} = draftSurface();
+      openCard(/Наружная стена/);
+
+      openLayerRow(/№4.*Фибролит/);
+      await clickAndFlush(screen.getByRole('button', {name: 'Применить'}));
+
+      // Форма закрыта, action'ов нет.
+      expect(screen.getByRole('button', {name: /№4.*Фибролит/})).toBeInTheDocument();
+      expect(actions).toHaveLength(0);
+    });
+
+    it('правки полей шапки, ввод в форме, «Отмена» и аккордеон черновик не шлют', async () => {
       const {actions} = draftSurface();
       openCard(/Наружная стена/);
 
       await act(async () => {
         fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});
-        fireEvent.change(getThicknessInputs()[1]!, {target: {value: '200'}});
       });
+      openLayerRow(/№2.*минераловатные/);
+      await act(async () => {
+        fireEvent.change(getThicknessInputs()[0]!, {target: {value: '200'}});
+      });
+      await clickAndFlush(screen.getByRole('button', {name: 'Отмена'}));
       await clickAndFlush(screen.getByRole('button', {name: /Стена А/}));
 
       expect(actions).toHaveLength(0);
