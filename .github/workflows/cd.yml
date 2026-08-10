@@ -110,15 +110,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # poetry ставим ДО setup-python: `cache: poetry` вычисляет ключ кэша через сам poetry,
+      # поэтому он обязан быть в PATH заранее (иначе setup-python падает "Unable to locate poetry").
+      - name: Install Poetry
+        run: pipx install poetry==2.3.2
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
           cache: poetry
           cache-dependency-path: packages/catalog-python/poetry.lock
-
-      - name: Install Poetry
-        run: pipx install poetry==2.3.2
 
       - name: Install Twine
         run: pipx install twine
