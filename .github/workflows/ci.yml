@@ -39,6 +39,8 @@ jobs:
         run: pipx install poetry==2.3.2
 
       - name: Install Node.js dependencies
+        env:
+          AI37_NPM_TOKEN: ${{ secrets.AI37_NPM_TOKEN }}
         run: pnpm install --frozen-lockfile
 
       - name: Install Python dependencies

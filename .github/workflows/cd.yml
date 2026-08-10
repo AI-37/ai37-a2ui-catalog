@@ -6,11 +6,6 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
-      skip_ci:
-        description: Skip the reusable CI workflow before publishing
-        required: true
-        default: false
-        type: boolean
       publish_npm:
         description: Publish npm packages
         required: true
@@ -25,7 +20,6 @@ on:
 jobs:
   ci:
     name: Reuse CI
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.skip_ci }}
     uses: ./.github/workflows/ci.yml
     secrets: inherit
 
@@ -34,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - ci
-    if: ${{ always() && (needs.ci.result == 'success' || needs.ci.result == 'skipped') }}
     outputs:
       version: ${{ steps.meta.outputs.version }}
     steps:
@@ -77,23 +70,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
+        env:
+          AI37_NPM_TOKEN: ${{ secrets.AI37_NPM_TOKEN }}
         run: pnpm install --frozen-lockfile
 
       - name: Build npm packages
+        env:
+          AI37_NPM_TOKEN: ${{ secrets.AI37_NPM_TOKEN }}
         run: pnpm -r --filter './packages/**' run build
 
       - name: Publish @ai37/a2ui-catalog-schemas
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm --filter @ai37/a2ui-catalog-schemas publish --access public --no-git-checks --registry https://registry.npmjs.org/
+          AI37_NPM_TOKEN: ${{ secrets.AI37_NPM_TOKEN }}
+        run: pnpm --filter @ai37/a2ui-catalog-schemas publish --no-git-checks --registry https://npm.app.sp-ai.ru/
 
       - name: Publish @ai37/a2ui-catalog-react
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm --filter @ai37/a2ui-catalog-react publish --access public --no-git-checks --registry https://registry.npmjs.org/
+          AI37_NPM_TOKEN: ${{ secrets.AI37_NPM_TOKEN }}
+        run: pnpm --filter @ai37/a2ui-catalog-react publish --no-git-checks --registry https://npm.app.sp-ai.ru/
 
   publish_pypi:
     name: Publish Python package
@@ -103,27 +99,42 @@ jobs:
     if: ${{ needs.release_metadata.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.publish_pypi) }}
     permissions:
       contents: read
+    # Все run-шаги — из каталога пакета. НЕ используем `poetry -C <dir>`: с src-layout
+    # (packages from="src") в poetry-core 2.x флаг -C удваивает путь → ищет src/src/… и падает.
+    defaults:
+      run:
+        working-directory: packages/catalog-python
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      # poetry ставим ДО setup-python: `cache: poetry` вычисляет ключ кэша через сам poetry,
+      # поэтому он обязан быть в PATH заранее (иначе setup-python падает "Unable to locate poetry").
+      - name: Install Poetry
+        run: pipx install poetry==2.3.2
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
           cache: poetry
+          # cache-dependency-path — это with:, резолвится от корня репо (не от working-directory)
           cache-dependency-path: packages/catalog-python/poetry.lock
 
-      - name: Install Poetry
-        run: pipx install poetry==2.3.2
+      - name: Install Twine
+        run: pipx install twine
 
       - name: Install dependencies
-        run: poetry -C packages/catalog-python install --no-interaction
+        run: poetry install --no-interaction
 
       - name: Build Python package
-        run: poetry -C packages/catalog-python build
+        run: poetry build
+
+      - name: Check Python package
+        run: twine check dist/*
 
       - name: Publish Python package
         env:
-          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        run: poetry -C packages/catalog-python publish --no-interaction --username __token__ --password "$PYPI_API_TOKEN"
+          TWINE_USERNAME: ci-publish
+          TWINE_PASSWORD: ${{ secrets.AI37_PYPI_TOKEN }}
+        run: twine upload --repository-url https://pypi.app.sp-ai.ru/ dist/*
