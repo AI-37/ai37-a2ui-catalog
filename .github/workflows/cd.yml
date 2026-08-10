@@ -106,6 +106,11 @@ jobs:
     if: ${{ needs.release_metadata.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.publish_pypi) }}
     permissions:
       contents: read
+    # Все run-шаги — из каталога пакета. НЕ используем `poetry -C <dir>`: с src-layout
+    # (packages from="src") в poetry-core 2.x флаг -C удваивает путь → ищет src/src/… и падает.
+    defaults:
+      run:
+        working-directory: packages/catalog-python
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -120,22 +125,23 @@ jobs:
         with:
           python-version: '3.13'
           cache: poetry
+          # cache-dependency-path — это with:, резолвится от корня репо (не от working-directory)
           cache-dependency-path: packages/catalog-python/poetry.lock
 
       - name: Install Twine
         run: pipx install twine
 
       - name: Install dependencies
-        run: poetry -C packages/catalog-python install --no-interaction
+        run: poetry install --no-interaction
 
       - name: Build Python package
-        run: poetry -C packages/catalog-python build
+        run: poetry build
 
       - name: Check Python package
-        run: twine check packages/catalog-python/dist/*
+        run: twine check dist/*
 
       - name: Publish Python package
         env:
           TWINE_USERNAME: ci-publish
           TWINE_PASSWORD: ${{ secrets.AI37_PYPI_TOKEN }}
-        run: twine upload --repository-url https://pypi.app.sp-ai.ru/ packages/catalog-python/dist/*
+        run: twine upload --repository-url https://pypi.app.sp-ai.ru/ dist/*
