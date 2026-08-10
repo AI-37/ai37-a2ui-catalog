@@ -7,7 +7,11 @@ export const formFieldTypeSchema = z.enum(['text', 'number', 'select', 'boolean'
 // 'fetch' (same-origin GET LOOKUP_SUGGEST_ROUTE); default 'action' применяет рендерер.
 export const lookupSuggestModeSchema = z.enum(['action', 'fetch']);
 
-export const formFieldSchema = z
+// Базовый объект поля ДО `.refine` — точка расширения для компонентов,
+// которым нужен свой набор типов поля (LiftEditor: `combo`, `advanced`, …).
+// `formFieldSchema` ниже — это ZodEffects, у него нет `.extend()`, поэтому
+// объект экспортируется отдельно. Сама схема FormCard не меняется.
+export const formFieldBaseSchema = z
   .object({
     name: z.string().min(1).max(80),
     label: z.string().min(1).max(120),
@@ -30,11 +34,15 @@ export const formFieldSchema = z
       ])
       .optional(),
   })
-  .strict()
-  .refine(field => field.type !== 'lookup' || typeof field.referenceId === 'string', {
+  .strict();
+
+export const formFieldSchema = formFieldBaseSchema.refine(
+  field => field.type !== 'lookup' || typeof field.referenceId === 'string',
+  {
     message: 'referenceId is required when type is "lookup"',
     path: ['referenceId'],
-  });
+  },
+);
 
 export const formCardSubmitSchema = z
   .object({
@@ -54,6 +62,7 @@ export const formCardPropsSchema = z
 
 export type FormFieldType = z.infer<typeof formFieldTypeSchema>;
 export type LookupSuggestMode = z.infer<typeof lookupSuggestModeSchema>;
+export type FormFieldBase = z.infer<typeof formFieldBaseSchema>;
 export type FormField = z.infer<typeof formFieldSchema>;
 export type FormCardSubmit = z.infer<typeof formCardSubmitSchema>;
 export type FormCardProps = z.infer<typeof formCardPropsSchema>;

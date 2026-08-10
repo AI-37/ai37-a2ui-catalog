@@ -1,0 +1,639 @@
+{
+  "$ref": "#/definitions/LiftEditor",
+  "definitions": {
+    "LiftEditor": {
+      "type": "object",
+      "properties": {
+        "methodField": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "text",
+                "number",
+                "select",
+                "boolean",
+                "lookup",
+                "combo"
+              ]
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "referenceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "minChars": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "suggestMode": {
+              "type": "string",
+              "enum": [
+                "action",
+                "fetch"
+              ]
+            },
+            "placeholder": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "defaultValue": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "label"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "advanced": {
+              "type": "boolean"
+            },
+            "hint": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "optionNotes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "optionsBy": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": [
+                    "building",
+                    "lift"
+                  ]
+                },
+                "options": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1
+                  }
+                }
+              },
+              "required": [
+                "source",
+                "options"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "label",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        "methodConfigs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "gostLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "buildingTitle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "buildingFields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "number",
+                        "select",
+                        "boolean",
+                        "lookup",
+                        "combo"
+                      ]
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1
+                    },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "minChars": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "suggestMode": {
+                      "type": "string",
+                      "enum": [
+                        "action",
+                        "fetch"
+                      ]
+                    },
+                    "placeholder": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "defaultValue": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "label"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "advanced": {
+                      "type": "boolean"
+                    },
+                    "hint": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "optionNotes": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "optionsBy": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": [
+                            "building",
+                            "lift"
+                          ]
+                        },
+                        "options": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          }
+                        }
+                      },
+                      "required": [
+                        "source",
+                        "options"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "label",
+                    "type"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "liftTitle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "liftFields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "number",
+                        "select",
+                        "boolean",
+                        "lookup",
+                        "combo"
+                      ]
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1
+                    },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "minChars": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "suggestMode": {
+                      "type": "string",
+                      "enum": [
+                        "action",
+                        "fetch"
+                      ]
+                    },
+                    "placeholder": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "defaultValue": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "label"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "advanced": {
+                      "type": "boolean"
+                    },
+                    "hint": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "optionNotes": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "optionsBy": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": [
+                            "building",
+                            "lift"
+                          ]
+                        },
+                        "options": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          }
+                        }
+                      },
+                      "required": [
+                        "source",
+                        "options"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "label",
+                    "type"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "liftsMode": {
+                "type": "string",
+                "enum": [
+                  "per-lift",
+                  "group"
+                ]
+              },
+              "liftTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "maxLifts": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16
+              },
+              "dependentRules": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "scope": {
+                            "type": "string",
+                            "enum": [
+                              "building",
+                              "lift"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "field"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 4
+                    },
+                    "rows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "when": {
+                            "type": "array",
+                            "items": {
+                              "type": [
+                                "string",
+                                "number"
+                              ]
+                            },
+                            "minItems": 1
+                          },
+                          "set": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": [
+                                "string",
+                                "number"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "when",
+                          "set"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    },
+                    "onNoMatch": {
+                      "type": "string",
+                      "enum": [
+                        "keep",
+                        "clear"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "sources",
+                    "rows"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 8
+              }
+            },
+            "required": [
+              "method",
+              "label",
+              "gostLabel",
+              "buildingTitle",
+              "buildingFields",
+              "liftTitle",
+              "liftFields",
+              "liftsMode",
+              "liftTabLabel"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "building": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "lifts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "buildingTabLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "advancedLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "addLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "removeLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "submitLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "submitAction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "methodField",
+        "methodConfigs",
+        "method",
+        "building",
+        "lifts",
+        "buildingTabLabel",
+        "advancedLabel",
+        "addLabel",
+        "removeLabel",
+        "submitLabel",
+        "submitAction"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2019-09/schema#"
+}

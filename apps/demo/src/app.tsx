@@ -19,8 +19,12 @@ import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.j
 import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
 import formCardLookupFetchMessages from '../../../fixtures/messages/form-card-lookup-fetch-surface.json';
 import constructionsEditorMessages from '../../../fixtures/messages/constructions-editor-surface.json';
+import liftEditorMessages from '../../../fixtures/messages/lift-editor-surface.json';
+import liftEditorGroupFixture from '../../../fixtures/valid/lift-editor-group.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
+import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
+import {createLiftEditorMessages} from './create-lift-editor-messages';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 
 const examples = [
@@ -66,6 +70,20 @@ const examples = [
     description:
       'Объединённый экран одним сообщением: вкладка общих данных (город из справочника подставляет климат) и вкладка конструкций со слоями-сводками и формой слоя с явным «Применить», lookup материалов (dev-middleware) и live Rпр; автосейв черновика по коммитам формы слоя (в консоли), подсветка невалидных конструкций и один submit без клиентской блокировки.',
     messages: withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
+  },
+  {
+    key: 'lift-preview',
+    title: 'Lift Editor — методика с лифтами',
+    description:
+      'Подбор лифтов одним сообщением (ГОСТ Р 52941-2008): вкладки «Здание» и «Лифт 1…N», добавление и удаление лифта, свободный ввод Q/Vн с подсказками нормативного ряда, авто-подстановка h/t123 по Vн с сохранением ручной правки и экспандер параметров по умолчанию. Всё локально — в консоли до «Рассчитать» нет ни одного action.',
+    messages: liftEditorMessages as A2uiMessage[],
+  },
+  {
+    key: 'lift-group-preview',
+    title: 'Lift Editor — лифтовая группа',
+    description:
+      'Та же схема с активной методикой ГОСТ 34758-2021: одна вкладка лифтовой группы без add/remove, тип здания переключает ряды Прил. Е у ширины двери и скорости, tОст считается по трём источникам (тип здания с соседнего экрана), Pk — по Q. Селектор методики наверху экрана «Здание» перестраивает форму без обращения к агенту.',
+    messages: createLiftEditorMessages(liftEditorGroupFixture.props as Record<string, unknown>),
   },
 ] as const;
 
@@ -134,6 +152,9 @@ export function App() {
         }
         if (example.key === 'constructions-preview') {
           attachDemoDraftLogger(processor, 'demo-surface', DEMO_DRAFT_ACTION);
+        }
+        if (example.key === 'lift-preview' || example.key === 'lift-group-preview') {
+          attachDemoActionLogger(processor, 'demo-surface', example.key);
         }
         return [example.key, processor.model.getSurface('demo-surface')];
       }),

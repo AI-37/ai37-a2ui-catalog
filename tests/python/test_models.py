@@ -25,6 +25,8 @@ def load_fixture(group: str, name: str):
         ("choice-card.json", "ChoiceCard"),
         ("form-card.json", "FormCard"),
         ("constructions-editor.json", "ConstructionsEditor"),
+        ("lift-editor-per-lift.json", "LiftEditor"),
+        ("lift-editor-group.json", "LiftEditor"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
@@ -47,6 +49,9 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("constructions-editor-unknown-type.json", "ConstructionsEditor"),
         ("constructions-editor-empty-draft-action.json", "ConstructionsEditor"),
         ("constructions-editor-unknown-general-key.json", "ConstructionsEditor"),
+        ("lift-editor-unknown-method.json", "LiftEditor"),
+        ("lift-editor-empty-lift-fields.json", "LiftEditor"),
+        ("lift-editor-when-length-mismatch.json", "LiftEditor"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:
@@ -63,6 +68,7 @@ def test_component_schemas_are_available() -> None:
     assert get_component_schema("ChoiceCard")["type"] == "object"
     assert get_component_schema("FormCard")["type"] == "object"
     assert get_component_schema("ConstructionsEditor")["type"] == "object"
+    assert get_component_schema("LiftEditor")["type"] == "object"
 
 
 def test_constructions_editor_round_trip() -> None:
