@@ -6,11 +6,6 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
-      skip_ci:
-        description: Skip the reusable CI workflow before publishing
-        required: true
-        default: false
-        type: boolean
       publish_npm:
         description: Publish npm packages
         required: true
@@ -25,7 +20,6 @@ on:
 jobs:
   ci:
     name: Reuse CI
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.skip_ci }}
     uses: ./.github/workflows/ci.yml
     secrets: inherit
 
@@ -34,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - ci
-    if: ${{ always() && (needs.ci.result == 'success' || needs.ci.result == 'skipped') }}
     outputs:
       version: ${{ steps.meta.outputs.version }}
     steps:
