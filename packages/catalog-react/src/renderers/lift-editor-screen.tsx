@@ -23,6 +23,7 @@ export function LiftEditorScreen({
   advancedLabel,
   methodSelect,
   onChange,
+  onCommit,
 }: LiftEditorScreenProps) {
   const missing = new Set(findMissingRequired(fields, values));
   const {main, advanced} = splitAdvancedFields(fields, values);
@@ -35,6 +36,7 @@ export function LiftEditorScreen({
       options={resolveLiftFieldOptions(field, building, values)}
       missing={missing.has(field.name)}
       onChange={value => onChange(field.name, value)}
+      onCommit={onCommit}
     />
   );
 
@@ -46,6 +48,8 @@ export function LiftEditorScreen({
       </header>
       <div style={{display: 'grid', gap: 12}}>
         {methodSelect ? (
+          // Без `onCommit`: смена методики — самостоятельный триггер черновика,
+          // blur селекта добавил бы только дубль.
           <LiftEditorField
             field={methodSelect.field}
             value={methodSelect.value}

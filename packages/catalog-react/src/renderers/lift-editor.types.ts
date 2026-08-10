@@ -46,6 +46,8 @@ export interface LiftEditorFieldProps {
   options: readonly LiftFieldOption[];
   missing: boolean;
   onChange: (value: string | boolean) => void;
+  /** Поле потеряло фокус, и значение изменилось с момента его получения. */
+  onCommit?: (() => void) | undefined;
 }
 
 export interface LiftEditorAdvancedProps {
@@ -70,6 +72,8 @@ export interface LiftEditorScreenProps {
     onChange: (value: string) => void;
   };
   onChange: (name: string, value: string | boolean) => void;
+  /** Поле экрана потеряло фокус с изменённым значением — повод для черновика. */
+  onCommit?: (() => void) | undefined;
 }
 
 export type {LiftEditorField, LiftEditorMethodConfig};

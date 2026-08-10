@@ -32,6 +32,11 @@ const primaryButtonStyle: React.CSSProperties = {
  * AG-UI-run до submit. Наружу уходит ровно один `dispatchAction` с полным
  * документом `{method, building, lifts}` активной ветки (Решение 10 design.md).
  *
+ * При заданном `draftAction` тот же документ дополнительно уезжает черновиком
+ * на границах экранов (смена вкладки, добавление и удаление лифта, смена
+ * методики) и на blur изменённого поля. Без пропа автосейва нет — поведение
+ * ровно прежнее.
+ *
  * Доменных знаний о ГОСТ в компоненте нет: конфиги методик, ряды подсказок и
  * строки зависимых значений целиком приходят в props.
  */
@@ -76,6 +81,36 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
 
   const updateDraft = (next: LiftEditorDraft) =>
     setDrafts(prev => ({...prev, [config.method]: next}));
+
+  // Документ активной ветки — общий payload submit'а и черновика: у агента одна
+  // ветка merge'а (Решение 4 design.md).
+  const buildDocument = (nextMethod: string, next: LiftEditorDraft) => ({
+    method: nextMethod,
+    building: next.building,
+    lifts: next.lifts,
+  });
+
+  // Сериализация последнего отправленного черновика: blur правки и следом смена
+  // вкладки — два триггера на одно состояние, action один (Решение 6 design.md).
+  const lastDraft = React.useRef<string | null>(null);
+
+  // Автосейв черновика: тот же payload, что у submit'а, но без блокировки
+  // незаполненными обязательными (Решение 5). Нет пропа — no-op.
+  const sendDraft = (next: LiftEditorDraft, nextMethod: string = config.method) => {
+    if (!props.draftAction) return;
+
+    const payload = buildDocument(nextMethod, next);
+    const serialized = JSON.stringify(payload);
+    if (serialized === lastDraft.current) return;
+
+    lastDraft.current = serialized;
+    void context.dispatchAction({event: {name: props.draftAction, context: payload}});
+  };
+
+  const handleSelectTab = (tab: LiftEditorTab) => {
+    setActiveTab(tab);
+    sendDraft(draft);
+  };
 
   const isTouchedIn = (source: ReadonlySet<string>, index: number) => (field: string) =>
     source.has(liftTouchedKey(config.method, index, field));
@@ -128,6 +163,9 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
   const handleMethodChange = (next: string) => {
     setMethod(next);
     setActiveTab('building');
+    // Черновик несёт ВНОВЬ выбранную ветку: прежняя остаётся только на клиенте.
+    const nextDraft = drafts[next];
+    if (nextDraft) sendDraft(nextDraft, next);
   };
 
   const handleAddLift = () => {
@@ -140,15 +178,19 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
         isTouched: () => false,
       }),
     ];
-    updateDraft({building: draft.building, lifts});
+    const next = {building: draft.building, lifts};
+    updateDraft(next);
     setActiveTab(lifts.length - 1);
+    sendDraft(next);
   };
 
   const handleRemoveLift = (index: number) => {
     if (draft.lifts.length <= 1) return;
+    const next = {building: draft.building, lifts: draft.lifts.filter((_u, i) => i !== index)};
     setTouched(shiftTouchedAfterRemove(touched, config.method, index));
-    updateDraft({building: draft.building, lifts: draft.lifts.filter((_u, i) => i !== index)});
+    updateDraft(next);
     setActiveTab(0);
+    sendDraft(next);
   };
 
   const incomplete = new Set<LiftEditorTab>();
@@ -165,7 +207,7 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
       event: {
         name: props.submitAction,
         // Только активная ветка: черновики остальных методик наружу не едут.
-        context: {method: config.method, building: draft.building, lifts: draft.lifts},
+        context: buildDocument(config.method, draft),
       },
     });
   };
@@ -191,7 +233,7 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
         addLabel={props.addLabel}
         canAdd={config.maxLifts === undefined || draft.lifts.length < config.maxLifts}
         incomplete={incomplete}
-        onSelect={setActiveTab}
+        onSelect={handleSelectTab}
         onAdd={handleAddLift}
       />
       {liftIndex === null ? (
@@ -214,6 +256,7 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
             onChange: handleMethodChange,
           }}
           onChange={handleBuildingChange}
+          onCommit={() => sendDraft(draft)}
         />
       ) : (
         <LiftEditorScreen
@@ -224,6 +267,7 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
           building={draft.building}
           advancedLabel={props.advancedLabel}
           onChange={(name, value) => handleLiftChange(liftIndex, name, value)}
+          onCommit={() => sendDraft(draft)}
         />
       )}
       <footer style={{display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'}}>

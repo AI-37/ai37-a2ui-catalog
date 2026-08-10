@@ -77,6 +77,20 @@ function typeInto(element: HTMLInputElement | HTMLSelectElement, value: string) 
   fireEvent.change(element, {target: {value}});
 }
 
+/** Триггеры автосейва доставляются асинхронно — как и submit. */
+async function flush(run: () => void) {
+  await act(async () => {
+    run();
+  });
+}
+
+/** Правка поля целиком: фокус → ввод → blur (коммит изменённого значения). */
+async function editField(container: HTMLElement, name: string, value: string) {
+  fireEvent.focus(field(container, name));
+  typeInto(field(container, name), value);
+  await flush(() => fireEvent.blur(field(container, name)));
+}
+
 describe('LiftEditor: вкладки', () => {
   it('переключение вкладок ничего не отправляет и сохраняет введённое', () => {
     const {container, actions} = renderEditor(perLiftProps());
@@ -424,5 +438,157 @@ describe('LiftEditor: валидация и submit', () => {
     expect(lifts).toHaveLength(2);
     expect(building.N).toBe(17);
     expect(building).not.toHaveProperty('buildingType');
+  });
+});
+
+describe('LiftEditor: автосохранение черновика (draftAction)', () => {
+  const DRAFT = 'lift:draft';
+
+  function draftEditor(overrides: Record<string, unknown> = {}) {
+    return renderEditor({...perLiftProps(), draftAction: DRAFT, ...overrides});
+  }
+
+  function lastAction(actions: Array<{name: string; context: Record<string, unknown>}>) {
+    return actions[actions.length - 1]!;
+  }
+
+  function draftLifts(action: {context: Record<string, unknown>}) {
+    return action.context.lifts as Array<Record<string, unknown>>;
+  }
+
+  it('без пропа сессия редактирования даёт ровно один action — submit', async () => {
+    const {container, actions} = renderEditor(perLiftProps());
+
+    await editField(container, 'H0', '12');
+    await flush(() => openTab('Здание'));
+    await editField(container, 'A', '360');
+    await flush(() => typeInto(field(container, 'method'), '34758'));
+    await flush(() => typeInto(field(container, 'method'), '52941'));
+    await flush(() => fireEvent.click(screen.getByRole('button', {name: '+ Добавить лифт'})));
+    await flush(() => fireEvent.click(screen.getByRole('button', {name: 'Удалить лифт'})));
+
+    expect(actions).toHaveLength(0);
+
+    await clickSubmit();
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe('calc');
+  });
+
+  it('смена вкладки уносит введённое одним черновиком', async () => {
+    const {container, actions} = draftEditor();
+
+    // Без blur: правка уезжает именно на границе экрана.
+    typeInto(field(container, 'H0'), '12');
+    await flush(() => openTab('Здание'));
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe(DRAFT);
+    expect(draftLifts(actions[0]!)[1]!.H0).toBe('12');
+  });
+
+  it('добавление и удаление лифта шлют по черновику с новым составом', async () => {
+    const {actions} = draftEditor();
+
+    await flush(() => fireEvent.click(screen.getByRole('button', {name: '+ Добавить лифт'})));
+
+    expect(actions).toHaveLength(1);
+    expect(draftLifts(actions[0]!)).toHaveLength(3);
+
+    // Переход на другую вкладку состояния не меняет — черновика не будет.
+    await flush(() => openTab('Лифт 1'));
+    expect(actions).toHaveLength(1);
+
+    await flush(() => fireEvent.click(screen.getByRole('button', {name: 'Удалить лифт'})));
+
+    expect(actions).toHaveLength(2);
+    expect(draftLifts(actions[1]!)).toHaveLength(2);
+    // Удалён первый лифт — остались бывший второй и добавленный.
+    expect(draftLifts(actions[1]!)[0]!.H0).toBe(draftLifts(actions[0]!)[1]!.H0);
+  });
+
+  it('смена методики шлёт черновик ВНОВЬ выбранной ветки', async () => {
+    const {container, actions} = draftEditor();
+
+    await flush(() => openTab('Здание'));
+    await flush(() => typeInto(field(container, 'method'), '34758'));
+
+    const draft = lastAction(actions);
+    expect(draft.name).toBe(DRAFT);
+    expect(draft.context.method).toBe('34758');
+    const building = draft.context.building as Record<string, unknown>;
+    expect(building).toHaveProperty('buildingType');
+    expect(building).not.toHaveProperty('N');
+    // Ветка 34758 — одна лифтовая группа.
+    expect(draftLifts(draft)).toHaveLength(1);
+  });
+
+  it('blur изменённого поля шлёт черновик, blur без правки — нет', async () => {
+    const {container, actions} = draftEditor();
+
+    await flush(() => {
+      fireEvent.focus(field(container, 'H0'));
+      fireEvent.blur(field(container, 'H0'));
+    });
+
+    expect(actions).toHaveLength(0);
+
+    await editField(container, 'H0', '12');
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe(DRAFT);
+    expect(draftLifts(actions[0]!)[1]!.H0).toBe('12');
+  });
+
+  it('два триггера на одно состояние дают один черновик', async () => {
+    const {container, actions} = draftEditor();
+
+    await editField(container, 'H0', '12');
+    await flush(() => openTab('Здание'));
+    await flush(() => openTab('Лифт 2'));
+    await flush(() => openTab('Здание'));
+
+    expect(actions).toHaveLength(1);
+  });
+
+  it('контекст черновика совпадает с контекстом submit’а', async () => {
+    const {container, actions} = draftEditor();
+
+    await editField(container, 'H0', '12');
+    await clickSubmit();
+
+    expect(actions).toHaveLength(2);
+    expect(actions[0]!.name).toBe(DRAFT);
+    expect(actions[1]!.name).toBe('calc');
+    expect(actions[1]!.context).toEqual(actions[0]!.context);
+  });
+
+  it('неполный документ уезжает черновиком, submit при этом заблокирован', async () => {
+    const props = perLiftProps();
+    const lifts = (props.lifts as Array<Record<string, unknown>>).map(lift => ({...lift}));
+    lifts[0] = {...lifts[0], H0: ''};
+
+    const {container, actions} = draftEditor({lifts});
+
+    // Стартовая вкладка — незаполненный «Лифт 1».
+    await editField(container, 'Q', '450');
+
+    expect(actions).toHaveLength(1);
+    expect(draftLifts(actions[0]!)[0]).toMatchObject({H0: '', Q: '450'});
+    expect(submitButton()).toBeDisabled();
+  });
+
+  it('черновик неактивной методики в контекст не попадает', async () => {
+    const {container, actions} = draftEditor();
+
+    await flush(() => openTab('Здание'));
+    await editField(container, 'A', '999');
+    await flush(() => typeInto(field(container, 'method'), '34758'));
+    await editField(container, 'A', '111');
+
+    const building = lastAction(actions).context.building as Record<string, unknown>;
+    expect(lastAction(actions).context.method).toBe('34758');
+    expect(building.A).toBe('111');
+    expect(building).not.toHaveProperty('N');
   });
 });

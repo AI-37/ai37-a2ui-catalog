@@ -37,6 +37,7 @@ describe('lift-editor schema', () => {
       'lift-editor-unknown-method.json',
       'lift-editor-empty-lift-fields.json',
       'lift-editor-when-length-mismatch.json',
+      'lift-editor-empty-draft-action.json',
     ]) {
       expect(liftEditorPropsSchema.safeParse(readFixture('invalid', fileName).props).success).toBe(
         false,
@@ -110,6 +111,18 @@ describe('lift-editor schema', () => {
         ],
       }).success,
     ).toBe(false);
+  });
+
+  it('draftAction опционален, пустая строка отвергается', () => {
+    const {props} = readFixture('valid', 'lift-editor-per-lift.json');
+
+    // Валидные фикстуры остаются без пропа — базовое поведение без автосейва.
+    expect(props).not.toHaveProperty('draftAction');
+    expect(liftEditorPropsSchema.safeParse(props).success).toBe(true);
+    expect(liftEditorPropsSchema.safeParse({...props, draftAction: 'lift:draft'}).success).toBe(
+      true,
+    );
+    expect(liftEditorPropsSchema.safeParse({...props, draftAction: ''}).success).toBe(false);
   });
 
   it('LiftEditor попадает в артефакт каталога', () => {

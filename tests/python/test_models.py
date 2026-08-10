@@ -52,6 +52,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("lift-editor-unknown-method.json", "LiftEditor"),
         ("lift-editor-empty-lift-fields.json", "LiftEditor"),
         ("lift-editor-when-length-mismatch.json", "LiftEditor"),
+        ("lift-editor-empty-draft-action.json", "LiftEditor"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:

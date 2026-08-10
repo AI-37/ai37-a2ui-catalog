@@ -617,6 +617,11 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 120
+        },
+        "draftAction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
         }
       },
       "required": [

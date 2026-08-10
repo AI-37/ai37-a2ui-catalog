@@ -98,6 +98,8 @@ class LiftEditorProps(StrictModel):
     submitLabel: str = Field(min_length=1, max_length=80)
     # Единственный action компонента.
     submitAction: str = Field(min_length=1, max_length=120)
+    # Имя action'а автосохранения черновика; без него автосейва нет.
+    draftAction: str = Field(default=None, min_length=1, max_length=120)
 
     @model_validator(mode="after")
     def validate_document(self) -> "LiftEditorProps":

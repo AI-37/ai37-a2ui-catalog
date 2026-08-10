@@ -10,11 +10,36 @@ let comboListSeq = 0;
  * (Решение 6 design.md): значение вне `options` принимается как есть, ряд ГОСТ
  * здесь подсказка, а не ограничение. `lookup` в редакторе не используется
  * (справочники — non-goal change'а) и рендерится как обычный текст.
+ *
+ * `onCommit` зовётся на `blur`, только если значение отличается от значения на
+ * момент `focus` (Решение 3 design.md): проход по форме табом черновиков не
+ * порождает.
  */
-export function LiftEditorField({field, value, options, missing, onChange}: LiftEditorFieldProps) {
+export function LiftEditorField({
+  field,
+  value,
+  options,
+  missing,
+  onChange,
+  onCommit,
+}: LiftEditorFieldProps) {
   // datalist привязывается по id — он должен пережить перерисовки поля.
   const listId = React.useMemo(() => `lift-editor-combo-${(comboListSeq += 1)}`, []);
   const text = value === undefined || value === null ? '' : String(value);
+  const focusedText = React.useRef<string | null>(null);
+
+  // Значение на фокусе, а не последний отправленный черновик: единица работы —
+  // редактирование поля, глубокое сравнение документа тут ничего не добавляет.
+  const commitProps = {
+    onFocus: () => {
+      focusedText.current = text;
+    },
+    onBlur: () => {
+      const before = focusedText.current;
+      focusedText.current = null;
+      if (before !== null && before !== text) onCommit?.();
+    },
+  };
 
   // Целиком `border`, а не `borderColor`: смешивать shorthand с частью
   // свойства нельзя — React ругается и снятие подсветки работает через раз.
@@ -33,6 +58,7 @@ export function LiftEditorField({field, value, options, missing, onChange}: Lift
           name={field.name}
           value={text}
           onChange={event => onChange(event.target.value)}
+          {...commitProps}
           style={{...controlStyle, ...invalidStyle}}
         >
           <option value="">— выберите —</option>
@@ -48,6 +74,7 @@ export function LiftEditorField({field, value, options, missing, onChange}: Lift
           name={field.name}
           checked={value === true || value === 'true'}
           onChange={event => onChange(event.target.checked)}
+          {...commitProps}
           style={{justifySelf: 'start'}}
         />
       ) : field.type === 'combo' ? (
@@ -59,6 +86,7 @@ export function LiftEditorField({field, value, options, missing, onChange}: Lift
             value={text}
             placeholder={field.placeholder}
             onChange={event => onChange(event.target.value)}
+            {...commitProps}
             style={{...controlStyle, ...invalidStyle}}
           />
           <datalist id={listId}>
@@ -74,6 +102,7 @@ export function LiftEditorField({field, value, options, missing, onChange}: Lift
           value={text}
           placeholder={field.placeholder}
           onChange={event => onChange(event.target.value)}
+          {...commitProps}
           style={{...controlStyle, ...invalidStyle}}
         />
       )}

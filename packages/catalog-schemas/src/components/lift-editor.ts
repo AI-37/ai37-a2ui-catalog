@@ -112,6 +112,9 @@ export const liftEditorPropsSchema = z
     submitLabel: z.string().min(1).max(80),
     // Единственный action компонента (Решение 10 design.md).
     submitAction: z.string().min(1).max(120),
+    // Имя action'а автосохранения черновика. Необязательный: без него компонент
+    // ведёт себя как раньше — наружу уходит только submit.
+    draftAction: z.string().min(1).max(120).optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
