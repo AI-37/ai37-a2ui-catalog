@@ -17,6 +17,11 @@ import flexTableMessages from '../../../fixtures/messages/flex-table-surface.jso
 import latexMessages from '../../../fixtures/messages/latex-formula-surface.json';
 import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.json';
 import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
+import formCardLookupFetchMessages from '../../../fixtures/messages/form-card-lookup-fetch-surface.json';
+import constructionsEditorMessages from '../../../fixtures/messages/constructions-editor-surface.json';
+import {attachDemoLookupHost} from './demo-lookup-host';
+import {attachDemoDraftLogger} from './attach-demo-draft-logger';
+import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 
 const examples = [
   {
@@ -48,6 +53,19 @@ const examples = [
     title: 'Form Card',
     description: 'Форма типизированных полей для сбора параметров у пользователя.',
     messages: formCardMessages as A2uiMessage[],
+  },
+  {
+    key: 'form-fetch-preview',
+    title: 'Form Card — lookup fetch',
+    description: 'Lookup-поле с подсказками через same-origin fetch (dev-middleware, только dev-сервер).',
+    messages: formCardLookupFetchMessages as A2uiMessage[],
+  },
+  {
+    key: 'constructions-preview',
+    title: 'Constructions Editor',
+    description:
+      'Объединённый экран одним сообщением: вкладка общих данных (город из справочника подставляет климат) и вкладка конструкций со слоями-сводками и формой слоя с явным «Применить», lookup материалов (dev-middleware) и live Rпр; автосейв черновика по коммитам формы слоя (в консоли), подсветка невалидных конструкций и один submit без клиентской блокировки.',
+    messages: withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
   },
 ] as const;
 
@@ -111,6 +129,12 @@ export function App() {
       examples.map(example => {
         const processor = new MessageProcessor([ai37Catalog]);
         processor.processMessages(example.messages);
+        if (example.key === 'form-preview') {
+          attachDemoLookupHost(processor, 'demo-surface');
+        }
+        if (example.key === 'constructions-preview') {
+          attachDemoDraftLogger(processor, 'demo-surface', DEMO_DRAFT_ACTION);
+        }
         return [example.key, processor.model.getSurface('demo-surface')];
       }),
     ) as Record<(typeof examples)[number]['key'], unknown>;

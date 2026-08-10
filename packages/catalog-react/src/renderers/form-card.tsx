@@ -1,17 +1,9 @@
 import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {formCardDefinition} from '@ai37/a2ui-catalog-schemas';
-import {useA2uiBaseStyles} from './shared';
+import {LookupFieldControl} from './lookup-field';
+import {inputStyle, useA2uiBaseStyles} from './shared';
 import {tokens} from './tokens';
-
-const inputStyle: React.CSSProperties = {
-  padding: '8px 10px',
-  borderRadius: 10,
-  border: `1px solid ${tokens.borderStrong}`,
-  fontSize: '0.95rem',
-  background: tokens.surface,
-  color: tokens.text,
-};
 
 export const FormCard = createComponentImplementation(formCardDefinition, ({props, context}) => {
   useA2uiBaseStyles();
@@ -72,7 +64,9 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
               {field.label}
               {field.required ? <span style={{color: tokens.danger}}> *</span> : null}
             </span>
-            {field.type === 'select' ? (
+            {field.type === 'lookup' ? (
+              <LookupFieldControl field={field} context={context} />
+            ) : field.type === 'select' ? (
               <select
                 name={field.name}
                 defaultValue={field.defaultValue as string | number | undefined}

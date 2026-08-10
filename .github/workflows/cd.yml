@@ -129,6 +129,9 @@ jobs:
       - name: Build Python package
         run: poetry -C packages/catalog-python build
 
+      - name: Check Python package
+        run: twine check packages/catalog-python/dist/*
+
       - name: Publish Python package
         env:
           TWINE_USERNAME: ci-publish

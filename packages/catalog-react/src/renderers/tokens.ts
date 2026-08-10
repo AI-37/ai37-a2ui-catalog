@@ -31,6 +31,8 @@ const DEFAULTS = {
   'color-accent': '#1e293b',
   'color-accent-contrast': '#ffffff',
   'color-danger': '#dc2626',
+  'color-warning': '#b45309',
+  'color-success': '#16a34a',
 
   'color-formula-from': '#f8fafc',
   'color-formula-to': '#eef2ff',
@@ -63,6 +65,8 @@ export const tokens = {
   accent: cssVar('color-accent'),
   accentContrast: cssVar('color-accent-contrast'),
   danger: cssVar('color-danger'),
+  warning: cssVar('color-warning'),
+  success: cssVar('color-success'),
 
   formulaFrom: cssVar('color-formula-from'),
   formulaTo: cssVar('color-formula-to'),
