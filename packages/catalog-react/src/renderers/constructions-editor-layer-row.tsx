@@ -5,7 +5,14 @@ import {layersEqual} from './layers-equal';
 import {LookupCombobox} from './lookup-combobox';
 import {readOptionLambda} from './read-option-lambda';
 import {resolveLayerLambda} from './resolve-layer-lambda';
-import {controlStyle, fieldLabelStyle, fieldStyle, FIELD_COLUMN_WIDTH} from './shared';
+import {
+  cancelButtonStyle,
+  commitButtonStyle,
+  controlStyle,
+  fieldLabelStyle,
+  fieldStyle,
+  FIELD_COLUMN_WIDTH,
+} from './shared';
 import {tokens} from './tokens';
 import {useLookupSuggest} from './use-lookup-suggest';
 
@@ -258,33 +265,10 @@ function LayerForm({
         </div>
       </div>
       <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-        <button
-          type="button"
-          onClick={handleApply}
-          style={{
-            padding: '6px 14px',
-            borderRadius: 10,
-            border: 'none',
-            background: tokens.accent,
-            color: tokens.accentContrast,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
+        <button type="button" onClick={handleApply} style={commitButtonStyle}>
           {mode === 'new' ? 'Добавить' : 'Применить'}
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          style={{
-            padding: '6px 14px',
-            borderRadius: 10,
-            border: `1px solid ${tokens.borderStrong}`,
-            background: 'transparent',
-            color: tokens.text,
-            cursor: 'pointer',
-          }}
-        >
+        <button type="button" onClick={onCancel} style={cancelButtonStyle}>
           Отмена
         </button>
         {mode === 'edit' ? (

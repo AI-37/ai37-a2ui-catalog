@@ -31,6 +31,12 @@ export type ConstructionsEditorGeneralProps = {
   onChange: (general: ConstructionsGeneral) => void;
 };
 
+/**
+ * Что именно раскрыто в единственной форме редактора: слой по индексу,
+ * новый слой, шапка карточки или паспортное Rпр.
+ */
+export type ConstructionsEditorFormTarget = number | 'new' | 'header' | 'passport';
+
 export type ConstructionsEditorCardProps = {
   entry: ConstructionEntry;
   typeConfigs: ConstructionTypeConfig[];
@@ -41,18 +47,44 @@ export type ConstructionsEditorCardProps = {
   /** false — климат тронут, Rнорм протух: чип показывает Rпр без сравнения. */
   showRnorm: boolean;
   /**
-   * Слой этой карточки, которым владеет форма ('new' — форма нового слоя).
-   * Состояние живёт в редакторе: форма одна на весь редактор, а не на карточку.
+   * Форма этой карточки, раскрытая сейчас (null — все свёрнуты). Состояние
+   * живёт в редакторе: форма одна на весь редактор любого вида, а не на карточку.
    */
-  editingIndex: number | 'new' | null;
-  onEditingChange: (index: number | 'new' | null) => void;
+  editingTarget: ConstructionsEditorFormTarget | null;
+  onEditingChange: (target: ConstructionsEditorFormTarget | null) => void;
   onToggle: () => void;
   /**
-   * Правка конструкции. `commit: true` — явный коммит формы слоя
-   * («Применить»/«Добавить»/«Удалить слой»): точка отправки черновика.
+   * Правка конструкции. `commit: true` — явный коммит формы (слоя, шапки или
+   * паспортного Rпр): точка отправки черновика.
    */
   onChange: (entry: ConstructionEntry, options?: {commit?: boolean}) => void;
   onRemove: () => void;
+};
+
+/** Поля шапки карточки — то, чем владеет её форма. */
+export type ConstructionHeaderFields = Pick<ConstructionEntry, 'type' | 'subtype' | 'name'>;
+
+export type ConstructionsEditorCardHeaderProps = {
+  entry: ConstructionEntry;
+  typeConfigs: ConstructionTypeConfig[];
+  /** true — вместо режима чтения раскрыта форма шапки. */
+  editing: boolean;
+  /** «Изменить» — забрать единственную форму редактора себе. */
+  onOpen: () => void;
+  /** «Сохранить» с изменёнными полями. */
+  onCommit: (fields: ConstructionHeaderFields) => void;
+  /** «Отмена» (и «Сохранить» без изменений): закрыть форму без следа. */
+  onCancel: () => void;
+};
+
+export type ConstructionsEditorPassportProps = {
+  /** Паспортное Rпр из состояния редактора; undefined — «не задано». */
+  value: number | undefined;
+  editing: boolean;
+  onOpen: () => void;
+  /** «Применить» с изменённым значением. */
+  onCommit: (value: number | undefined) => void;
+  onCancel: () => void;
 };
 
 /** Режим строки слоя: сводка, форма правки или форма нового слоя. */

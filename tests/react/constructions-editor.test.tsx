@@ -66,6 +66,24 @@ function openLayerRow(name: RegExp) {
   fireEvent.click(screen.getByRole('button', {name}));
 }
 
+/** «Изменить» у шапки: aria-label отличает её от кнопки паспортного Rпр. */
+function openHeaderForm(index = 0) {
+  fireEvent.click(screen.getAllByRole('button', {name: 'Изменить тип и название'})[index]!);
+}
+
+function openPassportForm(index = 0) {
+  fireEvent.click(screen.getAllByRole('button', {name: 'Изменить Rпр по паспорту'})[index]!);
+}
+
+/** Инпут названия существует только в раскрытой форме шапки — она одна. */
+function nameInput() {
+  return screen.getByLabelText('Название');
+}
+
+function passportInput() {
+  return screen.getByRole('spinbutton', {name: /Rпр по паспорту/});
+}
+
 /** Строки-сводки слоёв всех раскрытых карточек. */
 function layerSummaries() {
   return screen.queryAllByRole('button', {name: /^№\d/});
@@ -139,9 +157,11 @@ describe('ConstructionsEditor', () => {
     expect(screen.getByText('проходит 2 из 3')).toBeInTheDocument();
     expect(screen.queryAllByPlaceholderText('Материал из справочника или свой')).toHaveLength(0);
 
-    // Тип без слоёв — поле паспортного Rпр вместо таблицы.
+    // Тип без слоёв — паспортное Rпр текстом вместо таблицы слоёв.
     openCard(/Окно двухкамерное/);
-    expect(screen.getByRole('spinbutton', {name: /Rпр по паспорту/})).toHaveValue(0.56);
+    expect(screen.getByText('Rпр по паспорту:')).toBeInTheDocument();
+    expect(screen.getByText('0.56')).toBeInTheDocument();
+    expect(screen.queryAllByRole('spinbutton', {name: /Rпр по паспорту/})).toHaveLength(0);
 
     // Зазор — без ввода λ, подсказка про серверный Rs (в строке-сводке).
     openCard(/Наружная стена/);
@@ -225,14 +245,19 @@ describe('ConstructionsEditor', () => {
 
     fireEvent.click(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
     // Новая карточка первого типа из typeConfigs ("Наружные стены"), сразу
-    // раскрытая — её добавили, чтобы заполнить.
+    // раскрытая — её добавили, чтобы заполнить. Шапка при этом в режиме чтения.
     expect(screen.getAllByRole('button', {name: 'Удалить конструкцию'})).toHaveLength(4);
-    const typeSelects = screen.getAllByRole('combobox', {name: 'Тип конструкции'});
-    expect(typeSelects).toHaveLength(1);
+    expect(screen.queryAllByRole('combobox', {name: 'Тип конструкции'})).toHaveLength(0);
 
-    // Смена типа новой карточки на окна (hasLayers: false) → поле паспорта.
-    fireEvent.change(typeSelects[0]!, {target: {value: 'okna'}});
-    expect(screen.getAllByRole('spinbutton', {name: /Rпр по паспорту/})).toHaveLength(1);
+    // Смена типа новой карточки на окна (hasLayers: false) фиксируется по
+    // коммиту: до «Сохранить» карточка живёт прежним типом.
+    openHeaderForm();
+    fireEvent.change(screen.getByRole('combobox', {name: 'Тип конструкции'}), {
+      target: {value: 'okna'},
+    });
+    expect(screen.queryByText('Rпр по паспорту:')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    expect(screen.getAllByText('Rпр по паспорту:')).toHaveLength(1);
 
     const removeButtons = screen.getAllByRole('button', {name: 'Удалить конструкцию'});
     fireEvent.click(removeButtons[removeButtons.length - 1]!);
@@ -361,6 +386,119 @@ describe('ConstructionsEditor', () => {
     });
   });
 
+  describe('шапка карточки', () => {
+    it('по умолчанию текст: тип с разновидностью и название, контролов нет', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Пол по грунту/);
+
+      expect(
+        screen.getByText('Чердачные и цокольные перекрытия, полы · Пол по грунту'),
+      ).toBeInTheDocument();
+      expect(screen.queryByLabelText('Название')).not.toBeInTheDocument();
+      expect(screen.queryAllByRole('combobox', {name: 'Тип конструкции'})).toHaveLength(0);
+      expect(screen.getAllByRole('button', {name: 'Изменить тип и название'})).toHaveLength(1);
+    });
+
+    it('ввод в форме не трогает карточку до «Сохранить»', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+
+      openHeaderForm();
+      fireEvent.change(nameInput(), {target: {value: 'Стена А'}});
+
+      // Заголовок-аккордеон продолжает показывать название из state.
+      expect(screen.getByRole('button', {name: /Наружная стена/})).toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: /Стена А/})).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+
+      // Форма закрыта, новое название и в заголовке, и в режиме чтения.
+      expect(screen.queryByLabelText('Название')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Стена А/})).toBeInTheDocument();
+      expect(screen.getAllByText('Стена А')).toHaveLength(2);
+    });
+
+    it('«Отмена» и «Сохранить» без изменений не меняют состояния', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+
+      openHeaderForm();
+      fireEvent.change(nameInput(), {target: {value: 'Стена Б'}});
+      fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
+
+      expect(screen.queryByText('Стена Б')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Наружная стена/})).toBeInTheDocument();
+
+      openHeaderForm();
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+
+      expect(screen.queryByLabelText('Название')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Наружная стена/})).toBeInTheDocument();
+    });
+
+    it('форма одна на весь редактор: шапка и слой вытесняют друг друга', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Наружная стена/);
+
+      openLayerRow(/№2.*минераловатные/);
+      fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
+
+      // Открытие шапки закрывает форму слоя, её правки отброшены.
+      openHeaderForm();
+      expect(screen.queryAllByPlaceholderText('Материал из справочника или свой')).toHaveLength(0);
+      expect(screen.getByRole('button', {name: /№2.*150 мм/})).toBeInTheDocument();
+
+      // И наоборот: клик по строке слоя закрывает форму шапки.
+      openLayerRow(/№4.*Фибролит/);
+      expect(screen.queryByLabelText('Название')).not.toBeInTheDocument();
+      expect(getMaterialInputs()).toHaveLength(1);
+    });
+  });
+
+  describe('паспортное Rпр', () => {
+    it('«Применить» обновляет значение и live-Rпр; до коммита чип прежний', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Окно двухкамерное/);
+
+      openPassportForm();
+      fireEvent.change(passportInput(), {target: {value: '0.8'}});
+      expect(screen.getByText('Rпр 0.56 ≥ 0.54')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+
+      expect(screen.getByText('0.80')).toBeInTheDocument();
+      expect(screen.getByText('Rпр 0.80 ≥ 0.54')).toBeInTheDocument();
+    });
+
+    it('«Отмена» не оставляет следа', () => {
+      renderSurface();
+      openTab('Конструкции');
+      openCard(/Окно двухкамерное/);
+
+      openPassportForm();
+      fireEvent.change(passportInput(), {target: {value: '0.8'}});
+      fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
+
+      expect(screen.getByText('0.56')).toBeInTheDocument();
+      expect(screen.getByText('Rпр 0.56 ≥ 0.54')).toBeInTheDocument();
+    });
+
+    it('незаполненное значение показано предупреждением', () => {
+      renderSurface({
+        constructions: [{id: 'w-1', type: 'okna', name: 'Окно без паспорта', layers: []}],
+      });
+      openTab('Конструкции');
+      openCard(/Окно без паспорта/);
+
+      expect(screen.getByText('не задано')).toBeInTheDocument();
+    });
+  });
+
   describe('подсветка невалидной конструкции', () => {
     it('валидные данные фикстуры — пометки «проверить» нет', () => {
       renderSurface();
@@ -421,13 +559,15 @@ describe('ConstructionsEditor', () => {
 
       openTab('Конструкции');
       openCard(/Наружная стена/);
-      fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});
+      openHeaderForm();
+      fireEvent.change(nameInput(), {target: {value: 'Стена А'}});
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
 
       openTab('Общие данные');
       fireEvent.change(climateInput('tv'), {target: {value: '22'}});
 
       openTab('Конструкции');
-      expect(screen.getAllByLabelText('Название')[0]).toHaveValue('Стена А');
+      expect(screen.getByRole('button', {name: /Стена А/})).toBeInTheDocument();
 
       openTab('Общие данные');
       expect(climateInput('tv')).toHaveValue(22);
@@ -851,20 +991,73 @@ describe('ConstructionsEditor', () => {
       expect(actions).toHaveLength(0);
     });
 
-    it('правки полей шапки, ввод в форме, «Отмена» и аккордеон черновик не шлют', async () => {
+    it('ввод в незакоммиченных формах, «Отмена» и аккордеон черновик не шлют', async () => {
       const {actions} = draftSurface();
       openCard(/Наружная стена/);
 
+      openHeaderForm();
       await act(async () => {
-        fireEvent.change(screen.getAllByLabelText('Название')[0]!, {target: {value: 'Стена А'}});
+        fireEvent.change(nameInput(), {target: {value: 'Стена А'}});
       });
       openLayerRow(/№2.*минераловатные/);
       await act(async () => {
         fireEvent.change(getThicknessInputs()[0]!, {target: {value: '200'}});
       });
       await clickAndFlush(screen.getByRole('button', {name: 'Отмена'}));
-      await clickAndFlush(screen.getByRole('button', {name: /Стена А/}));
+      // Название не закоммичено — заголовок прежний.
+      await clickAndFlush(screen.getByRole('button', {name: /Наружная стена/}));
 
+      expect(actions).toHaveLength(0);
+    });
+
+    it('«Сохранить» шапки с изменёнными полями шлёт один черновик', async () => {
+      const {actions} = draftSurface();
+      openCard(/Наружная стена/);
+
+      openHeaderForm();
+      fireEvent.change(nameInput(), {target: {value: 'Стена А'}});
+      expect(actions).toHaveLength(0); // ввод в форме черновика не порождает
+      await clickAndFlush(screen.getByRole('button', {name: 'Сохранить'}));
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:draft');
+      const constructions = actions[0]!.context.constructions as Array<Record<string, unknown>>;
+      expect(constructions[0]).toMatchObject({id: 'c-wall-1', name: 'Стена А'});
+    });
+
+    it('«Сохранить» шапки без изменений черновик не шлёт', async () => {
+      const {actions} = draftSurface();
+      openCard(/Наружная стена/);
+
+      openHeaderForm();
+      await clickAndFlush(screen.getByRole('button', {name: 'Сохранить'}));
+
+      expect(screen.queryByLabelText('Название')).not.toBeInTheDocument();
+      expect(actions).toHaveLength(0);
+    });
+
+    it('«Применить» паспортного Rпр шлёт черновик с введённым значением', async () => {
+      const {actions} = draftSurface();
+      openCard(/Окно двухкамерное/);
+
+      openPassportForm();
+      fireEvent.change(passportInput(), {target: {value: '0.8'}});
+      expect(actions).toHaveLength(0);
+      await clickAndFlush(screen.getByRole('button', {name: 'Применить'}));
+
+      expect(actions).toHaveLength(1);
+      const constructions = actions[0]!.context.constructions as Array<Record<string, unknown>>;
+      expect(constructions[2]).toMatchObject({id: 'c-window-1', rprPassport: 0.8});
+    });
+
+    it('«Применить» паспортного Rпр без изменений черновик не шлёт', async () => {
+      const {actions} = draftSurface();
+      openCard(/Окно двухкамерное/);
+
+      openPassportForm();
+      await clickAndFlush(screen.getByRole('button', {name: 'Применить'}));
+
+      expect(screen.getByText('0.56')).toBeInTheDocument();
       expect(actions).toHaveLength(0);
     });
 
