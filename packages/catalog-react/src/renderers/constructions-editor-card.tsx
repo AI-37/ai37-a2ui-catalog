@@ -1,37 +1,29 @@
 import React from 'react';
-import type {
-  CherdachnyeSubtype,
-  ConstructionLayer,
-  ConstructionType,
-} from '@ai37/a2ui-catalog-schemas';
-import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
+import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import {computeLiveRpr} from './compute-live-rpr';
+import {ConstructionsEditorCardHeader} from './constructions-editor-card-header';
 import {ConstructionsEditorLayerRow} from './constructions-editor-layer-row';
+import {ConstructionsEditorPassport} from './constructions-editor-passport';
 import {findInvalidLayers} from './find-invalid-layers';
-import type {ConstructionsEditorCardProps} from './constructions-editor.types';
-import {
-  controlStyle,
-  fieldLabelStyle,
-  fieldStyle,
-  inputStyle,
-  FIELD_COLUMN_WIDTH,
-} from './shared';
+import type {
+  ConstructionHeaderFields,
+  ConstructionsEditorCardProps,
+} from './constructions-editor.types';
 import {tokens} from './tokens';
-
-const SUBTYPED_TYPE: ConstructionType = 'cherdachnye_podval_grunt';
 
 // Пустой слой формы «+ Слой»: в state редактора не попадает до «Добавить».
 const EMPTY_LAYER: ConstructionLayer = {material: '', thicknessMm: null};
 
 /**
- * Карточка-аккордеон одной конструкции: тип/subtype/название, слои
- * строками-сводками с единственной раскрытой формой (или паспортное Rпр для
- * типов без слоёв) и live-чип Rпр против Rнорм (сравнение — только при
- * `showRnorm`). Состоянием — и конструкций, и открытой формы слоя (она одна
- * на весь редактор) — владеет редактор; карточка поднимает правки через
- * `onChange` целой конструкцией, коммиты формы слоя — с `{commit: true}`.
- * Конструкция с ошибкой в данных подсвечена предупреждающим цветом с пометкой
- * «проверить» — индикация, не блок (см. `find-invalid-layers`).
+ * Карточка-аккордеон одной конструкции: шапка (тип/subtype/название), слои
+ * строками-сводками (или паспортное Rпр для типов без слоёв) и live-чип Rпр
+ * против Rнорм (сравнение — только при `showRnorm`). Все три блока живут одним
+ * паттерном «чтение ↔ форма с явным коммитом», и форма раскрыта максимум одна
+ * на весь редактор — её состоянием, как и состоянием конструкций, владеет
+ * редактор. Карточка поднимает правки через `onChange` целой конструкцией,
+ * коммиты форм — с `{commit: true}`. Конструкция с ошибкой в данных подсвечена
+ * предупреждающим цветом с пометкой «проверить» — индикация, не блок
+ * (см. `find-invalid-layers`).
  */
 export function ConstructionsEditorCard({
   entry,
@@ -41,7 +33,7 @@ export function ConstructionsEditorCard({
   minChars,
   open,
   showRnorm,
-  editingIndex,
+  editingTarget,
   onEditingChange,
   onToggle,
   onChange,
@@ -52,27 +44,14 @@ export function ConstructionsEditorCard({
   const invalidity = findInvalidLayers(entry, config);
   const title = entry.name?.trim() ? entry.name : (config?.label ?? entry.type);
 
-  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const nextType = event.target.value as ConstructionType;
-    onChange({
-      ...entry,
-      type: nextType,
-      subtype: nextType === SUBTYPED_TYPE ? entry.subtype : undefined,
-    });
+  const handleHeaderCommit = (fields: ConstructionHeaderFields) => {
+    onEditingChange(null);
+    onChange({...entry, ...fields}, {commit: true});
   };
 
-  const handleSubtypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    onChange({...entry, subtype: value ? (value as CherdachnyeSubtype) : undefined});
-  };
-
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({...entry, name: event.target.value});
-  };
-
-  const handleRprPassportChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const parsed = Number.parseFloat(event.target.value);
-    onChange({...entry, rprPassport: Number.isFinite(parsed) ? parsed : undefined});
+  const handlePassportCommit = (rprPassport: number | undefined) => {
+    onEditingChange(null);
+    onChange({...entry, rprPassport}, {commit: true});
   };
 
   const handleLayerCommit = (index: number, layer: ConstructionLayer) => {
@@ -157,57 +136,22 @@ export function ConstructionsEditorCard({
       </header>
       {open ? (
         <div style={{display: 'grid', gap: 10, padding: '0 12px 12px'}}>
-          {/* Поля шапки в столбик — как на вкладке общих данных. */}
-          <div style={{display: 'grid', gap: 10, maxWidth: FIELD_COLUMN_WIDTH}}>
-            <label style={fieldStyle}>
-              <span style={fieldLabelStyle}>Тип конструкции</span>
-              <select value={entry.type} onChange={handleTypeChange} style={controlStyle}>
-                {typeConfigs.map(typeConfig => (
-                  <option key={typeConfig.type} value={typeConfig.type}>
-                    {typeConfig.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {entry.type === SUBTYPED_TYPE ? (
-              <label style={fieldStyle}>
-                <span style={fieldLabelStyle}>Разновидность</span>
-                <select
-                  value={entry.subtype ?? ''}
-                  onChange={handleSubtypeChange}
-                  style={controlStyle}
-                >
-                  <option value="">—</option>
-                  {Object.entries(CHERDACHNYE_SUBTYPE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-            <label style={fieldStyle}>
-              <span style={fieldLabelStyle}>Название</span>
-              <input
-                type="text"
-                value={entry.name ?? ''}
-                onChange={handleNameChange}
-                style={controlStyle}
-              />
-            </label>
-          </div>
+          <ConstructionsEditorCardHeader
+            entry={entry}
+            typeConfigs={typeConfigs}
+            editing={editingTarget === 'header'}
+            onOpen={() => onEditingChange('header')}
+            onCommit={handleHeaderCommit}
+            onCancel={() => onEditingChange(null)}
+          />
           {config && !config.hasLayers ? (
-            <label style={{...fieldStyle, justifySelf: 'start'}}>
-              <span style={fieldLabelStyle}>Rпр по паспорту, м²·°C/Вт</span>
-              <input
-                type="number"
-                min={0.01}
-                step="any"
-                value={entry.rprPassport ?? ''}
-                onChange={handleRprPassportChange}
-                style={{...inputStyle, width: 160}}
-              />
-            </label>
+            <ConstructionsEditorPassport
+              value={entry.rprPassport}
+              editing={editingTarget === 'passport'}
+              onOpen={() => onEditingChange('passport')}
+              onCommit={handlePassportCommit}
+              onCancel={() => onEditingChange(null)}
+            />
           ) : (
             <div style={{display: 'grid', gap: 8}}>
               {entry.layers.map((layer, index) => (
@@ -219,7 +163,7 @@ export function ConstructionsEditorCard({
                   condition={condition}
                   materialsReferenceId={materialsReferenceId}
                   minChars={minChars}
-                  mode={editingIndex === index ? 'edit' : 'summary'}
+                  mode={editingTarget === index ? 'edit' : 'summary'}
                   // Клик по другой строке переводит форму туда: несохранённые
                   // правки прежней отбрасываются вместе с её формой.
                   onOpen={() => onEditingChange(index)}
@@ -228,7 +172,7 @@ export function ConstructionsEditorCard({
                   onRemove={() => handleLayerRemove(index)}
                 />
               ))}
-              {editingIndex === 'new' ? (
+              {editingTarget === 'new' ? (
                 <ConstructionsEditorLayerRow
                   layer={EMPTY_LAYER}
                   index={entry.layers.length}

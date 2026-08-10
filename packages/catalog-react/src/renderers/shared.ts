@@ -42,6 +42,39 @@ export const controlStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 };
 
+/** Кнопка коммита формы внутри карточки («Применить»/«Добавить»/«Сохранить»). */
+export const commitButtonStyle: React.CSSProperties = {
+  padding: '6px 14px',
+  borderRadius: 10,
+  border: 'none',
+  background: tokens.accent,
+  color: tokens.accentContrast,
+  fontWeight: 600,
+  cursor: 'pointer',
+};
+
+/** «Отмена» рядом с кнопкой коммита. */
+export const cancelButtonStyle: React.CSSProperties = {
+  padding: '6px 14px',
+  borderRadius: 10,
+  border: `1px solid ${tokens.borderStrong}`,
+  background: 'transparent',
+  color: tokens.text,
+  cursor: 'pointer',
+};
+
+/** «Изменить» рядом с блоком в режиме чтения: неброская вторичная кнопка. */
+export const editButtonStyle: React.CSSProperties = {
+  padding: '4px 10px',
+  borderRadius: 10,
+  border: `1px solid ${tokens.borderSubtle}`,
+  background: 'transparent',
+  color: tokens.textMuted,
+  fontSize: '0.85rem',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+};
+
 export function toDisplayValue(value: unknown) {
   if (value === null || value === undefined) {
     return '—';

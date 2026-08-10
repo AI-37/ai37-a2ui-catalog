@@ -10,7 +10,10 @@ import {computeLiveRpr} from './compute-live-rpr';
 import {ConstructionsEditorCard} from './constructions-editor-card';
 import {ConstructionsEditorGeneral} from './constructions-editor-general';
 import {ConstructionsEditorTabs} from './constructions-editor-tabs';
-import type {ConstructionsEditorTab} from './constructions-editor.types';
+import type {
+  ConstructionsEditorFormTarget,
+  ConstructionsEditorTab,
+} from './constructions-editor.types';
 import {createGeneralState} from './create-general-state';
 import {createLocalId} from './create-local-id';
 import {tokens} from './tokens';
@@ -39,8 +42,9 @@ const primaryButtonStyle: React.CSSProperties = {
  * клиентской блокировки нет, о недостающем сообщает агент; подсветка
  * невалидной конструкции — индикация на данных, не блок. При заданном
  * `draftAction` коммиты состояния конструкций (add/remove конструкции,
- * «Применить»/«Добавить»/«Удалить слой» формы слоя) дополнительно уезжают
- * черновиком с тем же payload'ом.
+ * «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки,
+ * «Применить» формы паспортного Rпр) дополнительно уезжают черновиком с тем
+ * же payload'ом.
  *
  * Без пропа `general` компонент работает как прежде: одна вкладка конструкций
  * (переключателя нет) и submit с `{constructions}` — путь отката.
@@ -58,12 +62,12 @@ export const ConstructionsEditor = createComponentImplementation(
     // Раскрытые карточки. Пустое множество на старте: десяток конструкций по
     // три слоя развёрнутыми — простыня, в которой не найти нужную.
     const [openIds, setOpenIds] = React.useState<ReadonlySet<string>>(new Set());
-    // Слой, которым владеет форма редактирования ('new' — форма нового слоя).
-    // Одна на весь редактор: открытие формы в другой карточке закрывает
-    // текущую, несохранённые правки отбрасываются вместе с ней.
-    const [editingLayer, setEditingLayer] = React.useState<{
+    // Единственная раскрытая форма редактора — любого вида: слой ('new' —
+    // форма нового слоя), шапка карточки или паспортное Rпр. Открытие любой
+    // формы закрывает текущую, несохранённые правки уходят вместе с ней.
+    const [editingTarget, setEditingTarget] = React.useState<{
       entryId: string;
-      index: number | 'new';
+      target: ConstructionsEditorFormTarget;
     } | null>(null);
     const [activeTab, setActiveTab] = React.useState<ConstructionsEditorTab>(
       hasGeneral ? 'general' : 'constructions',
@@ -130,9 +134,10 @@ export const ConstructionsEditor = createComponentImplementation(
     const handleEntryChange = (next: ConstructionEntry, options?: {commit?: boolean}) => {
       const updated = constructions.map(entry => (entry.id === next.id ? next : entry));
       setConstructions(updated);
-      // Коммит формы слоя («Применить»/«Добавить»/«Удалить слой») — явный
-      // признак от карточки; правки полей шапки приходят без него и уезжают
-      // со следующим коммитом либо submit'ом.
+      // Коммит формы (слоя, шапки, паспортного Rпр) — явный признак от
+      // карточки; ввод внутри незакоммиченной формы наверх не поднимается
+      // вовсе, а правки вкладки общих данных уезжают ближайшим коммитом
+      // либо submit'ом.
       if (options?.commit) sendDraft(updated);
     };
 
@@ -213,9 +218,9 @@ export const ConstructionsEditor = createComponentImplementation(
                 minChars={props.minChars}
                 open={openIds.has(entry.id)}
                 showRnorm={!climateDirty}
-                editingIndex={editingLayer?.entryId === entry.id ? editingLayer.index : null}
-                onEditingChange={index =>
-                  setEditingLayer(index === null ? null : {entryId: entry.id, index})
+                editingTarget={editingTarget?.entryId === entry.id ? editingTarget.target : null}
+                onEditingChange={target =>
+                  setEditingTarget(target === null ? null : {entryId: entry.id, target})
                 }
                 onToggle={() => handleToggle(entry.id)}
                 onChange={handleEntryChange}
