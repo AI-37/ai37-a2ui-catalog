@@ -43,7 +43,7 @@
     "node": ">=22.0.0"
   },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.app.sp-ai.ru/"
   },
   "scripts": {
     "build": "tsup",
