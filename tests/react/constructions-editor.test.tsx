@@ -284,7 +284,7 @@ describe('ConstructionsEditor', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(String(fetchMock.mock.calls[0]![0])).toBe(
-      `${LOOKUP_SUGGEST_ROUTE}?${new URLSearchParams({referenceId: 'sp50-materials', query: 'бет'})}`,
+      `${LOOKUP_SUGGEST_ROUTE}?${new URLSearchParams({resource: 'sp50-materials', query: 'бет'})}`,
     );
 
     fireEvent.mouseDown(screen.getByRole('option', {name: 'Бетон B25'}));
@@ -655,7 +655,7 @@ describe('ConstructionsEditor', () => {
       await typeAndFlush(getCityInput(), 'ново');
 
       expect(String(fetchMock.mock.calls[0]![0])).toBe(
-        `${LOOKUP_SUGGEST_ROUTE}?${new URLSearchParams({referenceId: 'cities', query: 'ново'})}`,
+        `${LOOKUP_SUGGEST_ROUTE}?${new URLSearchParams({resource: 'cities', query: 'ново'})}`,
       );
 
       fireEvent.mouseDown(screen.getByRole('option', {name: 'Новосибирск'}));

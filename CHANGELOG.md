@@ -4,7 +4,7 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
-## [0.13.0] - 2026-08-10
+## [0.14.0] - 2026-08-11
 
 ### Added
 
@@ -28,7 +28,7 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
   перегенерирован. Без `draftAction` поведение прежнее — единственный action за
   сессию — и это же путь отката для эмитентов, которым автосейв не нужен.
 
-## [0.12.0] - 2026-08-10
+## [0.13.0] - 2026-08-11
 
 ### Added
 
@@ -64,6 +64,24 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
   её валидация и рендерер не менялись.
 - Каталог остаётся `v2`: компонент добавлен аддитивно, `public/a2ui/catalogs`
   перегенерирован.
+
+## [0.12.0] - 2026-08-11
+
+### Changed
+
+- Fetch-канал lookup-поля `FormCard` (`suggestMode: 'fetch'`) ходит через
+  обобщённую ручку ресурсов оркестратора: `LOOKUP_SUGGEST_ROUTE`
+  `/api/reference-suggest` → `/api/agent-resource`; wire-параметр
+  `referenceId` → `resource` (значение `field.referenceId`); код ошибки
+  неизвестного справочника в контракте `unknown_reference` →
+  `unknown_resource` (`catalog-schemas` — константа/типы/доккоменты
+  `form-card-lookup-fetch`, плюс рендерер `use-lookup-suggest` в
+  `catalog-react`). Схема props `FormCard` не менялась (поле lookup
+  по-прежнему несёт `referenceId`); python-модели не затронуты (wire-контракт
+  роута в python-пакете не зеркалится). Ломающее изменение для потребителей
+  контракта — BFF/оркестратор обязаны обслуживать новый путь. Изменение
+  внесено в `catalog-schemas`/`catalog-react` ранее (PR #21), но осталось без
+  записи в changelog и без бампа версии — этот релиз их фиксирует.
 
 ## [0.11.0] - 2026-08-10
 
