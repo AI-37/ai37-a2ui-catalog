@@ -16,6 +16,7 @@ import type {
 } from './constructions-editor.types';
 import {createGeneralState} from './create-general-state';
 import {createLocalId} from './create-local-id';
+import {passingSummary} from './passing-summary';
 import {tokens} from './tokens';
 import {useA2uiBaseStyles} from './shared';
 
@@ -283,7 +284,7 @@ export const ConstructionsEditor = createComponentImplementation(
                   следующих props (Решение 4 design.md). */}
               {climateDirty ? null : (
                 <span style={{color: tokens.textMuted, fontSize: '0.9rem'}}>
-                  проходит {passing.length} из {comparable.length}
+                  {passingSummary(passing.length, comparable.length, constructions.length)}
                 </span>
               )}
             </>

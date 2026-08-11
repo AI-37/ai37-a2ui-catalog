@@ -771,7 +771,9 @@ describe('ConstructionsEditor', () => {
 
       openTab('Конструкции');
       expect(screen.getByText('Rпр 4.09 ≥ 3.25')).toBeInTheDocument();
-      expect(screen.getByText('проходит 1 из 1')).toBeInTheDocument();
+      // Конфиг только у стен: две другие конструкции фикстуры без нормы —
+      // сводка обязана сказать о них, иначе «1 из 1» прячет две трети набора.
+      expect(screen.getByText('проходит 1 из 1 · для 2 нормы нет')).toBeInTheDocument();
     });
 
     it('без rnorm у типа сравнение не показывается независимо от климата', () => {
@@ -783,7 +785,24 @@ describe('ConstructionsEditor', () => {
       openTab('Конструкции');
 
       expect(screen.getByText('Rпр 4.09')).toBeInTheDocument();
-      expect(screen.getByText('проходит 0 из 0')).toBeInTheDocument();
+      // Не «проходит 0 из 0»: сравнивать не с чем — это не приговор расчёту.
+      expect(screen.getByText('норма не задана — сравнивать не с чем')).toBeInTheDocument();
+    });
+  });
+
+  describe('сводка по конструкциям', () => {
+    it('норма есть у всех: остаток не поминается', () => {
+      renderSurface();
+      openTab('Конструкции');
+
+      expect(screen.getByText('проходит 2 из 3')).toBeInTheDocument();
+    });
+
+    it('конструкций нет — сводка говорит об этом, а не «0 из 0»', () => {
+      renderSurface({constructions: []});
+      openTab('Конструкции');
+
+      expect(screen.getByText('конструкций пока нет')).toBeInTheDocument();
     });
   });
 
