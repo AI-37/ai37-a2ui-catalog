@@ -19,6 +19,8 @@ Workspace состоит из пакетов:
 
 Поток данных: схемы → generate-artifacts.ts → catalog.json и component schemas → public/a2ui/catalogs → GitHub Pages. React-рендереры и Pydantic-модели подключаются к тем же компонентам; тесты и демо используют фикстуры.
 
+Fetch-канал подсказок lookup-полей (suggestMode: 'fetch') — debounced same-origin `GET /api/agent-resource?resource=&query=` (resource = referenceId справочника; путь и тип экспортируются из packages/catalog-schemas: `LOOKUP_SUGGEST_ROUTE`, `LookupSuggestResponse`). BFF потребителя проксирует запрос на REST оркестратора, тот резолвит resource в ручку агента-владельца справочника. Ответ 200 — `LookupSuggestResponse`; неизвестный resource — 404 `{error: "unknown_resource"}`.
+
 ```mermaid
 flowchart LR
     S[packages/catalog-schemas] --> G[generate-artifacts.ts]
@@ -47,7 +49,7 @@ flowchart LR
 - catalog.json: https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json
 - JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v1/components/*.schema.json и аналогично для v2.
 
-Отдельных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
+Отдельных публичных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Внутренний fetch-канал подсказок lookup-полей — same-origin `GET /api/agent-resource?resource=&query=` (resource = id справочника / `field.referenceId`; BFF потребителя проксирует на REST оркестратора; неизвестный resource — 404 `{error: "unknown_resource"}`). npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
 
 В составе @ai37/a2ui-catalog-react — рендерер ConstructionsEditor (редактор конструкций): наружу один submit с полным состоянием {general, constructions} (без клиентской блокировки); при заданном пропе draftAction черновик с тем же payload уходит по явным коммитам состояния конструкций — add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки, «Применить» формы паспортного Rпр (коммит без изменений действия не порождает; ввод внутри незакоммиченной формы — тоже). Слои — строки-сводки («№ · материал · толщина · λ»), форма правки одна на редактор; шапка раскрытой карточки по умолчанию — режим чтения (тип с разновидностью и название) с кнопкой «Изменить», правка — в форме с кнопками «Сохранить»/«Отмена»; «Rпр по паспорту» для типов без слоёв — отдельный элемент «значение + Изменить» с формой «Применить»/«Отмена» (незаданное значение показано предупреждающим цветом «не задано»). Все формы (слой, шапка, паспортное Rпр) делят одно место на редактор: открытие любой закрывает текущую с отбросом несохранённых правок. Невалидные конструкции подсвечиваются пометкой «! проверить» — индикация, не блок.
 
@@ -57,6 +59,7 @@ flowchart LR
 - React 19, Zod, Vite/Vitest, tsup, tsx;
 - Python 3, Pydantic, Poetry 2.3.2, Twine;
 - при сборке/публикации — приватные реестры AI-37: npm.app.sp-ai.ru (npm) и pypi.app.sp-ai.ru (PyPI), а также токены AI37_NPM_TOKEN / AI37_PYPI_TOKEN;
+- в fetch-режиме lookup — same-origin `/api/agent-resource`, который BFF потребителя проксирует на REST оркестратора (тот резолвит resource в ручку агента-владельца справочника);
 - внешние сервисы (Authentik, LiteLLM, БД, Redis, S3) в рантайме не используются.
 
 ### От него зависят
