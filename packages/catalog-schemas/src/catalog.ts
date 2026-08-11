@@ -12,6 +12,7 @@ import {simpleTableDefinition} from './components/simple-table';
 import {choiceCardDefinition} from './components/choice-card';
 import {formCardDefinition} from './components/form-card';
 import {constructionsEditorDefinition} from './components/constructions-editor';
+import {liftEditorDefinition} from './components/lift-editor';
 import {getBaseComponentEntries} from './base-components';
 import type {CatalogComponentDefinition, JsonSchema} from './types';
 
@@ -22,6 +23,7 @@ export const componentDefinitions = [
   choiceCardDefinition,
   formCardDefinition,
   constructionsEditorDefinition,
+  liftEditorDefinition,
 ] as const satisfies ReadonlyArray<CatalogComponentDefinition<any>>;
 
 export const componentDefinitionMap = new Map(

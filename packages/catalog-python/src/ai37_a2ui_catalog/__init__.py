@@ -5,6 +5,7 @@ from .models import (
     FlexTableProps,
     FormCardProps,
     LatexFormulaProps,
+    LiftEditorProps,
     SimpleTableProps,
 )
 from .validation import get_component_schema, validate_component_payload, validate_component_payload_json
@@ -17,6 +18,7 @@ __all__ = [
     "FlexTableProps",
     "FormCardProps",
     "LatexFormulaProps",
+    "LiftEditorProps",
     "SimpleTableProps",
     "get_component_schema",
     "validate_component_payload",

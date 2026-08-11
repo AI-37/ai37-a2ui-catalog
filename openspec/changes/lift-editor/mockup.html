@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LiftEditor — мокап</title>
+<style>
+  :root {
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    color: #0f172a;
+    background:
+      radial-gradient(circle at top left, rgba(255, 171, 77, 0.22), transparent 30%),
+      radial-gradient(circle at right center, rgba(95, 176, 255, 0.18), transparent 28%),
+      linear-gradient(180deg, #f7f2ea 0%, #eef5ff 100%);
+  }
+  body { margin: 0; min-height: 100vh; }
+  button, input, select { font: inherit; }
+  .shell { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; display: grid; gap: 18px; }
+  .hero { padding: 20px 22px; border-radius: 22px; background: rgba(255,255,255,.78); box-shadow: 0 24px 60px rgba(15,23,42,.08); }
+  .hero h1 { margin: 0 0 6px; font-size: 1.7rem; }
+  .hero p { margin: 0; color: #475569; font-size: .9rem; }
+  .eyebrow { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: #9a3412; }
+
+  .card { background: #fff; border-radius: 22px; border: 1px solid rgba(15,23,42,.08); box-shadow: 0 18px 44px rgba(15,23,42,.07); overflow: hidden; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; background: linear-gradient(145deg, rgba(255,244,231,.9), rgba(235,244,255,.9)); border-bottom: 1px solid rgba(15,23,42,.08); }
+  .tab { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px; border: 1px solid rgba(15,23,42,.12); background: rgba(255,255,255,.75); cursor: pointer; font-size: .9rem; }
+  .tab[aria-selected="true"] { background: #0f172a; color: #fff; border-color: #0f172a; }
+  .tab .dot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; }
+  .tab-add { margin-left: auto; border-style: dashed; }
+  .tab-add:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  .screen { padding: 18px 20px 20px; }
+  .screen h2 { margin: 0 0 2px; font-size: 1.1rem; }
+  .screen .gost { margin: 0 0 14px; color: #64748b; font-size: .82rem; }
+
+  .fields { display: grid; gap: 14px; }              /* одна колонка */
+  .field { display: grid; gap: 5px; }
+  .field label { font-size: .82rem; color: #334155; }
+  .field label .req { color: #ef4444; }
+  .field input, .field select { width: 100%; box-sizing: border-box; padding: 9px 11px; border-radius: 12px; border: 1px solid rgba(15,23,42,.16); background: #fff; }
+  .field.missing input, .field.missing select { border-color: #ef4444; background: #fff6f6; }
+  .field .hint { font-size: .72rem; color: #94a3b8; }
+  .field .hint.auto { color: #0369a1; }
+
+  details.adv { margin-top: 14px; }
+  details.adv > summary { cursor: pointer; font-size: .84rem; color: #475569; list-style: none;
+                          display: inline-flex; align-items: baseline; gap: 6px; }
+  details.adv > summary::-webkit-details-marker { display: none; }
+  details.adv > summary::before { content: '▸'; color: #94a3b8; font-size: .8em; }
+  details.adv[open] > summary::before { content: '▾'; }
+  details.adv > summary:hover { color: #0f172a; }
+  details.adv > summary .badge { color: #94a3b8; font-size: .8rem; }
+  details.adv .fields { margin-top: 12px; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 20px; border-top: 1px solid rgba(15,23,42,.08); background: rgba(248,250,252,.7); }
+  .btn { padding: 9px 16px; border-radius: 12px; border: 1px solid rgba(15,23,42,.16); background: #fff; cursor: pointer; }
+  .btn.primary { background: #0f172a; color: #fff; border-color: #0f172a; }
+  .btn.danger { color: #b91c1c; border-color: rgba(185,28,28,.3); }
+  .spacer { flex: 1; }
+
+  .panel { background: rgba(255,255,255,.85); border-radius: 18px; border: 1px solid rgba(15,23,42,.08); padding: 14px 16px; }
+  .panel h3 { margin: 0 0 8px; font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; color: #9a3412; }
+  pre { margin: 0; max-height: 300px; overflow: auto; font-size: .76rem; line-height: 1.45; background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 12px; }
+  ul.log { margin: 0; padding-left: 18px; font-size: .82rem; color: #334155; }
+  .muted { color: #64748b; font-size: .8rem; margin: 8px 0 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hero">
+    <div class="eyebrow">openspec / changes / lift-editor</div>
+    <h1>LiftEditor — мокап поведения</h1>
+    <p>Статический HTML для проверки UX. Поля и таблицы — из
+      <code>spai-elevator-calc-agent</code>. Вкладки, добавление лифта, смена ГОСТ и авто-подстановки —
+      локально; наружу уходит только submit.</p>
+  </div>
+
+  <div class="card">
+    <div class="tabs" id="tabs"></div>
+    <div class="screen" id="screen"></div>
+    <div class="actions" id="actions"></div>
+  </div>
+
+  <div class="panel">
+    <h3>dispatchAction наружу</h3>
+    <ul class="log" id="log"><li>пока ничего не отправлено</li></ul>
+  </div>
+  <div class="panel">
+    <h3>Payload submit (превью)</h3>
+    <pre id="payload"></pre>
+    <p class="muted" id="validity"></p>
+  </div>
+  <div class="panel">
+    <h3>Черновики по ГОСТ</h3>
+    <pre id="drafts"></pre>
+  </div>
+</div>
+
+<script>
+// ================= props (то, что пришлёт агент) =================
+const vnRows = [
+  { value: '0.63', note: 'h и t123 — уточнить у изготовителя', set: {} },
+  { value: '1',    note: 'h 1.5; t123 13.5', set: { h: 1.5,  t123: 13.5 } },
+  { value: '1.6',  note: 'h 3; t123 12',     set: { h: 3.0,  t123: 12.0 } },
+  { value: '2.5',  note: 'h 6; t123 14',     set: { h: 6.0,  t123: 14.0 } },
+  { value: '4',    note: 'h 15; t123 16.5',  set: { h: 15.0, t123: 16.5 } },
+];
+
+// Табл. Г.1: E по Q → Pk = round(E * 0,8)
+const E_BY_Q = { 450:6, 630:8, 800:10, 1000:13, 1275:17, 1350:18, 1600:21, 1800:24, 2000:26, 2500:33 };
+// Прил. Е: t_ост по (тип здания, doorWidth, Vн)
+const TOST = {
+  'Жилое':     { 800:{1:10.4,1.6:10.9,2:11.3,2.5:11.4,3:11.6,3.5:11.8},
+                 900:{1:10.6,1.6:11.1,2:11.5,2.5:11.6,3:11.8,3.5:12.0},
+                1100:{1:11.7,1.6:12.2,2:12.6,2.5:12.7,3:12.9,3.5:13.1} },
+  'Офис':      { 1100:{1:9.4,1.6:9.9,2:10.3,2.5:10.5}, 1200:{1:9.8,1.6:10.3,2:10.7,2.5:10.9} },
+  'Гостиница': { 1100:{1:9.4,1.6:9.9,2:10.3,2.5:10.5}, 1200:{1:9.8,1.6:10.3,2:10.7,2.5:10.9} },
+};
+
+const BUILDING_52941 = [
+  { name: 'N',  label: 'N — число заселённых этажей', required: true },
+  { name: 'A',  label: 'A — жильцы всего здания, чел.', required: true },
+  { name: 'hf', label: 'hf — высота этажа, м', defaultValue: 3.3, advanced: true },
+  { name: 'i',  label: 'i — интенсивность пассажиропотока, % (4–8)', defaultValue: 6, advanced: true },
+  { name: 'kp', label: 'kp — коэф. вероятной высоты, 0,7–0,9', defaultValue: 0.8, advanced: true },
+  { name: 'kt', label: 'kt — коэф. доп. потерь, 1,05–1,10', defaultValue: 1.05, advanced: true },
+  { name: 'gammaUp',   label: 'gammaUp — коэф. заполнения при подъёме', defaultValue: 0.8, advanced: true },
+  { name: 'gammaDown', label: 'gammaDown — коэф. заполнения при спуске', defaultValue: 0.8, advanced: true },
+];
+const LIFT_52941 = [
+  { name: 'Q',  label: 'Q — грузоподъёмность, кг', required: true, type: 'combo',
+    options: ['400', '630', '1000'], defaultValue: 630, hint: 'типовые значения — подсказка, ввод свободный' },
+  { name: 'Vn', label: 'Vn — скорость, м/с', required: true, type: 'combo',
+    options: vnRows.map(r => r.value), optionNotes: Object.fromEntries(vnRows.map(r => [r.value, r.note])),
+    defaultValue: '1', hint: 'ряд Прил. А — подсказка; своё значение тоже можно (h/t123 тогда вручную)' },
+  { name: 'H0', label: 'H0 — отметка нижней остановки от 0,000, м', required: true },
+  { name: 'Nn', label: 'Nn — этажей без пользования лифтом (0 = все)', required: true },
+  { name: 'h',    label: 'h — путь разгона/торможения, м', required: true, defaultValue: 1.5,
+    hint: 'подставляется по Vn (Прил. А); правка сохраняется до смены Vn' },
+  { name: 't123', label: 't123 — t1+t2+t3, с', required: true, defaultValue: 13.5,
+    hint: 'подставляется по Vn (Прил. А); правка сохраняется до смены Vn' },
+  { name: 'dt',   label: 'dt — время на пассажира, с', required: true, defaultValue: 1.5 },
+];
+
+const BUILDING_34758 = [
+  { name: 'buildingType', label: 'Тип здания', required: true, type: 'select',
+    options: ['Офис', 'Гостиница', 'Жилое'], defaultValue: 'Офис', lead: true },
+  { name: 'A',  label: 'A — заселённость, чел.', required: true },
+  { name: 'N1', label: 'N1 — число обслуживаемых этажей (≥2)', required: true },
+  { name: 'Nl', label: 'Nl — число лифтов в группе', required: true },
+  { name: 'hf', label: 'hf — высота этажа, м', defaultValue: 3.3, advanced: true },
+];
+const LIFT_34758 = [
+  { name: 'Q', label: 'Q — грузоподъёмность, кг', required: true, type: 'combo',
+    options: ['450','630','800','1000','1275','1350','1600','1800','2000','2500'], defaultValue: '1000',
+    hint: 'ряд Табл. Г.1 — подсказка; своё значение тоже можно (Pk тогда вручную)' },
+  { name: 'Vn', label: 'Vn — скорость, м/с', required: true, type: 'combo',
+    optionsBy: { 'Жилое': ['1','1.6','2','2.5','3','3.5'], 'Офис': ['1','1.6','2','2.5'], 'Гостиница': ['1','1.6','2','2.5'] },
+    hint: 'ряд Прил. Е — подсказка; ввод свободный' },
+  { name: 'doorWidth', label: 'doorWidth — ширина дверного проёма, мм', required: true, type: 'combo',
+    optionsBy: { 'Жилое': ['800','900','1100'], 'Офис': ['1100','1200'], 'Гостиница': ['1100','1200'] },
+    hint: 'ряд Прил. Е — подсказка; ввод свободный' },
+  { name: 'tOst', label: 'tOst — время на остановку, с', required: true,
+    auto: 'tOst', hint: 'авто по Прил. Е (тип здания × doorWidth × Vn); вне таблицы — вручную' },
+  { name: 'Pk', label: 'Pk — заполнение кабины, чел.',
+    auto: 'Pk', hint: 'авто от Q: round(E · 0,8), Табл. Г.1; вне ряда — вручную' },
+];
+
+const props = {
+  // ПЕРВИЧНЫЙ выбор — методика (ГОСТ), а не тип здания
+  gostField: { name: 'gost', label: 'Методика расчёта', required: true, type: 'select',
+    options: ['ГОСТ Р 52941-2008 (Жилое)', 'ГОСТ 34758-2021 (Офис/Гостиница/Жилое)'] },
+  gostConfigs: [
+    { gost: 'ГОСТ Р 52941-2008 (Жилое)', gostShort: 'ГОСТ Р 52941-2008',
+      buildingTitle: 'Параметры здания', buildingFields: BUILDING_52941,
+      liftTitle: 'Параметры лифта', liftFields: LIFT_52941,
+      liftsMode: 'per-lift', liftTabLabel: 'Лифт', maxLifts: 8,
+      dependentValues: { source: 'Vn', rows: vnRows } },
+    { gost: 'ГОСТ 34758-2021 (Офис/Гостиница/Жилое)', gostShort: 'ГОСТ 34758-2021',
+      buildingTitle: 'Параметры здания', buildingFields: BUILDING_34758,
+      liftTitle: 'Лифтовая группа', liftFields: LIFT_34758,
+      liftsMode: 'group', liftTabLabel: 'Лифтовая группа' },
+  ],
+  gost: 'ГОСТ Р 52941-2008 (Жилое)',
+  buildingTabLabel: 'Здание',
+  addLabel: '+ Добавить лифт',
+  removeLabel: 'Удалить лифт',
+  submitLabel: 'Рассчитать',
+  submitAction: 'calc',
+  advancedLabel: 'Параметры по умолчанию',
+};
+
+// ================= локальный state =================
+const cfgOf = (g) => props.gostConfigs.find(c => c.gost === g);
+const seed = (fields) => Object.fromEntries(fields.map(f => [f.name, f.defaultValue ?? '']));
+
+const state = {
+  gost: props.gost,
+  drafts: Object.fromEntries(props.gostConfigs.map(c => [
+    c.gost, { building: seed(c.buildingFields), lifts: [seed(c.liftFields)] },
+  ])),
+  active: 'building',
+  touched: new Set(),   // ручные правки авто-полей: 'gost|lift0|Pk'
+  dispatched: [],
+};
+
+const draft = () => state.drafts[state.gost];
+const isEmpty = (v) => v === '' || v === null || v === undefined;
+const num = (v) => { const n = parseFloat(String(v).replace(',', '.')); return Number.isFinite(n) ? n : null; };
+const missingIn = (fields, values) => fields.filter(f => f.required && isEmpty(values[f.name])).map(f => f.name);
+
+// ---- авто-подстановки 34758 (как в агенте: Pk от Q, tOst по Прил. Е) ----
+/** Опции поля могут зависеть от типа здания (ряды Прил. Е). */
+function optionsOf(f, buildingValues) {
+  if (!f.optionsBy) return f.options;
+  return f.optionsBy[buildingValues.buildingType] ?? [];
+}
+
+function applyAuto() {
+  const cfg = cfgOf(state.gost);
+  if (cfg.liftsMode !== 'group') return;
+  const d = draft(), b = d.building, lift = d.lifts[0];
+  const key = (f) => `${state.gost}|lift0|${f}`;
+
+  if (!state.touched.has(key('Pk'))) {
+    const E = E_BY_Q[num(lift.Q)];
+    lift.Pk = E === undefined ? '' : Math.round(E * 0.8);
+  }
+  if (!state.touched.has(key('tOst'))) {
+    const table = TOST[b.buildingType] || {};
+    const byVn = table[num(lift.doorWidth)] || {};
+    const t = byVn[num(lift.Vn)];
+    lift.tOst = t === undefined ? '' : t;
+  }
+}
+
+// ================= render =================
+// Узлы текущего экрана: при вводе они не пересоздаются, только синхронизируются
+// (иначе поле теряет фокус и экран мигает на каждый символ).
+let screenEls = [];
+let screenValues = {};
+
+/** Лёгкое обновление: значения, подсветка, вкладки, кнопки, панели. Без пересборки полей. */
+function refresh() {
+  applyAuto();
+  const cfg = cfgOf(state.gost), d = draft();
+  screenEls.forEach(({ f, wrap, input }) => {
+    const v = screenValues[f.name] ?? '';
+    if (document.activeElement !== input && String(input.value) !== String(v)) input.value = v;
+    wrap.classList.toggle('missing', !!f.required && isEmpty(v));
+  });
+  renderTabs(cfg, d);
+  renderActions(cfg, d);
+  renderPanels(cfg, d);
+}
+
+function renderTabs(cfg, d) {
+  const perLift = cfg.liftsMode === 'per-lift';
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  const mkTab = (label, key, missing) => {
+    const b = document.createElement('button');
+    b.className = 'tab';
+    b.setAttribute('aria-selected', String(state.active === key));
+    b.innerHTML = (missing ? '<span class="dot"></span>' : '') + label;
+    b.onclick = () => { state.active = key; render(); };   // без dispatch
+    return b;
+  };
+  tabs.append(mkTab(props.buildingTabLabel, 'building', missingIn(cfg.buildingFields, d.building).length > 0));
+  d.lifts.forEach((lift, i) =>
+    tabs.append(mkTab(perLift ? `${cfg.liftTabLabel} ${i + 1}` : cfg.liftTabLabel, i,
+      missingIn(cfg.liftFields, lift).length > 0)));
+  if (perLift) {
+    const add = document.createElement('button');
+    add.className = 'tab tab-add';
+    add.textContent = props.addLabel;
+    add.disabled = !!cfg.maxLifts && d.lifts.length >= cfg.maxLifts;
+    add.onclick = () => { d.lifts.push(seed(cfg.liftFields)); state.active = d.lifts.length - 1; render(); };
+    tabs.append(add);
+  }
+}
+
+/** Полная перерисовка экрана — на смену вкладки/ГОСТ/типа здания и состава лифтов. */
+function render() {
+  applyAuto();
+  const cfg = cfgOf(state.gost);
+  const d = draft();
+  const perLift = cfg.liftsMode === 'per-lift';
+  renderTabs(cfg, d);
+
+  const screen = document.getElementById('screen');
+  screen.innerHTML = '';
+  screenEls = [];
+  const onBuilding = state.active === 'building';
+  const values = onBuilding ? d.building : d.lifts[state.active];
+  const fields = onBuilding ? cfg.buildingFields : cfg.liftFields;
+  const liftIdx = onBuilding ? null : state.active;
+
+  const h2 = document.createElement('h2');
+  h2.textContent = onBuilding ? cfg.buildingTitle
+    : (perLift ? `${cfg.liftTitle} ${state.active + 1}` : cfg.liftTitle);
+  const gostLine = document.createElement('p');
+  gostLine.className = 'gost';
+  gostLine.textContent = cfg.gostShort + (onBuilding || !cfg.liftsMode ? '' : '');
+  screen.append(h2, gostLine);
+
+  screenValues = values;
+
+  // hard = состав формы мог измениться (select) → полная перерисовка;
+  // иначе достаточно синхронизации (ввод текста).
+  const onFieldChange = (name, v, hard) => {
+    values[name] = v;
+    if (liftIdx !== null) state.touched.add(`${state.gost}|lift${liftIdx}|${name}`);
+    // смена источника снимает «ручную правку» с зависимого поля — как Vn → h/t123
+    const k = (f) => `${state.gost}|lift0|${f}`;
+    if (name === 'Q') state.touched.delete(k('Pk'));
+    if (['doorWidth', 'Vn', 'buildingType'].includes(name)) state.touched.delete(k('tOst'));
+    const dep = cfg.dependentValues;
+    if (liftIdx !== null && dep && dep.source === name) {
+      // совпало со строкой ряда — подставляем; своё значение — h/t123 не трогаем
+      const row = dep.rows.find(r => num(r.value) !== null && num(r.value) === num(v));
+      if (row) Object.assign(values, row.set);              // Vn → h/t123
+    }
+    if (hard) render(); else refresh();
+  };
+
+  // В экспандер попадает только то, у чего РЕАЛЬНО есть значение (дефолт или авто).
+  // Пустое обязательное поле — всегда в основном столбце, иначе блокировка submit
+  // выглядит беспричинной.
+  const advCount = fields.filter(f => f.advanced && !(f.required && isEmpty(values[f.name]))).length;
+  // ради одного-двух полей экспандер не окупается — показываем их как обычные
+  const inAdvanced = (f) => advCount >= 3 && f.advanced && !(f.required && isEmpty(values[f.name]));
+  const mkField = (f) => {
+    const wrap = fieldNode(f, values, onFieldChange, optionsOf(f, d.building));
+    screenEls.push({ f, wrap, input: wrap.querySelector('input, select') });
+    return wrap;
+  };
+
+  const main = document.createElement('div');
+  main.className = 'fields';
+  // экран «Здание» открывается выбором методики, затем идут обычные поля
+  if (onBuilding) {
+    main.append(fieldNode(props.gostField, { gost: state.gost }, (_n, v) => {
+      state.gost = v; state.active = 'building'; render();   // черновик прежней ветки остаётся
+    }, props.gostField.options));
+  }
+  fields.filter(f => !inAdvanced(f)).forEach(f => main.append(mkField(f)));
+  screen.append(main);
+
+  // экспандер «Параметры по умолчанию» — только заполненные значения
+  const advFields = fields.filter(inAdvanced);
+  if (advFields.length) {
+    const det = document.createElement('details');
+    det.className = 'adv';
+    const sum = document.createElement('summary');
+    sum.innerHTML = `${props.advancedLabel}` +
+      `<span class="badge">${advFields.map(f => f.name).join(', ')}</span>`;
+    det.append(sum);
+    const box = document.createElement('div');
+    box.className = 'fields';
+    advFields.forEach(f => box.append(mkField(f)));
+    det.append(box);
+    screen.append(det);
+  }
+
+  renderActions(cfg, d);
+  renderPanels(cfg, d);
+}
+
+function renderActions(cfg, d) {
+  const perLift = cfg.liftsMode === 'per-lift';
+  const onBuilding = state.active === 'building';
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  if (perLift && !onBuilding && d.lifts.length > 1) {
+    actions.append(btn(props.removeLabel, 'btn danger', () => { d.lifts.splice(state.active, 1); state.active = 0; render(); }));
+  }
+  const sp = document.createElement('div'); sp.className = 'spacer'; actions.append(sp);
+  const allMissing = totalMissing(cfg, d);
+  const submit = btn(props.submitLabel, 'btn primary', () => dispatch(props.submitAction, payload()));
+  submit.disabled = allMissing.length > 0;
+  actions.append(submit);
+}
+
+function renderPanels(cfg, d) {
+  const allMissing = totalMissing(cfg, d);
+  document.getElementById('payload').textContent = JSON.stringify(payload(), null, 2);
+  document.getElementById('validity').textContent = allMissing.length
+    ? `submit заблокирован: не заполнено ${allMissing.length} — ${allMissing.join(', ')}`
+    : 'все обязательные заполнены — submit доступен';
+  document.getElementById('drafts').textContent = JSON.stringify(state.drafts, null, 2);
+  const log = document.getElementById('log');
+  log.innerHTML = state.dispatched.length
+    ? state.dispatched.map(a => `<li><code>${a}</code></li>`).join('')
+    : '<li>пока ничего не отправлено — вкладки, «+ Добавить лифт», смена ГОСТ и авто-подстановки работают локально</li>';
+}
+
+function totalMissing(cfg, d) {
+  const out = missingIn(cfg.buildingFields, d.building).map(n => `здание.${n}`);
+  d.lifts.forEach((l, i) => missingIn(cfg.liftFields, l).forEach(n =>
+    out.push(cfg.liftsMode === 'per-lift' ? `лифт${i + 1}.${n}` : `группа.${n}`)));
+  return out;
+}
+
+function payload() {
+  const cfg = cfgOf(state.gost), d = draft();
+  return { gost: cfg.gostShort, building: d.building, lifts: d.lifts };
+}
+
+let uid = 0;
+function fieldNode(f, values, onChange, options) {
+  const wrap = document.createElement('div');
+  wrap.className = 'field' + (f.required && isEmpty(values[f.name]) ? ' missing' : '');
+  const id = 'f' + (++uid);
+  wrap.innerHTML = `<label for="${id}">${f.label}${f.required ? ' <span class="req">*</span>' : ''}</label>`;
+  let input;
+  if (f.type === 'select') {
+    input = document.createElement('select');
+    input.append(new Option('— выберите —', ''));
+    (options ?? []).forEach(o => input.append(new Option(o, o)));
+  } else {
+    input = document.createElement('input');
+    input.type = 'text';
+    // combo: свободный ввод + подсказки ряда
+    if (f.type === 'combo') {
+      const list = document.createElement('datalist');
+      list.id = id + '_list';
+      (options ?? []).forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o;
+        const note = f.optionNotes?.[o];
+        if (note) { opt.label = `${o} — ${note}`; opt.textContent = note; }
+        list.append(opt);
+      });
+      input.setAttribute('list', list.id);
+      wrap.append(list);
+    }
+  }
+  input.id = id;
+  input.dataset.field = f.name;
+  input.value = values[f.name] ?? '';
+  // select меняет состав формы → полная перерисовка; текст/combo — только синхронизация
+  const hard = f.type === 'select';
+  input.oninput = () => onChange(f.name, input.value, hard);
+  input.onchange = () => onChange(f.name, input.value, hard);
+  wrap.append(input);
+  if (f.hint) {
+    const hint = document.createElement('div');
+    hint.className = 'hint' + (f.auto ? ' auto' : '');
+    hint.textContent = f.hint;
+    wrap.append(hint);
+  }
+  return wrap;
+}
+
+function btn(label, cls, onClick) {
+  const b = document.createElement('button');
+  b.className = cls; b.textContent = label; b.onclick = onClick;
+  return b;
+}
+
+function dispatch(name, context) {
+  state.dispatched.push(`${name} ${JSON.stringify(context)}`);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

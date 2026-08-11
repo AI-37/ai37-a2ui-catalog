@@ -16,6 +16,7 @@ COMPONENT_NAMES = (
     "ChoiceCard",
     "FormCard",
     "ConstructionsEditor",
+    "LiftEditor",
 )
 
 

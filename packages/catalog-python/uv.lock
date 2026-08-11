@@ -4,7 +4,7 @@ requires-python = ">=3.13, <4.0"
 
 [[package]]
 name = "ai37-a2ui-catalog"
-version = "0.10.0"
+version = "0.14.0"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },

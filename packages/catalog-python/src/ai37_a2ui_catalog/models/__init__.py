@@ -20,6 +20,18 @@ from .form_card import (
     LookupSuggestMode,
 )
 from .latex_formula import LatexFormulaProps
+from .lift_editor import (
+    LiftEditorDependentRule,
+    LiftEditorDependentRuleRow,
+    LiftEditorDependentRuleSource,
+    LiftEditorField,
+    LiftEditorFieldOptionsBy,
+    LiftEditorFieldScope,
+    LiftEditorFieldType,
+    LiftEditorMethodConfig,
+    LiftEditorProps,
+    LiftsMode,
+)
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
 
@@ -30,6 +42,7 @@ COMPONENT_MODELS = {
     "ChoiceCard": ChoiceCardProps,
     "FormCard": FormCardProps,
     "ConstructionsEditor": ConstructionsEditorProps,
+    "LiftEditor": LiftEditorProps,
 }
 
 __all__ = [
@@ -56,6 +69,16 @@ __all__ = [
     "FormFieldLookupValue",
     "FormFieldType",
     "LatexFormulaProps",
+    "LiftEditorDependentRule",
+    "LiftEditorDependentRuleRow",
+    "LiftEditorDependentRuleSource",
+    "LiftEditorField",
+    "LiftEditorFieldOptionsBy",
+    "LiftEditorFieldScope",
+    "LiftEditorFieldType",
+    "LiftEditorMethodConfig",
+    "LiftEditorProps",
+    "LiftsMode",
     "LookupSuggestMode",
     "SimpleTableColumn",
     "SimpleTableProps",

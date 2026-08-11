@@ -10,4 +10,5 @@ export * from './components/form-card-lookup.types';
 export * from './components/form-card-lookup-fetch';
 export * from './components/form-card-lookup-fetch.types';
 export * from './components/constructions-editor';
+export * from './components/lift-editor';
 export * from './catalog';
