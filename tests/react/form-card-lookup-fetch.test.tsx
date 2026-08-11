@@ -40,7 +40,8 @@ function pendingUntilAbort(init?: RequestInit) {
 }
 
 function suggestUrl(referenceId: string, query: string) {
-  return `${LOOKUP_SUGGEST_ROUTE}?${new URLSearchParams({referenceId, query})}`;
+  // fetch-канал ходит через обобщённую ручку ресурсов: wire-параметр `resource` (= referenceId).
+  return `${LOOKUP_SUGGEST_ROUTE}?${new URLSearchParams({resource: referenceId, query})}`;
 }
 
 // role=combobox есть и у <select>, поэтому lookup-инпут ищем по label поля.

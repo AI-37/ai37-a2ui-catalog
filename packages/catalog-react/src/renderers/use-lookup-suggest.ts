@@ -23,7 +23,8 @@ export type UseLookupSuggest = {
 
 /**
  * Fetch-канал подсказок lookup: debounced same-origin GET
- * `LOOKUP_SUGGEST_ROUTE?referenceId=&query=`. `AbortController` отменяет
+ * `LOOKUP_SUGGEST_ROUTE?resource=&query=` (resource = referenceId справочника).
+ * `AbortController` отменяет
  * предыдущий in-flight запрос, так что виден только ответ на последний ввод;
  * unmount отменяет активный запрос. Любой сбой канала — тихий fallback:
  * пустой дропдаун, поле остаётся редактируемым. Общий для lookup-поля
@@ -49,7 +50,9 @@ export function useLookupSuggest({referenceId, minChars}: UseLookupSuggestParams
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const params = new URLSearchParams({referenceId, query});
+    // `resource` = id справочника: fetch-канал ходит через обобщённую ручку ресурсов
+    // оркестратора (LOOKUP_SUGGEST_ROUTE = /api/agent-resource), а не /api/reference-suggest.
+    const params = new URLSearchParams({resource: referenceId, query});
 
     try {
       const response = await fetch(`${LOOKUP_SUGGEST_ROUTE}?${params}`, {
