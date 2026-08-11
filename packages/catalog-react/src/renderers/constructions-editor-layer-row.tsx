@@ -1,6 +1,7 @@
 import React from 'react';
 import type {ConstructionLayer, LookupOption} from '@ai37/a2ui-catalog-schemas';
 import type {ConstructionsEditorLayerRowProps} from './constructions-editor.types';
+import {isLambdaManualOutOfRange, isThicknessOutOfRange} from './find-invalid-layers';
 import {layersEqual} from './layers-equal';
 import {LookupCombobox} from './lookup-combobox';
 import {readOptionLambda} from './read-option-lambda';
@@ -45,6 +46,10 @@ function LayerSummary({layer, index, condition, onOpen}: ConstructionsEditorLaye
     typeof layer.lambdaA === 'number' || typeof layer.lambdaB === 'number';
   const materialMissing = layer.material.trim() === '';
   const thicknessMissing = layer.thicknessMm === null || layer.thicknessMm <= 0;
+  // Предикаты — из find-invalid-layers: подсвечиваем ровно то, что там же
+  // считается невалидным, иначе карточка помечена, а причина не видна.
+  const thicknessOutOfRange = isThicknessOutOfRange(layer.thicknessMm);
+  const lambdaOutOfRange = isLambdaManualOutOfRange(layer.lambdaManual);
 
   return (
     <button
@@ -94,14 +99,21 @@ function LayerSummary({layer, index, condition, onOpen}: ConstructionsEditorLaye
           marginLeft: 'auto',
         }}
       >
-        <span style={{color: thicknessMissing ? tokens.warning : tokens.text}}>
-          {thicknessMissing ? 'толщина не задана' : `${layer.thicknessMm} мм`}
+        <span style={{color: thicknessMissing || thicknessOutOfRange ? tokens.warning : tokens.text}}>
+          {thicknessMissing
+            ? 'толщина не задана'
+            : thicknessOutOfRange
+              ? `${layer.thicknessMm} мм — вне диапазона`
+              : `${layer.thicknessMm} мм`}
         </span>
         <span style={{color: tokens.textSubtle}}>·</span>
         {isGap ? (
           <span style={{color: tokens.textMuted}}>Rs — в итоговом расчёте</span>
         ) : hasManual ? (
-          <span>λ {layer.lambdaManual}</span>
+          <span style={lambdaOutOfRange ? {color: tokens.warning} : undefined}>
+            λ {layer.lambdaManual}
+            {lambdaOutOfRange ? ' — вне диапазона' : ''}
+          </span>
         ) : hasReferenceLambda ? (
           <span>
             λ {resolveLayerLambda(layer, condition)}

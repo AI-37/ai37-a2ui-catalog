@@ -549,6 +549,99 @@ describe('ConstructionsEditor', () => {
     });
   });
 
+  describe('физические диапазоны ручного ввода', () => {
+    /** Конструкция из одного слоя с ручной λ — минимальный носитель случая. */
+    const withManualLayer = (lambdaManual: number, thicknessMm = 10) => ({
+      constructions: [
+        {
+          id: 'r-1',
+          type: 'steny' as const,
+          name: 'Стена',
+          layers: [{material: 'Штукатурка', thicknessMm, lambdaManual}],
+        },
+      ],
+    });
+
+    it('λ 0,001 — прод-дефект: слой помечен «вне диапазона», карточка «проверить»', () => {
+      renderSurface(withManualLayer(0.001));
+      openTab('Конструкции');
+
+      expect(screen.getByText('! проверить')).toBeInTheDocument();
+      openCard(/Стена/);
+      expect(screen.getByRole('button', {name: /вне диапазона/})).toBeInTheDocument();
+    });
+
+    // Границы проверяем одним рендером двумя слоями: состоянием конструкций
+    // владеет компонент, новые props его не пересобирают — сравнивать «до/после»
+    // в одном тесте нечем.
+    it('λ на границах диапазона валидна: 0,02 и 5 пометки не дают', () => {
+      renderSurface({
+        constructions: [
+          {
+            id: 'r-3',
+            type: 'steny',
+            name: 'Стена',
+            layers: [
+              {material: 'Нижняя граница', thicknessMm: 10, lambdaManual: 0.02},
+              {material: 'Верхняя граница', thicknessMm: 10, lambdaManual: 5},
+            ],
+          },
+        ],
+      });
+      openTab('Конструкции');
+
+      expect(screen.queryByText('! проверить')).not.toBeInTheDocument();
+    });
+
+    it('λ из справочника не проверяется: гранит 3,49 и сталь 58 законны', () => {
+      renderSurface({
+        constructions: [
+          {
+            id: 'r-2',
+            type: 'steny',
+            name: 'Стена',
+            layers: [
+              {material: 'Гранит', thicknessMm: 40, materialKey: 'granit', lambdaA: 3.49, lambdaB: 3.49},
+              {material: 'Сталь', thicknessMm: 2, materialKey: 'stal', lambdaA: 58, lambdaB: 58},
+            ],
+          },
+        ],
+      });
+      openTab('Конструкции');
+
+      expect(screen.queryByText('! проверить')).not.toBeInTheDocument();
+    });
+
+    it('толщина сверх 2000 мм помечена и названа причиной', () => {
+      renderSurface(withManualLayer(0.7, 2500));
+      openTab('Конструкции');
+
+      expect(screen.getByText('! проверить')).toBeInTheDocument();
+      openCard(/Стена/);
+      expect(screen.getByRole('button', {name: /2500 мм — вне диапазона/})).toBeInTheDocument();
+    });
+
+    it('толщина ровно 2000 мм — ещё валидна', () => {
+      renderSurface(withManualLayer(0.7, 2000));
+      openTab('Конструкции');
+
+      expect(screen.queryByText('! проверить')).not.toBeInTheDocument();
+    });
+
+    it('индикация не блокирует: submit с невалидным слоем уходит как есть', async () => {
+      const {surface} = renderSurface(withManualLayer(0.001));
+      const actions = subscribeActions(surface);
+      openTab('Конструкции');
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:apply');
+    });
+  });
+
   describe('вкладки', () => {
     it('переключение локально: action\'ов нет, ввод обеих вкладок жив', () => {
       const {surface} = renderSurface();
