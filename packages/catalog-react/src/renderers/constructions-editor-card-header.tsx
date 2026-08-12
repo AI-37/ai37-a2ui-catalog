@@ -1,21 +1,12 @@
 import React from 'react';
 import type {CherdachnyeSubtype, ConstructionType} from '@ai37/a2ui-catalog-schemas';
 import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
+import {ConstructionsEditorSelect} from './constructions-editor-select';
 import type {
   ConstructionHeaderFields,
   ConstructionsEditorCardHeaderProps,
 } from './constructions-editor.types';
 import {headerFieldsEqual} from './header-fields-equal';
-import {
-  cancelButtonStyle,
-  commitButtonStyle,
-  controlStyle,
-  editButtonStyle,
-  fieldLabelStyle,
-  fieldStyle,
-  FIELD_COLUMN_WIDTH,
-} from './shared';
-import {tokens} from './tokens';
 
 /** Единственный тип с разновидностями: селект subtype только у него. */
 const SUBTYPED_TYPE: ConstructionType = 'cherdachnye_podval_grunt';
@@ -41,24 +32,13 @@ function HeaderSummary({entry, typeConfigs, onOpen}: ConstructionsEditorCardHead
   const name = entry.name?.trim();
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'baseline',
-        gap: 10,
-        maxWidth: FIELD_COLUMN_WIDTH,
-      }}
-    >
-      <div style={{display: 'grid', gap: 2, flex: 1, minWidth: 0}}>
-        <span style={{color: tokens.textStrong, fontWeight: 500, overflowWrap: 'anywhere'}}>
+    <div className="a2ui-ce-head">
+      <div className="a2ui-ce-head__text">
+        <span className="a2ui-ce-head__type">
           {config?.label ?? entry.type}
           {subtypeLabel ? ` · ${subtypeLabel}` : ''}
         </span>
-        {name ? (
-          <span style={{color: tokens.textMuted, fontSize: '0.9rem', overflowWrap: 'anywhere'}}>
-            {name}
-          </span>
-        ) : null}
+        {name ? <span className="a2ui-ce-head__name">{name}</span> : null}
       </div>
       {/* aria-label различает две кнопки «Изменить» карточки без слоёв
           (шапка и паспортное Rпр) — на слух они были бы одинаковы. */}
@@ -66,7 +46,7 @@ function HeaderSummary({entry, typeConfigs, onOpen}: ConstructionsEditorCardHead
         type="button"
         aria-label="Изменить тип и название"
         onClick={onOpen}
-        style={editButtonStyle}
+        className="a2ui-ce-btn a2ui-ce-btn--edit"
       >
         Изменить
       </button>
@@ -105,55 +85,52 @@ function HeaderForm({entry, typeConfigs, onCommit, onCancel}: ConstructionsEdito
   };
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gap: 10,
-        padding: '10px 12px',
-        borderRadius: 12,
-        border: `1px solid ${tokens.borderStrong}`,
-        background: tokens.surface,
-        maxWidth: FIELD_COLUMN_WIDTH,
-        boxSizing: 'border-box',
-      }}
-    >
-      <label style={fieldStyle}>
-        <span style={fieldLabelStyle}>Тип конструкции</span>
-        <select value={draft.type} onChange={handleTypeChange} style={controlStyle}>
+    <div className="a2ui-ce-form">
+      <label className="a2ui-ce-field">
+        <span className="a2ui-ce-field__label">Тип конструкции</span>
+        <ConstructionsEditorSelect
+          value={draft.type}
+          onChange={handleTypeChange}
+          className="a2ui-ce-control"
+        >
           {typeConfigs.map(typeConfig => (
             <option key={typeConfig.type} value={typeConfig.type}>
               {typeConfig.label}
             </option>
           ))}
-        </select>
+        </ConstructionsEditorSelect>
       </label>
       {draft.type === SUBTYPED_TYPE ? (
-        <label style={fieldStyle}>
-          <span style={fieldLabelStyle}>Разновидность</span>
-          <select value={draft.subtype ?? ''} onChange={handleSubtypeChange} style={controlStyle}>
+        <label className="a2ui-ce-field">
+          <span className="a2ui-ce-field__label">Разновидность</span>
+          <ConstructionsEditorSelect
+            value={draft.subtype ?? ''}
+            onChange={handleSubtypeChange}
+            className="a2ui-ce-control"
+          >
             <option value="">—</option>
             {Object.entries(CHERDACHNYE_SUBTYPE_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
             ))}
-          </select>
+          </ConstructionsEditorSelect>
         </label>
       ) : null}
-      <label style={fieldStyle}>
-        <span style={fieldLabelStyle}>Название</span>
+      <label className="a2ui-ce-field">
+        <span className="a2ui-ce-field__label">Название</span>
         <input
           type="text"
           value={draft.name ?? ''}
           onChange={event => setDraft({...draft, name: event.target.value})}
-          style={controlStyle}
+          className="a2ui-ce-control"
         />
       </label>
-      <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-        <button type="button" onClick={handleSave} style={commitButtonStyle}>
+      <div className="a2ui-ce-actions">
+        <button type="button" onClick={handleSave} className="a2ui-ce-btn a2ui-ce-btn--commit">
           Сохранить
         </button>
-        <button type="button" onClick={onCancel} style={cancelButtonStyle}>
+        <button type="button" onClick={onCancel} className="a2ui-ce-btn">
           Отмена
         </button>
       </div>

@@ -19,6 +19,7 @@ import choiceCardMessages from '../../../fixtures/messages/choice-card-surface.j
 import formCardMessages from '../../../fixtures/messages/form-card-surface.json';
 import formCardLookupFetchMessages from '../../../fixtures/messages/form-card-lookup-fetch-surface.json';
 import constructionsEditorMessages from '../../../fixtures/messages/constructions-editor-surface.json';
+import constructionsConditionsMessages from '../../../fixtures/messages/constructions-editor-conditions-surface.json';
 import liftEditorMessages from '../../../fixtures/messages/lift-editor-surface.json';
 import liftEditorGroupFixture from '../../../fixtures/valid/lift-editor-group.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
@@ -69,8 +70,15 @@ const examples = [
     key: 'constructions-preview',
     title: 'Constructions Editor',
     description:
-      'Объединённый экран одним сообщением: вкладка общих данных (город из справочника подставляет климат) и вкладка конструкций со слоями-сводками и формой слоя с явным «Применить», lookup материалов (dev-middleware) и live Rпр; автосейв черновика по коммитам формы слоя (в консоли), подсветка невалидных конструкций и один submit без клиентской блокировки.',
+      'Экран одним сообщением: блок «Условия» в шапке (город из справочника подставляет климат) и конструкции сразу под ним — слои-сводки с формой слоя и явным «Применить», lookup материалов (dev-middleware) и live Rпр; автосейв черновика по коммитам формы слоя (в консоли), подсветка невалидных конструкций и один submit без клиентской блокировки.',
     messages: withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
+  },
+  {
+    key: 'constructions-conditions-preview',
+    title: 'Constructions Editor — условия и provenance',
+    description:
+      'Тот же экран с шапкой карточки, свёрнутым блоком условий (строка-сводка собрана из значений) и источниками значений: «из проекта» заливкой, «предложено агентом» акцентной рамкой с обоснованием, «по умолчанию» маркером. ГСОП приходит от агента и стоит рядом с регионом; правка поля снимает с него подпись источника, правка климата прячет протухший ГСОП. Ширину карточки задаёт контейнер — сузьте окно, и сетка условий схлопнется в одну колонку.',
+    messages: constructionsConditionsMessages as A2uiMessage[],
   },
   {
     key: 'lift-preview',

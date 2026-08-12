@@ -8,7 +8,10 @@ from .constructions_editor import (
     ConstructionTypeConfig,
     ConstructionsCity,
     ConstructionsEditorProps,
+    ConstructionsFieldSource,
+    ConstructionsFieldSourceKind,
     ConstructionsGeneral,
+    ConstructionsGeneralSources,
 )
 from .flex_table import FlexTableCell, FlexTableProps, FlexTableRow
 from .form_card import (
@@ -59,7 +62,10 @@ __all__ = [
     "ConstructionTypeConfig",
     "ConstructionsCity",
     "ConstructionsEditorProps",
+    "ConstructionsFieldSource",
+    "ConstructionsFieldSourceKind",
     "ConstructionsGeneral",
+    "ConstructionsGeneralSources",
     "FlexTableCell",
     "FlexTableProps",
     "FlexTableRow",

@@ -3,32 +3,53 @@ import type {
   ConstructionLayer,
   ConstructionTypeConfig,
   ConstructionsEditorProps,
+  ConstructionsFieldSource,
   ConstructionsGeneral,
+  ConstructionsGeneralSources,
 } from '@ai37/a2ui-catalog-schemas';
 
 /** Условие эксплуатации ограждающих конструкций (выбор λА/λБ). */
 export type OperatingCondition = ConstructionsEditorProps['condition'];
 
-/** Вкладка объединённого экрана. */
-export type ConstructionsEditorTab = 'general' | 'constructions';
+/** Ключ поля общих данных — он же ключ записи в `generalSources`. */
+export type ConstructionsGeneralKey = keyof ConstructionsGeneral;
 
 /** Климат, вычитанный из опции справочника городов; нет поля — нет ключа. */
 export type ConstructionsClimatePatch = Partial<Pick<ConstructionsGeneral, 'tot' | 'zot' | 'tn'>>;
 
-export type ConstructionsEditorTabsProps = {
-  active: ConstructionsEditorTab;
-  generalLabel: string;
-  constructionsLabel: string;
-  onSelect: (tab: ConstructionsEditorTab) => void;
-};
-
 export type ConstructionsEditorGeneralProps = {
   general: ConstructionsGeneral;
+  /**
+   * Источники значений, которых пользователь ещё не касался: тронутое поле
+   * стало пользовательским и оформления источника не получает.
+   */
+  sources: ConstructionsGeneralSources;
+  /** false — климат тронут: присланный ГСОП протух и не показывается. */
+  showGsop: boolean;
   buildingTypeOptions?: string[] | undefined;
   /** Без справочника поле города остаётся обычным вводом без подсказок. */
   cityReferenceId?: string | undefined;
   minChars?: number | undefined;
-  onChange: (general: ConstructionsGeneral) => void;
+  /** Правка: новый блок целиком и ключи, которых коснулся пользователь. */
+  onChange: (general: ConstructionsGeneral, touched: ConstructionsGeneralKey[]) => void;
+};
+
+export type ConstructionsEditorConditionsProps = ConstructionsEditorGeneralProps & {
+  /** Раскрыт ли блок; состояние локальное, наружу не уезжает. */
+  open: boolean;
+  onToggle: () => void;
+};
+
+export type ConstructionsEditorSourceNoteProps = {
+  source: ConstructionsFieldSource;
+};
+
+export type ConstructionsEditorSelectProps = {
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  /** Класс самого `select` — оформление контрола, в т.ч. по источнику. */
+  className: string;
+  children: React.ReactNode;
 };
 
 /**

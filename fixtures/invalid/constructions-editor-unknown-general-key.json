@@ -21,7 +21,7 @@
       "tn": null,
       "tv": null,
       "condition": null,
-      "gsop": 5000
+      "hdd": 5000
     },
     "materialsReferenceId": "sp50-materials",
     "addLabel": "Добавить конструкцию",

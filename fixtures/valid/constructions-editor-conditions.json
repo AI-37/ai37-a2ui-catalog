@@ -1,0 +1,104 @@
+{
+  "component": "ConstructionsEditor",
+  "props": {
+    "constructions": [
+      {
+        "id": "c-wall-1",
+        "type": "steny",
+        "name": "Наружная стена (кирпич + минвата)",
+        "layers": [
+          {
+            "material": "Кладка из глиняного обыкновенного кирпича",
+            "thicknessMm": 380,
+            "kind": "material",
+            "materialKey": "m-kirpich-glina",
+            "lambdaA": 0.7,
+            "lambdaB": 0.81
+          },
+          {
+            "material": "Плиты минераловатные",
+            "thicknessMm": 150,
+            "materialKey": "m-minvata-plity",
+            "lambdaA": 0.045,
+            "lambdaB": 0.048
+          }
+        ]
+      },
+      {
+        "id": "c-roof-1",
+        "type": "pokrytiya",
+        "name": "Покрытие",
+        "layers": [
+          {
+            "material": "Железобетон",
+            "thicknessMm": 200,
+            "materialKey": "m-zhelezobeton",
+            "lambdaA": 1.92,
+            "lambdaB": 2.04
+          },
+          {
+            "material": "Экструдированный пенополистирол",
+            "thicknessMm": 200,
+            "materialKey": "m-xps",
+            "lambdaA": 0.031,
+            "lambdaB": 0.032
+          }
+        ]
+      }
+    ],
+    "typeConfigs": [
+      {
+        "type": "steny",
+        "label": "Наружные стены",
+        "hasLayers": true,
+        "rnorm": 3.5,
+        "alphaV": 8.7,
+        "alphaN": 23
+      },
+      {
+        "type": "pokrytiya",
+        "label": "Покрытия",
+        "hasLayers": true,
+        "rnorm": 5.2,
+        "alphaV": 8.7,
+        "alphaN": 23
+      }
+    ],
+    "general": {
+      "buildingType": "Жилые",
+      "city": {"value": "kurgan", "label": "Курган"},
+      "tot": -6.4,
+      "zot": 209,
+      "tn": -35,
+      "tv": 21,
+      "condition": "А",
+      "gsop": 6550
+    },
+    "generalSources": {
+      "city": {
+        "source": "question",
+        "note": "регион — из вашего вопроса · ГСОП рассчитан по СП 131.1"
+      },
+      "buildingType": {"source": "suggested", "note": "предложено — «жилого дома» в вопросе"},
+      "tv": {"source": "suggested", "note": "предложено — норма для жилых по ГОСТ 30494"},
+      "condition": {
+        "source": "suggested",
+        "note": "предложено — по зоне влажности региона и режиму помещений"
+      }
+    },
+    "conditionsCollapsed": true,
+    "headerTitle": "Параметры расчёта",
+    "headerContext": "Без проекта · СП 50.13330",
+    "buildingTypeOptions": [
+      "Жилые",
+      "Общественные",
+      "Административные"
+    ],
+    "cityReferenceId": "cities",
+    "materialsReferenceId": "sp50-materials",
+    "minChars": 2,
+    "addLabel": "Добавить конструкцию",
+    "submitLabel": "Рассчитать",
+    "submitAction": "constructions:apply"
+  }
+}

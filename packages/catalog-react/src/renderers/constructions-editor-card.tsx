@@ -2,6 +2,7 @@ import React from 'react';
 import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import {computeLiveRpr} from './compute-live-rpr';
 import {ConstructionsEditorCardHeader} from './constructions-editor-card-header';
+import {ConstructionsEditorChevron} from './constructions-editor-chevron';
 import {ConstructionsEditorLayerRow} from './constructions-editor-layer-row';
 import {ConstructionsEditorPassport} from './constructions-editor-passport';
 import {findInvalidLayers} from './find-invalid-layers';
@@ -73,69 +74,30 @@ export function ConstructionsEditorCard({
   };
 
   return (
-    <section
-      style={{
-        borderRadius: 14,
-        border: `1px solid ${invalidity.invalid ? tokens.warning : tokens.border}`,
-        background: tokens.surfaceMuted,
-      }}
-    >
-      <header style={{display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px'}}>
+    <section className={`a2ui-ce-card${invalidity.invalid ? ' a2ui-ce-card--invalid' : ''}`}>
+      <header className="a2ui-ce-card__header">
         <button
           type="button"
           aria-expanded={open}
           onClick={onToggle}
-          style={{
-            flex: 1,
-            display: 'flex',
-            // justifyContent явно: UA-стиль кнопки центрирует flex-содержимое,
-            // и заголовок уезжал от левого края.
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            gap: 8,
-            padding: 0,
-            border: 'none',
-            background: 'transparent',
-            color: tokens.textStrong,
-            fontWeight: 600,
-            fontSize: '0.98rem',
-            textAlign: 'left',
-            cursor: 'pointer',
-          }}
+          className="a2ui-ce-card__toggle"
         >
-          <Chevron open={open} />
+          <ConstructionsEditorChevron open={open} />
           {title}
         </button>
-        {invalidity.invalid ? (
-          <span
-            style={{
-              color: tokens.warning,
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            ! проверить
-          </span>
-        ) : null}
+        {invalidity.invalid ? <span className="a2ui-ce-card__warn">! проверить</span> : null}
         <RprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />
         <button
           type="button"
           aria-label="Удалить конструкцию"
           onClick={onRemove}
-          style={{
-            border: 'none',
-            background: 'transparent',
-            color: tokens.textSubtle,
-            cursor: 'pointer',
-            fontSize: '1rem',
-          }}
+          className="a2ui-ce-card__remove"
         >
           ✕
         </button>
       </header>
       {open ? (
-        <div style={{display: 'grid', gap: 10, padding: '0 12px 12px'}}>
+        <div className="a2ui-ce-card__body">
           <ConstructionsEditorCardHeader
             entry={entry}
             typeConfigs={typeConfigs}
@@ -153,7 +115,7 @@ export function ConstructionsEditorCard({
               onCancel={() => onEditingChange(null)}
             />
           ) : (
-            <div style={{display: 'grid', gap: 8}}>
+            <div className="a2ui-ce-card__layers">
               {entry.layers.map((layer, index) => (
                 <ConstructionsEditorLayerRow
                   key={index}
@@ -188,15 +150,7 @@ export function ConstructionsEditorCard({
                 <button
                   type="button"
                   onClick={() => onEditingChange('new')}
-                  style={{
-                    justifySelf: 'start',
-                    padding: '6px 12px',
-                    borderRadius: 10,
-                    border: `1px dashed ${tokens.borderStrong}`,
-                    background: 'transparent',
-                    color: tokens.text,
-                    cursor: 'pointer',
-                  }}
+                  className="a2ui-ce-btn a2ui-ce-btn--add-layer"
                 >
                   + Слой
                 </button>
@@ -209,34 +163,6 @@ export function ConstructionsEditorCard({
   );
 }
 
-/** Шеврон аккордеона: вправо — свёрнуто, вниз (поворот) — раскрыто. */
-function Chevron({open}: {open: boolean}) {
-  return (
-    <svg
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      aria-hidden="true"
-      focusable="false"
-      style={{
-        flexShrink: 0,
-        color: tokens.textSubtle,
-        transform: open ? 'rotate(90deg)' : 'none',
-        transition: 'transform 120ms ease',
-      }}
-    >
-      <path
-        d="M3.5 1.5 L7 5 L3.5 8.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 /**
  * Чип live-Rпр: значение и сравнение с Rнорм (зелёный ≥ / красный &lt;).
  * Без `rnorm` сравнение не показывается; без вычислимого Rпр — «—».
@@ -245,21 +171,10 @@ function RprChip({rpr, rnorm}: {rpr: number | null; rnorm: number | undefined}) 
   const comparable = rpr !== null && rnorm !== undefined;
   const passes = comparable && rpr >= rnorm;
 
-  const color = !comparable ? tokens.textMuted : passes ? tokens.success : tokens.danger;
-  const border = !comparable ? tokens.border : color;
+  const modifier = !comparable ? '' : passes ? ' a2ui-ce-chip--pass' : ' a2ui-ce-chip--fail';
 
   return (
-    <span
-      style={{
-        padding: '2px 10px',
-        borderRadius: 999,
-        border: `1px solid ${border}`,
-        color,
-        fontSize: '0.85rem',
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-      }}
-    >
+    <span className={`a2ui-ce-chip${modifier}`}>
       Rпр {rpr === null ? '—' : rpr.toFixed(2)}
       {comparable ? ` ${passes ? '≥' : '<'} ${rnorm.toFixed(2)}` : ''}
     </span>

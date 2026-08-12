@@ -25,6 +25,7 @@ def load_fixture(group: str, name: str):
         ("choice-card.json", "ChoiceCard"),
         ("form-card.json", "FormCard"),
         ("constructions-editor.json", "ConstructionsEditor"),
+        ("constructions-editor-conditions.json", "ConstructionsEditor"),
         ("lift-editor-per-lift.json", "LiftEditor"),
         ("lift-editor-group.json", "LiftEditor"),
     ],
@@ -97,7 +98,37 @@ def test_constructions_editor_general_accepts_empty_block() -> None:
     model = validate_component_payload("ConstructionsEditor", props)
 
     assert model.general is not None
-    assert model.general.model_dump() == empty_general
+    # gsop опционален — прежние эмитенты ключа не шлют, в дампе он None.
+    assert model.general.model_dump() == {**empty_general, "gsop": None}
+
+
+def test_constructions_editor_general_sources() -> None:
+    fixture = load_fixture("valid", "constructions-editor.json")
+    props = {
+        **fixture["props"],
+        "general": {**fixture["props"]["general"], "gsop": 6380},
+        "generalSources": {
+            "tv": {"source": "suggested", "note": "норма для жилых по ГОСТ 30494"},
+            "city": {"source": "project"},
+        },
+        "conditionsCollapsed": True,
+        "headerTitle": "Параметры расчёта",
+        "headerContext": "Проект «ЖК Северный, к.3» · СП 50.13330",
+    }
+
+    model = validate_component_payload("ConstructionsEditor", props)
+
+    assert model.general.gsop == 6380
+    assert model.generalSources.tv.source == "suggested"
+    assert model.generalSources.city.note is None
+
+    # Ключ, которого нет в general, отвергается — связь по строковому ключу
+    # проверяет схема (Решение 4 design.md).
+    with pytest.raises(ValidationError):
+        validate_component_payload(
+            "ConstructionsEditor",
+            {**props, "generalSources": {"unknownField": {"source": "project"}}},
+        )
 
 
 def test_constructions_editor_without_back_button() -> None:

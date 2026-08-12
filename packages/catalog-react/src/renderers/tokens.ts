@@ -36,6 +36,17 @@ const DEFAULTS = {
 
   'color-formula-from': '#f8fafc',
   'color-formula-to': '#eef2ff',
+
+  // Палитра макета теплотехнического брифа (`ConstructionsEditor`): тёплый
+  // нейтральный, с общей slate-палитрой каталога почти не пересекается.
+  // Отдельной группой, а не заменой общих токенов: подмена перекрасила бы и
+  // остальные рендереры, которых этот макет не касается.
+  'color-ce-surface': '#fafaf9',
+  'color-ce-surface-sunken': '#f1f1ef',
+  'color-ce-border': '#e5e4e1',
+  'color-ce-text': '#1f1f1e',
+  'color-ce-text-muted': '#6e6e6a',
+  'color-ce-accent': '#245a87',
 } as const;
 
 type TokenName = keyof typeof DEFAULTS;
@@ -70,6 +81,13 @@ export const tokens = {
 
   formulaFrom: cssVar('color-formula-from'),
   formulaTo: cssVar('color-formula-to'),
+
+  ceSurface: cssVar('color-ce-surface'),
+  ceSurfaceSunken: cssVar('color-ce-surface-sunken'),
+  ceBorder: cssVar('color-ce-border'),
+  ceText: cssVar('color-ce-text'),
+  ceTextMuted: cssVar('color-ce-text-muted'),
+  ceAccent: cssVar('color-ce-accent'),
 } as const;
 
 /** id для тега <style> с дефолтной темой (если консьюмер решит её объявить). */

@@ -9,7 +9,10 @@ import type {ConstructionsEditorProps, ConstructionsGeneral} from '@ai37/a2ui-ca
  *   Пустой выбор остаётся доступным — вариант «—» в селекте;
  * - `condition` берётся из `general`, а при пустом значении — из устаревшего
  *   top-level пропа (Решение 6 design.md); `null` дальше означает λБ, как на
- *   сервере.
+ *   сервере;
+ * - `gsop` переносится как есть: клиент его не считает и не правит, но держит в
+ *   состоянии — иначе показ рядом с регионом пришлось бы читать из props мимо
+ *   единственного источника правды (Решение 3 design.md).
  */
 export function createGeneralState(
   general: ConstructionsGeneral | undefined,
@@ -24,5 +27,6 @@ export function createGeneralState(
     tn: general?.tn ?? null,
     tv: general?.tv ?? null,
     condition: general?.condition ?? condition ?? null,
+    gsop: general?.gsop ?? null,
   };
 }

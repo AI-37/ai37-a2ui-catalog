@@ -71,20 +71,56 @@ class ConstructionsGeneral(StrictModel):
     tv: float | None
     # Условие эксплуатации А/Б; None → λБ (как на сервере).
     condition: Literal["А", "Б"] | None
+    # ГСОП от агента; клиент его не считает. Опционален ради обратной
+    # совместимости: прежние эмитенты ключа не шлют.
+    gsop: float | None = None
+
+
+# Откуда взялось значение поля general: из проекта, из текста вопроса,
+# предложено агентом или принято по умолчанию.
+ConstructionsFieldSourceKind = Literal["project", "question", "suggested", "default"]
+
+
+class ConstructionsFieldSource(StrictModel):
+    source: ConstructionsFieldSourceKind
+    # Человеческое обоснование одной строкой.
+    note: str = Field(default=None, min_length=1, max_length=200)
+
+
+class ConstructionsGeneralSources(StrictModel):
+    """Источники значений general — параллельный блок, наружу не уходит."""
+
+    buildingType: ConstructionsFieldSource = None
+    city: ConstructionsFieldSource = None
+    tot: ConstructionsFieldSource = None
+    zot: ConstructionsFieldSource = None
+    tn: ConstructionsFieldSource = None
+    tv: ConstructionsFieldSource = None
+    condition: ConstructionsFieldSource = None
+    gsop: ConstructionsFieldSource = None
 
 
 class ConstructionsEditorProps(StrictModel):
     constructions: list[ConstructionEntry]
     typeConfigs: list[ConstructionTypeConfig] = Field(min_length=1)
-    # Общие данные первой вкладки; без них вкладок нет и submit шлёт
+    # Общие данные блока «Условия»; без них блока нет и submit шлёт
     # только `{constructions}`.
     general: ConstructionsGeneral = None
+    # Источники значений general: оформление и подпись, наружу не уходят.
+    generalSources: ConstructionsGeneralSources = None
+    # Начальное состояние блока «Условия»; по умолчанию раскрыт.
+    conditionsCollapsed: bool = None
+    # Шапка карточки: заголовок слева, контекст справа.
+    headerTitle: str = Field(default=None, min_length=1, max_length=120)
+    headerContext: str = Field(default=None, min_length=1, max_length=200)
     buildingTypeOptions: list[Annotated[str, Field(min_length=1, max_length=200)]] = Field(
         default=None, max_length=50
     )
     # Справочник городов для lookup'а; опция может нести tot/zot/tn.
     cityReferenceId: str = Field(default=None, min_length=1, max_length=80)
+    # DEPRECATED: вкладок нет — общие данные стали блоком «Условия».
     generalTabLabel: str = Field(default=None, min_length=1, max_length=80)
+    # DEPRECATED: конструкции идут сразу под блоком «Условия».
     constructionsTabLabel: str = Field(default=None, min_length=1, max_length=80)
     # DEPRECATED: начальное значение general.condition; правится во вкладке.
     condition: Literal["А", "Б"] = None
@@ -92,7 +128,7 @@ class ConstructionsEditorProps(StrictModel):
     minChars: int = Field(default=None, ge=1, le=10)
     addLabel: str = Field(min_length=1, max_length=80)
     submitLabel: str = Field(min_length=1, max_length=80)
-    # Подпись кнопки перехода на вкладку конструкций (submit там же).
+    # DEPRECATED: перехода между вкладками нет — экран один.
     nextLabel: str = Field(default=None, min_length=1, max_length=80)
     submitAction: str = Field(min_length=1, max_length=120)
     # Кнопка возврата опциональна: на объединённом экране её нет.

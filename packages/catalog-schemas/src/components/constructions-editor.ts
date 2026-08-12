@@ -94,6 +94,42 @@ export const constructionsGeneralSchema = z
     tv: z.number().nullable(),
     // Условие эксплуатации А/Б — выбор λА/λБ; null → λБ (как на сервере).
     condition: z.enum(['А', 'Б']).nullable(),
+    // ГСОП, посчитанный агентом (клиент его не выводит из tот/zот). Опционален
+    // ради обратной совместимости: прежние эмитенты ключа не шлют.
+    gsop: z.number().nullable().optional(),
+  })
+  .strict();
+
+// Откуда взялось значение поля `general`: из проекта, из текста вопроса,
+// предложено агентом или принято по умолчанию.
+export const constructionsFieldSourceKindSchema = z.enum([
+  'project',
+  'question',
+  'suggested',
+  'default',
+]);
+
+export const constructionsFieldSourceSchema = z
+  .object({
+    source: constructionsFieldSourceKindSchema,
+    // Человеческое обоснование одной строкой («норма для жилых по ГОСТ 30494»).
+    note: z.string().min(1).max(200).optional(),
+  })
+  .strict();
+
+// Источники значений `general` — параллельный блок, а не обёртка над полями:
+// submit-payload остаётся прежним, наружу источники не уходят (Решение 4
+// design.md). Ключи те же, что у `general`, и все опциональные.
+export const constructionsGeneralSourcesSchema = z
+  .object({
+    buildingType: constructionsFieldSourceSchema.optional(),
+    city: constructionsFieldSourceSchema.optional(),
+    tot: constructionsFieldSourceSchema.optional(),
+    zot: constructionsFieldSourceSchema.optional(),
+    tn: constructionsFieldSourceSchema.optional(),
+    tv: constructionsFieldSourceSchema.optional(),
+    condition: constructionsFieldSourceSchema.optional(),
+    gsop: constructionsFieldSourceSchema.optional(),
   })
   .strict();
 
@@ -101,13 +137,25 @@ export const constructionsEditorPropsSchema = z
   .object({
     constructions: z.array(constructionEntrySchema),
     typeConfigs: z.array(constructionTypeConfigSchema).min(1),
-    // Общие данные первой вкладки. Без пропа вкладок нет: компонент работает
+    // Общие данные блока «Условия». Без пропа блока нет: компонент работает
     // как прежде — один экран конструкций и submit с `{constructions}`.
     general: constructionsGeneralSchema.optional(),
+    // Источники значений `general` — только оформление и подпись; ничего не
+    // блокируют и в submit-payload не уходят.
+    generalSources: constructionsGeneralSourcesSchema.optional(),
+    // Начальное состояние блока «Условия»; дальше состоянием владеет
+    // пользователь. По умолчанию блок раскрыт.
+    conditionsCollapsed: z.boolean().optional(),
+    // Шапка карточки: заголовок слева и контекст справа. Без `headerTitle`
+    // шапки нет.
+    headerTitle: z.string().min(1).max(120).optional(),
+    headerContext: z.string().min(1).max(200).optional(),
     buildingTypeOptions: z.array(z.string().min(1).max(200)).max(50).optional(),
     // Справочник городов для lookup'а; опция может нести tot/zot/tn.
     cityReferenceId: z.string().min(1).max(80).optional(),
+    /** @deprecated вкладок нет: общие данные — блок «Условия» на том же экране. */
     generalTabLabel: z.string().min(1).max(80).optional(),
+    /** @deprecated вкладок нет: конструкции идут сразу под блоком «Условия». */
     constructionsTabLabel: z.string().min(1).max(80).optional(),
     /** @deprecated начальное значение `general.condition`; правится во вкладке. */
     condition: z.enum(['А', 'Б']).optional(),
@@ -115,7 +163,7 @@ export const constructionsEditorPropsSchema = z
     minChars: z.number().int().min(1).max(10).optional(),
     addLabel: z.string().min(1).max(80),
     submitLabel: z.string().min(1).max(80),
-    // Подпись кнопки перехода на вкладку конструкций (submit там же).
+    /** @deprecated перехода между вкладками нет: экран один. */
     nextLabel: z.string().min(1).max(80).optional(),
     submitAction: z.string().min(1).max(120),
     // Кнопка возврата опциональна: на объединённом экране её нет, у прежних
@@ -137,6 +185,9 @@ export type ConstructionEntry = z.infer<typeof constructionEntrySchema>;
 export type ConstructionTypeConfig = z.infer<typeof constructionTypeConfigSchema>;
 export type ConstructionsCity = z.infer<typeof constructionsCitySchema>;
 export type ConstructionsGeneral = z.infer<typeof constructionsGeneralSchema>;
+export type ConstructionsFieldSourceKind = z.infer<typeof constructionsFieldSourceKindSchema>;
+export type ConstructionsFieldSource = z.infer<typeof constructionsFieldSourceSchema>;
+export type ConstructionsGeneralSources = z.infer<typeof constructionsGeneralSourcesSchema>;
 export type ConstructionsEditorProps = z.infer<typeof constructionsEditorPropsSchema>;
 
 export const constructionsEditorDefinition: CatalogComponentDefinition<
@@ -145,6 +196,6 @@ export const constructionsEditorDefinition: CatalogComponentDefinition<
   name: 'ConstructionsEditor',
   slug: 'constructions-editor',
   description:
-    'A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables, optionally paired with a general-data tab for climate and building inputs. The user edits both tabs entirely on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, city lookup that fills climate values, live reduced thermal resistance (R) feedback against the normative value — and submits the whole state back to the agent in a single action, without client-side blocking.',
+    'A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables, headed by a collapsible "conditions" block with the climate and building inputs (region with agent-computed HDD, room purpose, indoor temperature, operating condition). Every general value may carry its provenance (from the project, from the question, suggested by the agent, taken by default) shown as a caption under the control. The user edits everything on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, city lookup that fills climate values, live reduced thermal resistance (R) feedback against the normative value — and submits the whole state back to the agent in a single action, without client-side blocking.',
   schema: constructionsEditorPropsSchema,
 };

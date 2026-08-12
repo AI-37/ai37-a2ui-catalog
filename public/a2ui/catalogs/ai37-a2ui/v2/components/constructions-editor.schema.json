@@ -253,6 +253,12 @@
                   "type": "null"
                 }
               ]
+            },
+            "gsop": {
+              "type": [
+                "number",
+                "null"
+              ]
             }
           },
           "required": [
@@ -265,6 +271,209 @@
             "condition"
           ],
           "additionalProperties": false
+        },
+        "generalSources": {
+          "type": "object",
+          "properties": {
+            "buildingType": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "city": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "tot": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "zot": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "tn": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "tv": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "condition": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            },
+            "gsop": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "conditionsCollapsed": {
+          "type": "boolean"
+        },
+        "headerTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "headerContext": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
         },
         "buildingTypeOptions": {
           "type": "array",

@@ -17,6 +17,7 @@ export function LookupCombobox({
   onInputChange,
   onPick,
   onClose,
+  inputClassName,
 }: LookupComboboxProps) {
   return (
     <span style={{position: 'relative', display: 'grid'}}>
@@ -32,7 +33,9 @@ export function LookupCombobox({
         onKeyDown={event => {
           if (event.key === 'Escape') onClose();
         }}
-        style={inputStyle}
+        // Класс и инлайн-стиль взаимоисключающи: инлайн победил бы CSS-слой.
+        className={inputClassName}
+        style={inputClassName ? undefined : inputStyle}
       />
       <input type="hidden" name={name} value={selected?.value ?? ''} />
       {options.length > 0 ? (
