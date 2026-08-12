@@ -1,6 +1,6 @@
 {
   "name": "ai37-a2ui-catalog-monorepo",
-  "version": "0.14.0",
+  "version": "0.15.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.29.3",
@@ -19,7 +19,8 @@
     "verify:public": "tsx scripts/verify-public.ts",
     "lint": "pnpm run typecheck",
     "demo": "pnpm --filter @ai37/a2ui-demo run dev",
-    "version:bump": "node scripts/bump-version.mjs"
+    "version:bump": "node scripts/bump-version.mjs",
+    "install:consumer": "node scripts/install-to-consumer.mjs"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

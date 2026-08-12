@@ -52,16 +52,12 @@ function subscribeActions(surface: any) {
   return actions;
 }
 
-function openTab(name: 'Общие данные' | 'Конструкции') {
-  fireEvent.click(screen.getByRole('tab', {name}));
-}
-
 /** Карточки на старте свёрнуты — раскрываем ту, что нужна тесту. */
 function openCard(name: RegExp | string) {
   fireEvent.click(screen.getByRole('button', {name}));
 }
 
-/** Клик по строке-сводке слоя раскрывает его форму (имя начинается с «№N»). */
+/** Клик по строке-сводке слоя раскрывает его форму (ищем по материалу). */
 function openLayerRow(name: RegExp) {
   fireEvent.click(screen.getByRole('button', {name}));
 }
@@ -86,7 +82,9 @@ function passportInput() {
 
 /** Строки-сводки слоёв всех раскрытых карточек. */
 function layerSummaries() {
-  return screen.queryAllByRole('button', {name: /^№\d/});
+  // Строку слоя ищем по её классу: порядковых номеров в разметке больше нет,
+  // а материал у черновой строки может быть пустым.
+  return [...document.querySelectorAll('.a2ui-ce-layer')];
 }
 
 function getMaterialInputs() {
@@ -101,16 +99,35 @@ function getCityInput() {
   return screen.getByPlaceholderText('Город из справочника');
 }
 
-/** Поля климата ищем по расшифровке в подписи (обозначение идёт с <sub>). */
+/**
+ * Поля климата ищем по расшифровке в подписи (обозначение идёт с <sub>); tв
+ * переехало в основную сетку условий и подписано по-другому.
+ */
 const CLIMATE_LABELS = {
   tot: /средняя темп\. отопительного периода/,
   zot: /продолжительность отопит\. периода/,
   tn: /холодной пятидневки/,
-  tv: /расчётная внутренняя температура/,
+  tv: /Температура внутреннего воздуха/,
 } as const;
 
 function climateInput(key: keyof typeof CLIMATE_LABELS) {
   return screen.getByLabelText(CLIMATE_LABELS[key]);
+}
+
+/** Блок условий свёрнут — раскрываем его для тестов, которые смотрят в поля. */
+function showConditions() {
+  // Раскрывает вся строка-сводка: имя кнопки — весь её текст.
+  fireEvent.click(screen.getByRole('button', {name: /Показать/}));
+}
+
+/** Поле ГСОП ряда климата: подпись + значение, ввода в нём нет. */
+function gsopField() {
+  return screen.getByText(/ГСОП — градусо-сутки/).closest('div')!;
+}
+
+/** Поле условий целиком (подпись + контрол + подпись источника). */
+function conditionsField(label: RegExp | string) {
+  return screen.getByLabelText(label).closest('label')!;
 }
 
 async function typeAndFlush(input: HTMLElement, value: string) {
@@ -146,7 +163,6 @@ describe('ConstructionsEditor', () => {
 
   it('рендерит карточки из фикстуры: слои, live-чипы, паспортное Rпр, сводка', () => {
     renderSurface();
-    openTab('Конструкции');
 
     // Три карточки с чипами: стена проходит, пол по грунту (без 1/αн) — нет,
     // окно по паспортному Rпр — проходит. Всё это видно свёрнутым.
@@ -169,14 +185,13 @@ describe('ConstructionsEditor', () => {
 
     // Слои раскрытой карточки — строки-сводки с источником λ, ни одной формы.
     // accessible name склеивает вложенный значок: «λ 0.81авто».
-    expect(screen.getByRole('button', {name: /№1.*380 мм.*λ 0\.81авто/})).toBeInTheDocument();
-    expect(screen.getByRole('button', {name: /№4.*Фибролит.*λ 0\.09/})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: /380 мм.*λ 0\.81авто/})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: /Фибролит.*λ 0\.09/})).toBeInTheDocument();
     expect(screen.queryAllByPlaceholderText('Материал из справочника или свой')).toHaveLength(0);
   });
 
   it('пол по грунту: live-Rпр без члена 1/αн (alphaN-record без записи)', () => {
     renderSurface();
-    openTab('Конструкции');
 
     // 1/8.7 + 0.2/2.04 = 0.21 — если бы 1/αн трактовался как деление на
     // отсутствующее значение, чип был бы NaN/Infinity.
@@ -197,11 +212,10 @@ describe('ConstructionsEditor', () => {
   it('правка в форме слоя попадает в state по «Применить»; до коммита live-Rпр прежний', () => {
     const {surface} = renderSurface();
     const actions = subscribeActions(surface);
-    openTab('Конструкции');
     openCard(/Наружная стена/);
 
     // Толщина минваты (2-я строка стены): 150 → 10 — Rпр упадёт ниже Rнорм.
-    openLayerRow(/№2.*минераловатные/);
+    openLayerRow(/минераловатные/);
     fireEvent.change(getThicknessInputs()[0]!, {target: {value: '10'}});
 
     // До «Применить» правка живёт только в форме: чип и сводка не тронуты.
@@ -211,7 +225,7 @@ describe('ConstructionsEditor', () => {
     fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
     // Форма закрыта, строка-сводка и live-Rпр показывают новую толщину.
-    expect(screen.getByRole('button', {name: /№2.*10 мм/})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: /минераловатные.*10 мм/})).toBeInTheDocument();
     expect(screen.getByText('Rпр 1.17 < 3.19')).toBeInTheDocument();
     expect(screen.getByText('проходит 1 из 3')).toBeInTheDocument();
     expect(actions).toHaveLength(0);
@@ -220,7 +234,6 @@ describe('ConstructionsEditor', () => {
   it('«Добавить» и «Удалить слой» меняют список мгновенно, без action\'ов и сети', () => {
     const {surface} = renderSurface();
     const actions = subscribeActions(surface);
-    openTab('Конструкции');
     openCard(/Наружная стена/);
     const initialRows = layerSummaries().length;
 
@@ -231,7 +244,7 @@ describe('ConstructionsEditor', () => {
     expect(layerSummaries()).toHaveLength(initialRows + 1);
 
     // Удаление — из открытой формы слоя.
-    openLayerRow(/№5/);
+    openLayerRow(/материал не указан/);
     fireEvent.click(screen.getByRole('button', {name: 'Удалить слой'}));
     expect(layerSummaries()).toHaveLength(initialRows);
 
@@ -241,7 +254,6 @@ describe('ConstructionsEditor', () => {
 
   it('add/remove конструкции; смена типа на «без слоёв» показывает паспортное Rпр', () => {
     renderSurface();
-    openTab('Конструкции');
 
     fireEvent.click(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
     // Новая карточка первого типа из typeConfigs ("Наружные стены"), сразу
@@ -274,7 +286,6 @@ describe('ConstructionsEditor', () => {
       }),
     );
     renderSurface();
-    openTab('Конструкции');
     openCard(/Наружная стена/);
 
     fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
@@ -296,12 +307,11 @@ describe('ConstructionsEditor', () => {
 
     // Коммит «Добавить» переносит выбор в строку-сводку.
     fireEvent.click(screen.getByRole('button', {name: 'Добавить'}));
-    expect(screen.getByRole('button', {name: /№5.*Бетон B25.*λ 1\.86авто/})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: /Бетон B25.*λ 1\.86авто/})).toBeInTheDocument();
   });
 
   it('свободный текст без выбора опции — ручная λ', async () => {
     renderSurface();
-    openTab('Конструкции');
     openCard(/Наружная стена/);
 
     fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
@@ -314,7 +324,6 @@ describe('ConstructionsEditor', () => {
 
   it('аккордеон: карточки свёрнуты, раскрытие показывает строки слоёв, чип виден всегда', () => {
     renderSurface();
-    openTab('Конструкции');
 
     expect(layerSummaries()).toHaveLength(0);
     expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
@@ -330,50 +339,46 @@ describe('ConstructionsEditor', () => {
   describe('форма слоя', () => {
     it('раскрыта максимум одна форма; переключение строки отбрасывает правки', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
-      openLayerRow(/№2.*минераловатные/);
+      openLayerRow(/минераловатные/);
       fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
 
       // Клик по другой строке переводит форму туда, правки №2 отброшены.
-      openLayerRow(/№4.*Фибролит/);
+      openLayerRow(/Фибролит/);
       expect(getMaterialInputs()).toHaveLength(1);
       expect((getMaterialInputs()[0] as HTMLInputElement).value).toBe('Фибролит (нестандартный)');
-      expect(screen.getByRole('button', {name: /№2.*150 мм/})).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /минераловатные.*150 мм/})).toBeInTheDocument();
       expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
     });
 
     it('форма одна на весь редактор: открытие в другой карточке закрывает первую', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
       openCard(/Пол по грунту/);
 
-      openLayerRow(/№2.*минераловатные/);
+      openLayerRow(/минераловатные/);
       expect(getMaterialInputs()).toHaveLength(1);
 
-      openLayerRow(/№1.*Железобетон/);
+      openLayerRow(/Железобетон/);
       expect(getMaterialInputs()).toHaveLength(1);
       expect((getMaterialInputs()[0] as HTMLInputElement).value).toBe('Железобетон');
     });
 
     it('«Отмена» закрывает форму без следа', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
-      openLayerRow(/№4.*Фибролит/);
+      openLayerRow(/Фибролит/);
       fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
       fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
 
-      expect(screen.getByRole('button', {name: /№4.*30 мм/})).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Фибролит.*30 мм/})).toBeInTheDocument();
       expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
     });
 
     it('«+ Слой» с «Отменой» не оставляет пустой строки', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
       fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
@@ -389,7 +394,6 @@ describe('ConstructionsEditor', () => {
   describe('шапка карточки', () => {
     it('по умолчанию текст: тип с разновидностью и название, контролов нет', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Пол по грунту/);
 
       expect(
@@ -402,7 +406,6 @@ describe('ConstructionsEditor', () => {
 
     it('ввод в форме не трогает карточку до «Сохранить»', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
       openHeaderForm();
@@ -422,7 +425,6 @@ describe('ConstructionsEditor', () => {
 
     it('«Отмена» и «Сохранить» без изменений не меняют состояния', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
       openHeaderForm();
@@ -441,19 +443,18 @@ describe('ConstructionsEditor', () => {
 
     it('форма одна на весь редактор: шапка и слой вытесняют друг друга', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
-      openLayerRow(/№2.*минераловатные/);
+      openLayerRow(/минераловатные/);
       fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
 
       // Открытие шапки закрывает форму слоя, её правки отброшены.
       openHeaderForm();
       expect(screen.queryAllByPlaceholderText('Материал из справочника или свой')).toHaveLength(0);
-      expect(screen.getByRole('button', {name: /№2.*150 мм/})).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /минераловатные.*150 мм/})).toBeInTheDocument();
 
       // И наоборот: клик по строке слоя закрывает форму шапки.
-      openLayerRow(/№4.*Фибролит/);
+      openLayerRow(/Фибролит/);
       expect(screen.queryByLabelText('Название')).not.toBeInTheDocument();
       expect(getMaterialInputs()).toHaveLength(1);
     });
@@ -462,7 +463,6 @@ describe('ConstructionsEditor', () => {
   describe('паспортное Rпр', () => {
     it('«Применить» обновляет значение и live-Rпр; до коммита чип прежний', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Окно двухкамерное/);
 
       openPassportForm();
@@ -477,7 +477,6 @@ describe('ConstructionsEditor', () => {
 
     it('«Отмена» не оставляет следа', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Окно двухкамерное/);
 
       openPassportForm();
@@ -492,7 +491,6 @@ describe('ConstructionsEditor', () => {
       renderSurface({
         constructions: [{id: 'w-1', type: 'okna', name: 'Окно без паспорта', layers: []}],
       });
-      openTab('Конструкции');
       openCard(/Окно без паспорта/);
 
       expect(screen.getByText('не задано')).toBeInTheDocument();
@@ -502,40 +500,38 @@ describe('ConstructionsEditor', () => {
   describe('подсветка невалидной конструкции', () => {
     it('валидные данные фикстуры — пометки «проверить» нет', () => {
       renderSurface();
-      openTab('Конструкции');
 
-      expect(screen.queryByText('! проверить')).not.toBeInTheDocument();
+      expect(screen.queryByText('проверить')).not.toBeInTheDocument();
     });
 
     it('появляется по коммиту слоя без λ и гаснет после исправления, без action\'ов', async () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
       // Стираем ручную λ фибролита и коммитим — карточка невалидна.
-      openLayerRow(/№4.*Фибролит/);
+      openLayerRow(/Фибролит/);
       fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
         target: {value: ''},
       });
       fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
-      expect(screen.getByText('! проверить')).toBeInTheDocument();
-      expect(screen.getByRole('button', {name: /№4.*λ не задана/})).toBeInTheDocument();
+      expect(screen.getByText('проверить')).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Фибролит.*λ не задана/})).toBeInTheDocument();
 
       // Пометка видна и на свернутой карточке.
       openCard(/Наружная стена/);
-      expect(screen.getByText('! проверить')).toBeInTheDocument();
+      expect(screen.getByText('проверить')).toBeInTheDocument();
 
       // Исправление гасит подсветку само, никаких action'ов не было.
       openCard(/Наружная стена/);
-      openLayerRow(/№4.*Фибролит/);
+      openLayerRow(/Фибролит/);
       fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
         target: {value: '0.09'},
       });
       fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
-      expect(screen.queryByText('! проверить')).not.toBeInTheDocument();
+      expect(screen.queryByText('проверить')).not.toBeInTheDocument();
       expect(actions).toHaveLength(0);
     });
 
@@ -543,75 +539,175 @@ describe('ConstructionsEditor', () => {
       renderSurface({
         constructions: [{id: 'w-1', type: 'okna', name: 'Окно без паспорта', layers: []}],
       });
-      openTab('Конструкции');
 
-      expect(screen.getByText('! проверить')).toBeInTheDocument();
+      expect(screen.getByText('проверить')).toBeInTheDocument();
     });
   });
 
-  describe('вкладки', () => {
-    it('переключение локально: action\'ов нет, ввод обеих вкладок жив', () => {
+  describe('блок «Условия» вместо вкладок', () => {
+    it('оба блока видны сразу, переключателя вкладок нет', () => {
+      renderSurface();
+
+      expect(screen.queryAllByRole('tab')).toHaveLength(0);
+      expect(getCityInput()).toHaveValue('Москва');
+      expect(screen.getByText('Наружная стена (кирпич + минвата)')).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: 'Рассчитать'})).toBeInTheDocument();
+      expect(screen.getByText('проходит 2 из 3')).toBeInTheDocument();
+    });
+
+    it('старые пропы вкладок не рисуются', () => {
+      renderSurface({
+        generalTabLabel: 'Общие данные',
+        constructionsTabLabel: 'Конструкции',
+        nextLabel: 'К конструкциям',
+      });
+
+      expect(screen.queryAllByRole('tab')).toHaveLength(0);
+      expect(screen.queryByRole('button', {name: 'К конструкциям'})).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: 'Далее'})).not.toBeInTheDocument();
+    });
+
+    it('сворачивание локально: action\'ов нет, введённое переживает его', () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
 
-      // Стартовая вкладка — общие данные.
-      expect(getCityInput()).toHaveValue('Москва');
-
-      openTab('Конструкции');
       openCard(/Наружная стена/);
       openHeaderForm();
       fireEvent.change(nameInput(), {target: {value: 'Стена А'}});
       fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
 
-      openTab('Общие данные');
       fireEvent.change(climateInput('tv'), {target: {value: '22'}});
 
-      openTab('Конструкции');
-      expect(screen.getByRole('button', {name: /Стена А/})).toBeInTheDocument();
+      // Свернули и раскрыли — правка на месте, наверх ничего не ушло.
+      fireEvent.click(screen.getByRole('button', {name: 'Свернуть'}));
+      expect(screen.queryByLabelText(CLIMATE_LABELS.tv)).not.toBeInTheDocument();
+      showConditions();
 
-      openTab('Общие данные');
       expect(climateInput('tv')).toHaveValue(22);
-
+      expect(screen.getByRole('button', {name: /Стена А/})).toBeInTheDocument();
       expect(actions).toHaveLength(0);
     });
 
-    it('«Далее» ведёт на конструкции, ввод общих данных не теряется', () => {
+    it('conditionsCollapsed задаёт начальное состояние блока', () => {
+      renderSurface({conditionsCollapsed: true});
+
+      expect(screen.queryByPlaceholderText('Город из справочника')).not.toBeInTheDocument();
+      expect(screen.getByText('Условия расчёта')).toBeInTheDocument();
+
+      showConditions();
+      expect(getCityInput()).toHaveValue('Москва');
+    });
+
+    it('сводка свёрнутой строки собрана из значений и следует за правкой', () => {
+      renderSurface();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '21'}});
+      fireEvent.click(screen.getByRole('button', {name: 'Свернуть'}));
+
+      expect(
+        screen.getByText('Москва · климат по СП 131 · tв +21 °C · условия Б'),
+      ).toBeInTheDocument();
+    });
+
+    it('пустое значение не попадает в сводку', () => {
+      renderSurface({general: {...EMPTY_GENERAL, tv: 20}, conditionsCollapsed: true});
+
+      // Ни города, ни климата — только tв и условия по умолчанию.
+      expect(screen.getByText('tв +20 °C · условия Б')).toBeInTheDocument();
+    });
+
+    it('шапка карточки рисуется только с headerTitle', () => {
+      const {unmount} = renderSurface({
+        headerTitle: 'Параметры расчёта',
+        headerContext: 'Проект «ЖК Северный, к.3» · СП 50.13330',
+      });
+
+      expect(screen.getByText('Параметры расчёта')).toBeInTheDocument();
+      expect(screen.getByText('Проект «ЖК Северный, к.3» · СП 50.13330')).toBeInTheDocument();
+      unmount();
+
+      renderSurface({headerContext: 'Проект «ЖК Северный, к.3»'});
+      expect(screen.queryByText('Проект «ЖК Северный, к.3»')).not.toBeInTheDocument();
+    });
+
+    it('ГСОП — поле ряда климата: значение от агента, без пересчёта на клиенте', () => {
+      renderSurface({
+        general: {
+          buildingType: 'Жилое многоквартирное',
+          city: {value: 'tyumen', label: 'Тюмень'},
+          tot: -6.4,
+          zot: 218,
+          tn: -35,
+          tv: 20,
+          condition: 'Б',
+          gsop: 6380,
+        },
+      });
+
+      // Значение с неразрывным пробелом в разрядах — ищем по началу числа.
+      expect(gsopField().textContent).toMatch(/6.380/);
+      // Поле не редактируется: ввода в нём нет.
+      expect(gsopField().querySelector('input')).toBeNull();
+
+      // Правка климата делает присланный ГСОП протухшим — значение исчезает.
+      fireEvent.change(climateInput('tot'), {target: {value: '-7'}});
+      expect(gsopField().textContent).not.toMatch(/6.380/);
+      expect(gsopField().textContent).toContain('—');
+    });
+
+    it('без ГСОП поле остаётся на месте с прочерком, в регионе его нет', () => {
+      renderSurface();
+
+      expect(gsopField().textContent).toContain('—');
+      expect(conditionsField(/Регион строительства/).textContent).not.toContain('ГСОП');
+    });
+
+    it('климат правится в отдельном ряду и уходит в submit', async () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
 
+      fireEvent.change(climateInput('tot'), {target: {value: '-3.1'}});
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+
+      expect((actions[0]!.context.general as Record<string, unknown>).tot).toBe(-3.1);
+    });
+
+    it('правка условий показывает «Сохранить» и уезжает черновиком', async () => {
+      const {surface} = renderSurface({draftAction: 'constructions:draft'});
+      const actions = subscribeActions(surface);
+
+      // Пока условия не трогали, сохранять нечего.
+      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
+
       fireEvent.change(climateInput('tv'), {target: {value: '22'}});
-      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+      expect(actions).toHaveLength(0); // ввод сам по себе черновика не шлёт
 
-      // Вкладка конструкций открыта, submit — здесь.
-      expect(screen.getByRole('tab', {name: 'Конструкции'})).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
-      expect(screen.getByRole('button', {name: 'Рассчитать'})).toBeInTheDocument();
-      expect(actions).toHaveLength(0);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+      });
 
-      openTab('Общие данные');
-      expect(climateInput('tv')).toHaveValue(22);
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:draft');
+      expect(actions[0]!.context.general).toMatchObject({tv: 22});
+      // Сохранили — кнопки снова нет.
+      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
     });
 
-    it('на общих данных нет submit\'а и сводки по конструкциям', () => {
-      renderSurface();
+    it('без draftAction кнопки сохранения нет — правки уедут submit\'ом', () => {
+      renderSurface({draftAction: undefined});
 
-      expect(screen.getByRole('button', {name: 'Далее'})).toBeInTheDocument();
-      expect(screen.queryByRole('button', {name: 'Рассчитать'})).not.toBeInTheDocument();
-      expect(screen.queryByText(/проходит/)).not.toBeInTheDocument();
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+
+      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
     });
 
-    it('подпись кнопки перехода берётся из nextLabel', () => {
-      renderSurface({nextLabel: 'К конструкциям'});
-
-      expect(screen.getByRole('button', {name: 'К конструкциям'})).toBeInTheDocument();
-    });
-
-    it('без пропа general вкладок нет — прежний экран конструкций', () => {
+    it('без пропа general блока условий нет — прежний экран конструкций', () => {
       renderSurface({general: undefined});
 
-      expect(screen.queryAllByRole('tab')).toHaveLength(0);
+      expect(screen.queryByPlaceholderText('Город из справочника')).not.toBeInTheDocument();
+      expect(screen.queryByText('Условия расчёта')).not.toBeInTheDocument();
       expect(screen.getByText('Наружная стена (кирпич + минвата)')).toBeInTheDocument();
     });
 
@@ -639,7 +735,207 @@ describe('ConstructionsEditor', () => {
     });
   });
 
-  describe('вкладка общих данных', () => {
+  describe('provenance полей условий', () => {
+    const SOURCES = {
+      city: {source: 'project'},
+      tv: {source: 'suggested', note: 'норма для жилых по ГОСТ 30494'},
+      buildingType: {source: 'question'},
+      condition: {source: 'default', note: 'условия Б, как на сервере'},
+    };
+
+    /** Оформление — это классы контрола: проверяем то, к чему цепляется CSS. */
+    function controlClass(label: RegExp | string) {
+      return screen.getByLabelText(label).className;
+    }
+
+    it('оформление и подпись по каждому источнику', () => {
+      renderSurface({generalSources: SOURCES});
+
+      // project — заливка без акцента, подпись названием источника.
+      expect(controlClass(/Регион строительства/)).toContain('a2ui-ce-control--project');
+      expect(conditionsField(/Регион строительства/).textContent).toContain('из проекта');
+
+      // suggested — акцентная рамка и обоснование агента под контролом.
+      expect(controlClass(/Температура внутреннего воздуха/)).toContain(
+        'a2ui-ce-control--suggested',
+      );
+      expect(conditionsField(/Температура внутреннего воздуха/).textContent).toContain(
+        'норма для жилых по ГОСТ 30494',
+      );
+
+      // question без note — только название источника, без пустого хвоста.
+      expect(controlClass(/Назначение помещений/)).toContain('a2ui-ce-control--suggested');
+      expect(conditionsField(/Назначение помещений/).textContent).toContain('из вопроса');
+
+      // default — обычный контрол, источник виден подписью с маркером.
+      expect(controlClass(/Условия эксплуатации/)).toBe('a2ui-ce-control');
+      expect(conditionsField(/Условия эксплуатации/).textContent).toContain(
+        'условия Б, как на сервере',
+      );
+    });
+
+    it('без generalSources подписей и акцентов нет', () => {
+      renderSurface();
+
+      expect(controlClass(/Регион строительства/)).toBe('a2ui-ce-control');
+      expect(conditionsField(/Регион строительства/).textContent).not.toContain('из проекта');
+    });
+
+    it('источник ничего не блокирует: поле из проекта правится', async () => {
+      const {surface} = renderSurface({generalSources: SOURCES});
+      const actions = subscribeActions(surface);
+
+      fireEvent.change(getCityInput(), {target: {value: 'Мурманск'}});
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+
+      expect(getCityInput()).not.toBeDisabled();
+      expect(actions[0]!.context.general).toMatchObject({
+        city: {value: 'Мурманск', label: 'Мурманск'},
+      });
+    });
+
+    it('правка снимает подпись и акцент только у тронутого поля', () => {
+      renderSurface({generalSources: SOURCES});
+
+      fireEvent.change(climateInput('tv'), {target: {value: '21'}});
+
+      const tvField = conditionsField(/Температура внутреннего воздуха/);
+      expect(controlClass(/Температура внутреннего воздуха/)).toBe('a2ui-ce-control');
+      expect(tvField.textContent).not.toContain('ГОСТ 30494');
+
+      // Соседние поля не тронуты — их подписи на месте.
+      expect(conditionsField(/Регион строительства/).textContent).toContain('из проекта');
+      expect(conditionsField(/Назначение помещений/).textContent).toContain('из вопроса');
+      expect(conditionsField(/Условия эксплуатации/).textContent).toContain('условия Б');
+    });
+
+    it('новые props возвращают оформление: набор тронутых полей сбрасывается', async () => {
+      const {processor} = renderSurface({generalSources: SOURCES});
+
+      fireEvent.change(climateInput('tv'), {target: {value: '21'}});
+      expect(controlClass(/Температура внутреннего воздуха/)).toBe('a2ui-ce-control');
+
+      await updateProps(processor, {
+        general: {
+          buildingType: 'Жилое многоквартирное',
+          city: {value: 'moskva', label: 'Москва'},
+          tot: -2.2,
+          zot: 205,
+          tn: -25,
+          tv: 21,
+          condition: 'Б',
+        },
+        generalSources: SOURCES,
+      });
+
+      expect(controlClass(/Температура внутреннего воздуха/)).toContain(
+        'a2ui-ce-control--suggested',
+      );
+    });
+
+    it('источники не уходят в payload submit и draft', async () => {
+      const {surface} = renderSurface({generalSources: SOURCES, draftAction: 'constructions:draft'});
+      const actions = subscribeActions(surface);
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+
+      expect(actions).toHaveLength(2);
+      for (const action of actions) {
+        expect(action.context).not.toHaveProperty('generalSources');
+        expect(Object.keys(action.context).sort()).toEqual(['constructions', 'general']);
+        expect(action.context.general).not.toHaveProperty('source');
+      }
+    });
+  });
+
+  describe('адаптив по ширине контейнера', () => {
+    /**
+     * jsdom не считает раскладку: реальную ширину колонок проверить нечем.
+     * Проверяем механизм — правила приходят стилевым слоем пакета, пороги
+     * заданы контейнером, а не окном, и фиксированных ширин в разметке нет.
+     */
+    function editorCss() {
+      // React 19 поднимает тег в <head>, переписывая href/precedence в data-*
+      // на клиенте; на сервере атрибуты остаются как есть. Ключ несёт хэш
+      // содержимого, поэтому ищем по префиксу.
+      const tag = document.head.querySelector(
+        'style[data-href^="a2ui-constructions-editor"], style[href^="a2ui-constructions-editor"]',
+      );
+      return tag?.textContent ?? '';
+    }
+
+    it('стилевой слой приезжает сам, без импорта CSS хостом', () => {
+      renderSurface();
+
+      expect(editorCss()).toContain('.a2ui-ce {');
+      expect(editorCss()).toContain('container-type: inline-size');
+    });
+
+    it('корень объявляет ширину: контейнер не схлопывается во флекс-хосте', () => {
+      renderSurface();
+      const root = document.querySelector('.a2ui-ce')!;
+      const rule = editorCss().split('.a2ui-ce__header')[0]!;
+
+      // container-type: inline-size обнуляет вклад содержимого в intrinsic-
+      // ширину: во флекс-хосте (.a2ui-surface { display: flex }) без явной
+      // ширины flex-basis: auto резолвится в 0 и карточка схлопывается в рамки.
+      // jsdom раскладку не считает — проверяем контракт правила.
+      expect(root).not.toBeNull();
+      expect(rule).toContain('container-type: inline-size');
+      expect(rule).toContain('width: 100%');
+      expect(rule).toContain('min-width: 0');
+    });
+
+    it('палитра блока наследует общие токены каталога (тема хоста, в т.ч. тёмная)', () => {
+      renderSurface();
+
+      // Хост темизирует каталог через --a2ui-color-*; группа ce читает их
+      // вторым фолбэком, поэтому отдельного маппинга у хоста не требует.
+      expect(editorCss()).toContain(
+        'var(--a2ui-color-ce-surface, var(--a2ui-color-surface, #fafaf9))',
+      );
+      expect(editorCss()).toContain(
+        'var(--a2ui-color-ce-text, var(--a2ui-color-text-strong, #1f1f1e))',
+      );
+    });
+
+    it('раскладка зависит от контейнера, а не от окна', () => {
+      renderSurface();
+      const css = editorCss();
+
+      // Ни одного viewport-запроса: компонент живёт в чат-колонке, ширина
+      // которой от размера окна не выводится.
+      expect(css).not.toContain('@media');
+      expect(css).toContain('@container a2ui-ce (min-width: 560px)');
+
+      // Многоколоночные сетки объявлены только внутри контейнерного запроса —
+      // базовая раскладка одноколоночная (деградация без поддержки @container).
+      const [base, wide] = css.split('@container');
+      expect(base).not.toContain('grid-template-columns');
+      expect(wide).toContain('.a2ui-ce-conditions__grid');
+      expect(wide).toContain('.a2ui-ce-pair');
+    });
+
+    it('фиксированной колонки в разметке нет — компонент занимает контейнер', () => {
+      const {container} = renderSurface();
+      openCard(/Наружная стена/);
+
+      const styled = Array.from(container.querySelectorAll('[style]'));
+      for (const element of styled) {
+        expect(element.getAttribute('style')).not.toMatch(/(max-)?width:\s*\d+px/);
+      }
+      expect(editorCss()).not.toContain('max-width: 420px');
+    });
+  });
+
+  describe('поля блока условий', () => {
     const cityOption = {value: 'novosibirsk', label: 'Новосибирск', tot: -6.4, zot: 218, tn: -33};
 
     function mockCities(options: unknown[]) {
@@ -674,11 +970,11 @@ describe('ConstructionsEditor', () => {
       renderSurface({general: EMPTY_GENERAL});
 
       // Агент прислал пустой buildingType → выбран первый из buildingTypeOptions.
-      expect(screen.getByLabelText('Тип здания')).toHaveValue('Жилое многоквартирное');
+      expect(screen.getByLabelText('Назначение помещений')).toHaveValue('Жилое многоквартирное');
 
       // Пустой выбор остаётся доступным.
-      fireEvent.change(screen.getByLabelText('Тип здания'), {target: {value: ''}});
-      expect(screen.getByLabelText('Тип здания')).toHaveValue('');
+      fireEvent.change(screen.getByLabelText('Назначение помещений'), {target: {value: ''}});
+      expect(screen.getByLabelText('Назначение помещений')).toHaveValue('');
     });
 
     it('опция без климата: заполняется только город', async () => {
@@ -714,8 +1010,7 @@ describe('ConstructionsEditor', () => {
     it('смена условия эксплуатации пересчитывает live-Rпр по λА', () => {
       renderSurface();
 
-      fireEvent.change(screen.getByLabelText('Условие эксплуатации'), {target: {value: 'А'}});
-      openTab('Конструкции');
+      fireEvent.change(screen.getByLabelText('Условия эксплуатации'), {target: {value: 'А'}});
 
       // λА вместо λБ: 1/8.7 + 1/23 + 0.38/0.7 + 0.15/0.045 + 0.03/0.09 = 4.37.
       expect(screen.getByText('Rпр 4.37 ≥ 3.19')).toBeInTheDocument();
@@ -725,10 +1020,9 @@ describe('ConstructionsEditor', () => {
   describe('чипы Rнорм и правки климата', () => {
     it('климат не тронут — сравнение и сводка на месте', () => {
       renderSurface();
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
-      openLayerRow(/№2.*минераловатные/);
+      openLayerRow(/минераловатные/);
       fireEvent.change(getThicknessInputs()[0]!, {target: {value: '160'}});
       fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
@@ -740,7 +1034,6 @@ describe('ConstructionsEditor', () => {
       renderSurface();
 
       fireEvent.change(climateInput('zot'), {target: {value: '210'}});
-      openTab('Конструкции');
 
       expect(screen.getByText('Rпр 4.09')).toBeInTheDocument();
       expect(screen.queryByText('Rпр 4.09 ≥ 3.19')).not.toBeInTheDocument();
@@ -751,7 +1044,6 @@ describe('ConstructionsEditor', () => {
       const {processor} = renderSurface();
 
       fireEvent.change(climateInput('zot'), {target: {value: '210'}});
-      openTab('Конструкции');
       expect(screen.queryByText(/проходит/)).not.toBeInTheDocument();
 
       await updateProps(processor, {
@@ -769,7 +1061,6 @@ describe('ConstructionsEditor', () => {
         ],
       });
 
-      openTab('Конструкции');
       expect(screen.getByText('Rпр 4.09 ≥ 3.25')).toBeInTheDocument();
       expect(screen.getByText('проходит 1 из 1')).toBeInTheDocument();
     });
@@ -780,7 +1071,6 @@ describe('ConstructionsEditor', () => {
           {type: 'steny', label: 'Наружные стены', hasLayers: true, alphaV: 8.7, alphaN: 23},
         ],
       });
-      openTab('Конструкции');
 
       expect(screen.getByText('Rпр 4.09')).toBeInTheDocument();
       expect(screen.getByText('проходит 0 из 0')).toBeInTheDocument();
@@ -791,7 +1081,6 @@ describe('ConstructionsEditor', () => {
     it('полное состояние обеих вкладок уходит одним action\'ом', async () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
-      openTab('Конструкции');
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
@@ -820,7 +1109,6 @@ describe('ConstructionsEditor', () => {
     it('пустая форма уходит как есть, ничего не подсвечивается', async () => {
       const {surface} = renderSurface({constructions: [], general: EMPTY_GENERAL});
       const actions = subscribeActions(surface);
-      openTab('Конструкции');
 
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
@@ -831,6 +1119,11 @@ describe('ConstructionsEditor', () => {
       expect(actions[0]!.context.general).toEqual({
         ...EMPTY_GENERAL,
         buildingType: 'Жилое многоквартирное',
+        // Условие эксплуатации по умолчанию — Б: сервер трактует null так же,
+        // а пустой селект показывал бы «—» вместо значения, с которым считают.
+        condition: 'Б',
+        // ГСОП клиент не считает — в состоянии он null, пока агент не пришлёт.
+        gsop: null,
       });
       expect(actions[0]!.context.constructions).toEqual([]);
     });
@@ -838,7 +1131,6 @@ describe('ConstructionsEditor', () => {
     it('незаполненный закоммиченный слой не блокирует submit', async () => {
       const {surface} = renderSurface();
       const actions = subscribeActions(surface);
-      openTab('Конструкции');
       openCard(/Наружная стена/);
 
       // «Добавить» с пустой формой — слой-черновик попадает в state как есть.
@@ -862,7 +1154,6 @@ describe('ConstructionsEditor', () => {
       const actions = subscribeActions(surface);
 
       fireEvent.change(climateInput('tv'), {target: {value: '22'}});
-      openTab('Конструкции');
       await act(async () => {
         fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
       });
@@ -890,7 +1181,6 @@ describe('ConstructionsEditor', () => {
     function draftSurface() {
       const rendered = renderSurface(withDraft);
       const actions = subscribeActions(rendered.surface);
-      openTab('Конструкции');
       return {...rendered, actions};
     }
 
@@ -904,7 +1194,6 @@ describe('ConstructionsEditor', () => {
     it('без пропа коммиты не порождают action', async () => {
       const {surface} = renderSurface({draftAction: undefined});
       const actions = subscribeActions(surface);
-      openTab('Конструкции');
 
       await clickAndFlush(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
       await clickAndFlush(screen.getByRole('button', {name: '+ Слой'}));
@@ -953,7 +1242,7 @@ describe('ConstructionsEditor', () => {
         (actions[0]!.context.constructions as Array<Record<string, unknown>>)[0]!.layers,
       ).toHaveLength(5);
 
-      openLayerRow(/№5/);
+      openLayerRow(/материал не указан/);
       await clickAndFlush(screen.getByRole('button', {name: 'Удалить слой'}));
       expect(actions).toHaveLength(2);
       expect(
@@ -965,7 +1254,7 @@ describe('ConstructionsEditor', () => {
       const {actions} = draftSurface();
       openCard(/Наружная стена/);
 
-      openLayerRow(/№4.*Фибролит/);
+      openLayerRow(/Фибролит/);
       fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
         target: {value: '0.05'},
       });
@@ -983,11 +1272,11 @@ describe('ConstructionsEditor', () => {
       const {actions} = draftSurface();
       openCard(/Наружная стена/);
 
-      openLayerRow(/№4.*Фибролит/);
+      openLayerRow(/Фибролит/);
       await clickAndFlush(screen.getByRole('button', {name: 'Применить'}));
 
       // Форма закрыта, action'ов нет.
-      expect(screen.getByRole('button', {name: /№4.*Фибролит/})).toBeInTheDocument();
+      expect(screen.getByRole('button', {name: /Фибролит/})).toBeInTheDocument();
       expect(actions).toHaveLength(0);
     });
 
@@ -999,7 +1288,7 @@ describe('ConstructionsEditor', () => {
       await act(async () => {
         fireEvent.change(nameInput(), {target: {value: 'Стена А'}});
       });
-      openLayerRow(/№2.*минераловатные/);
+      openLayerRow(/минераловатные/);
       await act(async () => {
         fireEvent.change(getThicknessInputs()[0]!, {target: {value: '200'}});
       });
@@ -1064,9 +1353,7 @@ describe('ConstructionsEditor', () => {
     it('введённый город уезжает вместе со структурной правкой', async () => {
       const {actions} = draftSurface();
 
-      openTab('Общие данные');
       fireEvent.change(getCityInput(), {target: {value: 'Мурманск'}});
-      openTab('Конструкции');
       await clickAndFlush(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
 
       expect(actions).toHaveLength(1);

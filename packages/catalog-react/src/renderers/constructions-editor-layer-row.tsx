@@ -5,15 +5,6 @@ import {layersEqual} from './layers-equal';
 import {LookupCombobox} from './lookup-combobox';
 import {readOptionLambda} from './read-option-lambda';
 import {resolveLayerLambda} from './resolve-layer-lambda';
-import {
-  cancelButtonStyle,
-  commitButtonStyle,
-  controlStyle,
-  fieldLabelStyle,
-  fieldStyle,
-  FIELD_COLUMN_WIDTH,
-} from './shared';
-import {tokens} from './tokens';
 import {useLookupSuggest} from './use-lookup-suggest';
 
 /**
@@ -47,68 +38,28 @@ function LayerSummary({layer, index, condition, onOpen}: ConstructionsEditorLaye
   const thicknessMissing = layer.thicknessMm === null || layer.thicknessMm <= 0;
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      style={{
-        display: 'flex',
-        alignItems: 'baseline',
-        // Явно: хостовые стили кнопок (`.a2ui-surface button` и подобные)
-        // центрируют flex-содержимое — сводка превращается в кашу по центру.
-        justifyContent: 'flex-start',
-        flexWrap: 'wrap',
-        gap: '2px 10px',
-        padding: '8px 12px',
-        borderRadius: 12,
-        border: `1px solid ${tokens.borderSubtle}`,
-        background: tokens.surface,
-        color: tokens.text,
-        fontSize: '0.9rem',
-        textAlign: 'left',
-        cursor: 'pointer',
-        width: '100%',
-        maxWidth: FIELD_COLUMN_WIDTH,
-        boxSizing: 'border-box',
-      }}
-    >
-      <span style={{color: tokens.textSubtle, fontVariantNumeric: 'tabular-nums'}}>
-        №{index + 1}
-      </span>
+    <button type="button" onClick={onOpen} className="a2ui-ce-layer">
       <span
-        style={{
-          color: materialMissing ? tokens.warning : tokens.textStrong,
-          fontWeight: 500,
-          flex: 1,
-          minWidth: 0,
-          overflowWrap: 'anywhere',
-        }}
+        className={`a2ui-ce-layer__material${materialMissing ? ' a2ui-ce-layer__warn' : ''}`}
       >
         {materialMissing ? 'материал не указан' : layer.material}
       </span>
-      <span
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          gap: 6,
-          whiteSpace: 'nowrap',
-          marginLeft: 'auto',
-        }}
-      >
-        <span style={{color: thicknessMissing ? tokens.warning : tokens.text}}>
+      <span className="a2ui-ce-layer__numbers">
+        <span className={thicknessMissing ? 'a2ui-ce-layer__warn' : undefined}>
           {thicknessMissing ? 'толщина не задана' : `${layer.thicknessMm} мм`}
         </span>
-        <span style={{color: tokens.textSubtle}}>·</span>
+        <span className="a2ui-ce-layer__dot">·</span>
         {isGap ? (
-          <span style={{color: tokens.textMuted}}>Rs — в итоговом расчёте</span>
+          <span className="a2ui-ce-layer__hint">Rs — в итоговом расчёте</span>
         ) : hasManual ? (
           <span>λ {layer.lambdaManual}</span>
         ) : hasReferenceLambda ? (
           <span>
             λ {resolveLayerLambda(layer, condition)}
-            <span style={{color: tokens.textSubtle, fontSize: '0.8rem'}}> авто</span>
+            <span className="a2ui-ce-auto"> авто</span>
           </span>
         ) : (
-          <span style={{color: tokens.warning}}>λ не задана</span>
+          <span className="a2ui-ce-layer__warn">λ не задана</span>
         )}
       </span>
     </button>
@@ -199,23 +150,11 @@ function LayerForm({
 
   return (
     // Материал — своя строка на всю ширину (названия из справочника длинные),
-    // толщина и λ — следующей, парой, кнопки коммита — последней.
-    <div
-      style={{
-        display: 'grid',
-        gap: 8,
-        padding: '10px 12px',
-        borderRadius: 12,
-        border: `1px solid ${tokens.borderStrong}`,
-        background: tokens.surface,
-        // Та же колонка, что у полей шапки и вкладки общих данных;
-        // border-box — чтобы 420 были внешней шириной при любом reset'е хоста.
-        maxWidth: FIELD_COLUMN_WIDTH,
-        boxSizing: 'border-box',
-      }}
-    >
-      <label style={{...fieldStyle, minWidth: 0}}>
-        <span style={fieldLabelStyle}>Материал</span>
+    // толщина и λ — следующей, парой (на узком контейнере — друг под другом),
+    // кнопки коммита — последней.
+    <div className="a2ui-ce-form">
+      <label className="a2ui-ce-field">
+        <span className="a2ui-ce-field__label">Материал</span>
         <LookupCombobox
           name={rowName}
           placeholder="Материал из справочника или свой"
@@ -225,30 +164,29 @@ function LayerForm({
           onInputChange={handleMaterialInput}
           onPick={handleMaterialPick}
           onClose={closeOptions}
+          inputClassName="a2ui-ce-control"
         />
       </label>
-      <div style={{display: 'flex', flexWrap: 'wrap', gap: 12}}>
-        <label style={{...fieldStyle, width: 140}}>
-          <span style={fieldLabelStyle}>Толщина, мм</span>
+      <div className="a2ui-ce-pair">
+        <label className="a2ui-ce-field">
+          <span className="a2ui-ce-field__label">Толщина, мм</span>
           <input
             type="number"
             min={1}
             step="any"
             value={draft.thicknessMm ?? ''}
             onChange={handleThicknessChange}
-            style={controlStyle}
+            className="a2ui-ce-control"
           />
         </label>
-        <div style={{...fieldStyle, width: 200}}>
-          <span style={fieldLabelStyle}>λ, Вт/(м·°C)</span>
+        <div className="a2ui-ce-field">
+          <span className="a2ui-ce-field__label">λ, Вт/(м·°C)</span>
           {isGap ? (
-            <span style={{color: tokens.textMuted, fontSize: '0.85rem', alignSelf: 'center'}}>
-              Rs — в итоговом расчёте
-            </span>
+            <span className="a2ui-ce-static a2ui-ce-static--muted">Rs — в итоговом расчёте</span>
           ) : hasReferenceLambda ? (
-            <span style={{color: tokens.text, alignSelf: 'center'}}>
+            <span className="a2ui-ce-static">
               {resolvedLambda}
-              <span style={{color: tokens.textSubtle, fontSize: '0.8rem'}}> авто</span>
+              <span className="a2ui-ce-auto"> авто</span>
             </span>
           ) : (
             <input
@@ -259,32 +197,20 @@ function LayerForm({
               placeholder="λ вручную"
               value={draft.lambdaManual ?? ''}
               onChange={handleLambdaManualChange}
-              style={controlStyle}
+              className="a2ui-ce-control"
             />
           )}
         </div>
       </div>
-      <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-        <button type="button" onClick={handleApply} style={commitButtonStyle}>
+      <div className="a2ui-ce-actions">
+        <button type="button" onClick={handleApply} className="a2ui-ce-btn a2ui-ce-btn--commit">
           {mode === 'new' ? 'Добавить' : 'Применить'}
         </button>
-        <button type="button" onClick={onCancel} style={cancelButtonStyle}>
+        <button type="button" onClick={onCancel} className="a2ui-ce-btn">
           Отмена
         </button>
         {mode === 'edit' ? (
-          <button
-            type="button"
-            onClick={onRemove}
-            style={{
-              marginLeft: 'auto',
-              padding: '6px 4px',
-              border: 'none',
-              background: 'transparent',
-              color: tokens.danger,
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-            }}
-          >
+          <button type="button" onClick={onRemove} className="a2ui-ce-btn a2ui-ce-btn--danger">
             Удалить слой
           </button>
         ) : null}

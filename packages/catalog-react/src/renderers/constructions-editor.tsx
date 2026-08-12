@@ -8,46 +8,41 @@ import {
 import {climateKey} from './climate-key';
 import {computeLiveRpr} from './compute-live-rpr';
 import {ConstructionsEditorCard} from './constructions-editor-card';
-import {ConstructionsEditorGeneral} from './constructions-editor-general';
-import {ConstructionsEditorTabs} from './constructions-editor-tabs';
+import {ConstructionsEditorConditions} from './constructions-editor-conditions';
+import {
+  CONSTRUCTIONS_EDITOR_CSS,
+  CONSTRUCTIONS_EDITOR_STYLE_HREF,
+} from './constructions-editor-styles';
 import type {
   ConstructionsEditorFormTarget,
-  ConstructionsEditorTab,
+  ConstructionsGeneralKey,
 } from './constructions-editor.types';
 import {createGeneralState} from './create-general-state';
 import {createLocalId} from './create-local-id';
-import {tokens} from './tokens';
+import {omitTouchedSources} from './omit-touched-sources';
+import {StyleTag} from './style-tag';
 import {useA2uiBaseStyles} from './shared';
 
-const GENERAL_TAB_LABEL = 'Общие данные';
-const CONSTRUCTIONS_TAB_LABEL = 'Конструкции';
-const NEXT_LABEL = 'Далее';
-
-const primaryButtonStyle: React.CSSProperties = {
-  padding: '10px 18px',
-  borderRadius: 12,
-  border: 'none',
-  background: tokens.accent,
-  color: tokens.accentContrast,
-  fontWeight: 600,
-  cursor: 'pointer',
-};
-
 /**
- * Объединённый экран теплотехнического расчёта одним сообщением: вкладки
- * «Общие данные» и «Конструкции» с общим локальным состоянием (Решения 1—6
- * design.md). Переключение вкладок — чисто клиентское, ввод обеих переживает
- * его: на вкладке общих данных кнопка «Далее» просто ведёт к конструкциям,
- * submit живёт там. Наружу уходит один submit с `{general, constructions}` как есть —
- * клиентской блокировки нет, о недостающем сообщает агент; подсветка
- * невалидной конструкции — индикация на данных, не блок. При заданном
- * `draftAction` коммиты состояния конструкций (add/remove конструкции,
- * «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки,
- * «Применить» формы паспортного Rпр) дополнительно уезжают черновиком с тем
- * же payload'ом.
+ * Экран теплотехнического расчёта одним сообщением: блок «Условия» в шапке и
+ * конструкции сразу под ним, с общим локальным состоянием (Решения 1—8
+ * design.md). Вкладок нет — оба блока видны сразу; условия сворачиваются в
+ * строку-сводку, и это переключение чисто клиентское: наружу не уезжает
+ * ничего, введённое его переживает. Наружу уходит один submit с
+ * `{general, constructions}` как есть — клиентской блокировки нет, о
+ * недостающем сообщает агент; подсветка невалидной конструкции — индикация на
+ * данных, не блок. При заданном `draftAction` коммиты состояния конструкций
+ * (add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя,
+ * «Сохранить» формы шапки, «Применить» формы паспортного Rпр) дополнительно
+ * уезжают черновиком с тем же payload'ом.
  *
- * Без пропа `general` компонент работает как прежде: одна вкладка конструкций
- * (переключателя нет) и submit с `{constructions}` — путь отката.
+ * `generalSources` — только оформление полей условий: в payload источники не
+ * попадают, агент их и прислал. Пропы вкладок (`generalTabLabel`,
+ * `constructionsTabLabel`, `nextLabel`) схема принимает ради совместимости
+ * эмитентов, но рендерер их игнорирует.
+ *
+ * Без пропа `general` компонент работает как прежде: только конструкции и
+ * submit с `{constructions}` — путь отката.
  */
 export const ConstructionsEditor = createComponentImplementation(
   constructionsEditorDefinition,
@@ -69,9 +64,9 @@ export const ConstructionsEditor = createComponentImplementation(
       entryId: string;
       target: ConstructionsEditorFormTarget;
     } | null>(null);
-    const [activeTab, setActiveTab] = React.useState<ConstructionsEditorTab>(
-      hasGeneral ? 'general' : 'constructions',
-    );
+    // Начальное состояние блока условий задаёт агент, дальше им владеет
+    // пользователь: `conditionsCollapsed` читается один раз (Решение 6).
+    const [conditionsOpen, setConditionsOpen] = React.useState(!props.conditionsCollapsed);
     // Состояние из props, а не сами props: дефолт типа здания подставляется
     // здесь же и «тронутым климатом» не считается.
     const initialGeneral = createGeneralState(
@@ -80,16 +75,37 @@ export const ConstructionsEditor = createComponentImplementation(
       props.buildingTypeOptions,
     );
     const [general, setGeneral] = React.useState<ConstructionsGeneral>(initialGeneral);
+    // Тронутые пользователем поля условий: с них снято оформление источника.
+    const [touched, setTouched] = React.useState<ReadonlySet<ConstructionsGeneralKey>>(new Set());
+    // Есть несохранённые правки условий: правка поля черновика не порождает
+    // (иначе он уезжал бы на каждое нажатие клавиши), поэтому коммит — явный.
+    const [conditionsDirty, setConditionsDirty] = React.useState(false);
 
     // Снимок климата, из которого агент посчитал `rnorm`. Новые props (ответ
-    // агента с пересчитанным Rнорм) — новый снимок и свежее состояние вкладки.
+    // агента с пересчитанным Rнорм) — новый снимок, свежие значения и свежие
+    // источники: набор тронутых полей сбрасывается вместе с ними.
     const propsClimate = climateKey(initialGeneral);
     const [baseClimate, setBaseClimate] = React.useState(propsClimate);
     if (propsClimate !== baseClimate) {
       setBaseClimate(propsClimate);
       setGeneral(initialGeneral);
+      setTouched(new Set());
+      setConditionsDirty(false);
     }
     const climateDirty = climateKey(general) !== baseClimate;
+
+    const handleGeneralChange = (
+      next: ConstructionsGeneral,
+      changed: ConstructionsGeneralKey[],
+    ) => {
+      setGeneral(next);
+      setConditionsDirty(true);
+      setTouched(prev => {
+        const nextTouched = new Set(prev);
+        for (const key of changed) nextTouched.add(key);
+        return nextTouched;
+      });
+    };
 
     const typeConfigs = props.typeConfigs;
     // `condition` из вкладки; нет значения — λБ, как на сервере (Решение 6).
@@ -173,122 +189,89 @@ export const ConstructionsEditor = createComponentImplementation(
       });
     };
 
-    const showConstructions = !hasGeneral || activeTab === 'constructions';
-
     return (
-      <div
-        style={{
-          display: 'grid',
-          gap: 12,
-          padding: 18,
-          borderRadius: 18,
-          border: `1px solid ${tokens.border}`,
-          background: tokens.surface,
-          color: tokens.text,
-        }}
-      >
-        {hasGeneral ? (
-          <ConstructionsEditorTabs
-            active={activeTab}
-            generalLabel={props.generalTabLabel ?? GENERAL_TAB_LABEL}
-            constructionsLabel={props.constructionsTabLabel ?? CONSTRUCTIONS_TAB_LABEL}
-            onSelect={setActiveTab}
-          />
+      <div className="a2ui-ce">
+        <StyleTag href={CONSTRUCTIONS_EDITOR_STYLE_HREF} css={CONSTRUCTIONS_EDITOR_CSS} />
+        {props.headerTitle ? (
+          <header className="a2ui-ce__header">
+            <span className="a2ui-ce__header-title">{props.headerTitle}</span>
+            {props.headerContext ? (
+              <span className="a2ui-ce__header-context">{props.headerContext}</span>
+            ) : null}
+          </header>
         ) : null}
-        {hasGeneral && activeTab === 'general' ? (
-          <div role="tabpanel">
-            <ConstructionsEditorGeneral
+        <div className="a2ui-ce__body">
+          {hasGeneral ? (
+            <ConstructionsEditorConditions
+              open={conditionsOpen}
+              onToggle={() => setConditionsOpen(prev => !prev)}
               general={general}
+              sources={omitTouchedSources(props.generalSources, touched)}
+              showGsop={!climateDirty}
               buildingTypeOptions={props.buildingTypeOptions}
               cityReferenceId={props.cityReferenceId}
               minChars={props.minChars}
-              onChange={setGeneral}
+              onChange={handleGeneralChange}
+              dirty={conditionsDirty}
+              onSave={
+                props.draftAction
+                  ? () => {
+                      sendDraft(constructions);
+                      setConditionsDirty(false);
+                    }
+                  : undefined
+              }
             />
-          </div>
-        ) : null}
-        {showConstructions ? (
-          <div role={hasGeneral ? 'tabpanel' : undefined} style={{display: 'grid', gap: 12}}>
-            {constructions.map(entry => (
-              <ConstructionsEditorCard
-                key={entry.id}
-                entry={entry}
-                typeConfigs={typeConfigs}
-                condition={condition}
-                materialsReferenceId={props.materialsReferenceId}
-                minChars={props.minChars}
-                open={openIds.has(entry.id)}
-                showRnorm={!climateDirty}
-                editingTarget={editingTarget?.entryId === entry.id ? editingTarget.target : null}
-                onEditingChange={target =>
-                  setEditingTarget(target === null ? null : {entryId: entry.id, target})
-                }
-                onToggle={() => handleToggle(entry.id)}
-                onChange={handleEntryChange}
-                onRemove={() => handleEntryRemove(entry.id)}
-              />
-            ))}
-            <button
-              type="button"
-              onClick={handleAdd}
-              style={{
-                justifySelf: 'start',
-                padding: '8px 14px',
-                borderRadius: 12,
-                border: `1px dashed ${tokens.borderStrong}`,
-                background: 'transparent',
-                color: tokens.text,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              + {props.addLabel}
-            </button>
-          </div>
-        ) : null}
-        <footer style={{display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'}}>
-          {props.backLabel && props.backAction ? (
-            <button
-              type="button"
-              onClick={handleBack}
-              style={{
-                padding: '10px 18px',
-                borderRadius: 12,
-                border: `1px solid ${tokens.borderStrong}`,
-                background: 'transparent',
-                color: tokens.text,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              {props.backLabel}
-            </button>
           ) : null}
-          {activeTab === 'general' && hasGeneral ? (
-            // «Далее» — та же локальная смена вкладки, что и клик по табу:
-            // введённое остаётся в state, агенту ничего не уходит. Сводка по
-            // конструкциям здесь не к месту — она про соседнюю вкладку.
+          <section className="a2ui-ce__group">
+            <h3 className="a2ui-ce-section-title">Конструкции · {constructions.length}</h3>
+            <div className="a2ui-ce__list">
+              {constructions.map(entry => (
+                <ConstructionsEditorCard
+                  key={entry.id}
+                  entry={entry}
+                  typeConfigs={typeConfigs}
+                  condition={condition}
+                  materialsReferenceId={props.materialsReferenceId}
+                  minChars={props.minChars}
+                  open={openIds.has(entry.id)}
+                  showRnorm={!climateDirty}
+                  editingTarget={editingTarget?.entryId === entry.id ? editingTarget.target : null}
+                  onEditingChange={target =>
+                    setEditingTarget(target === null ? null : {entryId: entry.id, target})
+                  }
+                  onToggle={() => handleToggle(entry.id)}
+                  onChange={handleEntryChange}
+                  onRemove={() => handleEntryRemove(entry.id)}
+                />
+              ))}
+              <button type="button" onClick={handleAdd} className="a2ui-ce-btn a2ui-ce-btn--dashed">
+                + {props.addLabel}
+              </button>
+            </div>
+          </section>
+          <footer className="a2ui-ce__footer">
+            {props.backLabel && props.backAction ? (
+              <button type="button" onClick={handleBack} className="a2ui-ce-btn">
+                {props.backLabel}
+              </button>
+            ) : null}
             <button
               type="button"
-              onClick={() => setActiveTab('constructions')}
-              style={primaryButtonStyle}
+              onClick={handleSubmit}
+              className="a2ui-ce-btn a2ui-ce-btn--primary"
             >
-              {props.nextLabel ?? NEXT_LABEL}
+              {props.submitLabel}
             </button>
-          ) : (
-            <>
-              <button type="button" onClick={handleSubmit} style={primaryButtonStyle}>
-                {props.submitLabel}
-              </button>
-              {/* Климат тронут → присланный Rнорм протух, сводка молчит до
-                  следующих props (Решение 4 design.md). */}
-              {climateDirty ? null : (
-                <span style={{color: tokens.textMuted, fontSize: '0.9rem'}}>
-                  проходит {passing.length} из {comparable.length}
-                </span>
-              )}
-            </>
-          )}
-        </footer>
+            {/* Климат тронут → присланный Rнорм протух, сводка молчит до
+                следующих props (Решение 4 design.md). */}
+            {climateDirty ? null : (
+              <span className="a2ui-ce__count">
+                проходит {passing.length} из {comparable.length}
+              </span>
+            )}
+          </footer>
+        </div>
       </div>
     );
   },

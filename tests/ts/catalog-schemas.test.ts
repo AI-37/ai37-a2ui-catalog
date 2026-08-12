@@ -28,6 +28,7 @@ describe('catalog-schemas', () => {
     const choice = readFixture('valid', 'choice-card.json');
     const form = readFixture('valid', 'form-card.json');
     const constructions = readFixture('valid', 'constructions-editor.json');
+    const conditions = readFixture('valid', 'constructions-editor-conditions.json');
 
     expect(simpleTablePropsSchema.safeParse(simple.props).success).toBe(true);
     expect(flexTablePropsSchema.safeParse(flex.props).success).toBe(true);
@@ -35,6 +36,7 @@ describe('catalog-schemas', () => {
     expect(choiceCardPropsSchema.safeParse(choice.props).success).toBe(true);
     expect(formCardPropsSchema.safeParse(form.props).success).toBe(true);
     expect(constructionsEditorPropsSchema.safeParse(constructions.props).success).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse(conditions.props).success).toBe(true);
   });
 
   it('rejects invalid fixtures', () => {
@@ -128,6 +130,71 @@ describe('catalog-schemas', () => {
 
     const unknownKey = readFixture('invalid', 'constructions-editor-unknown-general-key.json');
     expect(constructionsEditorPropsSchema.safeParse(unknownKey.props).success).toBe(false);
+  });
+
+  it('generalSources: валидный блок, отказ на неизвестном ключе', () => {
+    const valid = readFixture('valid', 'constructions-editor.json');
+    const props = valid.props as Record<string, unknown>;
+
+    expect(
+      constructionsEditorPropsSchema.safeParse({
+        ...props,
+        generalSources: {
+          tv: {source: 'suggested', note: 'норма для жилых по ГОСТ 30494'},
+          city: {source: 'project'},
+          condition: {source: 'default'},
+        },
+      }).success,
+    ).toBe(true);
+
+    // Ключ вне `general` — связь «поле ↔ источник» проверяет схема.
+    expect(
+      constructionsEditorPropsSchema.safeParse({
+        ...props,
+        generalSources: {unknownField: {source: 'project'}},
+      }).success,
+    ).toBe(false);
+
+    // Неизвестный источник и пустая запись тоже отвергаются.
+    expect(
+      constructionsEditorPropsSchema.safeParse({
+        ...props,
+        generalSources: {tv: {source: 'guessed'}},
+      }).success,
+    ).toBe(false);
+    expect(
+      constructionsEditorPropsSchema.safeParse({...props, generalSources: {tv: {}}}).success,
+    ).toBe(false);
+  });
+
+  it('gsop, conditionsCollapsed и шапка карточки опциональны', () => {
+    const valid = readFixture('valid', 'constructions-editor.json');
+    const props = valid.props as Record<string, unknown>;
+    const general = props.general as Record<string, unknown>;
+
+    // Старая фикстура без новых ключей остаётся валидной (аддитивность).
+    expect(general.gsop).toBeUndefined();
+    expect(constructionsEditorPropsSchema.safeParse(props).success).toBe(true);
+
+    expect(
+      constructionsEditorPropsSchema.safeParse({
+        ...props,
+        general: {...general, gsop: 6380},
+        conditionsCollapsed: true,
+        headerTitle: 'Параметры расчёта',
+        headerContext: 'Проект «ЖК Северный, к.3» · СП 50.13330',
+      }).success,
+    ).toBe(true);
+
+    // ГСОП «неизвестен» приходит null, а не строкой.
+    expect(
+      constructionsEditorPropsSchema.safeParse({...props, general: {...general, gsop: null}})
+        .success,
+    ).toBe(true);
+    expect(
+      constructionsEditorPropsSchema.safeParse({...props, general: {...general, gsop: '6380'}})
+        .success,
+    ).toBe(false);
   });
 
   it('back-кнопка и general опциональны (объединённый экран и путь отката)', () => {

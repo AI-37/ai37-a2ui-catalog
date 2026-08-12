@@ -36,12 +36,43 @@ const DEFAULTS = {
 
   'color-formula-from': '#f8fafc',
   'color-formula-to': '#eef2ff',
+
+  // Палитра макета теплотехнического брифа (`ConstructionsEditor`): тёплый
+  // нейтральный, с общей slate-палитрой каталога почти не пересекается.
+  // Отдельной группой, а не заменой общих токенов: подмена перекрасила бы и
+  // остальные рендереры, которых этот макет не касается.
+  'color-ce-surface': '#fafaf9',
+  'color-ce-surface-sunken': '#f1f1ef',
+  'color-ce-border': '#e5e4e1',
+  'color-ce-text': '#1f1f1e',
+  'color-ce-text-muted': '#6e6e6a',
+  'color-ce-accent': '#245a87',
 } as const;
 
 type TokenName = keyof typeof DEFAULTS;
 
+/**
+ * Токены палитры макета наследуют общие токены каталога: хост, объявивший тему
+ * (в т.ч. тёмную) для `--a2ui-color-surface` и соседей, получает
+ * `ConstructionsEditor` в этой теме, ничего не зная про группу `ce`. Значение
+ * макета остаётся последним фолбэком — «из коробки» компонент выглядит так,
+ * как нарисован.
+ */
+const INHERITS: Partial<Record<TokenName, TokenName>> = {
+  'color-ce-surface': 'color-surface',
+  'color-ce-surface-sunken': 'color-surface-muted',
+  'color-ce-border': 'color-border',
+  'color-ce-text': 'color-text-strong',
+  'color-ce-text-muted': 'color-text-subtle',
+  'color-ce-accent': 'color-accent',
+};
+
 function cssVar(name: TokenName): string {
-  return `var(--a2ui-${name}, ${DEFAULTS[name]})`;
+  const inherited = INHERITS[name];
+
+  return inherited === undefined
+    ? `var(--a2ui-${name}, ${DEFAULTS[name]})`
+    : `var(--a2ui-${name}, var(--a2ui-${inherited}, ${DEFAULTS[name]}))`;
 }
 
 /** Семантические токены для использования в стилях рендереров. */
@@ -70,6 +101,13 @@ export const tokens = {
 
   formulaFrom: cssVar('color-formula-from'),
   formulaTo: cssVar('color-formula-to'),
+
+  ceSurface: cssVar('color-ce-surface'),
+  ceSurfaceSunken: cssVar('color-ce-surface-sunken'),
+  ceBorder: cssVar('color-ce-border'),
+  ceText: cssVar('color-ce-text'),
+  ceTextMuted: cssVar('color-ce-text-muted'),
+  ceAccent: cssVar('color-ce-accent'),
 } as const;
 
 /** id для тега <style> с дефолтной темой (если консьюмер решит её объявить). */

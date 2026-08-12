@@ -5192,7 +5192,7 @@
       }
     },
     "ConstructionsEditor": {
-      "description": "A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables, optionally paired with a general-data tab for climate and building inputs. The user edits both tabs entirely on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, city lookup that fills climate values, live reduced thermal resistance (R) feedback against the normative value — and submits the whole state back to the agent in a single action, without client-side blocking.",
+      "description": "A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables, headed by a collapsible \"conditions\" block with the climate and building inputs (region with agent-computed HDD, room purpose, indoor temperature, operating condition). Every general value may carry its provenance (from the project, from the question, suggested by the agent, taken by default) shown as a caption under the control. The user edits everything on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, city lookup that fills climate values, live reduced thermal resistance (R) feedback against the normative value — and submits the whole state back to the agent in a single action, without client-side blocking.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/constructions-editor.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/ConstructionsEditor",
@@ -5449,6 +5449,12 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "gsop": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   }
                 },
                 "required": [
@@ -5461,6 +5467,209 @@
                   "condition"
                 ],
                 "additionalProperties": false
+              },
+              "generalSources": {
+                "type": "object",
+                "properties": {
+                  "buildingType": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "city": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tot": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "zot": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tn": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tv": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "condition": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "gsop": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "conditionsCollapsed": {
+                "type": "boolean"
+              },
+              "headerTitle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "headerContext": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
               },
               "buildingTypeOptions": {
                 "type": "array",
