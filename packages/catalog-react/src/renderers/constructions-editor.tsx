@@ -77,6 +77,9 @@ export const ConstructionsEditor = createComponentImplementation(
     const [general, setGeneral] = React.useState<ConstructionsGeneral>(initialGeneral);
     // Тронутые пользователем поля условий: с них снято оформление источника.
     const [touched, setTouched] = React.useState<ReadonlySet<ConstructionsGeneralKey>>(new Set());
+    // Есть несохранённые правки условий: правка поля черновика не порождает
+    // (иначе он уезжал бы на каждое нажатие клавиши), поэтому коммит — явный.
+    const [conditionsDirty, setConditionsDirty] = React.useState(false);
 
     // Снимок климата, из которого агент посчитал `rnorm`. Новые props (ответ
     // агента с пересчитанным Rнорм) — новый снимок, свежие значения и свежие
@@ -87,6 +90,7 @@ export const ConstructionsEditor = createComponentImplementation(
       setBaseClimate(propsClimate);
       setGeneral(initialGeneral);
       setTouched(new Set());
+      setConditionsDirty(false);
     }
     const climateDirty = climateKey(general) !== baseClimate;
 
@@ -95,6 +99,7 @@ export const ConstructionsEditor = createComponentImplementation(
       changed: ConstructionsGeneralKey[],
     ) => {
       setGeneral(next);
+      setConditionsDirty(true);
       setTouched(prev => {
         const nextTouched = new Set(prev);
         for (const key of changed) nextTouched.add(key);
@@ -207,6 +212,15 @@ export const ConstructionsEditor = createComponentImplementation(
               cityReferenceId={props.cityReferenceId}
               minChars={props.minChars}
               onChange={handleGeneralChange}
+              dirty={conditionsDirty}
+              onSave={
+                props.draftAction
+                  ? () => {
+                      sendDraft(constructions);
+                      setConditionsDirty(false);
+                    }
+                  : undefined
+              }
             />
           ) : null}
           <section className="a2ui-ce__group">

@@ -153,7 +153,9 @@ export function ConstructionsEditorGeneral({
             }
             className={fieldSourceControlClass(sources.condition)}
           >
-            <option value="">—</option>
+            {/* «Не задано» показываем, только пока значение пустое: null здесь
+                означает λБ, и выбирать его отдельным пунктом незачем. */}
+            {general.condition === null ? <option value="">—</option> : null}
             <option value="А">А</option>
             <option value="Б">Б</option>
           </ConstructionsEditorSelect>

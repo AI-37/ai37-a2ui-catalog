@@ -13,10 +13,14 @@ export const CONSTRUCTIONS_EDITOR_STYLE_PREFIX = 'a2ui-constructions-editor';
  * пакета и импорта у каждого потребителя (Решение 1 design.md).
  *
  * Правила: все классы с префиксом `a2ui-ce-` (изоляции в чужом хосте нет,
- * префикс — единственная защита от коллизий), специфичность — один класс,
- * чтобы хост мог переопределить своим правилом без `!important`. Цвета — только
- * токены `--a2ui-*`; значения макета вынесены в группу `--a2ui-color-ce-*`
- * (`tokens.ts`), литералов здесь нет.
+ * префикс — единственная защита от коллизий). Правила, сбрасывающие
+ * оформление кнопок, полей и селектов, записаны от корня
+ * (`.a2ui-ce .a2ui-ce-btn`): у хоста такие стили обычно объявлены на элементе
+ * (`[data-copilotkit] button` — специфичность 0,1,1) и одноклассовое правило
+ * они перебивают — заголовки карточек уезжали в серые «пилюли» кнопок хоста.
+ * Остальное держим на одном классе, чтобы хост мог переопределить без
+ * `!important`. Цвета — только токены `--a2ui-*`; значения макета вынесены в
+ * группу `--a2ui-color-ce-*` (`tokens.ts`), литералов здесь нет.
  *
  * Узкая раскладка — базовая, широкая живёт внутри `@container`: без поддержки
  * container queries компонент деградирует в одну колонку, а не ломается.
@@ -27,6 +31,13 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   container-type: inline-size;
   container-name: a2ui-ce;
   display: grid;
+  /* width обязателен: container-type: inline-size включает size containment,
+     вклад содержимого в intrinsic-ширину становится нулевым — во флекс-хосте
+     (.a2ui-surface { display: flex }) flex-basis: auto резолвится в 0, и
+     карточка схлопывается в две рамки, а overflow: hidden срезает содержимое.
+     min-width: 0 — чтобы длинная строка не распирала колонку хоста. */
+  width: 100%;
+  min-width: 0;
   border-radius: 14px;
   border: 1px solid ${tokens.ceBorder};
   background: ${tokens.ceSurface};
@@ -109,7 +120,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
 
 /* Свёрнутый блок условий: строка-сводка целиком раскрывает блок, поэтому она
    кнопка — со сброшенным UA-оформлением и выравниванием по левому краю. */
-.a2ui-ce-banner {
+.a2ui-ce .a2ui-ce-banner {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -143,7 +154,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   overflow-wrap: anywhere;
 }
 
-.a2ui-ce-link {
+.a2ui-ce .a2ui-ce-link {
   padding: 0;
   border: none;
   background: transparent;
@@ -154,7 +165,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   white-space: nowrap;
 }
 
-.a2ui-ce-btn {
+.a2ui-ce .a2ui-ce-btn {
   padding: 8px 14px;
   border-radius: 9px;
   border: 1px solid ${tokens.ceBorder};
@@ -166,32 +177,32 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   white-space: nowrap;
 }
 
-.a2ui-ce-btn--primary {
+.a2ui-ce .a2ui-ce-btn--primary {
   padding: 10px 20px;
   border-color: transparent;
   background: ${tokens.ceText};
   color: ${tokens.ceSurface};
 }
 
-.a2ui-ce-btn--dashed {
+.a2ui-ce .a2ui-ce-btn--dashed {
   justify-self: start;
   border-style: dashed;
 }
 
-.a2ui-ce-btn--commit {
+.a2ui-ce .a2ui-ce-btn--commit {
   border-color: transparent;
   background: ${tokens.ceText};
   color: ${tokens.ceSurface};
 }
 
-.a2ui-ce-btn--edit {
+.a2ui-ce .a2ui-ce-btn--edit {
   padding: 4px 10px;
   color: ${tokens.ceTextMuted};
   font-size: 12px;
   white-space: nowrap;
 }
 
-.a2ui-ce-btn--danger {
+.a2ui-ce .a2ui-ce-btn--danger {
   margin-left: auto;
   padding: 6px 4px;
   border-color: transparent;
@@ -199,10 +210,48 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   font-size: 12.5px;
 }
 
-.a2ui-ce-btn--add-layer {
+.a2ui-ce .a2ui-ce-btn--add-layer {
   justify-self: start;
   padding: 6px 12px;
   border-style: dashed;
+}
+
+/* Ховер объявляем сами: у хоста он объявлен на элементе
+   (.a2ui-surface button:hover с заливкой) и красит серой пилюлей всё, у чего
+   нет своего состояния — заголовок карточки, «✕», ссылки. */
+.a2ui-ce .a2ui-ce-card__toggle:hover,
+.a2ui-ce .a2ui-ce-link:hover,
+.a2ui-ce .a2ui-ce-card__remove:hover {
+  background: transparent;
+}
+
+.a2ui-ce .a2ui-ce-link:hover {
+  text-decoration: underline;
+}
+
+.a2ui-ce .a2ui-ce-card__remove:hover {
+  color: ${tokens.ceText};
+}
+
+.a2ui-ce .a2ui-ce-banner:hover {
+  background: ${tokens.ceSurfaceSunken};
+}
+
+/* Строка слоя и карточка кликабельны — им ховер нужен, но свой: рамкой. */
+.a2ui-ce .a2ui-ce-layer:hover {
+  background: ${tokens.ceSurface};
+  border-color: ${tokens.ceTextMuted};
+}
+
+.a2ui-ce .a2ui-ce-btn:hover {
+  background: transparent;
+  border-color: ${tokens.ceTextMuted};
+}
+
+.a2ui-ce .a2ui-ce-btn--primary:hover,
+.a2ui-ce .a2ui-ce-btn--commit:hover {
+  background: ${tokens.ceText};
+  border-color: transparent;
 }
 
 /* Ряд полей: одно поле в колонку, подпись над контролом. */
@@ -227,13 +276,18 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   color: ${tokens.ceTextMuted};
 }
 
-.a2ui-ce-control {
+.a2ui-ce .a2ui-ce-control {
   width: 100%;
   min-height: 37px;
   box-sizing: border-box;
   padding: 10px 12px;
   border-radius: 9px;
+  /* Рамка считается от цвета текста, а не от токена границы: у тёмной темы
+     хоста граница почти совпадает с фоном, и поля переставали читаться как
+     поля — на виду оставались только акцентные. Токен остаётся запасным
+     значением для сред без color-mix. */
   border: 1px solid ${tokens.ceBorder};
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
   font-size: 14px;
   line-height: 17px;
   background: ${tokens.ceSurface};
@@ -242,16 +296,14 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
 
 /* Значение из проекта: заливка отличает поле от обычного контрола, рамка
    остаётся (макет, figma-values.md). */
-.a2ui-ce-control--project {
+.a2ui-ce .a2ui-ce-control--project {
   background: ${tokens.ceSurfaceSunken};
 }
 
-/* Предложенное агентом/выведенное из вопроса: акцентная рамка, значение
-   приглушено — «ещё не подтверждено». */
-.a2ui-ce-control--suggested {
-  border: 1.5px solid ${tokens.ceAccent};
-  color: ${tokens.ceTextMuted};
-}
+/* Предложенное агентом/выведенное из вопроса: контрол обычный, источник несёт
+   только подпись под ним. Акцентная рамка из макета в жизни подсвечивала самые
+   рядовые поля (климат из справочника СП 131) — три подсвеченных поля среди
+   обычных читались как ошибка, а не как «предложено». */
 
 /* Селект в оформлении контрола: нативный вид сброшен, стрелка своя — иначе
    системный контрол не совпадает по высоте с текстовыми полями ряда. */
@@ -260,7 +312,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   display: grid;
 }
 
-.a2ui-ce-select > select {
+.a2ui-ce .a2ui-ce-select > select {
   appearance: none;
   -webkit-appearance: none;
   padding-right: 32px;
@@ -292,7 +344,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   color: ${tokens.ceAccent};
 }
 
-.a2ui-ce-note__dot {
+.a2ui-ce-dot {
   flex-shrink: 0;
   width: 6px;
   height: 6px;
@@ -349,10 +401,6 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   background: ${tokens.ceSurfaceSunken};
 }
 
-.a2ui-ce-card--invalid {
-  border-color: ${tokens.warning};
-}
-
 .a2ui-ce-card__header {
   display: flex;
   align-items: center;
@@ -360,7 +408,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   padding: 10px 12px;
 }
 
-.a2ui-ce-card__toggle {
+.a2ui-ce .a2ui-ce-card__toggle {
   flex: 1;
   display: flex;
   /* justify-content явно: UA-стиль кнопки центрирует flex-содержимое, и
@@ -382,14 +430,18 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
 }
 
 .a2ui-ce-card__warn {
-  color: ${tokens.warning};
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: ${tokens.ceTextMuted};
   font-size: 11.5px;
-  font-weight: 500;
   white-space: nowrap;
 }
 
-.a2ui-ce-card__remove {
+.a2ui-ce .a2ui-ce-card__remove {
   border: none;
+  /* padding задаём явно: у хоста кнопка с 8/16, и «✕» раздувал строку. */
+  padding: 4px;
   background: transparent;
   color: ${tokens.ceTextMuted};
   cursor: pointer;
@@ -494,7 +546,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   width: 160px;
 }
 
-.a2ui-ce-layer {
+.a2ui-ce .a2ui-ce-layer {
   display: flex;
   align-items: baseline;
   /* Явно: хостовые стили кнопок центрируют flex-содержимое — сводка
@@ -513,11 +565,6 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   line-height: 15px;
   text-align: left;
   cursor: pointer;
-}
-
-.a2ui-ce-layer__no {
-  color: ${tokens.ceTextMuted};
-  font-variant-numeric: tabular-nums;
 }
 
 /* Материал забирает остаток строки, но не ужимается уже 8rem: колонка чисел
@@ -556,6 +603,11 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
 .a2ui-ce-pair {
   display: grid;
   gap: 14px;
+}
+
+.a2ui-ce-conditions__actions {
+  display: flex;
+  margin-top: 14px;
 }
 
 .a2ui-ce-conditions__climate {

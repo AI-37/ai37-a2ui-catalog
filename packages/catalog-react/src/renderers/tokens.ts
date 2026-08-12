@@ -51,8 +51,28 @@ const DEFAULTS = {
 
 type TokenName = keyof typeof DEFAULTS;
 
+/**
+ * Токены палитры макета наследуют общие токены каталога: хост, объявивший тему
+ * (в т.ч. тёмную) для `--a2ui-color-surface` и соседей, получает
+ * `ConstructionsEditor` в этой теме, ничего не зная про группу `ce`. Значение
+ * макета остаётся последним фолбэком — «из коробки» компонент выглядит так,
+ * как нарисован.
+ */
+const INHERITS: Partial<Record<TokenName, TokenName>> = {
+  'color-ce-surface': 'color-surface',
+  'color-ce-surface-sunken': 'color-surface-muted',
+  'color-ce-border': 'color-border',
+  'color-ce-text': 'color-text-strong',
+  'color-ce-text-muted': 'color-text-subtle',
+  'color-ce-accent': 'color-accent',
+};
+
 function cssVar(name: TokenName): string {
-  return `var(--a2ui-${name}, ${DEFAULTS[name]})`;
+  const inherited = INHERITS[name];
+
+  return inherited === undefined
+    ? `var(--a2ui-${name}, ${DEFAULTS[name]})`
+    : `var(--a2ui-${name}, var(--a2ui-${inherited}, ${DEFAULTS[name]}))`;
 }
 
 /** Семантические токены для использования в стилях рендереров. */

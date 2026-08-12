@@ -85,7 +85,14 @@ export function ConstructionsEditorCard({
           <ConstructionsEditorChevron open={open} />
           {title}
         </button>
-        {invalidity.invalid ? <span className="a2ui-ce-card__warn">! проверить</span> : null}
+        {invalidity.invalid ? (
+          // Пометка, а не тревога: точка и слово приглушённым — карточка с
+          // незаполненным слоем не ошибка, её просто ещё не дозаполнили.
+          <span className="a2ui-ce-card__warn">
+            <span className="a2ui-ce-dot" aria-hidden="true" />
+            проверить
+          </span>
+        ) : null}
         <RprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />
         <button
           type="button"

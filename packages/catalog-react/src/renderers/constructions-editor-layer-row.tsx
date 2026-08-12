@@ -39,7 +39,6 @@ function LayerSummary({layer, index, condition, onOpen}: ConstructionsEditorLaye
 
   return (
     <button type="button" onClick={onOpen} className="a2ui-ce-layer">
-      <span className="a2ui-ce-layer__no">№{index + 1}</span>
       <span
         className={`a2ui-ce-layer__material${materialMissing ? ' a2ui-ce-layer__warn' : ''}`}
       >

@@ -16,7 +16,7 @@ export function ConstructionsEditorSourceNote({source}: ConstructionsEditorSourc
 
   return (
     <span className={`a2ui-ce-note${accent ? ' a2ui-ce-note--accent' : ''}`}>
-      {source.source === 'default' ? <span className="a2ui-ce-note__dot" aria-hidden="true" /> : null}
+      {source.source === 'default' ? <span className="a2ui-ce-dot" aria-hidden="true" /> : null}
       {source.note ?? fieldSourceLabel(source.source)}
     </span>
   );

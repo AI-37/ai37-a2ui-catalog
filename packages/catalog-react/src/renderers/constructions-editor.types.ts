@@ -38,6 +38,10 @@ export type ConstructionsEditorConditionsProps = ConstructionsEditorGeneralProps
   /** Раскрыт ли блок; состояние локальное, наружу не уезжает. */
   open: boolean;
   onToggle: () => void;
+  /** Есть несохранённые правки условий — показываем кнопку сохранения. */
+  dirty: boolean;
+  /** Отправить правки условий; без `draftAction` у эмитента кнопки нет. */
+  onSave?: (() => void) | undefined;
 };
 
 export type ConstructionsEditorSourceNoteProps = {
@@ -113,7 +117,7 @@ export type ConstructionsEditorLayerRowMode = 'summary' | 'edit' | 'new';
 
 export type ConstructionsEditorLayerRowProps = {
   layer: ConstructionLayer;
-  /** Порядковый номер строки для «№» сводки (с нуля). */
+  /** Порядковый номер строки: нужен форме и ключам, в сводке не показывается. */
   index: number;
   /** name скрытого input'а комбобокса; уникален в пределах surface'а. */
   rowName: string;

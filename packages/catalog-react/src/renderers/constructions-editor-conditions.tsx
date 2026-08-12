@@ -11,7 +11,13 @@ import type {ConstructionsEditorConditionsProps} from './constructions-editor.ty
  * введённое живёт в состоянии редактора и сворачивание его не трогает
  * (Решение 6 design.md).
  */
-export function ConstructionsEditorConditions({open, onToggle, ...general}: ConstructionsEditorConditionsProps) {
+export function ConstructionsEditorConditions({
+  open,
+  onToggle,
+  dirty,
+  onSave,
+  ...general
+}: ConstructionsEditorConditionsProps) {
   if (!open) {
     return (
       <section className="a2ui-ce__group">
@@ -38,6 +44,15 @@ export function ConstructionsEditorConditions({open, onToggle, ...general}: Cons
         </button>
       </div>
       <ConstructionsEditorGeneral {...general} />
+      {/* Кнопка появляется только по факту правки: пока условия не трогали,
+          сохранять нечего, и пустая кнопка сбивала бы с толку. */}
+      {dirty && onSave ? (
+        <div className="a2ui-ce-conditions__actions">
+          <button type="button" onClick={onSave} className="a2ui-ce-btn a2ui-ce-btn--commit">
+            Сохранить
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }
