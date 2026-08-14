@@ -19,7 +19,8 @@ function referenceSuggestMiddleware(): Plugin {
     configureServer(server) {
       server.middlewares.use(LOOKUP_SUGGEST_ROUTE, (req, res) => {
         const url = new URL(req.url ?? '/', 'http://localhost');
-        const referenceId = url.searchParams.get('referenceId') ?? '';
+        // Wire-параметр канала — `resource` (= referenceId справочника), см. use-lookup-suggest.
+        const referenceId = url.searchParams.get('resource') ?? '';
         const query = (url.searchParams.get('query') ?? '').trim().toLowerCase();
 
         res.setHeader('content-type', 'application/json');
@@ -32,8 +33,12 @@ function referenceSuggestMiddleware(): Plugin {
         }
 
         if (referenceId === 'sp50-materials') {
+          // Ищем и по слотам оформления: раздел табл. М.1 живёт в `group`,
+          // в `label` его может не быть — как у настоящего агента-справочника.
           const options = DEMO_MATERIALS.filter(material =>
-            material.label.toLowerCase().includes(query),
+            [material.label, material.group, material.title].some(text =>
+              text?.toLowerCase().includes(query),
+            ),
           );
           res.end(JSON.stringify({options}));
           return;

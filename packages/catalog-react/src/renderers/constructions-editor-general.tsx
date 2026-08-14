@@ -45,7 +45,7 @@ export function ConstructionsEditorGeneral({
   minChars,
   onChange,
 }: ConstructionsEditorGeneralProps) {
-  const {options, handleInputText, closeOptions} = useLookupSuggest({
+  const {options, loading, queried, handleInputText, closeOptions} = useLookupSuggest({
     referenceId: cityReferenceId ?? '',
     minChars,
   });
@@ -87,6 +87,8 @@ export function ConstructionsEditorGeneral({
             inputText={general.city?.label ?? ''}
             selected={selectedCity}
             options={options}
+            loading={loading}
+            queried={queried}
             onInputChange={handleCityInput}
             onPick={handleCityPick}
             onClose={closeOptions}

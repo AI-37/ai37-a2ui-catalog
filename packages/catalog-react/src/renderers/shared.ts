@@ -75,6 +75,38 @@ export const editButtonStyle: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
+/**
+ * Слоты многострочной опции lookup-дропдауна: group — надстрочный контекст,
+ * мельче и приглушённее; meta — нижняя приглушённая строка. Кегли меньше
+ * основного текста, чтобы высокая опция не съедала весь `maxHeight: 240`
+ * попапа.
+ */
+export const lookupOptionGroupStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.78rem',
+  color: tokens.textSubtle,
+};
+
+export const lookupOptionTitleStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.95rem',
+  color: tokens.text,
+};
+
+export const lookupOptionMetaStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.82rem',
+  color: tokens.textMuted,
+};
+
+/** Статус-строка попапа lookup («Ищем…» / «Ничего не найдено») — вне списка опций. */
+export const lookupStatusStyle: React.CSSProperties = {
+  display: 'block',
+  padding: '6px 8px',
+  fontSize: '0.85rem',
+  color: tokens.textMuted,
+};
+
 export function toDisplayValue(value: unknown) {
   if (value === null || value === undefined) {
     return '—';

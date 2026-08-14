@@ -4,21 +4,102 @@
  * `lambdaA`/`lambdaB` (контракт fetch-ответа допускает расширение) — выбор
  * заполняет λ строки; «Пароизоляционная плёнка» без λ показывает переход на
  * ручной ввод.
+ *
+ * Слоты `group`/`title`/`meta` — оформление многострочной опции (раздел
+ * табл. М.1 · название позиции · ρ и λ); `label` остаётся самодостаточным —
+ * именно он попадает в поле после выбора. «Пароизоляционная плёнка» слотов не
+ * несёт — показывает смешанную выдачу и однострочный fallback (справочник без
+ * слотов целиком — `cities` в примерах FormCard рядом).
  */
 export const DEMO_MATERIALS: Array<{
   value: string;
   label: string;
+  group?: string;
+  title?: string;
+  meta?: string;
   lambdaA?: number;
   lambdaB?: number;
 }> = [
-  {value: 'm-kirpich-glina', label: 'Кладка из глиняного обыкновенного кирпича', lambdaA: 0.7, lambdaB: 0.81},
-  {value: 'm-kirpich-silikat', label: 'Кладка из силикатного кирпича', lambdaA: 0.76, lambdaB: 0.87},
-  {value: 'm-minvata-plity', label: 'Плиты минераловатные', lambdaA: 0.045, lambdaB: 0.048},
-  {value: 'm-penopolistirol', label: 'Пенополистирол (плиты)', lambdaA: 0.038, lambdaB: 0.041},
-  {value: 'm-eps', label: 'Экструдированный пенополистирол', lambdaA: 0.031, lambdaB: 0.034},
-  {value: 'm-zhelezobeton', label: 'Железобетон', lambdaA: 1.92, lambdaB: 2.04},
-  {value: 'm-gazobeton-600', label: 'Газобетон D600', lambdaA: 0.22, lambdaB: 0.26},
-  {value: 'm-shtukaturka-cement', label: 'Штукатурка цементно-песчаная', lambdaA: 0.76, lambdaB: 0.93},
-  {value: 'm-derevo-sosna', label: 'Сосна и ель поперёк волокон', lambdaA: 0.14, lambdaB: 0.18},
+  {
+    value: 'm-kirpich-glina',
+    label: 'Кладка из глиняного обыкновенного кирпича',
+    group: 'Кирпичная кладка из сплошного кирпича',
+    title: 'Глиняного обыкновенного на цементно-песчаном растворе',
+    meta: 'ρ 1800 · λА 0,70 / λБ 0,81',
+    lambdaA: 0.7,
+    lambdaB: 0.81,
+  },
+  {
+    value: 'm-kirpich-silikat',
+    label: 'Кладка из силикатного кирпича',
+    group: 'Кирпичная кладка из сплошного кирпича',
+    title: 'Силикатного на цементно-песчаном растворе',
+    meta: 'ρ 1800 · λА 0,76 / λБ 0,87',
+    lambdaA: 0.76,
+    lambdaB: 0.87,
+  },
+  {
+    value: 'm-minvata-plity',
+    label: 'Плиты минераловатные',
+    group: 'Теплоизоляционные материалы',
+    title: 'Плиты минераловатные из каменного волокна',
+    meta: 'ρ 50 · λА 0,045 / λБ 0,048',
+    lambdaA: 0.045,
+    lambdaB: 0.048,
+  },
+  {
+    value: 'm-penopolistirol',
+    label: 'Пенополистирол (плиты)',
+    group: 'Теплоизоляционные материалы',
+    title: 'Пенополистирол (плиты)',
+    meta: 'ρ 25 · λА 0,038 / λБ 0,041',
+    lambdaA: 0.038,
+    lambdaB: 0.041,
+  },
+  {
+    value: 'm-eps',
+    label: 'Экструдированный пенополистирол',
+    group: 'Теплоизоляционные материалы',
+    title: 'Экструдированный пенополистирол',
+    meta: 'ρ 30 · λА 0,031 / λБ 0,034',
+    lambdaA: 0.031,
+    lambdaB: 0.034,
+  },
+  {
+    value: 'm-zhelezobeton',
+    label: 'Железобетон',
+    group: 'Бетоны',
+    title: 'Железобетон',
+    meta: 'ρ 2500 · λА 1,92 / λБ 2,04',
+    lambdaA: 1.92,
+    lambdaB: 2.04,
+  },
+  {
+    value: 'm-gazobeton-600',
+    label: 'Газобетон D600',
+    group: 'Ячеистые бетоны',
+    title: 'Газобетон на цементном вяжущем D600',
+    meta: 'ρ 600 · λА 0,22 / λБ 0,26',
+    lambdaA: 0.22,
+    lambdaB: 0.26,
+  },
+  {
+    value: 'm-shtukaturka-cement',
+    label: 'Штукатурка цементно-песчаная',
+    group: 'Растворы',
+    title: 'Цементно-песчаный раствор',
+    meta: 'ρ 1800 · λА 0,76 / λБ 0,93',
+    lambdaA: 0.76,
+    lambdaB: 0.93,
+  },
+  {
+    value: 'm-derevo-sosna',
+    label: 'Сосна и ель поперёк волокон',
+    group: 'Древесина',
+    title: 'Сосна и ель поперёк волокон',
+    meta: 'ρ 500 · λА 0,14 / λБ 0,18',
+    lambdaA: 0.14,
+    lambdaB: 0.18,
+  },
   {value: 'm-paroizolyaciya', label: 'Пароизоляционная плёнка'},
 ];
