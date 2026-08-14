@@ -16,6 +16,11 @@ ConstructionType = Literal[
 
 CherdachnyeSubtype = Literal["cherdak", "podval_vent", "podval_nevent", "pol_po_gruntu"]
 
+# Агентский статус подтверждения: 'confirm' — состав предложен агентом,
+# 'confirm-passport' — паспортное Rпр взято из текста. Гасится на клиенте;
+# присланный клиентом статус агент игнорирует (как id).
+ConstructionStatus = Literal["confirm", "confirm-passport"]
+
 PositiveFloat = Annotated[float, Field(gt=0)]
 
 
@@ -38,6 +43,7 @@ class ConstructionEntry(StrictModel):
     name: str = Field(default=None, max_length=200)
     layers: list[ConstructionLayer] = Field(max_length=50)
     rprPassport: float = Field(default=None, gt=0)
+    status: ConstructionStatus = None
 
 
 class ConstructionTypeConfig(StrictModel):
@@ -130,6 +136,8 @@ class ConstructionsEditorProps(StrictModel):
     submitLabel: str = Field(min_length=1, max_length=80)
     # DEPRECATED: перехода между вкладками нет — экран один.
     nextLabel: str = Field(default=None, min_length=1, max_length=80)
+    # Подпись кнопки в pending-режиме; без неё кнопка всегда submitLabel.
+    pendingLabel: str = Field(default=None, min_length=1, max_length=80)
     submitAction: str = Field(min_length=1, max_length=120)
     # Кнопка возврата опциональна: на объединённом экране её нет.
     backLabel: str = Field(default=None, min_length=1, max_length=80)

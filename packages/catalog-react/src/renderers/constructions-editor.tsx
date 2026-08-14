@@ -19,7 +19,9 @@ import type {
 } from './constructions-editor.types';
 import {createGeneralState} from './create-general-state';
 import {createLocalId} from './create-local-id';
+import {findInvalidLayers} from './find-invalid-layers';
 import {omitTouchedSources} from './omit-touched-sources';
+import {scrollToElement} from './scroll-to-element';
 import {StyleTag} from './style-tag';
 import {useA2uiBaseStyles} from './shared';
 
@@ -43,6 +45,16 @@ import {useA2uiBaseStyles} from './shared';
  *
  * Без пропа `general` компонент работает как прежде: только конструкции и
  * submit с `{constructions}` — путь отката.
+ *
+ * Статусные чипы карточек живут за live-гейтом условий (`conditionsFilled`):
+ * пока обязательные поля «Условий» пусты, чипов нет. Агентские статусы
+ * (`entry.status`) гасятся на клиенте просмотром карточки без ошибок данных
+ * или коммитом любой её формы — до submit, ключ — `id` карточки. С пропом
+ * `pendingLabel` кнопка двухрежимная: пока есть незаполненные условия или
+ * карточки, требующие внимания, клик — навигация к первой проблеме (условия →
+ * первая карточка) без action'а; чистый список — прежний submit. Это
+ * сознательный отход от «индикация, не блок» (design.md
+ * calc-button-next-label); без пропа поведение прежнее.
  */
 export const ConstructionsEditor = createComponentImplementation(
   constructionsEditorDefinition,
@@ -67,6 +79,15 @@ export const ConstructionsEditor = createComponentImplementation(
     // Начальное состояние блока условий задаёт агент, дальше им владеет
     // пользователь: `conditionsCollapsed` читается один раз (Решение 6).
     const [conditionsOpen, setConditionsOpen] = React.useState(!props.conditionsCollapsed);
+    // Погашенные агентские статусы (`confirm`/`confirm-passport`): просмотр
+    // карточки без ошибок данных или коммит любой её формы. Живёт до submit;
+    // на стороне агента статусы снимает `constructions:apply`.
+    const [dismissedStatusIds, setDismissedStatusIds] = React.useState<ReadonlySet<string>>(
+      new Set(),
+    );
+    // Якоря навигации pending-кнопки: блок условий и карточки по id.
+    const conditionsRef = React.useRef<HTMLDivElement | null>(null);
+    const cardRefs = React.useRef(new Map<string, HTMLDivElement>());
     // Состояние из props, а не сами props: дефолт типа здания подставляется
     // здесь же и «тронутым климатом» не считается.
     const initialGeneral = createGeneralState(
@@ -111,6 +132,44 @@ export const ConstructionsEditor = createComponentImplementation(
     // `condition` из вкладки; нет значения — λБ, как на сервере (Решение 6).
     const condition = general.condition ?? undefined;
 
+    const invalidityOf = (entry: ConstructionEntry) =>
+      findInvalidLayers(
+        entry,
+        typeConfigs.find(candidate => candidate.type === entry.type),
+      );
+
+    // Гейт условий — клиентский live-эквивалент isStep1Filled агента:
+    // назначение, регион, tот, zот, tв. Пока не заполнены, статусных чипов нет
+    // («готова»/«подтвердите» преждевременны). Без пропа `general` гейта нет —
+    // путь отката ведёт себя как прежде.
+    const conditionsFilled =
+      !hasGeneral ||
+      (general.buildingType !== null &&
+        general.city !== null &&
+        general.tot !== null &&
+        general.zot !== null &&
+        general.tv !== null);
+
+    // Гашение просмотром: раскрытие карточки без ошибок данных подтверждает её
+    // состав (вердикт Rпр не важен — непрохождение нормы легитимно); карточка
+    // с ошибками данных гасится только их починкой.
+    const dismissStatusOnView = (id: string) => {
+      const entry = constructions.find(candidate => candidate.id === id);
+      if (!entry?.status || invalidityOf(entry).invalid) return;
+      setDismissedStatusIds(prev => new Set(prev).add(id));
+    };
+
+    const needsAttention = (entry: ConstructionEntry) =>
+      invalidityOf(entry).invalid ||
+      (entry.status !== undefined && !dismissedStatusIds.has(entry.id));
+
+    // Pending — тот же источник, что чипы: незаполненные условия либо карточка,
+    // требующая внимания. Без пропа `pendingLabel` режима нет: кнопка всегда
+    // submit, как раньше.
+    const pending =
+      props.pendingLabel !== undefined &&
+      (!conditionsFilled || constructions.some(needsAttention));
+
     const comparable = constructions.filter(entry => {
       const config = typeConfigs.find(candidate => candidate.type === entry.type);
       return config?.rnorm !== undefined;
@@ -122,6 +181,7 @@ export const ConstructionsEditor = createComponentImplementation(
     });
 
     const handleToggle = (id: string) => {
+      if (!openIds.has(id)) dismissStatusOnView(id);
       setOpenIds(prev => {
         const next = new Set(prev);
         if (next.has(id)) {
@@ -154,7 +214,11 @@ export const ConstructionsEditor = createComponentImplementation(
       // карточки; ввод внутри незакоммиченной формы наверх не поднимается
       // вовсе, а правки вкладки общих данных уезжают ближайшим коммитом
       // либо submit'ом.
-      if (options?.commit) sendDraft(updated);
+      if (options?.commit) {
+        sendDraft(updated);
+        // Правка равна подтверждению: коммит любой формы гасит агентский статус.
+        setDismissedStatusIds(prev => (prev.has(next.id) ? prev : new Set(prev).add(next.id)));
+      }
     };
 
     const handleEntryRemove = (id: string) => {
@@ -182,6 +246,21 @@ export const ConstructionsEditor = createComponentImplementation(
       });
     };
 
+    // «Далее» — навигация, не action: раскрыть незаполненные условия, иначе
+    // первую сверху карточку, требующую внимания (раскрытие гасит её агентский
+    // статус по общему правилу просмотра), со скроллом к цели.
+    const handlePendingClick = () => {
+      if (!conditionsFilled) {
+        setConditionsOpen(true);
+        scrollToElement(conditionsRef.current);
+        return;
+      }
+      const target = constructions.find(needsAttention);
+      if (!target) return;
+      if (!openIds.has(target.id)) handleToggle(target.id);
+      scrollToElement(cardRefs.current.get(target.id) ?? null);
+    };
+
     const handleBack = () => {
       if (!props.backAction) return;
       void context.dispatchAction({
@@ -202,48 +281,64 @@ export const ConstructionsEditor = createComponentImplementation(
         ) : null}
         <div className="a2ui-ce__body">
           {hasGeneral ? (
-            <ConstructionsEditorConditions
-              open={conditionsOpen}
-              onToggle={() => setConditionsOpen(prev => !prev)}
-              general={general}
-              sources={omitTouchedSources(props.generalSources, touched)}
-              showGsop={!climateDirty}
-              buildingTypeOptions={props.buildingTypeOptions}
-              cityReferenceId={props.cityReferenceId}
-              minChars={props.minChars}
-              onChange={handleGeneralChange}
-              dirty={conditionsDirty}
-              onSave={
-                props.draftAction
-                  ? () => {
-                      sendDraft(constructions);
-                      setConditionsDirty(false);
-                    }
-                  : undefined
-              }
-            />
+            <div ref={conditionsRef}>
+              <ConstructionsEditorConditions
+                open={conditionsOpen}
+                onToggle={() => setConditionsOpen(prev => !prev)}
+                general={general}
+                sources={omitTouchedSources(props.generalSources, touched)}
+                showGsop={!climateDirty}
+                buildingTypeOptions={props.buildingTypeOptions}
+                cityReferenceId={props.cityReferenceId}
+                minChars={props.minChars}
+                onChange={handleGeneralChange}
+                dirty={conditionsDirty}
+                onSave={
+                  props.draftAction
+                    ? () => {
+                        sendDraft(constructions);
+                        setConditionsDirty(false);
+                      }
+                    : undefined
+                }
+              />
+            </div>
           ) : null}
           <section className="a2ui-ce__group">
             <h3 className="a2ui-ce-section-title">Конструкции · {constructions.length}</h3>
             <div className="a2ui-ce__list">
               {constructions.map(entry => (
-                <ConstructionsEditorCard
+                <div
                   key={entry.id}
-                  entry={entry}
-                  typeConfigs={typeConfigs}
-                  condition={condition}
-                  materialsReferenceId={props.materialsReferenceId}
-                  minChars={props.minChars}
-                  open={openIds.has(entry.id)}
-                  showRnorm={!climateDirty}
-                  editingTarget={editingTarget?.entryId === entry.id ? editingTarget.target : null}
-                  onEditingChange={target =>
-                    setEditingTarget(target === null ? null : {entryId: entry.id, target})
-                  }
-                  onToggle={() => handleToggle(entry.id)}
-                  onChange={handleEntryChange}
-                  onRemove={() => handleEntryRemove(entry.id)}
-                />
+                  ref={element => {
+                    if (element) {
+                      cardRefs.current.set(entry.id, element);
+                    } else {
+                      cardRefs.current.delete(entry.id);
+                    }
+                  }}
+                >
+                  <ConstructionsEditorCard
+                    entry={entry}
+                    typeConfigs={typeConfigs}
+                    condition={condition}
+                    materialsReferenceId={props.materialsReferenceId}
+                    minChars={props.minChars}
+                    open={openIds.has(entry.id)}
+                    showRnorm={!climateDirty}
+                    showStatusChips={conditionsFilled}
+                    statusDismissed={dismissedStatusIds.has(entry.id)}
+                    editingTarget={
+                      editingTarget?.entryId === entry.id ? editingTarget.target : null
+                    }
+                    onEditingChange={target =>
+                      setEditingTarget(target === null ? null : {entryId: entry.id, target})
+                    }
+                    onToggle={() => handleToggle(entry.id)}
+                    onChange={handleEntryChange}
+                    onRemove={() => handleEntryRemove(entry.id)}
+                  />
+                </div>
               ))}
               <button type="button" onClick={handleAdd} className="a2ui-ce-btn a2ui-ce-btn--dashed">
                 + {props.addLabel}
@@ -258,10 +353,10 @@ export const ConstructionsEditor = createComponentImplementation(
             ) : null}
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={pending ? handlePendingClick : handleSubmit}
               className="a2ui-ce-btn a2ui-ce-btn--primary"
             >
-              {props.submitLabel}
+              {pending ? props.pendingLabel : props.submitLabel}
             </button>
             {/* Климат тронут → присланный Rнорм протух, сводка молчит до
                 следующих props (Решение 4 design.md). */}

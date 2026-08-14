@@ -5294,6 +5294,13 @@
                       "type": "number",
                       "exclusiveMinimum": true,
                       "minimum": 0
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "confirm",
+                        "confirm-passport"
+                      ]
                     }
                   },
                   "required": [
@@ -5723,6 +5730,11 @@
                 "maxLength": 80
               },
               "nextLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "pendingLabel": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80

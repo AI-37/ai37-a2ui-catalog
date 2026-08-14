@@ -27,6 +27,7 @@ import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
 import {createLiftEditorMessages} from './create-lift-editor-messages';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
+import {withStatusChipsPreview} from './with-status-chips-preview';
 import {DEMO_LIFT_DRAFT_ACTION, withLiftDraftAction} from './with-lift-draft-action';
 
 const examples = [
@@ -72,6 +73,15 @@ const examples = [
     description:
       'Экран одним сообщением: блок «Условия» в шапке (город из справочника подставляет климат) и конструкции сразу под ним — слои-сводки с формой слоя и явным «Применить», lookup материалов (dev-middleware) и live Rпр; автосейв черновика по коммитам формы слоя (в консоли), подсветка невалидных конструкций и один submit без клиентской блокировки.',
     messages: withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
+  },
+  {
+    key: 'constructions-status-preview',
+    title: 'Constructions Editor — статусы и «Далее»',
+    description:
+      'Статусные чипы и двухрежимная кнопка: tв пуст — чипов нет, «Далее» раскрывает условия; после ввода tв карточки получают «подтвердите» / «подтвердите паспорт» / «2 слоя без λ», «Далее» ведёт по проблемным карточкам (раскрытие полной гасит статус в «готова», правка слоя — тоже), чистый список возвращает «Рассчитать» с прежним submit.',
+    messages: withStatusChipsPreview(
+      withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
+    ),
   },
   {
     key: 'constructions-conditions-preview',
