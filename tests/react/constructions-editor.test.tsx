@@ -509,19 +509,20 @@ describe('ConstructionsEditor', () => {
       const actions = subscribeActions(surface);
       openCard(/Наружная стена/);
 
-      // Стираем ручную λ фибролита и коммитим — карточка невалидна.
+      // Стираем ручную λ фибролита и коммитим — карточка невалидна; все
+      // проблемы одного вида «нет λ», поэтому чип называет счёт.
       openLayerRow(/Фибролит/);
       fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
         target: {value: ''},
       });
       fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
-      expect(screen.getByText('проверить')).toBeInTheDocument();
+      expect(screen.getByText('1 слой без λ')).toBeInTheDocument();
       expect(screen.getByRole('button', {name: /Фибролит.*λ не задана/})).toBeInTheDocument();
 
       // Пометка видна и на свернутой карточке.
       openCard(/Наружная стена/);
-      expect(screen.getByText('проверить')).toBeInTheDocument();
+      expect(screen.getByText('1 слой без λ')).toBeInTheDocument();
 
       // Исправление гасит подсветку само, никаких action'ов не было.
       openCard(/Наружная стена/);
@@ -531,7 +532,7 @@ describe('ConstructionsEditor', () => {
       });
       fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
-      expect(screen.queryByText('проверить')).not.toBeInTheDocument();
+      expect(screen.queryByText('1 слой без λ')).not.toBeInTheDocument();
       expect(actions).toHaveLength(0);
     });
 
@@ -541,6 +542,304 @@ describe('ConstructionsEditor', () => {
       });
 
       expect(screen.getByText('проверить')).toBeInTheDocument();
+    });
+  });
+
+  describe('статусные чипы карточек (construction-status-chips)', () => {
+    // Полные условия фикстуры — гейт чипов открыт.
+    const FULL_GENERAL = {
+      buildingType: 'Жилое многоквартирное',
+      city: {value: 'moskva', label: 'Москва'},
+      tot: -2.2,
+      zot: 205,
+      tn: -25,
+      tv: 20,
+      condition: 'Б',
+    };
+
+    const VALID_LAYERS = [
+      {material: 'Кладка из кирпича', thicknessMm: 380, lambdaA: 0.7, lambdaB: 0.81},
+      {material: 'Плиты минераловатные', thicknessMm: 150, lambdaA: 0.045, lambdaB: 0.048},
+    ];
+
+    function presetWall(overrides?: Record<string, unknown>) {
+      return {
+        id: 'p-wall',
+        type: 'steny',
+        name: 'Типовая стена',
+        layers: VALID_LAYERS,
+        status: 'confirm',
+        ...overrides,
+      };
+    }
+
+    it('пустые условия — статусных чипов нет ни на одной карточке', () => {
+      renderSurface({general: EMPTY_GENERAL, constructions: [presetWall()]});
+
+      expect(screen.queryByText('подтвердите')).not.toBeInTheDocument();
+      expect(screen.queryByText('готова')).not.toBeInTheDocument();
+      expect(screen.queryByText('проверить')).not.toBeInTheDocument();
+    });
+
+    it('условия дозаполнили — чипы появились тем же рендером, без хода агента', () => {
+      renderSurface({
+        general: {...FULL_GENERAL, tv: null},
+        constructions: [presetWall()],
+      });
+      expect(screen.queryByText('подтвердите')).not.toBeInTheDocument();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '20'}});
+
+      expect(screen.getByText('подтвердите')).toBeInTheDocument();
+    });
+
+    it('tн в гейт не входит: без неё чипы уже рендерятся', () => {
+      renderSurface({
+        general: {...FULL_GENERAL, tn: null},
+        constructions: [presetWall()],
+      });
+
+      expect(screen.getByText('подтвердите')).toBeInTheDocument();
+    });
+
+    it('палитра и приоритет: проблемы данных → агентский статус → готова', () => {
+      renderSurface({
+        general: FULL_GENERAL,
+        constructions: [
+          // Статус + невалидный слой: виден только чип проблем данных.
+          presetWall({
+            id: 'c-1',
+            name: 'Стена с дефектом',
+            layers: [{material: 'Минвата', thicknessMm: 150}],
+          }),
+          presetWall({id: 'c-2', name: 'Полный пресет'}),
+          presetWall({id: 'c-3', name: 'Готовая', status: undefined}),
+          {
+            id: 'c-4',
+            type: 'okna',
+            name: 'Окно из текста',
+            layers: [],
+            rprPassport: 0.83,
+            status: 'confirm-passport',
+          },
+        ],
+      });
+
+      expect(screen.getByText('1 слой без λ')).toBeInTheDocument();
+      expect(screen.getByText('подтвердите')).toBeInTheDocument();
+      expect(screen.getByText('готова')).toBeInTheDocument();
+      expect(screen.getByText('подтвердите паспорт')).toBeInTheDocument();
+    });
+
+    it('однородные «нет λ» считаются, смешанные проблемы — общий «проверить»', () => {
+      renderSurface({
+        general: FULL_GENERAL,
+        constructions: [
+          presetWall({
+            id: 'c-lambda',
+            name: 'Два слоя без λ',
+            status: undefined,
+            layers: [
+              {material: 'Минвата', thicknessMm: 150},
+              {material: 'Кирпич', thicknessMm: 380},
+            ],
+          }),
+          presetWall({
+            id: 'c-mixed',
+            name: 'Смешанные проблемы',
+            status: undefined,
+            layers: [
+              {material: 'Минвата', thicknessMm: 150},
+              {material: 'Кирпич', thicknessMm: null, lambdaB: 0.81},
+            ],
+          }),
+        ],
+      });
+
+      expect(screen.getByText('2 слоя без λ')).toBeInTheDocument();
+      expect(screen.getByText('проверить')).toBeInTheDocument();
+    });
+
+    it('раскрытие полной карточки гасит статус — карточка становится «готова»', () => {
+      const {surface} = renderSurface({general: FULL_GENERAL, constructions: [presetWall()]});
+      const actions = subscribeActions(surface);
+
+      openCard(/Типовая стена/);
+
+      expect(screen.queryByText('подтвердите')).not.toBeInTheDocument();
+      expect(screen.getByText('готова')).toBeInTheDocument();
+      expect(actions).toHaveLength(0);
+    });
+
+    it('непроходящая по Rпр, но полная — раскрытие тоже гасит', () => {
+      renderSurface({
+        general: FULL_GENERAL,
+        constructions: [
+          presetWall({
+            name: 'Тонкая стена',
+            layers: [{material: 'Кирпич', thicknessMm: 380, lambdaB: 0.81}],
+          }),
+        ],
+      });
+
+      openCard(/Тонкая стена/);
+
+      expect(screen.queryByText('подтвердите')).not.toBeInTheDocument();
+      expect(screen.getByText('готова')).toBeInTheDocument();
+      // Красный чип Rпр остаётся: непрохождение нормы — легитимный результат.
+      expect(screen.getByText(/Rпр .*<.*3\.19/)).toBeInTheDocument();
+    });
+
+    it('раскрытие карточки с ошибками данных статус не гасит', () => {
+      renderSurface({
+        general: FULL_GENERAL,
+        constructions: [
+          presetWall({
+            name: 'Стена с дефектом',
+            layers: [{material: 'Минвата', thicknessMm: 150}],
+          }),
+        ],
+      });
+
+      openCard(/Стена с дефектом/);
+      // Приоритет у чипа проблем данных; статус жив: после починки слоя без
+      // повторного просмотра карточка снова просит подтверждения.
+      expect(screen.getByText('1 слой без λ')).toBeInTheDocument();
+
+      openCard(/Стена с дефектом/); // свернуть — просмотр с ошибками не подтвердил
+      expect(screen.getByText('1 слой без λ')).toBeInTheDocument();
+      expect(screen.queryByText('готова')).not.toBeInTheDocument();
+    });
+
+    it('коммит правки слоя равен подтверждению', () => {
+      renderSurface({
+        general: FULL_GENERAL,
+        constructions: [
+          presetWall({
+            name: 'Стена с дефектом',
+            layers: [{material: 'Минвата', thicknessMm: 150}],
+          }),
+        ],
+      });
+
+      openCard(/Стена с дефектом/);
+      expect(screen.queryByText('готова')).not.toBeInTheDocument();
+
+      openLayerRow(/Минвата/);
+      fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
+        target: {value: '0.05'},
+      });
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+
+      expect(screen.queryByText('подтвердите')).not.toBeInTheDocument();
+      expect(screen.getByText('готова')).toBeInTheDocument();
+    });
+  });
+
+  describe('двухрежимная кнопка (calc-button-next-label)', () => {
+    const FULL_GENERAL = {
+      buildingType: 'Жилое многоквартирное',
+      city: {value: 'moskva', label: 'Москва'},
+      tot: -2.2,
+      zot: 205,
+      tn: -25,
+      tv: 20,
+      condition: 'Б',
+    };
+
+    const PRESET = {
+      id: 'p-wall',
+      type: 'steny',
+      name: 'Типовая стена',
+      layers: [
+        {material: 'Кладка из кирпича', thicknessMm: 380, lambdaA: 0.7, lambdaB: 0.81},
+        {material: 'Плиты минераловатные', thicknessMm: 150, lambdaA: 0.045, lambdaB: 0.048},
+      ],
+      status: 'confirm',
+    };
+
+    it('без пропа pendingLabel поведение прежнее: submit даже при пометках', async () => {
+      const {surface} = renderSurface({general: EMPTY_GENERAL, constructions: [PRESET]});
+      const actions = subscribeActions(surface);
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:apply');
+    });
+
+    it('условия пусты: «Далее» раскрывает блок условий, action не уходит', () => {
+      const {surface} = renderSurface({
+        pendingLabel: 'Далее',
+        general: EMPTY_GENERAL,
+        conditionsCollapsed: true,
+        constructions: [PRESET],
+      });
+      const actions = subscribeActions(surface);
+      expect(screen.queryByRole('button', {name: 'Рассчитать'})).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      // Блок условий раскрыт — поля видны; ни одна карточка не раскрыта.
+      expect(getCityInput()).toBeInTheDocument();
+      expect(layerSummaries()).toHaveLength(0);
+      expect(actions).toHaveLength(0);
+    });
+
+    it('условия заполнены: «Далее» раскрывает первую требующую внимания карточку', () => {
+      const {surface} = renderSurface({
+        pendingLabel: 'Далее',
+        general: FULL_GENERAL,
+        constructions: [
+          {...PRESET, id: 'p-1', name: 'Первый пресет'},
+          {...PRESET, id: 'p-2', name: 'Второй пресет'},
+        ],
+      });
+      const actions = subscribeActions(surface);
+
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      // Первая карточка раскрыта (слои видны) и подтверждена просмотром;
+      // вторая ждёт своей очереди со статусом.
+      expect(layerSummaries().length).toBeGreaterThan(0);
+      expect(screen.getByText('готова')).toBeInTheDocument();
+      expect(screen.getByText('подтвердите')).toBeInTheDocument();
+      expect(actions).toHaveLength(0);
+
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      expect(screen.queryByText('подтвердите')).not.toBeInTheDocument();
+      expect(actions).toHaveLength(0);
+    });
+
+    it('последняя пометка погашена — подпись меняется на submitLabel тем же рендером', () => {
+      renderSurface({
+        pendingLabel: 'Далее',
+        general: FULL_GENERAL,
+        constructions: [PRESET],
+      });
+      expect(screen.getByRole('button', {name: 'Далее'})).toBeInTheDocument();
+
+      openCard(/Типовая стена/);
+
+      expect(screen.queryByRole('button', {name: 'Далее'})).not.toBeInTheDocument();
+      expect(screen.getByRole('button', {name: 'Рассчитать'})).toBeInTheDocument();
+    });
+
+    it('чистый список: «Рассчитать» шлёт apply с полным состоянием, как раньше', async () => {
+      const {surface} = renderSurface({pendingLabel: 'Далее'});
+      const actions = subscribeActions(surface);
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:apply');
+      expect(actions[0]!.context).toHaveProperty('general');
+      expect(actions[0]!.context).toHaveProperty('constructions');
     });
   });
 

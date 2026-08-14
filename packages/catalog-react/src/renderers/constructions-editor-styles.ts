@@ -438,6 +438,20 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   white-space: nowrap;
 }
 
+/* «Готова»: та же пометка, но позитивным тоном. */
+.a2ui-ce-card__ok {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: ${tokens.success};
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.a2ui-ce-dot--ok {
+  background: ${tokens.success};
+}
+
 .a2ui-ce .a2ui-ce-card__remove {
   border: none;
   /* padding задаём явно: у хоста кнопка с 8/16, и «✕» раздувал строку. */

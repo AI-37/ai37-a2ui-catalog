@@ -111,6 +111,41 @@ describe('catalog-schemas', () => {
     expect(constructionsEditorPropsSchema.safeParse(invalidDraft.props).success).toBe(false);
   });
 
+  it('status конструкции: без поля валидно, оба значения принимаются, чужое режется', () => {
+    const valid = readFixture('valid', 'constructions-editor.json');
+    const props = valid.props as {constructions: Array<Record<string, unknown>>} & Record<
+      string,
+      unknown
+    >;
+
+    // Обратная совместимость: props старых агентов без поля валидны.
+    expect(constructionsEditorPropsSchema.safeParse(props).success).toBe(true);
+
+    const withStatus = (status: unknown) => ({
+      ...props,
+      constructions: [{...props.constructions[0], status}, ...props.constructions.slice(1)],
+    });
+
+    expect(constructionsEditorPropsSchema.safeParse(withStatus('confirm')).success).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse(withStatus('confirm-passport')).success).toBe(
+      true,
+    );
+    expect(constructionsEditorPropsSchema.safeParse(withStatus('ready')).success).toBe(false);
+  });
+
+  it('pendingLabel опционален, но не пустой', () => {
+    const valid = readFixture('valid', 'constructions-editor.json');
+    const props = valid.props as Record<string, unknown>;
+
+    expect(constructionsEditorPropsSchema.safeParse(props).success).toBe(true);
+    expect(
+      constructionsEditorPropsSchema.safeParse({...props, pendingLabel: 'Далее'}).success,
+    ).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse({...props, pendingLabel: ''}).success).toBe(
+      false,
+    );
+  });
+
   it('general: пустой блок валиден, неизвестный ключ отклоняется', () => {
     const valid = readFixture('valid', 'constructions-editor.json');
     const props = valid.props as Record<string, unknown>;

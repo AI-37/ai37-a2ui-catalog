@@ -37,6 +37,13 @@ export const cherdachnyeSubtypeSchema = z.enum([
   'pol_po_gruntu',
 ]);
 
+// Агентский статус подтверждения: агент знает происхождение данных, клиент —
+// только их полноту. 'confirm' — состав предложен агентом (типовой или с
+// допущениями разбора), 'confirm-passport' — паспортное Rпр взято из
+// текста/документа, а не введено формой. Гасится на клиенте просмотром или
+// правкой карточки; присланный клиентом статус агент игнорирует (как `id`).
+export const constructionStatusSchema = z.enum(['confirm', 'confirm-passport']);
+
 export const constructionEntrySchema = z
   .object({
     // Ключ React-списка; клиентский, агент его игнорирует.
@@ -47,6 +54,7 @@ export const constructionEntrySchema = z
     layers: z.array(constructionLayerSchema).max(50),
     // Типы без слоёв (окна/фонари/двери): паспортное Rпр вместо таблицы.
     rprPassport: z.number().positive().optional(),
+    status: constructionStatusSchema.optional(),
   })
   .strict();
 
@@ -165,6 +173,11 @@ export const constructionsEditorPropsSchema = z
     submitLabel: z.string().min(1).max(80),
     /** @deprecated перехода между вкладками нет: экран один. */
     nextLabel: z.string().min(1).max(80).optional(),
+    // Подпись кнопки в pending-режиме (условия не заполнены либо карточка
+    // требует внимания): клик по ней — навигация к первому проблемному месту,
+    // action не уходит. Без пропа кнопка всегда `submitLabel` и всегда шлёт
+    // `submitAction` — прежнее поведение.
+    pendingLabel: z.string().min(1).max(80).optional(),
     submitAction: z.string().min(1).max(120),
     // Кнопка возврата опциональна: на объединённом экране её нет, у прежних
     // эмитентов поведение не меняется.
@@ -178,6 +191,7 @@ export const constructionsEditorPropsSchema = z
   .strict();
 
 export type ConstructionLayerKind = z.infer<typeof constructionLayerKindSchema>;
+export type ConstructionStatus = z.infer<typeof constructionStatusSchema>;
 export type ConstructionLayer = z.infer<typeof constructionLayerSchema>;
 export type ConstructionType = z.infer<typeof constructionTypeSchema>;
 export type CherdachnyeSubtype = z.infer<typeof cherdachnyeSubtypeSchema>;

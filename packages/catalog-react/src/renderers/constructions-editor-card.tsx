@@ -6,6 +6,7 @@ import {ConstructionsEditorChevron} from './constructions-editor-chevron';
 import {ConstructionsEditorLayerRow} from './constructions-editor-layer-row';
 import {ConstructionsEditorPassport} from './constructions-editor-passport';
 import {findInvalidLayers} from './find-invalid-layers';
+import {formatMissingLambda} from './format-missing-lambda';
 import type {
   ConstructionHeaderFields,
   ConstructionsEditorCardProps,
@@ -22,9 +23,10 @@ const EMPTY_LAYER: ConstructionLayer = {material: '', thicknessMm: null};
  * паттерном «чтение ↔ форма с явным коммитом», и форма раскрыта максимум одна
  * на весь редактор — её состоянием, как и состоянием конструкций, владеет
  * редактор. Карточка поднимает правки через `onChange` целой конструкцией,
- * коммиты форм — с `{commit: true}`. Конструкция с ошибкой в данных подсвечена
- * предупреждающим цветом с пометкой «проверить» — индикация, не блок
- * (см. `find-invalid-layers`).
+ * коммиты форм — с `{commit: true}`. Статусный чип в шапке один, по приоритету
+ * «проблемы данных → агентский статус → готова» — индикация, не блок
+ * (см. `find-invalid-layers`); при закрытом гейте условий (`showStatusChips`)
+ * чипов нет вовсе, остаётся только чип Rпр.
  */
 export function ConstructionsEditorCard({
   entry,
@@ -34,6 +36,8 @@ export function ConstructionsEditorCard({
   minChars,
   open,
   showRnorm,
+  showStatusChips,
+  statusDismissed,
   editingTarget,
   onEditingChange,
   onToggle,
@@ -44,6 +48,23 @@ export function ConstructionsEditorCard({
   const rpr = computeLiveRpr(entry, config, condition);
   const invalidity = findInvalidLayers(entry, config);
   const title = entry.name?.trim() ? entry.name : (config?.label ?? entry.type);
+
+  // Ровно один статусный чип по приоритету: проблемы данных (однородное «нет λ»
+  // называется счётом) → непогашенный агентский статус → «готова».
+  const agentStatus = statusDismissed ? undefined : entry.status;
+  const statusChip = !showStatusChips
+    ? null
+    : invalidity.invalid
+      ? {
+          ok: false,
+          text:
+            invalidity.missingLambdaCount !== null
+              ? formatMissingLambda(invalidity.missingLambdaCount)
+              : 'проверить',
+        }
+      : agentStatus
+        ? {ok: false, text: agentStatus === 'confirm' ? 'подтвердите' : 'подтвердите паспорт'}
+        : {ok: true, text: 'готова'};
 
   const handleHeaderCommit = (fields: ConstructionHeaderFields) => {
     onEditingChange(null);
@@ -74,7 +95,9 @@ export function ConstructionsEditorCard({
   };
 
   return (
-    <section className={`a2ui-ce-card${invalidity.invalid ? ' a2ui-ce-card--invalid' : ''}`}>
+    <section
+      className={`a2ui-ce-card${invalidity.invalid && showStatusChips ? ' a2ui-ce-card--invalid' : ''}`}
+    >
       <header className="a2ui-ce-card__header">
         <button
           type="button"
@@ -85,12 +108,15 @@ export function ConstructionsEditorCard({
           <ConstructionsEditorChevron open={open} />
           {title}
         </button>
-        {invalidity.invalid ? (
-          // Пометка, а не тревога: точка и слово приглушённым — карточка с
-          // незаполненным слоем не ошибка, её просто ещё не дозаполнили.
-          <span className="a2ui-ce-card__warn">
-            <span className="a2ui-ce-dot" aria-hidden="true" />
-            проверить
+        {statusChip ? (
+          // Пометка, а не тревога: точка и слово — карточка с незаполненным
+          // слоем или неподтверждённым составом не ошибка.
+          <span className={statusChip.ok ? 'a2ui-ce-card__ok' : 'a2ui-ce-card__warn'}>
+            <span
+              className={`a2ui-ce-dot${statusChip.ok ? ' a2ui-ce-dot--ok' : ''}`}
+              aria-hidden="true"
+            />
+            {statusChip.text}
           </span>
         ) : null}
         <RprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />
