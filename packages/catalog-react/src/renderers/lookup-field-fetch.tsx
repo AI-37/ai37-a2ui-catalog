@@ -16,7 +16,7 @@ export function LookupFieldFetchControl({field}: LookupFieldControlProps) {
 
   const [inputText, setInputText] = React.useState(defaultSelected?.label ?? '');
   const [selected, setSelected] = React.useState<LookupOption | null>(defaultSelected);
-  const {options, handleInputText, closeOptions} = useLookupSuggest({
+  const {options, loading, queried, handleInputText, closeOptions} = useLookupSuggest({
     referenceId: field.referenceId ?? '',
     minChars: field.minChars,
   });
@@ -41,6 +41,8 @@ export function LookupFieldFetchControl({field}: LookupFieldControlProps) {
       inputText={inputText}
       selected={selected}
       options={options}
+      loading={loading}
+      queried={queried}
       onInputChange={handleChange}
       onPick={handlePick}
       onClose={closeOptions}

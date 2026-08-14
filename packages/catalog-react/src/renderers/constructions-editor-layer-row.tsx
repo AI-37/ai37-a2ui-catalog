@@ -83,7 +83,7 @@ function LayerForm({
   onRemove,
 }: ConstructionsEditorLayerRowProps) {
   const [draft, setDraft] = React.useState<ConstructionLayer>(layer);
-  const {options, handleInputText, closeOptions} = useLookupSuggest({
+  const {options, loading, queried, handleInputText, closeOptions} = useLookupSuggest({
     referenceId: materialsReferenceId,
     minChars,
   });
@@ -161,6 +161,8 @@ function LayerForm({
           inputText={draft.material}
           selected={selected}
           options={options}
+          loading={loading}
+          queried={queried}
           onInputChange={handleMaterialInput}
           onPick={handleMaterialPick}
           onClose={closeOptions}

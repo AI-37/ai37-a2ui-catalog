@@ -13,11 +13,19 @@ export type UseLookupSuggestParams = {
 };
 
 export type UseLookupSuggest = {
-  /** Видимые опции дропдауна; пустой массив = дропдаун закрыт. */
+  /** Видимые опции дропдауна. */
   options: LookupOption[];
+  /**
+   * Идёт поиск: с момента прохождения порога `minChars` (включая паузу
+   * debounce) и до ответа/ошибки. Отмена запроса следующим вводом `loading`
+   * не гасит — его уже поднял этот следующий ввод.
+   */
+  loading: boolean;
+  /** По текущему вводу уже был завершённый запрос: пустые `options` = «ничего не найдено». */
+  queried: boolean;
   /** Ввод пользователя: debounce + запрос подсказок (или сброс ниже порога). */
   handleInputText: (text: string) => void;
-  /** Закрыть дропдаун (blur, Escape, выбор опции). */
+  /** Закрыть дропдаун (blur, Escape, выбор опции); сбрасывает и статусы. */
   closeOptions: () => void;
 };
 
@@ -32,6 +40,8 @@ export type UseLookupSuggest = {
  */
 export function useLookupSuggest({referenceId, minChars}: UseLookupSuggestParams): UseLookupSuggest {
   const [options, setOptions] = React.useState<LookupOption[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [queried, setQueried] = React.useState(false);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const abortRef = React.useRef<AbortController | null>(null);
 
@@ -60,15 +70,22 @@ export function useLookupSuggest({referenceId, minChars}: UseLookupSuggestParams
       });
       if (!response.ok) {
         setOptions([]);
+        setLoading(false);
+        setQueried(true);
         return;
       }
       const body: unknown = await response.json();
       setOptions(parseLookupOptions(body));
+      setLoading(false);
+      setQueried(true);
     } catch {
       // Отменённый запрос (новый ввод/unmount) — не сбой: его ответ просто
-      // не нужен, состояние не трогаем. Остальное — тихий fallback.
+      // не нужен, состояние (включая `loading` нового ввода) не трогаем.
+      // Остальное — тихий fallback, но запрос считается завершённым.
       if (!controller.signal.aborted) {
         setOptions([]);
+        setLoading(false);
+        setQueried(true);
       }
     }
   };
@@ -80,14 +97,24 @@ export function useLookupSuggest({referenceId, minChars}: UseLookupSuggestParams
     if (query.length < threshold) {
       abortRef.current?.abort();
       setOptions([]);
+      setLoading(false);
+      setQueried(false);
       return;
     }
+    // `loading` поднимается уже здесь, а не в момент fetch: пауза debounce —
+    // та самая дырка, из-за которой поле выглядело пустым.
+    setLoading(true);
+    setQueried(false);
     debounceRef.current = setTimeout(() => {
       void requestOptions(query);
     }, LOOKUP_DEBOUNCE_MS);
   };
 
-  const closeOptions = () => setOptions([]);
+  const closeOptions = () => {
+    setOptions([]);
+    setLoading(false);
+    setQueried(false);
+  };
 
-  return {options, handleInputText, closeOptions};
+  return {options, loading, queried, handleInputText, closeOptions};
 }
