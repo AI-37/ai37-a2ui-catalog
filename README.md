@@ -4,10 +4,10 @@
 # ai37-a2ui-catalog
 
 ## Описание
-Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений.
+Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений. С версии 0.16.0 lookup-подсказки умеют многострочную опцию из слотов `group`/`title`/`meta` с подсветкой совпадения и состоянием поиска в дропдауне.
 
 ## Стек
-TypeScript, React 19, Zod, @a2ui/react (overrides: 0.10.1), Vite, Vitest, tsup, tsx, Python 3 + Pydantic, Poetry 2.3.2, Twine, pnpm (>=10), Node >=22. Версия пакетов workspace — 0.17.0. Публикация пакетов — в приватные реестры AI-37 (npm.app.sp-ai.ru и pypi.app.sp-ai.ru).
+TypeScript, React 19, Zod, @a2ui/react (overrides: 0.10.1), Vite, Vitest, tsup, tsx, Python 3 + Pydantic, Poetry 2.3.2, Twine, pnpm (>=10), Node >=22. Версия пакетов workspace — 0.16.0. Публикация пакетов — в приватные реестры AI-37 (npm.app.sp-ai.ru и pypi.app.sp-ai.ru).
 
 ## Схема работы
 Workspace состоит из пакетов:
@@ -19,9 +19,11 @@ Workspace состоит из пакетов:
 
 Поток данных: схемы → generate-artifacts.ts → catalog.json и component schemas → public/a2ui/catalogs → GitHub Pages. React-рендереры и Pydantic-модели подключаются к тем же компонентам; тесты и демо используют фикстуры.
 
-Fetch-канал подсказок lookup-полей (suggestMode: 'fetch') — debounced same-origin `GET /api/agent-resource?resource=&query=` (resource = referenceId справочника; путь и тип экспортируются из packages/catalog-schemas: `LOOKUP_SUGGEST_ROUTE`, `LookupSuggestResponse`). BFF потребителя проксирует запрос на REST оркестратора, тот резолвит resource в ручку агента-владельца справочника. Ответ 200 — `LookupSuggestResponse`; неизвестный resource — 404 `{error: "unknown_resource"}`.
+Fetch-канал подсказок lookup-полей (suggestMode: 'fetch') — debounced same-origin `GET /api/agent-resource?resource=&query=` (resource = referenceId справочника; путь и тип экспортируются из packages/catalog-schemas: `LOOKUP_SUGGEST_ROUTE`, `LookupSuggestResponse`). BFF потребителя проксирует запрос на REST оркестратора, тот резолвит resource в ручку агента-владельца справочника. Ответ 200 — `LookupSuggestResponse`; неизвестный resource — 404 с error-полем (в dev-middleware демо — `{error: "unknown_reference"}`; changelog 0.12.0 фиксирует контрактный код `unknown_resource`.
 
-Статусные чипы карточек ConstructionsEditor рендерятся только при заполненных обязательных полях блока «Условия» (live-гейт): ровно один чип по приоритету «проблемы данных → агентский статус → готова»; однородные проблемы «нет λ» называются счётом, смешанные — «проверить». Агентский статус (`confirm`/`confirm-passport`) гаснет на клиенте раскрытием карточки без ошибок данных или коммитом любой её формы. С опциональным пропом `pendingLabel` кнопка редактора двухрежимная: пока условия не заполнены или есть карточки, требующие внимания, клик — навигация к первой проблеме (раскрытие условий либо первой проблемной карточки со скроллом) без action; чистый список — прежний submit. Без пропа поведение прежнее.
+Опция подсказки (`LookupOption`) может нести необязательные слоты оформления `group` / `title` / `meta` — wire-тип, не zod-схема props (python-зеркало не затронуто). При наличии `title` опция рендерится многострочно: `group` — мелким приглушённым сверху, `title` — основной строкой, `meta` — приглушённой снизу; отсутствующий слот опускается вместе со строкой. Опция без `title` рендерится однострочным `label`, как раньше; `label` остаётся обязательным и самодостаточным — именно он попадает в поле после выбора, в submit уходит `value`. Первое вхождение текущего ввода подсвечивается жирным в каждом слоте (без учёта регистра, `splitFirstMatch` на `toLowerCase().indexOf()`, без RegExp; разметка из данных опции трактуется как текст, `dangerouslySetInnerHTML` не используется).
+
+Хук `useLookupSuggest` дополнительно сообщает `loading` и `queried`: попап открыт с момента, как ввод достиг порога `minChars` (включая паузу debounce), и показывает индикатор «Ищем…» до ответа; завершённый запрос без опций — «Ничего не найдено». Строка состояния живёт вне `role="listbox"` с `role="status"`, на контейнере попапа во время загрузки — `aria-busy`. Отмена предыдущего запроса следующим вводом `loading` не гасит.
 
 ```mermaid
 flowchart LR
@@ -35,29 +37,30 @@ flowchart LR
 ```
 
 ## Структура каталогов
-- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений; dev-middleware мокает fetch-справочники lookup; витрины покрывают статусные чипы и двухрежимную кнопку ConstructionsEditor (withStatusChipsPreview);
-- packages/catalog-schemas — канонические Zod-схемы, типы и генерация JSON Schema;
-- packages/catalog-react — React-рендереры компонентов каталога (в т.ч. ConstructionsEditor);
+- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений; dev-middleware мокает fetch-справочники lookup (справочник материалов `sp50-materials` демонстрирует слоты `group`/`title`/`meta`, поиск идёт по label/group/title);
+- packages/catalog-schemas — канонические Zod-схемы, типы и генерация JSON Schema (включая тип `LookupOption` со слотами оформления);
+- packages/catalog-react — React-рендереры компонентов каталога (в т.ч. ConstructionsEditor, LookupCombobox, LookupOptionRow, split-first-match);
 - packages/catalog-python — Pydantic-модели валидации (зеркало zod-схем);
 - fixtures — валидные, невалидные и сквозные фикстуры A2UI-сообщений;
-- tests — тесты (tests/react — Vitest; python-часть — Pytest);
+- tests — тесты (tests/react — Vitest, включая lookup-option-rich-render.test.tsx и parse-lookup-options.test.ts; python-часть — Pytest);
 - public/a2ui/catalogs — статические артефакты каталога (catalog.json, JSON Schema компонентов) для GitHub Pages;
+- scripts/install-to-consumer.mjs — установка локальной сборки пакетов в потребителя тарболлами (минуя реестр) через `pnpm run install:consumer`;
 - .github/workflows — CI/CD (pages.yml, ci.yml, cd.yml);
 - .npmrc — scoped-реестр @ai37 и авторизация для npm.app.sp-ai.ru;
-- docs, openspec — документация и design-доки.
+- docs, openspec — документация и design-доки (включая openspec/changes/lookup-option-rich-render).
 
 ## Публичные интерфейсы
 Статический A2UI-каталог, публикуемый на GitHub Pages:
 - catalog.json: https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json
 - JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v1/components/*.schema.json и аналогично для v2.
 
-Отдельных публичных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Внутренний fetch-канал подсказок lookup-полей — same-origin `GET /api/agent-resource?resource=&query=` (resource = id справочника / `field.referenceId`; BFF потребителя проксирует на REST оркестратора; неизвестный resource — 404 `{error: "unknown_resource"}`). npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
+Отдельных публичных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Внутренний fetch-канал подсказок lookup-полей — same-origin `GET /api/agent-resource?resource=&query=` (resource = id справочника / `field.referenceId`; BFF потребителя проксирует на REST оркестратора). В dev-middleware apps/demo неизвестный resource — 404 `{error: "unknown_reference"}` (changelog 0.12.0 объявляет контрактный код `unknown_resource`). Тип `LookupOption` fetch-канала — необязательные слоты `group` / `title` / `meta`; разбор ответа `parseLookupOptions` фильтрует массив и сохраняет все доп. поля целиком (контракт `LookupOption & Record<string, unknown>`, так доезжают и λА/λБ). npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
 
-В составе @ai37/a2ui-catalog-react — рендерер ConstructionsEditor (редактор конструкций): наружу один submit с полным состоянием {general, constructions} (без клиентской блокировки); при заданном пропе draftAction черновик с тем же payload уходит по явным коммитам состояния конструкций — add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки, «Применить» формы паспортного Rпр (коммит без изменений действия не порождает; ввод внутри незакоммиченной формы — тоже). Слои — строки-сводки («№ · материал · толщина · λ»), форма правки одна на редактор; шапка раскрытой карточки по умолчанию — режим чтения (тип с разновидностью и название) с кнопкой «Изменить», правка — в форме с кнопками «Сохранить»/«Отмена»; «Rпр по паспорту» для типов без слоёв — отдельный элемент «значение + Изменить» с формой «Применить»/«Отмена» (незаданное значение показано предупреждающим цветом «не задано»). Все формы (слой, шапка, паспортное Rпр) делят одно место на редактор: открытие любой закрывает текущую с отбросом несохранённых правок. С 0.17.0: опциональное агентское поле `entry.status` ('confirm' | 'confirm-passport') — состав предложен агентом / паспортное Rпр взято из текста; статусный чип карточки один, по приоритету «проблемы данных → агентский статус → готова» (однородные проблемы «нет λ» называются счётом «1 слой без λ»/«2 слоя без λ», смешанные — «проверить»), рендерится только при заполненных обязательных полях «Условий»; агентский статус гаснет на клиенте раскрытием карточки без ошибок данных (вердикт Rпр не важен) или коммитом любой её формы. Опциональный проп `pendingLabel` — двухрежимная кнопка: пока условия не заполнены или карточка требует внимания, кнопка подписана `pendingLabel` и клик раскрывает условия либо первую проблемную карточку со скроллом, action не шлёт; чистый список — прежний submit; без пропа поведение прежнее.
+В составе @ai37/a2ui-catalog-react — рендерер ConstructionsEditor (редактор конструкций): наружу один submit с полным состоянием {general, constructions} (без клиентской блокировки); при заданном пропе draftAction черновик с тем же payload уходит по явным коммитам состояния конструкций — add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки, «Применить» формы паспортного Rпр (коммит без изменений действия не порождает; ввод внутри незакоммиченной формы — тоже). Слои — строки-сводки («№ · материал · толщина · λ»), форма правки одна на редактор; шапка раскрытой карточки по умолчанию — режим чтения (тип с разновидностью и название) с кнопкой «Изменить», правка — в форме с кнопками «Сохранить»/«Отмена»; «Rпр по паспорту» для типов без слоёв — отдельный элемент «значение + Изменить» с формой «Применить»/«Отмена» (незаданное значение показано предупреждающим цветом «не задано»). Все формы (слой, шапка, паспортное Rпр) делят одно место на редактор: открытие любой закрывает текущую с отбросом несохранённых правок. Невалидные конструкции подсвечиваются пометкой «! проверить» — индикация, не блок.
 
 ## Зависимости в экосистеме
 ### Зависит от
-- npm-пакеты @a2ui/react и @a2ui/web_core (overrides: 0.10.1);
+- npm-пакеты @a2ui/react и @a2ui/web_core (overrides: 0.10.1), а также workspace-пакеты: catalog-react зависит от catalog-schemas, demo — от catalog-react и catalog-schemas;
 - React 19, Zod, Vite/Vitest, tsup, tsx;
 - Python 3, Pydantic, Poetry 2.3.2, Twine;
 - при сборке/публикации — приватные реестры AI-37: npm.app.sp-ai.ru (npm) и pypi.app.sp-ai.ru (PyPI), а также токены AI37_NPM_TOKEN / AI37_PYPI_TOKEN;
@@ -65,17 +68,17 @@ flowchart LR
 - внешние сервисы (Authentik, LiteLLM, БД, Redis, S3) в рантайме не используются.
 
 ### От него зависят
-По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений). Рендерер ConstructionsEditor рассчитан на агента teplo-calc (приём submit/draftAction с состоянием конструкций; агентские статусы снимает `constructions:apply`).
+По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений). Рендерер ConstructionsEditor рассчитан на агента teplo-calc (приём submit/draftAction с состоянием конструкций). Чтобы слоты `group`/`title`/`meta` доехали до рендерера, агент-справочник (например, spai-thermal-calc-agent) должен начать их отдавать; до этого рендер деградирует в однострочный `label`. spai-ui — без изменений.
 
 ## Конфигурация
 Явного .env.example нет. Используются переменные окружения:
 - AI37_NPM_TOKEN — токен авторизации для приватного npm-реестра npm.app.sp-ai.ru (задан в .npmrc и в CI/CD);
 - AI37_PYPI_TOKEN — токен (password) для публикации Python-пакета через Twine на pypi.app.sp-ai.ru (в cd.yml).
 
-Скоуп @ai37 закреплён за npm.app.sp-ai.ru в .npmrc (always-auth=true). Версии пакетов синхронизируются через pnpm run version:bump <version>; каждый PR также обновляет CHANGELOG.md. Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml. Тематизация рендереров — через CSS-переменные (tokens.ts), включая токен --a2ui-color-warning для подсветки невалидных конструкций и --a2ui-color-success для чипа «готова».
+Скоуп @ai37 закреплён за npm.app.sp-ai.ru в .npmrc (always-auth=true). Версии пакетов синхронизируются через pnpm run version:bump <version>; каждый PR также обновляет CHANGELOG.md. Доступные npm-скрипты: pnpm run build, typecheck, test, test:ts, test:python, export:schemas, export:public, verify:public, lint, demo, version:bump, install:consumer. Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml. Тематизация рендереров — через CSS-переменные (tokens.ts), включая токен --a2ui-color-warning для подсветки невалидных конструкций.
 
 ## Данные и хранилища
-БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2 (в v2 добавлены `status` конструкции и проп `pendingLabel`). Фикстуры: fixtures/valid, fixtures/invalid, fixtures/messages.
+БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2. Фикстуры: fixtures/valid, fixtures/invalid, fixtures/messages.
 
 ## Быстрый старт (локально)
 Установка зависимостей:
@@ -83,12 +86,12 @@ flowchart LR
 - pnpm install — зависимости workspace (pnpm >= 10, Node >= 22);
 - poetry -C packages/catalog-python install — Python-пакет ai37-a2ui-catalog.
 
-.env.example отсутствует — других env-переменных нет. Отдельного health-check нет; smoke-проверка после установки — pnpm run test. Демо-приложение apps/demo (Vite + dev-middleware с мок-справочниками) служит для ручной проверки A2UI-сообщений; в нём есть витрина «Constructions Editor — статусы и «Далее» (withStatusChipsPreview).
+.env.example отсутствует — других env-переменных нет. Отдельного health-check нет; smoke-проверка после установки — pnpm run test. Демо-приложение: pnpm run demo (Vite + dev-middleware с мок-справочниками) для ручной проверки A2UI-сообщений; в демо можно набрать «кир» при подключённом справочнике материалов и увидеть индикатор, многострочные опции с подсвеченным «Кир». Локальная проверка в потребителе без публикации: pnpm run install:consumer [путь] (по умолчанию ../spai-ui) — собирает тарболлы пакетов и ставит их в consumer через npm install --no-save.
 
 ## Как запускать тесты
 Предварительно: pnpm install и poetry -C packages/catalog-python install.
 - pnpm run test — vitest + pytest;
-- pnpm run test:ts — только TypeScript/React-тесты;
+- pnpm run test:ts — только TypeScript/React-тесты (включая lookup-option-rich-render.test.tsx, parse-lookup-options.test.ts);
 - pnpm run test:python — только Python-тесты;
 - pnpm run lint — typecheck.
 
@@ -106,6 +109,10 @@ GitHub Actions:
 - ecosystem/v2/10-agui-protocol.md — протокол AG-UI/A2UI, в контексте которого существует каталог;
 - docs/theming.md;
 - docs/initial-plan.md;
+- openspec/changes/lookup-option-rich-render/design.md;
+- openspec/changes/lookup-option-rich-render/proposal.md;
+- openspec/changes/lookup-option-rich-render/specs/lookup-option-rich-render/spec.md;
+- openspec/changes/lookup-option-rich-render/specs/form-card-lookup-fetch-mode/spec.md;
 - openspec/changes/form-card-dispatch-action/design.md.
 <!-- ai37:card:end -->
 
