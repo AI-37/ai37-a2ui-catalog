@@ -283,8 +283,9 @@ export const ConstructionsEditor = createComponentImplementation(
     };
 
     // «Далее» — навигация, не action: раскрыть незаполненные условия, иначе
-    // первую сверху карточку, требующую внимания (раскрытие гасит её агентский
-    // статус по общему правилу просмотра), со скроллом к цели.
+    // ТОЛЬКО первую сверху карточку, требующую внимания (остальные свернуть —
+    // режим последовательного просмотра; раскрытие гасит её агентский статус
+    // по общему правилу просмотра), со скроллом к цели.
     const handlePendingClick = () => {
       if (!conditionsFilled) {
         setConditionsOpen(true);
@@ -293,7 +294,8 @@ export const ConstructionsEditor = createComponentImplementation(
       }
       const target = constructions.find(needsAttention);
       if (!target) return;
-      if (!openIds.has(target.id)) handleToggle(target.id);
+      dismissStatusOnView(target.id);
+      setOpenIds(new Set([target.id]));
       scrollToElement(cardRefs.current.get(target.id) ?? null);
     };
 
