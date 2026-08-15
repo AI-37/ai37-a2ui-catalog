@@ -17,6 +17,7 @@ import type {
   ConstructionsEditorFormTarget,
   ConstructionsGeneralKey,
 } from './constructions-editor.types';
+import {CONDITIONS_DRAFT_DEBOUNCE_MS} from './conditions-draft-debounce-ms';
 import {createGeneralState} from './create-general-state';
 import {createLocalId} from './create-local-id';
 import {findInvalidLayers} from './find-invalid-layers';
@@ -36,7 +37,10 @@ import {useA2uiBaseStyles} from './shared';
  * данных, не блок. При заданном `draftAction` коммиты состояния конструкций
  * (add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя,
  * «Сохранить» формы шапки, «Применить» формы паспортного Rпр) дополнительно
- * уезжают черновиком с тем же payload'ом.
+ * уезжают черновиком с тем же payload'ом — сразу, без дебаунса. Правки полей
+ * условий уезжают тем же черновиком автоматически, с дебаунсом: кнопки
+ * сохранения условий нет, а ГСОП и Rнорм обновляются ответным снапшотом
+ * агента (design constructions-editor-live-draft).
  *
  * `generalSources` — только оформление полей условий: в payload источники не
  * попадают, агент их и прислал. Пропы вкладок (`generalTabLabel`,
@@ -98,9 +102,6 @@ export const ConstructionsEditor = createComponentImplementation(
     const [general, setGeneral] = React.useState<ConstructionsGeneral>(initialGeneral);
     // Тронутые пользователем поля условий: с них снято оформление источника.
     const [touched, setTouched] = React.useState<ReadonlySet<ConstructionsGeneralKey>>(new Set());
-    // Есть несохранённые правки условий: правка поля черновика не порождает
-    // (иначе он уезжал бы на каждое нажатие клавиши), поэтому коммит — явный.
-    const [conditionsDirty, setConditionsDirty] = React.useState(false);
 
     // Снимок климата, из которого агент посчитал `rnorm`. Новые props (ответ
     // агента с пересчитанным Rнорм) — новый снимок, свежие значения и свежие
@@ -111,16 +112,47 @@ export const ConstructionsEditor = createComponentImplementation(
       setBaseClimate(propsClimate);
       setGeneral(initialGeneral);
       setTouched(new Set());
-      setConditionsDirty(false);
     }
     const climateDirty = climateKey(general) !== baseClimate;
+
+    // Отложенный draft правок условий. Payload собирается из ref в момент
+    // срабатывания таймера, а не в момент правки — последний ввод побеждает
+    // (Решение 1 design constructions-editor-live-draft).
+    const draftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const draftStateRef = React.useRef({general, constructions});
+    draftStateRef.current = {general, constructions};
+
+    const cancelPendingDraft = () => {
+      if (draftTimerRef.current === null) return;
+      clearTimeout(draftTimerRef.current);
+      draftTimerRef.current = null;
+    };
+
+    // Таймер не переживает unmount: отправлять draft уже некому.
+    React.useEffect(() => cancelPendingDraft, []);
+
+    const scheduleConditionsDraft = () => {
+      const draftAction = props.draftAction;
+      if (!draftAction) return;
+      cancelPendingDraft();
+      draftTimerRef.current = setTimeout(() => {
+        draftTimerRef.current = null;
+        const latest = draftStateRef.current;
+        void context.dispatchAction({
+          event: {
+            name: draftAction,
+            context: {general: latest.general, constructions: latest.constructions},
+          },
+        });
+      }, CONDITIONS_DRAFT_DEBOUNCE_MS);
+    };
 
     const handleGeneralChange = (
       next: ConstructionsGeneral,
       changed: ConstructionsGeneralKey[],
     ) => {
       setGeneral(next);
-      setConditionsDirty(true);
+      scheduleConditionsDraft();
       setTouched(prev => {
         const nextTouched = new Set(prev);
         for (const key of changed) nextTouched.add(key);
@@ -199,9 +231,11 @@ export const ConstructionsEditor = createComponentImplementation(
       hasGeneral ? {general, constructions: entries} : {constructions: entries};
 
     // Автосейв черновика: тот же payload, что у submit'а, без чтения ответа
-    // агента. Нет пропа — no-op.
+    // агента. Нет пропа — no-op. Немедленный draft несёт полное состояние —
+    // отложенный после него избыточен, таймер сбрасывается.
     const sendDraft = (next: ConstructionEntry[]) => {
       if (!props.draftAction) return;
+      cancelPendingDraft();
       void context.dispatchAction({
         event: {name: props.draftAction, context: buildContext(next)},
       });
@@ -212,8 +246,7 @@ export const ConstructionsEditor = createComponentImplementation(
       setConstructions(updated);
       // Коммит формы (слоя, шапки, паспортного Rпр) — явный признак от
       // карточки; ввод внутри незакоммиченной формы наверх не поднимается
-      // вовсе, а правки вкладки общих данных уезжают ближайшим коммитом
-      // либо submit'ом.
+      // вовсе.
       if (options?.commit) {
         sendDraft(updated);
         // Правка равна подтверждению: коммит любой формы гасит агентский статус.
@@ -239,8 +272,11 @@ export const ConstructionsEditor = createComponentImplementation(
     };
 
     // Ничего не блокируем и не подсвечиваем: единственный компетентный
-    // валидатор — агент (Решение 3 design.md).
+    // валидатор — агент (Решение 3 design.md). Отложенный draft отменяется:
+    // submit шлёт то же полное состояние, а запоздавший ответ черновика мог бы
+    // визуально «откатить» форму (Решение 3 design constructions-editor-live-draft).
     const handleSubmit = () => {
+      cancelPendingDraft();
       void context.dispatchAction({
         event: {name: props.submitAction, context: buildContext(constructions)},
       });
@@ -287,20 +323,10 @@ export const ConstructionsEditor = createComponentImplementation(
                 onToggle={() => setConditionsOpen(prev => !prev)}
                 general={general}
                 sources={omitTouchedSources(props.generalSources, touched)}
-                showGsop={!climateDirty}
                 buildingTypeOptions={props.buildingTypeOptions}
                 cityReferenceId={props.cityReferenceId}
                 minChars={props.minChars}
                 onChange={handleGeneralChange}
-                dirty={conditionsDirty}
-                onSave={
-                  props.draftAction
-                    ? () => {
-                        sendDraft(constructions);
-                        setConditionsDirty(false);
-                      }
-                    : undefined
-                }
               />
             </div>
           ) : null}

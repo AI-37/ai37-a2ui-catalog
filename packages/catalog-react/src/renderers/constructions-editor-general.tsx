@@ -39,7 +39,6 @@ const CLIMATE_FIELDS: Array<{
 export function ConstructionsEditorGeneral({
   general,
   sources,
-  showGsop,
   buildingTypeOptions,
   cityReferenceId,
   minChars,
@@ -74,7 +73,7 @@ export function ConstructionsEditorGeneral({
     onChange({...general, [key]: Number.isFinite(parsed) ? parsed : null}, [key]);
   };
 
-  const gsop = showGsop && general.gsop !== null && general.gsop !== undefined ? general.gsop : null;
+  const gsop = general.gsop ?? null;
 
   return (
     <>
@@ -184,8 +183,9 @@ export function ConstructionsEditorGeneral({
           </label>
         ))}
         {/* ГСОП — четвёртое поле ряда, но не ввод: его считает агент. Поле
-            стоит всегда, а значения нет («—»), пока агент не прислал или пока
-            тронут климат — присланное протухло (Решение 3 design.md). */}
+            стоит всегда: значение из последнего снапшота агента, пока не
+            прислал — «—»; на время «дебаунс + раунд-трип» живёт прежнее
+            значение (Решение 2 design constructions-editor-live-draft). */}
         <div className="a2ui-ce-field">
           <span className="a2ui-ce-field__label">
             ГСОП — градусо-сутки отопит. периода, °C·сут/год

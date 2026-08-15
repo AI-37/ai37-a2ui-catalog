@@ -4,6 +4,30 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.18.0] - 2026-08-15
+
+### Added
+
+- Живой автосейв условий в `ConstructionsEditor` (change
+  `constructions-editor-live-draft`): правка любого поля блока «Условия»
+  (город, назначение, tв, условия эксплуатации, tот, zот, tн) отправляет
+  `draftAction` с дебаунсом `CONDITIONS_DRAFT_DEBOUNCE_MS` (500 мс, экспорт
+  пакета): серия правок схлопывается в один action после паузы ввода, payload
+  собирается из состояния на момент отправки. Структурные правки шлют draft
+  по-прежнему сразу и снимают отложенный; submit отменяет отложенный draft.
+
+### Changed
+
+- ГСОП виден всегда: значение `general.gsop` из последнего снапшота агента
+  (нет значения — прочерк); гейт «климат тронут — ГСОП прячется» удалён,
+  пересчитанные производные приезжают ответом агента на draft.
+
+### Removed
+
+- Кнопка «Сохранить» блока условий и dirty-логика (`conditionsDirty`,
+  `dirty`/`onSave` в `ConstructionsEditorConditions`): автосейв делает явный
+  коммит условий ненужным. Схема не менялась — контракт `draftAction` прежний.
+
 ## [0.17.0] - 2026-08-14
 
 ### Added
