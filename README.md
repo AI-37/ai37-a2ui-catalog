@@ -4,10 +4,10 @@
 # ai37-a2ui-catalog
 
 ## Описание
-Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений. С версии 0.18.0 в ConstructionsEditor правки блока «Условия» автосохраняются черновиком с дебаунсом 500 мс (кнопка «Сохранить» удалена, ГСОП виден всегда); lookup-подсказки умеют многострочные опции со слотами group/title/meta.
+Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений. С версии 0.18.0 в ConstructionsEditor правки блока «Условия» автосохраняются черновиком с дебаунсом 500 мс (кнопка «Сохранить» удалена, ГСОП виден всегда); lookup-подсказки умеют многострочные опции со слотами group/title/meta. С версии 0.19.0 pending-навигация «Далее» в ConstructionsEditor раскрывает только целевую карточку, сворачивая остальные (`openIds = {target}`); ручной аккордеон остаётся мульти-open.
 
 ## Стек
-TypeScript, React 19, Zod, @a2ui/react (overrides: 0.10.1), Vite, Vitest, tsup, tsx, Python 3 + Pydantic, Poetry 2.3.2, Twine, pnpm (>=10), Node >=22. Версия пакетов workspace — 0.18.0. Публикация пакетов — в приватные реестры AI-37 (npm.app.sp-ai.ru и pypi.app.sp-ai.ru). Константа дебаунса автодрафта условий CONDITIONS_DRAFT_DEBOUNCE_MS = 500 мс экспортируется из @ai37/a2ui-catalog-react.
+TypeScript, React 19, Zod, @a2ui/react (overrides: 0.10.1), Vite, Vitest, tsup, tsx, Python 3 + Pydantic, Poetry 2.3.2, Twine, pnpm (>=10), Node >=22. Версия пакетов workspace — 0.19.0. Публикация пакетов — в приватные реестры AI-37 (npm.app.sp-ai.ru и pypi.app.sp-ai.ru). Константа дебаунса автодрафта условий CONDITIONS_DRAFT_DEBOUNCE_MS = 500 мс экспортируется из @ai37/a2ui-catalog-react.
 
 ## Схема работы
 Workspace состоит из пакетов:
@@ -27,6 +27,8 @@ Fetch-канал подсказок lookup-полей (suggestMode: 'fetch') —
 
 Автосейв условий ConstructionsEditor (change `constructions-editor-live-draft`): при заданном `draftAction` правка любого поля блока «Условия» (город, назначение помещений, tв, условия эксплуатации, tот, zот, tн) планирует `draftAction` с дебаунсом `CONDITIONS_DRAFT_DEBOUNCE_MS = 500` мс — серия правок схлопывается в один action после паузы ввода, payload собирается из state на момент отправки (последний ввод побеждает). Структурные правки (add/remove конструкции, коммиты форм слоя/шапки/паспортного Rпр) шлют draft сразу и снимают отложенный; submit отменяет отложенный draft; unmount чистит таймер. Кнопка «Сохранить» и dirty-логика (`conditionsDirty`, `dirty`/`onSave`) удалены; ГСОП рендерится всегда — значение `general.gsop` из последнего снапшота агента либо «—», пересчитанные производные (`general.gsop`, `typeConfigs`) приходят ответным снапшотом на draft, ввод пользователя не затирается. Схема `constructions-editor.ts` не менялась — контракт `draftAction` прежний (`{general, constructions}`).
 
+Pending-навигация «Далее» (change `pending-nav-single-open`): при заполненных обязательных полях условий клик по pending-кнопке раскрывает первую сверху карточку, требующую внимания, и одновременно сворачивает все остальные — `setOpenIds(new Set([target.id]))` вместо `handleToggle`; статус целевой гасится прежним правилом просмотра (`dismissStatusOnView`), action не отправляется. Ручной аккордеон (`handleToggle`) не меняется — мульти-open сохраняется; навигация к незаполненным условиям раскрывает блок условий, не трогая состояния карточек. Схемы и props не менялись.
+
 ```mermaid
 flowchart LR
     S[packages/catalog-schemas] --> G[generate-artifacts.ts]
@@ -44,12 +46,12 @@ flowchart LR
 - packages/catalog-react — React-рендереры компонентов каталога (в т.ч. ConstructionsEditor, LookupCombobox, LookupOptionRow, `conditions-draft-debounce-ms`, split-first-match);
 - packages/catalog-python — Pydantic-модели валидации (зеркало zod-схем);
 - fixtures — валидные, невалидные и сквозные фикстуры A2UI-сообщений;
-- tests — тесты (tests/react — Vitest, включая `constructions-editor.test.tsx` с кейсами живого автодрафта и `lookup-option-rich-render.test.tsx`; python-часть — Pytest);
+- tests — тесты (tests/react — Vitest, включая `constructions-editor.test.tsx` с кейсами живого автодрафта, pending-навигации и `lookup-option-rich-render.test.tsx`; python-часть — Pytest);
 - public/a2ui/catalogs — статические артефакты каталога (catalog.json, JSON Schema компонентов) для GitHub Pages;
 - scripts/install-to-consumer.mjs — установка локальной сборки пакетов в потребителя тарболлами (минуя реестр) через `pnpm run install:consumer`;
 - .github/workflows — CI/CD (pages.yml, ci.yml, cd.yml);
 - .npmrc — scoped-реестр @ai37 и авторизация для npm.app.sp-ai.ru;
-- docs, openspec — документация и design-доки (включая openspec/changes/lookup-option-rich-render и openspec/changes/constructions-editor-live-draft).
+- docs, openspec — документация и design-доки (включая openspec/changes/lookup-option-rich-render, openspec/changes/constructions-editor-live-draft и openspec/changes/pending-nav-single-open).
 
 ## Публичные интерфейсы
 Статический A2UI-каталог, публикуемый на GitHub Pages:
@@ -58,7 +60,7 @@ flowchart LR
 
 Отдельных публичных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Внутренний fetch-канал подсказок lookup-полей — same-origin `GET /api/agent-resource?resource=&query=` (resource = id справочника / `field.referenceId`; BFF потребителя проксирует на REST оркестратора). В dev-middleware apps/demo неизвестный resource — 404 `{error: "unknown_reference"}` (changelog 0.12.0 объявляет контрактный код `unknown_resource`). Тип `LookupOption` fetch-канала — необязательные слоты `group` / `title` / `meta`; разбор ответа `parseLookupOptions` фильтрует массив и сохраняет все доп. поля целиком (контракт `LookupOption & Record<string, unknown>`). npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
 
-В составе @ai37/a2ui-catalog-react — рендерер ConstructionsEditor (редактор конструкций): наружу один submit с полным состоянием `{general, constructions}` (без клиентской блокировки); при заданном пропе `draftAction` черновик с тем же payload уходит автоматически — структурные коммиты (add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки, «Применить» формы паспортного Rпр) сразу, правки полей блока «Условия» с дебаунсом `CONDITIONS_DRAFT_DEBOUNCE_MS` (500 мс). Кнопки сохранения условий нет; ввод внутри незакоммиченной формы и «Отмена» не шлют ничего. Submit и немедленный draft отменяют отложенный черновик; unmount чистит таймер. ГСОП показывается всегда: значение `general.gsop` из последнего снапшота агента либо «—»; пересчитанные производные приходят ответом агента на draft, ввод не затирается. Слои — строки-сводки («№ · материал · толщина · λ»), форма правки одна на редактор; шапка раскрытой карточки по умолчанию — режим чтения (тип с разновидностью и название) с кнопкой «Изменить», правка — в форме с кнопками «Сохранить»/«Отмена»; «Rпр по паспорту» для типов без слоёв — отдельный элемент «значение + Изменить» с формой «Применить»/«Отмена» (незаданное значение показано предупреждающим цветом «не задано»). Все формы (слой, шапка, паспортное Rпр) делят одно место на редактор: открытие любой закрывает текущую с отбросом несохранённых правок. Невалидные конструкции подсвечиваются пометкой «! проверить» — индикация, не блок.
+В составе @ai37/a2ui-catalog-react — рендерер ConstructionsEditor (редактор конструкций): наружу один submit с полным состоянием `{general, constructions}` (без клиентской блокировки); при заданном пропе `draftAction` черновик с тем же payload уходит автоматически — структурные коммиты (add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки, «Применить» формы паспортного Rпр) сразу, правки полей блока «Условия» с дебаунсом `CONDITIONS_DRAFT_DEBOUNCE_MS` (500 мс). Кнопки сохранения условий нет; ввод внутри незакоммиченной формы и «Отмена» не шлют ничего. При заданном пропе `pendingLabel` кнопка двухрежимная: пока условия не заполнены или есть карточки, требующие внимания, клик — навигация без action'а (раскрыть условия либо первую проблемную карточку); навигация к карточке раскрывает только целевую, остальные сворачиваются (`openIds = {target}`), ручной аккордеон остаётся мульти-open. Submit и немедленный draft отменяют отложенный черновик; unmount чистит таймер. ГСОП показывается всегда: значение `general.gsop` из последнего снапшота агента либо «—»; пересчитанные производные приходят ответом агента на draft, ввод не затирается. Слои — строки-сводки («№ · материал · толщина · λ»), форма правки одна на редактор; шапка раскрытой карточки по умолчанию — режим чтения (тип с разновидностью и название) с кнопкой «Изменить», правка — в форме с кнопками «Сохранить»/«Отмена»; «Rпр по паспорту» для типов без слоёв — отдельный элемент «значение + Изменить» с формой «Применить»/«Отмена» (незаданное значение показано предупреждающим цветом «не задано»). Все формы (слой, шапка, паспортное Rпр) делят одно место на редактор: открытие любой закрывает текущую с отбросом несохранённых правок. Невалидные конструкции подсвечиваются пометкой «! проверить» — индикация, не блок.
 
 ## Зависимости в экосистеме
 ### Зависит от
@@ -119,7 +121,11 @@ GitHub Actions:
 - openspec/changes/lookup-option-rich-render/proposal.md;
 - openspec/changes/lookup-option-rich-render/specs/lookup-option-rich-render/spec.md;
 - openspec/changes/lookup-option-rich-render/specs/form-card-lookup-fetch-mode/spec.md;
-- openspec/changes/form-card-dispatch-action/design.md.
+- openspec/changes/form-card-dispatch-action/design.md;
+- openspec/changes/pending-nav-single-open/design.md;
+- openspec/changes/pending-nav-single-open/proposal.md;
+- openspec/changes/pending-nav-single-open/specs/constructions-editor-pending-nav/spec.md;
+- openspec/changes/pending-nav-single-open/tasks.md.
 <!-- ai37:card:end -->
 
 <!-- Ниже — только уникальный человеческий контекст (замысел, инварианты, грабли).
