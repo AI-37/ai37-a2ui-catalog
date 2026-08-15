@@ -4,6 +4,16 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.19.0] - 2026-08-15
+
+### Changed
+
+- Pending-навигация «Далее» в `ConstructionsEditor` раскрывает только целевую
+  карточку (change `pending-nav-single-open`): остальные карточки сворачиваются
+  (`openIds = {target}`), статус целевой гасится прежним правилом просмотра.
+  Ручной аккордеон остаётся мульти-open; навигация к незаполненным условиям
+  карточки не трогает. Схемы и props не менялись.
+
 ## [0.18.0] - 2026-08-15
 
 ### Added

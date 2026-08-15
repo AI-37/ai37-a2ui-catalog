@@ -847,6 +847,120 @@ describe('ConstructionsEditor', () => {
     });
   });
 
+  describe('pending-навигация: одиночное раскрытие (constructions-editor-pending-nav)', () => {
+    const FULL_GENERAL = {
+      buildingType: 'Жилое многоквартирное',
+      city: {value: 'moskva', label: 'Москва'},
+      tot: -2.2,
+      zot: 205,
+      tn: -25,
+      tv: 20,
+      condition: 'Б',
+    };
+
+    const PRESET = {
+      id: 'p-wall',
+      type: 'steny',
+      name: 'Типовая стена',
+      layers: [
+        {material: 'Кладка из кирпича', thicknessMm: 380, lambdaA: 0.7, lambdaB: 0.81},
+        {material: 'Плиты минераловатные', thicknessMm: 150, lambdaA: 0.045, lambdaB: 0.048},
+      ],
+      status: 'confirm',
+    };
+
+    function cardHeader(name: RegExp) {
+      return screen.getByRole('button', {name});
+    }
+
+    it('«Далее» раскрывает только целевую карточку', () => {
+      renderSurface({
+        pendingLabel: 'Далее',
+        general: FULL_GENERAL,
+        constructions: [
+          {...PRESET, id: 'p-1', name: 'Первый пресет'},
+          {...PRESET, id: 'p-2', name: 'Второй пресет'},
+        ],
+      });
+
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      expect(cardHeader(/Первый пресет/)).toHaveAttribute('aria-expanded', 'true');
+      expect(cardHeader(/Второй пресет/)).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByText('готова')).toBeInTheDocument();
+    });
+
+    it('повторное «Далее» сворачивает предыдущую, та остаётся «готова»', () => {
+      renderSurface({
+        pendingLabel: 'Далее',
+        general: FULL_GENERAL,
+        constructions: [
+          {...PRESET, id: 'p-1', name: 'Первый пресет'},
+          {...PRESET, id: 'p-2', name: 'Второй пресет'},
+        ],
+      });
+
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      expect(cardHeader(/Первый пресет/)).toHaveAttribute('aria-expanded', 'false');
+      expect(cardHeader(/Второй пресет/)).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getAllByText('готова')).toHaveLength(2);
+      expect(screen.queryByText('подтвердите')).not.toBeInTheDocument();
+    });
+
+    it('раскрытая вручную карточка сворачивается при навигации к другой', () => {
+      renderSurface({
+        pendingLabel: 'Далее',
+        general: FULL_GENERAL,
+        constructions: [
+          {...PRESET, id: 'p-clean', name: 'Чистый пресет', status: undefined},
+          {...PRESET, id: 'p-2', name: 'Второй пресет'},
+        ],
+      });
+      openCard(/Чистый пресет/);
+      expect(cardHeader(/Чистый пресет/)).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      expect(cardHeader(/Чистый пресет/)).toHaveAttribute('aria-expanded', 'false');
+      expect(cardHeader(/Второй пресет/)).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('ручной аккордеон остаётся мульти-open', () => {
+      renderSurface({
+        pendingLabel: 'Далее',
+        general: FULL_GENERAL,
+        constructions: [
+          {...PRESET, id: 'p-1', name: 'Первый пресет'},
+          {...PRESET, id: 'p-2', name: 'Второй пресет'},
+        ],
+      });
+
+      openCard(/Первый пресет/);
+      openCard(/Второй пресет/);
+
+      expect(cardHeader(/Первый пресет/)).toHaveAttribute('aria-expanded', 'true');
+      expect(cardHeader(/Второй пресет/)).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('навигация к условиям не трогает раскрытую карточку', () => {
+      renderSurface({
+        pendingLabel: 'Далее',
+        general: EMPTY_GENERAL,
+        conditionsCollapsed: true,
+        constructions: [PRESET],
+      });
+      openCard(/Типовая стена/);
+      expect(cardHeader(/Типовая стена/)).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+
+      expect(getCityInput()).toBeInTheDocument();
+      expect(cardHeader(/Типовая стена/)).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
   describe('блок «Условия» вместо вкладок', () => {
     it('оба блока видны сразу, переключателя вкладок нет', () => {
       renderSurface();
