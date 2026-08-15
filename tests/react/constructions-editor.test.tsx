@@ -6,7 +6,11 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
 import {LOOKUP_DEBOUNCE_MS, LOOKUP_SUGGEST_ROUTE} from '@ai37/a2ui-catalog-schemas';
-import {ai37Catalog, resolveLayerLambda} from '@ai37/a2ui-catalog-react';
+import {
+  CONDITIONS_DRAFT_DEBOUNCE_MS,
+  ai37Catalog,
+  resolveLayerLambda,
+} from '@ai37/a2ui-catalog-react';
 
 function readMessages(fileName: string) {
   return JSON.parse(
@@ -948,10 +952,10 @@ describe('ConstructionsEditor', () => {
       // Поле не редактируется: ввода в нём нет.
       expect(gsopField().querySelector('input')).toBeNull();
 
-      // Правка климата делает присланный ГСОП протухшим — значение исчезает.
+      // Правка климата значение не прячет: прежний ГСОП живёт до нового
+      // снапшота агента (constructions-editor-live-draft).
       fireEvent.change(climateInput('tot'), {target: {value: '-7'}});
-      expect(gsopField().textContent).not.toMatch(/6.380/);
-      expect(gsopField().textContent).toContain('—');
+      expect(gsopField().textContent).toMatch(/6.380/);
     });
 
     it('без ГСОП поле остаётся на месте с прочерком, в регионе его нет', () => {
@@ -971,35 +975,6 @@ describe('ConstructionsEditor', () => {
       });
 
       expect((actions[0]!.context.general as Record<string, unknown>).tot).toBe(-3.1);
-    });
-
-    it('правка условий показывает «Сохранить» и уезжает черновиком', async () => {
-      const {surface} = renderSurface({draftAction: 'constructions:draft'});
-      const actions = subscribeActions(surface);
-
-      // Пока условия не трогали, сохранять нечего.
-      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
-
-      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
-      expect(actions).toHaveLength(0); // ввод сам по себе черновика не шлёт
-
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
-      });
-
-      expect(actions).toHaveLength(1);
-      expect(actions[0]!.name).toBe('constructions:draft');
-      expect(actions[0]!.context.general).toMatchObject({tv: 22});
-      // Сохранили — кнопки снова нет.
-      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
-    });
-
-    it('без draftAction кнопки сохранения нет — правки уедут submit\'ом', () => {
-      renderSurface({draftAction: undefined});
-
-      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
-
-      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
     });
 
     it('без пропа general блока условий нет — прежний экран конструкций', () => {
@@ -1676,6 +1651,170 @@ describe('ConstructionsEditor', () => {
       expect(actions).toHaveLength(3);
       expect(actions[2]!.name).toBe('constructions:apply');
       expect(actions[2]!.context.constructions as unknown[]).toHaveLength(3);
+    });
+  });
+
+  describe('живой автодрафт условий (constructions-editor-live-draft)', () => {
+    function draftSurface(overrides?: Record<string, unknown>) {
+      const rendered = renderSurface({draftAction: 'constructions:draft', ...overrides});
+      const actions = subscribeActions(rendered.surface);
+      return {...rendered, actions};
+    }
+
+    /** Пауза ввода: окно дебаунса истекло, отложенный draft ушёл. */
+    async function flushDraftDebounce() {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(CONDITIONS_DRAFT_DEBOUNCE_MS);
+      });
+    }
+
+    it('серия правок без пауз схлопывается в один action со всеми значениями', async () => {
+      const {actions} = draftSurface();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      fireEvent.change(climateInput('tot'), {target: {value: '-3.5'}});
+      fireEvent.change(climateInput('zot'), {target: {value: '210'}});
+      expect(actions).toHaveLength(0); // окно ещё не истекло
+
+      await flushDraftDebounce();
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:draft');
+      // Последний ввод побеждает: payload собран из state на момент отправки.
+      expect(actions[0]!.context.general).toMatchObject({tv: 22, tot: -3.5, zot: 210});
+      expect(Object.keys(actions[0]!.context).sort()).toEqual(['constructions', 'general']);
+    });
+
+    it('правки с паузой длиннее окна — два action\'а, второй с обоими значениями', async () => {
+      const {actions} = draftSurface();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      await flushDraftDebounce();
+      expect(actions).toHaveLength(1);
+
+      fireEvent.change(climateInput('tot'), {target: {value: '-3.5'}});
+      await flushDraftDebounce();
+
+      expect(actions).toHaveLength(2);
+      expect(actions[1]!.context.general).toMatchObject({tv: 22, tot: -3.5});
+    });
+
+    it('submit до истечения окна отменяет отложенный draft', async () => {
+      const {actions} = draftSurface();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+      });
+      await flushDraftDebounce();
+
+      // Ушёл только submit с полным состоянием — draft после него опасен:
+      // его запоздавший ответ визуально «откатил» бы форму.
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:apply');
+      expect(actions[0]!.context.general).toMatchObject({tv: 22});
+    });
+
+    it('структурная правка шлёт draft сразу и снимает отложенный', async () => {
+      const {actions} = draftSurface();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', {name: '+ Добавить конструкцию'}));
+      });
+      await flushDraftDebounce();
+
+      // Немедленный draft уже унёс полное состояние, включая правку условий.
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:draft');
+      expect(actions[0]!.context.general).toMatchObject({tv: 22});
+      expect(actions[0]!.context.constructions as unknown[]).toHaveLength(4);
+    });
+
+    it('unmount до истечения окна — draft не уходит', async () => {
+      const {actions, unmount} = draftSurface();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      unmount();
+      await flushDraftDebounce();
+
+      expect(actions).toHaveLength(0);
+    });
+
+    it('выбор города из lookup: город и автозаполненный климат одним action\'ом', async () => {
+      fetchMock.mockImplementation(() =>
+        Promise.resolve({
+          ok: true,
+          json: async () => ({
+            options: [{value: 'novosibirsk', label: 'Новосибирск', tot: -6.4, zot: 218, tn: -33}],
+          }),
+        }),
+      );
+      const {actions} = draftSurface();
+
+      await typeAndFlush(getCityInput(), 'ново');
+      fireEvent.mouseDown(screen.getByRole('option', {name: 'Новосибирск'}));
+      await flushDraftDebounce();
+
+      expect(actions).toHaveLength(1);
+      expect(actions[0]!.name).toBe('constructions:draft');
+      expect(actions[0]!.context.general).toMatchObject({
+        city: {value: 'novosibirsk', label: 'Новосибирск'},
+        tot: -6.4,
+        zot: 218,
+        tn: -33,
+      });
+    });
+
+    it('кнопка сохранения условий не рендерится ни в каком состоянии', async () => {
+      const {actions} = draftSurface();
+      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
+
+      // Правка кнопку не показывает — черновик уезжает сам.
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
+
+      await flushDraftDebounce();
+
+      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
+      expect(actions).toHaveLength(1);
+    });
+
+    it('без draftAction правки условий не шлют ничего — уедут submit\'ом', async () => {
+      const {surface} = renderSurface({draftAction: undefined});
+      const actions = subscribeActions(surface);
+
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      await flushDraftDebounce();
+
+      expect(actions).toHaveLength(0);
+      expect(screen.queryByRole('button', {name: 'Сохранить'})).not.toBeInTheDocument();
+    });
+
+    it('replace-снапшот приносит новый ГСОП, введённые поля не затираются', async () => {
+      const {processor} = draftSurface();
+
+      fireEvent.change(climateInput('tv'), {target: {value: '22'}});
+      await flushDraftDebounce();
+
+      // Ответ агента на draft: echo введённого tv + пересчитанный ГСОП.
+      await updateProps(processor, {
+        draftAction: 'constructions:draft',
+        general: {
+          buildingType: 'Жилое многоквартирное',
+          city: {value: 'moskva', label: 'Москва'},
+          tot: -2.2,
+          zot: 205,
+          tn: -25,
+          tv: 22,
+          condition: 'Б',
+          gsop: 4961,
+        },
+      });
+
+      expect(gsopField().textContent).toMatch(/4.961/);
+      expect(climateInput('tv')).toHaveValue(22);
+      expect(climateInput('tot')).toHaveValue(-2.2);
     });
   });
 });

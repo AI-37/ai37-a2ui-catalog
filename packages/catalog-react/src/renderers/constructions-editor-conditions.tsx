@@ -14,8 +14,6 @@ import type {ConstructionsEditorConditionsProps} from './constructions-editor.ty
 export function ConstructionsEditorConditions({
   open,
   onToggle,
-  dirty,
-  onSave,
   ...general
 }: ConstructionsEditorConditionsProps) {
   if (!open) {
@@ -44,15 +42,6 @@ export function ConstructionsEditorConditions({
         </button>
       </div>
       <ConstructionsEditorGeneral {...general} />
-      {/* Кнопка появляется только по факту правки: пока условия не трогали,
-          сохранять нечего, и пустая кнопка сбивала бы с толку. */}
-      {dirty && onSave ? (
-        <div className="a2ui-ce-conditions__actions">
-          <button type="button" onClick={onSave} className="a2ui-ce-btn a2ui-ce-btn--commit">
-            Сохранить
-          </button>
-        </div>
-      ) : null}
     </section>
   );
 }

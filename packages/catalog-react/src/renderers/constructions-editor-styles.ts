@@ -619,11 +619,6 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   gap: 14px;
 }
 
-.a2ui-ce-conditions__actions {
-  display: flex;
-  margin-top: 14px;
-}
-
 .a2ui-ce-conditions__climate {
   display: grid;
   gap: 14px;

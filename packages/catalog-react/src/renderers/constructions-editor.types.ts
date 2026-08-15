@@ -24,8 +24,6 @@ export type ConstructionsEditorGeneralProps = {
    * стало пользовательским и оформления источника не получает.
    */
   sources: ConstructionsGeneralSources;
-  /** false — климат тронут: присланный ГСОП протух и не показывается. */
-  showGsop: boolean;
   buildingTypeOptions?: string[] | undefined;
   /** Без справочника поле города остаётся обычным вводом без подсказок. */
   cityReferenceId?: string | undefined;
@@ -38,10 +36,6 @@ export type ConstructionsEditorConditionsProps = ConstructionsEditorGeneralProps
   /** Раскрыт ли блок; состояние локальное, наружу не уезжает. */
   open: boolean;
   onToggle: () => void;
-  /** Есть несохранённые правки условий — показываем кнопку сохранения. */
-  dirty: boolean;
-  /** Отправить правки условий; без `draftAction` у эмитента кнопки нет. */
-  onSave?: (() => void) | undefined;
 };
 
 export type ConstructionsEditorSourceNoteProps = {
