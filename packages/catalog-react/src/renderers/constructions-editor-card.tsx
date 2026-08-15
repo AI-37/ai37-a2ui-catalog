@@ -17,13 +17,25 @@ import {tokens} from './tokens';
 const EMPTY_LAYER: ConstructionLayer = {material: '', thicknessMm: null};
 
 /**
+ * Черновик открытой формы для превью Rпр: слой (edit/new) или паспортное
+ * значение. Живёт только в карточке и только на чип — state редактора,
+ * сводки и черновики агенту его не видят.
+ */
+type RprPreview =
+  | {kind: 'layer'; layer: ConstructionLayer}
+  | {kind: 'passport'; value: number | undefined};
+
+/**
  * Карточка-аккордеон одной конструкции: шапка (тип/subtype/название), слои
  * строками-сводками (или паспортное Rпр для типов без слоёв) и live-чип Rпр
  * против Rнорм (сравнение — только при `showRnorm`). Все три блока живут одним
  * паттерном «чтение ↔ форма с явным коммитом», и форма раскрыта максимум одна
  * на весь редактор — её состоянием, как и состоянием конструкций, владеет
  * редактор. Карточка поднимает правки через `onChange` целой конструкцией,
- * коммиты форм — с `{commit: true}`. Статусный чип в шапке один, по приоритету
+ * коммиты форм — с `{commit: true}`. Единственное исключение из «до коммита
+ * ничего не меняется» — чип Rпр: он пересчитывается мгновенно по черновику
+ * открытой формы слоя/паспорта (`onDraftChange` → превью в state карточки),
+ * не трогая state редактора. Статусный чип в шапке один, по приоритету
  * «проблемы данных → агентский статус → готова» — индикация, не блок
  * (см. `find-invalid-layers`); при закрытом гейте условий (`showStatusChips`)
  * чипов нет вовсе, остаётся только чип Rпр.
@@ -45,7 +57,38 @@ export function ConstructionsEditorCard({
   onRemove,
 }: ConstructionsEditorCardProps) {
   const config = typeConfigs.find(candidate => candidate.type === entry.type);
-  const rpr = computeLiveRpr(entry, config, condition);
+
+  // Превью-черновик открытой формы — только для чипа Rпр. Любая смена
+  // `editingTarget` (открытие, отмена, переключение, коммит) сбрасывает его
+  // прямо в рендере — чип ни кадра не живёт черновиком чужой формы; после
+  // коммита те же значения уже в `entry`, скачка нет.
+  const [preview, setPreview] = React.useState<RprPreview | null>(null);
+  const [previewTarget, setPreviewTarget] = React.useState(editingTarget);
+  if (previewTarget !== editingTarget) {
+    setPreviewTarget(editingTarget);
+    setPreview(null);
+  }
+
+  // Entry для чипа: подменённый слой (edit), добавленный в конец (new) или
+  // чужое `rprPassport`. Всё остальное — статус, невалидность, сводки —
+  // считается от закоммиченного `entry`.
+  const previewEntry =
+    preview === null
+      ? entry
+      : preview.kind === 'passport'
+        ? {...entry, rprPassport: preview.value}
+        : editingTarget === 'new'
+          ? {...entry, layers: [...entry.layers, preview.layer]}
+          : typeof editingTarget === 'number'
+            ? {
+                ...entry,
+                layers: entry.layers.map((prev, i) =>
+                  i === editingTarget ? preview.layer : prev,
+                ),
+              }
+            : entry;
+
+  const rpr = computeLiveRpr(previewEntry, config, condition);
   const invalidity = findInvalidLayers(entry, config);
   const title = entry.name?.trim() ? entry.name : (config?.label ?? entry.type);
 
@@ -146,6 +189,7 @@ export function ConstructionsEditorCard({
               onOpen={() => onEditingChange('passport')}
               onCommit={handlePassportCommit}
               onCancel={() => onEditingChange(null)}
+              onDraftChange={value => setPreview({kind: 'passport', value})}
             />
           ) : (
             <div className="a2ui-ce-card__layers">
@@ -165,6 +209,7 @@ export function ConstructionsEditorCard({
                   onCommit={next => handleLayerCommit(index, next)}
                   onCancel={() => onEditingChange(null)}
                   onRemove={() => handleLayerRemove(index)}
+                  onDraftChange={draft => setPreview({kind: 'layer', layer: draft})}
                 />
               ))}
               {editingTarget === 'new' ? (
@@ -178,6 +223,7 @@ export function ConstructionsEditorCard({
                   mode="new"
                   onCommit={handleLayerAdd}
                   onCancel={() => onEditingChange(null)}
+                  onDraftChange={draft => setPreview({kind: 'layer', layer: draft})}
                 />
               ) : (
                 <button

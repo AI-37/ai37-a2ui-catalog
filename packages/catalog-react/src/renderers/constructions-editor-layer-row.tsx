@@ -12,8 +12,10 @@ import {useLookupSuggest} from './use-lookup-suggest';
  * «№ · материал · толщина · λ», кликом раскрывается в форму. `edit`/`new` —
  * форма с lookup'ом материала (fetch-канал справочника прил. М), толщиной и λ;
  * правки живут в локальной копии и попадают наверх только по коммиту
- * («Применить»/«Добавить»), «Отмена» отбрасывает копию. Строки-зазоры λ не
- * требуют: их Rs считает сервер в итоговом расчёте.
+ * («Применить»/«Добавить»), «Отмена» отбрасывает копию. Каждое изменение
+ * копии дополнительно уходит в `onDraftChange` — карточка считает по нему
+ * превью Rпр для чипа; это не коммит и state редактора не меняет.
+ * Строки-зазоры λ не требуют: их Rs считает сервер в итоговом расчёте.
  */
 export function ConstructionsEditorLayerRow(props: ConstructionsEditorLayerRowProps) {
   if (props.mode === 'summary') {
@@ -81,12 +83,20 @@ function LayerForm({
   onCommit,
   onCancel,
   onRemove,
+  onDraftChange,
 }: ConstructionsEditorLayerRowProps) {
   const [draft, setDraft] = React.useState<ConstructionLayer>(layer);
   const {options, loading, queried, handleInputText, closeOptions} = useLookupSuggest({
     referenceId: materialsReferenceId,
     minChars,
   });
+
+  // Каждая правка уходит и в превью Rпр карточки; открытие формы без правок
+  // черновика наверх не шлёт.
+  const updateDraft = (next: ConstructionLayer) => {
+    setDraft(next);
+    onDraftChange?.(next);
+  };
 
   const isGap = draft.kind !== undefined && draft.kind !== 'material';
   const hasReferenceLambda =
@@ -99,7 +109,7 @@ function LayerForm({
     const text = event.target.value;
     // Свободный текст сбрасывает выбор из справочника — строка переходит на
     // ручную λ (или остаётся зазором без λ).
-    setDraft({
+    updateDraft({
       ...draft,
       material: text,
       materialKey: undefined,
@@ -116,7 +126,7 @@ function LayerForm({
 
     // λ из опции вытесняет ручную: resolveLayerLambda предпочитает
     // lambdaManual, оставить её — значит молча игнорировать справочник.
-    setDraft({
+    updateDraft({
       ...draft,
       material: option.label,
       materialKey: option.value,
@@ -129,12 +139,12 @@ function LayerForm({
 
   const handleThicknessChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const parsed = Number.parseFloat(event.target.value);
-    setDraft({...draft, thicknessMm: Number.isFinite(parsed) ? parsed : null});
+    updateDraft({...draft, thicknessMm: Number.isFinite(parsed) ? parsed : null});
   };
 
   const handleLambdaManualChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const parsed = Number.parseFloat(event.target.value);
-    setDraft({...draft, lambdaManual: Number.isFinite(parsed) ? parsed : undefined});
+    updateDraft({...draft, lambdaManual: Number.isFinite(parsed) ? parsed : undefined});
   };
 
   const handleApply = () => {

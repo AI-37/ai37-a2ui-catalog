@@ -40,12 +40,15 @@ function PassportSummary({value, onOpen}: ConstructionsEditorPassportProps) {
   );
 }
 
-function PassportForm({value, onCommit, onCancel}: ConstructionsEditorPassportProps) {
+function PassportForm({value, onCommit, onCancel, onDraftChange}: ConstructionsEditorPassportProps) {
   const [draft, setDraft] = React.useState<number | undefined>(value);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const parsed = Number.parseFloat(event.target.value);
-    setDraft(Number.isFinite(parsed) ? parsed : undefined);
+    const next = Number.isFinite(parsed) ? parsed : undefined;
+    setDraft(next);
+    // Каждая правка уходит и в превью Rпр карточки; черновик — не коммит.
+    onDraftChange?.(next);
   };
 
   const handleApply = () => {
