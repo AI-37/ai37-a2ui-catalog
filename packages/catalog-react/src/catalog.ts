@@ -18,6 +18,7 @@ import {ChoiceCard} from './renderers/choice-card';
 import {FormCard} from './renderers/form-card';
 import {ConstructionsEditor} from './renderers/constructions-editor';
 import {LiftEditor} from './renderers/lift-editor';
+import {ThermalReport} from './renderers/thermal-report';
 
 const customComponents: ReactComponentImplementation[] = [
   SimpleTable,
@@ -27,6 +28,7 @@ const customComponents: ReactComponentImplementation[] = [
   FormCard,
   ConstructionsEditor,
   LiftEditor,
+  ThermalReport,
 ];
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(
