@@ -57,6 +57,16 @@ const DEFAULTS = {
   'color-le-text': '#1f1f1e',
   'color-le-text-muted': '#6e6e6a',
   'color-le-accent': '#245a87',
+
+  // Палитра `ThermalReport` (`tr`): та же тёплая нейтраль макетов SP-AI,
+  // своя группа по канону ce/le (правка палитры одного компонента не красит
+  // другие). Статусные цвета — общие danger/success/warning.
+  'color-tr-surface': '#fafaf9',
+  'color-tr-surface-sunken': '#f1f1ef',
+  'color-tr-border': '#e5e4e1',
+  'color-tr-text': '#1f1f1e',
+  'color-tr-text-muted': '#6e6e6a',
+  'color-tr-accent': '#245a87',
 } as const;
 
 type TokenName = keyof typeof DEFAULTS;
@@ -81,6 +91,12 @@ const INHERITS: Partial<Record<TokenName, TokenName>> = {
   'color-le-text': 'color-text-strong',
   'color-le-text-muted': 'color-text-subtle',
   'color-le-accent': 'color-accent',
+  'color-tr-surface': 'color-surface',
+  'color-tr-surface-sunken': 'color-surface-muted',
+  'color-tr-border': 'color-border',
+  'color-tr-text': 'color-text-strong',
+  'color-tr-text-muted': 'color-text-subtle',
+  'color-tr-accent': 'color-accent',
 };
 
 function cssVar(name: TokenName): string {
@@ -131,6 +147,13 @@ export const tokens = {
   leText: cssVar('color-le-text'),
   leTextMuted: cssVar('color-le-text-muted'),
   leAccent: cssVar('color-le-accent'),
+
+  trSurface: cssVar('color-tr-surface'),
+  trSurfaceSunken: cssVar('color-tr-surface-sunken'),
+  trBorder: cssVar('color-tr-border'),
+  trText: cssVar('color-tr-text'),
+  trTextMuted: cssVar('color-tr-text-muted'),
+  trAccent: cssVar('color-tr-accent'),
 } as const;
 
 /** id для тега <style> с дефолтной темой (если консьюмер решит её объявить). */

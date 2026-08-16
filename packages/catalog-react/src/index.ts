@@ -17,3 +17,4 @@ export * from './renderers/lift-draft-debounce-ms';
 // (λ-дефолт обязан совпадать с resolve-layer-lambda агента teplo-calc).
 export * from './renderers/resolve-layer-lambda';
 export * from './renderers/compute-live-rpr';
+export * from './renderers/thermal-report';

@@ -22,10 +22,13 @@ import constructionsEditorMessages from '../../../fixtures/messages/construction
 import constructionsConditionsMessages from '../../../fixtures/messages/constructions-editor-conditions-surface.json';
 import liftEditorMessages from '../../../fixtures/messages/lift-editor-surface.json';
 import liftEditorGroupFixture from '../../../fixtures/valid/lift-editor-group.json';
+import thermalReportSingleFixture from '../../../fixtures/valid/thermal-report-single.json';
+import thermalReportMultiFixture from '../../../fixtures/valid/thermal-report-multi.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
 import {createLiftEditorMessages} from './create-lift-editor-messages';
+import {createThermalReportMessages} from './create-thermal-report-messages';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 import {withStatusChipsPreview} from './with-status-chips-preview';
 import {DEMO_LIFT_DRAFT_ACTION, withLiftDraftAction} from './with-lift-draft-action';
@@ -107,6 +110,24 @@ const examples = [
       draftAction: DEMO_LIFT_DRAFT_ACTION,
     }),
   },
+  {
+    key: 'thermal-report-single-preview',
+    title: 'Thermal Report — одна конструкция',
+    description:
+      'Результат теплотехнического расчёта карточками вместо markdown-простыни: вердикт с бейджем и крупным R₀, проверки со статусами (kоб — справочной строкой без кнопки), таблица слоёв с итоговой строкой, исходные данные чипами по источнику («принято системой» — пунктиром с заметкой), протокол расчёта под катом. Клик «Изменить и пересчитать» диспатчит действие — видно в консоли.',
+    messages: createThermalReportMessages(
+      thermalReportSingleFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'thermal-report-multi-preview',
+    title: 'Thermal Report — 7 конструкций',
+    description:
+      'Тот же компонент в наполнении списка: вердикт «Соответствуют 2 из 7», конструкции с чипами отклонения по знаку (−53,9 % красным, +0,6 % зелёным) и «Подобрать» только у непроходящих, строка исключённых с «Вернуть в расчёт», допущения жёлтой заметкой. Все кнопки диспатчат действия с payload (constructionId) — смотрите консоль.',
+    messages: createThermalReportMessages(
+      thermalReportMultiFixture.props as Record<string, unknown>,
+    ),
+  },
 ] as const;
 
 const seedMessages: ThreadMessageLike[] = [
@@ -175,7 +196,12 @@ export function App() {
         if (example.key === 'constructions-preview') {
           attachDemoDraftLogger(processor, 'demo-surface', DEMO_DRAFT_ACTION);
         }
-        if (example.key === 'lift-preview' || example.key === 'lift-group-preview') {
+        if (
+          example.key === 'lift-preview' ||
+          example.key === 'lift-group-preview' ||
+          example.key === 'thermal-report-single-preview' ||
+          example.key === 'thermal-report-multi-preview'
+        ) {
           attachDemoActionLogger(processor, 'demo-surface', example.key);
         }
         return [example.key, processor.model.getSurface('demo-surface')];
