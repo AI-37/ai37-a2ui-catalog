@@ -3,8 +3,8 @@ import type {ThermalReportAction} from '@ai37/a2ui-catalog-schemas';
 import type {ThermalReportOnAction} from './thermal-report.types';
 
 const VARIANT_CLASS = {
-  solid: 'a2ui-tr-btn',
-  outline: 'a2ui-tr-btn a2ui-tr-btn--outline',
+  solid: 'a2ui-tr-btn a2ui-tr-btn--solid',
+  outline: 'a2ui-tr-btn',
   link: 'a2ui-tr-btn a2ui-tr-btn--link',
 } as const;
 

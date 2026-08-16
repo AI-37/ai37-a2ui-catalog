@@ -10,6 +10,12 @@ export const THERMAL_REPORT_STYLE_PREFIX = 'a2ui-thermal-report';
  * единственная защита от коллизий в чужом хосте. Кнопки сброшены от корня
  * (`.a2ui-tr .a2ui-tr-btn`) — правила хоста на элементе их перебивали бы.
  * Цвета — только токены `--a2ui-*` (группа `tr` + общие статусные).
+ *
+ * Метрики — канон CE: кегли в px (14 титулы / 12.5 вторичный текст / 10.5
+ * uppercase-подписи с letter-spacing 0.21px), weight 500 у титулов, кнопки
+ * 13px с радиусом 9px без жирности, карточка 14px, строки 10px. Отличия от
+ * CE — только то, что задано макетом отчёта: serif-заголовок вердикта и
+ * чипы-пилюли исходных данных.
  */
 export const THERMAL_REPORT_CSS = `
 .a2ui-tr {
@@ -19,7 +25,7 @@ export const THERMAL_REPORT_CSS = `
   gap: 12px;
   color: ${tokens.trText};
   box-sizing: border-box;
-  font-size: 0.95rem;
+  font-size: 14px;
 }
 .a2ui-tr__card {
   border-radius: 14px;
@@ -39,9 +45,10 @@ export const THERMAL_REPORT_CSS = `
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 10.5px;
+  line-height: 13px;
+  letter-spacing: 0.21px;
+  font-weight: 500;
   text-transform: uppercase;
 }
 .a2ui-tr__badge--pass { color: ${tokens.success}; }
@@ -57,26 +64,28 @@ export const THERMAL_REPORT_CSS = `
   margin: 10px 0 0;
   font-family: Georgia, 'Times New Roman', serif;
   font-weight: 500;
-  font-size: 1.7rem;
+  font-size: 26px;
   line-height: 1.2;
   color: ${tokens.trText};
 }
 .a2ui-tr__summary {
   margin: 8px 0 0;
   color: ${tokens.trTextMuted};
+  font-size: 13px;
   line-height: 1.45;
 }
 
 /* Заголовок списочной секции («ПРОВЕРКИ», «КОНСТРУКЦИИ») */
 .a2ui-tr__list-label {
   margin: 0 0 10px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 10.5px;
+  line-height: 13px;
+  letter-spacing: 0.21px;
+  font-weight: 500;
   text-transform: uppercase;
   color: ${tokens.trTextMuted};
 }
-.a2ui-tr__rows { display: grid; gap: 8px; }
+.a2ui-tr__rows { display: grid; gap: 10px; }
 .a2ui-tr__row {
   display: flex;
   align-items: center;
@@ -89,8 +98,8 @@ export const THERMAL_REPORT_CSS = `
   background: ${tokens.trSurface};
 }
 .a2ui-tr__row-main { display: grid; gap: 3px; min-width: 0; flex: 1 1 240px; }
-.a2ui-tr__row-title { font-weight: 600; }
-.a2ui-tr__row-detail { color: ${tokens.trTextMuted}; font-size: 0.88rem; }
+.a2ui-tr__row-title { font-weight: 500; line-height: 1.3; }
+.a2ui-tr__row-detail { color: ${tokens.trTextMuted}; font-size: 12.5px; line-height: 1.35; }
 .a2ui-tr__row-side { display: inline-flex; align-items: center; gap: 10px; flex: none; }
 
 /* Статус проверки и чип отклонения */
@@ -98,7 +107,7 @@ export const THERMAL_REPORT_CSS = `
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.88rem;
+  font-size: 12.5px;
   font-weight: 500;
 }
 .a2ui-tr__status--pass { color: ${tokens.success}; }
@@ -107,37 +116,42 @@ export const THERMAL_REPORT_CSS = `
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 .a2ui-tr__deviation--pass { color: ${tokens.success}; }
 .a2ui-tr__deviation--fail { color: ${tokens.danger}; }
 
-/* Кнопки: тёмная пилюля (действие строки) и контурная (исходные данные) */
+/* Кнопки — канон CE: 13px, радиус 9px, без жирности; тёмная — как
+   ce-btn--commit (border transparent + заливка текстовым цветом). */
 .a2ui-tr .a2ui-tr-btn {
   appearance: none;
-  border: none;
   margin: 0;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: ${tokens.trText};
-  color: ${tokens.trSurface};
+  padding: 8px 14px;
+  border-radius: 9px;
+  border: 1px solid ${tokens.trBorder};
+  background: transparent;
+  color: ${tokens.trText};
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 13px;
+  line-height: 13px;
   cursor: pointer;
   white-space: nowrap;
 }
-.a2ui-tr .a2ui-tr-btn--outline {
-  background: ${tokens.trSurface};
-  color: ${tokens.trText};
-  border: 1px solid ${tokens.trBorder};
+.a2ui-tr .a2ui-tr-btn--solid {
+  border-color: transparent;
+  background: ${tokens.trText};
+  color: ${tokens.trSurface};
 }
 .a2ui-tr .a2ui-tr-btn--link {
-  background: transparent;
-  color: ${tokens.trAccent};
   padding: 4px 0;
-  border-radius: 6px;
+  border-color: transparent;
+  color: ${tokens.trAccent};
+}
+.a2ui-tr .a2ui-tr-btn--link:hover {
+  background: transparent;
+  text-decoration: underline;
 }
 
 /* Таблица слоёв */
@@ -146,18 +160,19 @@ export const THERMAL_REPORT_CSS = `
   align-items: baseline;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 4px 14px;
-  padding: 12px 20px;
+  gap: 6px 14px;
+  padding: 13px 20px;
   background: ${tokens.trSurfaceSunken};
   border-bottom: 1px solid ${tokens.trBorder};
 }
-.a2ui-tr__table-title { font-weight: 600; }
-.a2ui-tr__table-meta { color: ${tokens.trTextMuted}; font-size: 0.85rem; }
+.a2ui-tr__table-title { font-size: 14px; line-height: 14px; font-weight: 500; }
+.a2ui-tr__table-meta { color: ${tokens.trTextMuted}; font-size: 12.5px; line-height: 13px; }
 .a2ui-tr__table-scroll { overflow-x: auto; }
 .a2ui-tr__table {
   width: 100%;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
+  font-size: 13px;
 }
 .a2ui-tr__table th,
 .a2ui-tr__table td {
@@ -172,7 +187,7 @@ export const THERMAL_REPORT_CSS = `
   width: 100%;
 }
 .a2ui-tr__table th {
-  font-size: 0.8rem;
+  font-size: 12px;
   font-weight: 500;
   color: ${tokens.trTextMuted};
   border-bottom: 1px solid ${tokens.trBorder};
@@ -181,7 +196,7 @@ export const THERMAL_REPORT_CSS = `
 .a2ui-tr__table tr:last-child td { border-bottom: none; }
 .a2ui-tr__table-footer td {
   background: ${tokens.trSurfaceSunken};
-  font-weight: 600;
+  font-weight: 500;
   white-space: normal;
 }
 
@@ -194,7 +209,7 @@ export const THERMAL_REPORT_CSS = `
   border-radius: 10px;
   background: ${tokens.trSurfaceSunken};
   color: ${tokens.trTextMuted};
-  font-size: 0.88rem;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 .a2ui-tr__note-dot {
@@ -203,7 +218,7 @@ export const THERMAL_REPORT_CSS = `
   border-radius: 50%;
   background: ${tokens.warning};
   flex: none;
-  margin-top: 6px;
+  margin-top: 5px;
 }
 
 /* Исходные данные */
@@ -213,18 +228,19 @@ export const THERMAL_REPORT_CSS = `
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 14px;
-  padding: 12px 14px 12px 20px;
+  padding: 13px 14px 13px 20px;
   background: ${tokens.trSurfaceSunken};
   border-bottom: 1px solid ${tokens.trBorder};
 }
-.a2ui-tr__inputs-title { font-weight: 600; }
+.a2ui-tr__inputs-title { font-size: 14px; line-height: 14px; font-weight: 500; }
 .a2ui-tr__group { display: grid; gap: 8px; }
 .a2ui-tr__group + .a2ui-tr__group { margin-top: 14px; }
 .a2ui-tr__group-label {
   margin: 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 10.5px;
+  line-height: 13px;
+  letter-spacing: 0.21px;
+  font-weight: 500;
   text-transform: uppercase;
   color: ${tokens.trTextMuted};
 }
@@ -237,11 +253,11 @@ export const THERMAL_REPORT_CSS = `
   padding: 6px 12px;
   border: 1px solid ${tokens.trBorder};
   border-radius: 999px;
-  font-size: 0.88rem;
+  font-size: 12.5px;
 }
 .a2ui-tr__group--warning .a2ui-tr__chip { border-style: dashed; }
 .a2ui-tr__chip-label { color: ${tokens.trTextMuted}; }
-.a2ui-tr__chip-value { font-weight: 600; }
+.a2ui-tr__chip-value { font-weight: 500; }
 
 /* Протокол */
 .a2ui-tr__protocol { border-radius: 14px; border: 1px solid ${tokens.trBorder}; background: ${tokens.trSurface}; }
@@ -256,22 +272,22 @@ export const THERMAL_REPORT_CSS = `
 .a2ui-tr__protocol-summary::-webkit-details-marker { display: none; }
 .a2ui-tr__protocol-summary::before {
   content: '›';
-  font-weight: 600;
+  font-weight: 500;
   color: ${tokens.trTextMuted};
   transition: transform 0.15s ease;
   display: inline-block;
 }
 .a2ui-tr__protocol[open] .a2ui-tr__protocol-summary::before { transform: rotate(90deg); }
-.a2ui-tr__protocol-title { font-weight: 600; }
+.a2ui-tr__protocol-title { font-size: 14px; font-weight: 500; }
+.a2ui-tr__protocol-meta { color: ${tokens.trTextMuted}; font-size: 12.5px; }
 /* От корня: сброс .a2ui-tr .a2ui-tr-btn (margin: 0) специфичнее одного класса. */
 .a2ui-tr .a2ui-tr__protocol-download { margin-left: auto; }
-.a2ui-tr__protocol-meta { color: ${tokens.trTextMuted}; font-size: 0.85rem; }
 .a2ui-tr__protocol-content {
   margin: 0;
   padding: 14px 20px;
   border-top: 1px solid ${tokens.trBorder};
   background: ${tokens.trSurfaceSunken};
-  font-size: 0.82rem;
+  font-size: 12px;
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
