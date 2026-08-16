@@ -111,6 +111,11 @@ export type ConstructionsEditorPassportProps = {
   /** «Применить» с изменённым значением. */
   onCommit: (value: number | undefined) => void;
   onCancel: () => void;
+  /**
+   * Каждое изменение черновика формы — для превью Rпр в карточке.
+   * Черновик не коммит: state редактора и action'ы от него не меняются.
+   */
+  onDraftChange?: (value: number | undefined) => void;
 };
 
 /** Режим строки слоя: сводка, форма правки или форма нового слоя. */
@@ -134,4 +139,9 @@ export type ConstructionsEditorLayerRowProps = {
   onCancel: () => void;
   /** «Удалить слой» из формы; у формы нового слоя кнопки нет. */
   onRemove?: () => void;
+  /**
+   * Каждое изменение черновика формы (толщина, λ, материал) — для превью Rпр
+   * в карточке. Черновик не коммит: state редактора от него не меняется.
+   */
+  onDraftChange?: (layer: ConstructionLayer) => void;
 };

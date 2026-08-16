@@ -213,7 +213,7 @@ describe('ConstructionsEditor', () => {
     expect(resolveLayerLambda({...layer, lambdaManual: 0.05}, 'А')).toBe(0.05);
   });
 
-  it('правка в форме слоя попадает в state по «Применить»; до коммита live-Rпр прежний', () => {
+  it('правка в форме слоя пересчитывает чип Rпр мгновенно; state — по «Применить»', () => {
     const {surface} = renderSurface();
     const actions = subscribeActions(surface);
     openCard(/Наружная стена/);
@@ -222,9 +222,11 @@ describe('ConstructionsEditor', () => {
     openLayerRow(/минераловатные/);
     fireEvent.change(getThicknessInputs()[0]!, {target: {value: '10'}});
 
-    // До «Применить» правка живёт только в форме: чип и сводка не тронуты.
-    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    // Чип уже видит черновик (превью), но state не тронут: футер «проходит
+    // 2 из 3» прежний, action'ов нет.
+    expect(screen.getByText('Rпр 1.17 < 3.19')).toBeInTheDocument();
     expect(screen.getByText('проходит 2 из 3')).toBeInTheDocument();
+    expect(actions).toHaveLength(0);
 
     fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
@@ -347,6 +349,8 @@ describe('ConstructionsEditor', () => {
 
       openLayerRow(/минераловатные/);
       fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
+      // Черновик уже виден чипу как превью.
+      expect(screen.queryByText('Rпр 4.09 ≥ 3.19')).not.toBeInTheDocument();
 
       // Клик по другой строке переводит форму туда, правки №2 отброшены.
       openLayerRow(/Фибролит/);
@@ -375,6 +379,8 @@ describe('ConstructionsEditor', () => {
 
       openLayerRow(/Фибролит/);
       fireEvent.change(getThicknessInputs()[0]!, {target: {value: '999'}});
+      // Превью на чипе; «Отмена» вернёт закоммиченное значение.
+      expect(screen.queryByText('Rпр 4.09 ≥ 3.19')).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
 
       expect(screen.getByRole('button', {name: /Фибролит.*30 мм/})).toBeInTheDocument();
@@ -392,6 +398,41 @@ describe('ConstructionsEditor', () => {
 
       expect(layerSummaries()).toHaveLength(4);
       expect(screen.getByRole('button', {name: '+ Слой'})).toBeInTheDocument();
+    });
+  });
+
+  describe('превью Rпр из открытой формы', () => {
+    it('черновик формы «+ Слой» участвует в чипе до «Добавить»', () => {
+      renderSurface();
+      openCard(/Наружная стена/);
+
+      // 48 мм при λ 0.048 — ровно +1.00 к сумме: 4.09 → 5.09.
+      fireEvent.click(screen.getByRole('button', {name: '+ Слой'}));
+      fireEvent.change(getThicknessInputs()[0]!, {target: {value: '48'}});
+      fireEvent.change(screen.getByRole('spinbutton', {name: /λ.*вручную/}), {
+        target: {value: '0.048'},
+      });
+
+      // Чип видит ещё не добавленный слой, список слоёв — нет.
+      expect(screen.getByText('Rпр 5.09 ≥ 3.19')).toBeInTheDocument();
+      expect(layerSummaries()).toHaveLength(4);
+
+      // «Отмена» — слой не добавлен, чип вернулся.
+      fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
+      expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+      expect(layerSummaries()).toHaveLength(4);
+    });
+
+    it('стёртая толщина исключает слой из суммы без NaN', () => {
+      renderSurface();
+      openCard(/Наружная стена/);
+
+      openLayerRow(/минераловатные/);
+      fireEvent.change(getThicknessInputs()[0]!, {target: {value: ''}});
+
+      // Минвата (0.150/0.048 = 3.13) выпала из суммы: 4.09 → 0.96.
+      expect(screen.getByText('Rпр 0.96 < 3.19')).toBeInTheDocument();
+      expect(screen.queryByText(/NaN|Infinity/)).not.toBeInTheDocument();
     });
   });
 
@@ -465,13 +506,14 @@ describe('ConstructionsEditor', () => {
   });
 
   describe('паспортное Rпр', () => {
-    it('«Применить» обновляет значение и live-Rпр; до коммита чип прежний', () => {
+    it('ввод пересчитывает чип мгновенно; «Применить» коммитит значение', () => {
       renderSurface();
       openCard(/Окно двухкамерное/);
 
       openPassportForm();
       fireEvent.change(passportInput(), {target: {value: '0.8'}});
-      expect(screen.getByText('Rпр 0.56 ≥ 0.54')).toBeInTheDocument();
+      // Чип уже показывает превью, значение в state ещё прежнее.
+      expect(screen.getByText('Rпр 0.80 ≥ 0.54')).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
 
@@ -479,12 +521,13 @@ describe('ConstructionsEditor', () => {
       expect(screen.getByText('Rпр 0.80 ≥ 0.54')).toBeInTheDocument();
     });
 
-    it('«Отмена» не оставляет следа', () => {
+    it('«Отмена» не оставляет следа и возвращает чип к закоммиченному', () => {
       renderSurface();
       openCard(/Окно двухкамерное/);
 
       openPassportForm();
       fireEvent.change(passportInput(), {target: {value: '0.8'}});
+      expect(screen.getByText('Rпр 0.80 ≥ 0.54')).toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', {name: 'Отмена'}));
 
       expect(screen.getByText('0.56')).toBeInTheDocument();
