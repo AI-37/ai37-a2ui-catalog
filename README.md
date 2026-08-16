@@ -4,10 +4,10 @@
 # ai37-a2ui-catalog
 
 ## Описание
-Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений. С версии 0.18.0 в ConstructionsEditor правки блока «Условия» автосохраняются черновиком с дебаунсом 500 мс (кнопка «Сохранить» удалена, ГСОП виден всегда); lookup-подсказки умеют многострочные опции со слотами group/title/meta. С версии 0.19.0 pending-навигация «Далее» в ConstructionsEditor раскрывает только целевую карточку, сворачивая остальные (`openIds = {target}`); ручной аккордеон остаётся мульти-open. Чип Rпр карточки конструкции пересчитывается мгновенно по каждой правке открытой формы слоя/нового слоя/паспортного Rпр — до «Применить»/«Добавить».
+Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений. С версии 0.22.0 (аддитивно, без смены версии каталога — остаёмся в v2) в состав добавлен доменный компонент `ThermalReport`: карточный вывод результата теплотехнического расчёта по СП 50.13330 вместо markdown-простыни — вердикт с бейджем и крупным headline, проверки со статусами или список конструкций с чипами отклонений и действиями, таблица слоёв с итоговой строкой, исходные данные чипами по источнику, допущения и свёрнутый «Протокол расчёта» с кнопкой «Скачать». В ConstructionsEditor сохранены прежние механики: автосейв условий с дебаунсом 500 мс, pending-навигация «Далее» с раскрытием одной целевой карточки и мгновенная пересчётка чипа Rпр по черновику форм.
 
 ## Стек
-TypeScript, React 19, Zod, @a2ui/react (overrides: 0.10.1), Vite, Vitest, tsup, tsx, Python 3 + Pydantic, Poetry 2.3.2, Twine, pnpm (>=10), Node >=22. Версия пакетов workspace — 0.19.0. Публикация пакетов — в приватные реестры AI-37 (npm.app.sp-ai.ru и pypi.app.sp-ai.ru). Константа дебаунса автодрафта условий CONDITIONS_DRAFT_DEBOUNCE_MS = 500 мс экспортируется из @ai37/a2ui-catalog-react.
+TypeScript, React 19, Zod, @a2ui/react (overrides: 0.10.1), Vite, Vitest, tsup, tsx, Python 3 + Pydantic, Poetry 2.3.2, Twine, pnpm (>=10), Node >=22. Версия пакетов workspace — 0.22.0. Публикация пакетов — в приватные реестры AI-37 (npm.app.sp-ai.ru и pypi.app.sp-ai.ru). Константа дебаунса автодрафта условий CONDITIONS_DRAFT_DEBOUNCE_MS = 500 мс экспортируется из @ai37/a2ui-catalog-react.
 
 ## Схема работы
 Workspace состоит из пакетов:
@@ -19,17 +19,7 @@ Workspace состоит из пакетов:
 
 Поток данных: схемы → generate-artifacts.ts → catalog.json и component schemas → public/a2ui/catalogs → GitHub Pages. React-рендереры и Pydantic-модели подключаются к тем же компонентам; тесты и демо используют фикстуры.
 
-Fetch-канал подсказок lookup-полей (suggestMode: 'fetch') — debounced same-origin `GET /api/agent-resource?resource=&query=` (resource = referenceId справочника; путь и тип экспортируются из packages/catalog-schemas: `LOOKUP_SUGGEST_ROUTE`, `LookupSuggestResponse`). BFF потребителя проксирует запрос на REST оркестратора, тот резолвит resource в ручку агента-владельца справочника. Ответ 200 — `LookupSuggestResponse`; неизвестный resource — 404 с error-полем (в dev-middleware демо — `{error: "unknown_reference"}`; changelog 0.12.0 фиксирует контрактный код `unknown_resource`).
-
-Опция подсказки (`LookupOption`) может нести необязательные слоты оформления `group` / `title` / `meta` — wire-тип, не zod-схема props (python-зеркало не затронуто). При наличии `title` опция рендерится многострочно: `group` — мелким приглушённым сверху, `title` — основной строкой, `meta` — приглушённой снизу; отсутствующий слот опускается вместе со строкой. Опция без `title` рендерится однострочным `label`, как раньше; `label` остаётся обязательным и самодостаточным — именно он попадает в поле после выбора, в submit уходит `value`. Первое вхождение текущего ввода подсвечивается жирным в каждом слоте (без учёта регистра, `splitFirstMatch` на `toLowerCase().indexOf()`, без RegExp; разметка из данных опции трактуется как текст, `dangerouslySetInnerHTML` не используется).
-
-Хук `useLookupSuggest` дополнительно сообщает `loading` и `queried`: попап открыт с момента, как ввод достиг порога `minChars` (включая паузу debounce), и показывает индикатор «Ищем…» до ответа; завершённый запрос без опций — «Ничего не найдено». Строка состояния живёт вне `role="listbox"` с `role="status"`, на контейнере попапа во время загрузки — `aria-busy`. Отмена предыдущего запроса следующим вводом `loading` не гасит.
-
-Автосейв условий ConstructionsEditor (change `constructions-editor-live-draft`): при заданном `draftAction` правка любого поля блока «Условия» (город, назначение помещений, tв, условия эксплуатации, tот, zот, tн) планирует `draftAction` с дебаунсом `CONDITIONS_DRAFT_DEBOUNCE_MS = 500` мс — серия правок схлопывается в один action после паузы ввода, payload собирается из state на момент отправки (последний ввод побеждает). Структурные правки (add/remove конструкции, коммиты форм слоя/шапки/паспортного Rпр) шлют draft сразу и снимают отложенный; submit отменяет отложенный draft; unmount чистит таймер. Кнопка «Сохранить» и dirty-логика (`conditionsDirty`, `dirty`/`onSave`) удалены; ГСОП рендерится всегда — значение `general.gsop` из последнего снапшота агента либо «—», пересчитанные производные (`general.gsop`, `typeConfigs`) приходят ответным снапшотом на draft, ввод пользователя не затирается. Схема `constructions-editor.ts` не менялась — контракт `draftAction` прежний (`{general, constructions}`).
-
-Pending-навигация «Далее» (change `pending-nav-single-open`): при заполненных обязательных полях условий клик по pending-кнопке раскрывает первую сверху карточку, требующую внимания, и одновременно сворачивает все остальные — `setOpenIds(new Set([target.id]))` вместо `handleToggle`; статус целевой гасится прежним правилом просмотра (`dismissStatusOnView`), action не отправляется. Ручной аккордеон (`handleToggle`) не меняется — мульти-open сохраняется; навигация к незаполненным условиям раскрывает блок условий, не трогая состояния карточек. Схемы и props не менялись.
-
-Мгновенная пересчётка Rпр (change `instant-rpr-recalc`): чип Rпр в шапке карточки считается `computeLiveRpr` не только от закоммиченного `entry`, но и от превью-черновика открытой формы. `LayerForm` (слой edit/new) и `PassportForm` (паспортное Rпр) получили необязательный колбэк `onDraftChange`, который зовётся при каждом изменении черновика (толщина, ручная λ, ввод/выбор материала; для паспорта — изменение значения). Карточка держит `preview` в state и строит `previewEntry`: для edit — подменяет слой по индексу, для new — добавляет черновик в конец `layers`, для passport — подменяет `rprPassport`; чип пересчитывается из `previewEntry`, всё остальное (статусный чип, невалидность, строки-сводки, футер «проходит N из M», черновики агенту) — из закоммиченного `entry`. Превью сбрасывается (`null`) при любом изменении `editingTarget` (открытие, отмена, переключение, коммит); открытие формы без правок чип не меняет. Неполный черновик (стёртая толщина/λ) временно исключает слой из суммы без NaN/Infinity.
+`ThermalReport` зарегистрирован в обоих пакетах: zod-схема `components/thermal-report.ts` (strict-объекты; обязательны `verdict` и `inputs`, режим «одна конструкция / список» определяется по наличию секций без флага; единственное число в props — `deviationPct`, остальное — готовые строки) и рендерер `renderers/thermal-report*.tsx/.ts` (корень, verdict, checks, constructions, inputs, layers-table, protocol, styles, action-button, format-deviation-pct). Кнопки-действия диспатчат агенту `{event: {name, context: payload ?? {}}}` через `context.dispatchAction`; «Протокол расчёта» — нативный `<details>`, свёрнут по умолчанию, контент — markdown моноширинным `<pre>` без рендера, при `downloadFileName` отдаётся клиентским Blob'ом. Стили — `THERMAL_REPORT_CSS` с префиксом `a2ui-tr-`, цвета — токены группы `tr` (INHERITS на общие токены, как `ce`/`le`). Демо содержит два примера (одна конструкция / 7 конструкций), собранные из `fixtures/valid/thermal-report-*.json` через `create-thermal-report-messages.ts`; действия логируются `attachDemoActionLogger`.
 
 ```mermaid
 flowchart LR
@@ -43,26 +33,26 @@ flowchart LR
 ```
 
 ## Структура каталогов
-- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений; dev-middleware мокает fetch-справочники lookup (справочник материалов `sp50-materials` демонстрирует слоты `group`/`title`/`meta`, поиск идёт по label/group/title); логгер черновиков `attach-demo-draft-logger` выводит полный payload draft (`action.context`);
-- packages/catalog-schemas — канонические Zod-схемы, типы и генерация JSON Schema (включая тип `LookupOption` со слотами оформления);
-- packages/catalog-react — React-рендереры компонентов каталога (в т.ч. ConstructionsEditor, LookupCombobox, LookupOptionRow, `conditions-draft-debounce-ms`, split-first-match);
+- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений; dev-middleware мокает fetch-справочники lookup; логгеры черновиков/действий; примеры Thermal Report (single/multi) и помощник `create-thermal-report-messages.ts`;
+- packages/catalog-schemas — канонические Zod-схемы, типы и генерация JSON Schema (включая `components/thermal-report.ts` и регистрацию в `CATALOG_COMPONENT_NAMES`, `constants.ts`, `catalog.ts`, `index.ts`);
+- packages/catalog-react — React-рендереры компонентов каталога (в т.ч. `renderers/thermal-report*.tsx/.ts`, группа токенов `tr` в `tokens.ts`);
 - packages/catalog-python — Pydantic-модели валидации (зеркало zod-схем);
-- fixtures — валидные, невалидные и сквозные фикстуры A2UI-сообщений;
-- tests — тесты (tests/react — Vitest, включая `constructions-editor.test.tsx` с кейсами живого автодрафта, pending-навигации, превью Rпр и `lookup-option-rich-render.test.tsx`; python-часть — Pytest);
-- public/a2ui/catalogs — статические артефакты каталога (catalog.json, JSON Schema компонентов) для GitHub Pages;
-- scripts/install-to-consumer.mjs — установка локальной сборки пакетов в потребителя тарболлами (минуя реестр) через `pnpm run install:consumer`;
+- fixtures — валидные, невалидные и сквозные фикстуры A2UI-сообщений (включая `valid/thermal-report-single.json` и `valid/thermal-report-multi.json`);
+- tests — тесты (tests/react — Vitest, включая `thermal-report.test.tsx`; tests/ts — включая `thermal-report-schema.test.ts`; python-часть — Pytest);
+- public/a2ui/catalogs — статические артефакты каталога (catalog.json, JSON Schema компонентов, включая `components/thermal-report.schema.json`) для GitHub Pages;
+- scripts/install-to-consumer.mjs — установка локальной сборки пакетов в потребителя тарболлами;
 - .github/workflows — CI/CD (pages.yml, ci.yml, cd.yml);
 - .npmrc — scoped-реестр @ai37 и авторизация для npm.app.sp-ai.ru;
-- docs, openspec — документация и design-доки (включая openspec/changes/lookup-option-rich-render, openspec/changes/constructions-editor-live-draft, openspec/changes/pending-nav-single-open и openspec/changes/instant-rpr-recalc).
+- docs, openspec — документация и design-доки (включая openspec/changes/thermal-report и прежние changes).
 
 ## Публичные интерфейсы
 Статический A2UI-каталог, публикуемый на GitHub Pages:
-- catalog.json: https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v1/catalog.json
-- JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v1/components/*.schema.json и аналогично для v2.
+- catalog.json: https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json
+- JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v2/components/*.schema.json (включая `thermal-report.schema.json`) и аналогично для v1.
 
-Отдельных публичных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Внутренний fetch-канал подсказок lookup-полей — same-origin `GET /api/agent-resource?resource=&query=` (resource = id справочника / `field.referenceId`; BFF потребителя проксирует на REST оркестратора). В dev-middleware apps/demo неизвестный resource — 404 `{error: "unknown_reference"}` (changelog 0.12.0 объявляет контрактный код `unknown_resource`). Тип `LookupOption` fetch-канала — необязательные слоты `group` / `title` / `meta`; разбор ответа `parseLookupOptions` фильтрует массив и сохраняет все доп. поля целиком (контракт `LookupOption & Record<string, unknown>`). npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
+Отдельных публичных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Внутренний fetch-канал подсказок lookup-полей — same-origin `GET /api/agent-resource?resource=&query=` (resource = id справочника / `field.referenceId`; BFF потребителя проксирует на REST оркестратора). В dev-middleware apps/demo неизвестный resource — 404 `{error: "unknown_reference"}` (changelog 0.12.0 объявляет контрактный код `unknown_resource`). npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
 
-В составе @ai37/a2ui-catalog-react — рендерер ConstructionsEditor (редактор конструкций): наружу один submit с полным состоянием `{general, constructions}` (без клиентской блокировки); при заданном пропе `draftAction` черновик с тем же payload уходит автоматически — структурные коммиты (add/remove конструкции, «Применить»/«Добавить»/«Удалить слой» формы слоя, «Сохранить» формы шапки, «Применить» формы паспортного Rпр) сразу, правки полей блока «Условия» с дебаунсом `CONDITIONS_DRAFT_DEBOUNCE_MS` (500 мс). Кнопки сохранения условий нет; ввод внутри незакоммиченной формы и «Отмена» не шлют ничего, кроме превью-пересчёта чипа Rпр: чип карточки пересчитывается мгновенно по черновику открытой формы слоя/нового слоя/паспортного Rпр (превью в state карточки, колбэк `onDraftChange`), при этом до коммита state редактора, строки-сводки, статусные чипы, футер «проходит N из M» и `draftAction` остаются на закоммиченном состоянии. При заданном пропе `pendingLabel` кнопка двухрежимная: пока условия не заполнены или есть карточки, требующие внимания, клик — навигация без action'а (раскрыть условия либо первую проблемную карточку); навигация к карточке раскрывает только целевую, остальные сворачиваются (`openIds = {target}`), ручной аккордеон остаётся мульти-open. Submit и немедленный draft отменяют отложенный черновик; unmount чистит таймер. ГСОП показывается всегда: значение `general.gsop` из последнего снапшота агента либо «—»; пересчитанные производные приходят ответом агента на draft, ввод не затирается. Слои — строки-сводки («№ · материал · толщина · λ»), форма правки одна на редактор; шапка раскрытой карточки по умолчанию — режим чтения (тип с разновидностью и название) с кнопкой «Изменить», правка — в форме с кнопками «Сохранить»/«Отмена»; «Rпр по паспорту» для типов без слоёв — отдельный элемент «значение + Изменить» с формой «Применить»/«Отмена» (незаданное значение показано предупреждающим цветом «не задано»). Все формы (слой, шапка, паспортное Rпр) делят одно место на редактор: открытие любой закрывает текущую с отбросом несохранённых правок. Невалидные конструкции подсвечиваются пометкой «! проверить» — индикация, не блок.
+В составе каталога v2 — компонент `ThermalReport` (read-mostly): секции `verdict` (обязателен), `checks`/`layersTable` (режим одной конструкции), `constructions`/`excluded`/`assumptions` (режим списка), `inputs` (обязателен), `protocol`. Действия — объект `{name, label, payload?}`; имя в схему не зашито, в фикстурах канонические `report_fix_construction` (payload `{constructionId}`), `report_edit_inputs`, `report_restore_excluded`. Чип отклонения форматируется самим рендерером по знаку `deviationPct`: «−23,3 %» / «+0,6 %» (типографский минус, десятичная запятая, один знак). Группа исходных данных с `tone: 'warning'` («принято системой — проверьте») отличается пунктирными чипами, предупреждающим заголовком и `note`. Протокол свёрнут по умолчанию, «Скачать» при `downloadFileName` отдаёт `content` Blob'ом, не раскрывая протокол.
 
 ## Зависимости в экосистеме
 ### Зависит от
@@ -74,17 +64,17 @@ flowchart LR
 - внешние сервисы (Authentik, LiteLLM, БД, Redis, S3) в рантайме не используются.
 
 ### От него зависят
-По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений). Рендерер ConstructionsEditor рассчитан на агента teplo-calc (приём submit/draftAction с состоянием конструкций); по proposal `constructions-editor-live-draft` потребители spai-teplo-calc, spai-chat-backend и spai-ui — без изменений. Чтобы слоты `group`/`title`/`meta` доехали до рендерера, агент-справочник (например, spai-thermal-calc-agent) должен начать их отдавать; до этого рендер деградирует в однострочный `label`.
+По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений). Рендерер ConstructionsEditor рассчитан на агента teplo-calc; proposal `constructions-editor-live-draft` отмечает потребителей spai-teplo-calc, spai-chat-backend и spai-ui — без изменений. Для слотов `group`/`title`/`meta` lookup-опций агент-справочник (например, spai-thermal-calc-agent) должен начать их отдавать; до этого рендер деградирует в однострочный `label`. Компонент `ThermalReport` рассчитан на агента spai-teplo-calc как эмитента отчёта (парный change `thermal-report` там) и на spai-ui как потребителя (bump schemas+react после publish).
 
 ## Конфигурация
 Явного .env.example нет. Используются переменные окружения:
 - AI37_NPM_TOKEN — токен авторизации для приватного npm-реестра npm.app.sp-ai.ru (задан в .npmrc и в CI/CD);
 - AI37_PYPI_TOKEN — токен (password) для публикации Python-пакета через Twine на pypi.app.sp-ai.ru (в cd.yml).
 
-Скоуп @ai37 закреплён за npm.app.sp-ai.ru в .npmrc (always-auth=true). Версии пакетов синхронизируются через `pnpm run version:bump <version>`; каждый PR также обновляет CHANGELOG.md. Доступные npm-скрипты: pnpm run build, typecheck, test, test:ts, test:python, export:schemas, export:public, verify:public, lint, demo, version:bump, install:consumer. Константа `CONDITIONS_DRAFT_DEBOUNCE_MS = 500` мс экспортируется из @ai37/a2ui-catalog-react (не env; используется тестами и хостами для единого окна дебаунса). Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml. Тематизация рендереров — через CSS-переменные (tokens.ts), включая токен --a2ui-color-warning для подсветки невалидных конструкций.
+Скоуп @ai37 закреплён за npm.app.sp-ai.ru в .npmrc (always-auth=true). Версии пакетов синхронизируются через `pnpm run version:bump <version>`; каждый PR также обновляет CHANGELOG.md. Доступные npm-скрипты: pnpm run build, typecheck, test, test:ts, test:python, export:schemas, export:public, verify:public, lint, demo, version:bump, install:consumer. Константа `CONDITIONS_DRAFT_DEBOUNCE_MS = 500` мс экспортируется из @ai37/a2ui-catalog-react (не env; используется тестами и хостами для единого окна дебаунса). Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml. Тематизация рендереров — через CSS-переменные (tokens.ts), включая токены группы `tr` и общие статусные danger/success/warning для ThermalReport.
 
 ## Данные и хранилища
-БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2. Фикстуры: fixtures/valid, fixtures/invalid, fixtures/messages.
+БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2 (в v2 добавлен `components/thermal-report.schema.json`; catalog.json перегенерирован). Фикстуры: fixtures/valid (включая thermal-report-single.json, thermal-report-multi.json), fixtures/invalid, fixtures/messages.
 
 ## Быстрый старт (локально)
 Установка зависимостей:
@@ -92,18 +82,18 @@ flowchart LR
 - `pnpm install` — зависимости workspace (pnpm >= 10, Node >= 22);
 - `poetry -C packages/catalog-python install` — Python-пакет ai37-a2ui-catalog.
 
-.env.example отсутствует — других env-переменных нет. Отдельного health-check нет; smoke-проверка после установки — `pnpm run test`. Демо-приложение: `pnpm run demo` (Vite + dev-middleware с мок-справочниками) для ручной проверки A2UI-сообщений; в демо можно набрать «кир» при подключённом справочнике материалов и увидеть индикатор, многострочные опции с подсвеченным «Кир». Локальная проверка в потребителе без публикации: `pnpm run install:consumer [путь]` (по умолчанию ../spai-ui) — собирает тарболлы пакетов и ставит их в consumer через npm install --no-save.
+.env.example отсутствует — других env-переменных нет. Отдельного health-check нет; smoke-проверка после установки — `pnpm run test`. Демо-приложение: `pnpm run demo` (Vite + dev-middleware с мок-справочниками) для ручной проверки A2UI-сообщений; в демо доступны примеры Thermal Report — одна конструкция и список из 7 конструкций (действия видны в консоли). Локальная проверка в потребителе без публикации: `pnpm run install:consumer [путь]` (по умолчанию ../spai-ui) — собирает тарболлы пакетов и ставит их в consumer через npm install --no-save.
 
 ## Как запускать тесты
 Предварительно: `pnpm install` и `poetry -C packages/catalog-python install`.
 - `pnpm run test` — vitest + pytest;
-- `pnpm run test:ts` — только TypeScript/React-тесты (включая constructions-editor.test.tsx, lookup-option-rich-render.test.tsx, parse-lookup-options.test.ts);
+- `pnpm run test:ts` — только TypeScript/React-тесты (включая constructions-editor.test.tsx, lookup-option-rich-render.test.tsx, thermal-report.test.tsx, thermal-report-schema.test.ts, parse-lookup-options.test.ts);
 - `pnpm run test:python` — только Python-тесты;
 - `pnpm run lint` — typecheck.
 
 ## Деплой
 GitHub Actions:
-- .github/workflows/pages.yml публикует статические артефакты на GitHub Pages;
+- .github/workflows/pages.yml публикует статические артефакты (включая обновлённые v2 с thermal-report.schema.json) на GitHub Pages;
 - .github/workflows/ci.yml — CI-проверки (Reuse CI), при pnpm install используется AI37_NPM_TOKEN;
 - .github/workflows/cd.yml — CD на push тегов v* или workflow_dispatch:
   - publish_npm: pnpm build и публикация @ai37/a2ui-catalog-* в приватный реестр https://npm.app.sp-ai.ru/ (токен AI37_NPM_TOKEN);
@@ -115,24 +105,15 @@ GitHub Actions:
 - ecosystem/v2/10-agui-protocol.md — протокол AG-UI/A2UI, в контексте которого существует каталог;
 - docs/theming.md;
 - docs/initial-plan.md;
-- openspec/changes/constructions-editor-live-draft/design.md;
-- openspec/changes/constructions-editor-live-draft/proposal.md;
-- openspec/changes/constructions-editor-live-draft/specs/constructions-editor-draft/spec.md;
-- openspec/changes/constructions-editor-live-draft/tasks.md;
-- openspec/changes/lookup-option-rich-render/design.md;
-- openspec/changes/lookup-option-rich-render/proposal.md;
-- openspec/changes/lookup-option-rich-render/specs/lookup-option-rich-render/spec.md;
-- openspec/changes/lookup-option-rich-render/specs/form-card-lookup-fetch-mode/spec.md;
+- openspec/changes/constructions-editor-live-draft/design.md, proposal.md, specs/constructions-editor-draft/spec.md, tasks.md;
+- openspec/changes/lookup-option-rich-render/design.md, proposal.md, specs/lookup-option-rich-render/spec.md, specs/form-card-lookup-fetch-mode/spec.md;
 - openspec/changes/form-card-dispatch-action/design.md;
-- openspec/changes/pending-nav-single-open/design.md;
-- openspec/changes/pending-nav-single-open/proposal.md;
-- openspec/changes/pending-nav-single-open/specs/constructions-editor-pending-nav/spec.md;
-- openspec/changes/pending-nav-single-open/tasks.md;
-- openspec/changes/instant-rpr-recalc/design.md;
-- openspec/changes/instant-rpr-recalc/proposal.md;
-- openspec/changes/instant-rpr-recalc/specs/constructions-editor-inline-layers/spec.md;
-- openspec/changes/instant-rpr-recalc/specs/constructions-editor-rpr-preview/spec.md;
-- openspec/changes/instant-rpr-recalc/tasks.md.
+- openspec/changes/pending-nav-single-open/design.md, proposal.md, specs/constructions-editor-pending-nav/spec.md, tasks.md;
+- openspec/changes/instant-rpr-recalc/design.md, proposal.md, specs/constructions-editor-inline-layers/spec.md, specs/constructions-editor-rpr-preview/spec.md, tasks.md;
+- openspec/changes/thermal-report/design.md;
+- openspec/changes/thermal-report/proposal.md;
+- openspec/changes/thermal-report/specs/thermal-report-component/spec.md;
+- openspec/changes/thermal-report/tasks.md.
 <!-- ai37:card:end -->
 
 <!-- Ниже — только уникальный человеческий контекст (замысел, инварианты, грабли).
