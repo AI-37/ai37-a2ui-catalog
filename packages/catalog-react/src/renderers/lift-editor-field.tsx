@@ -1,65 +1,36 @@
 import React from 'react';
-import {controlStyle, fieldLabelStyle, fieldStyle} from './shared';
-import {tokens} from './tokens';
+import {LiftEditorSourceNote} from './lift-editor-source-note';
 import type {LiftEditorFieldProps} from './lift-editor.types';
 
 let comboListSeq = 0;
 
 /**
- * Контрол одного поля редактора. `combo` — свободный ввод с подсказками ряда
- * (Решение 6 design.md): значение вне `options` принимается как есть, ряд ГОСТ
- * здесь подсказка, а не ограничение. `lookup` в редакторе не используется
- * (справочники — non-goal change'а) и рендерится как обычный текст.
+ * Контрол одного поля редактора. `combo` — свободный ввод с подсказками ряда:
+ * значение вне `options` принимается как есть, ряд ГОСТ здесь подсказка, а не
+ * ограничение. `lookup` в редакторе не используется и рендерится как текст.
  *
- * `onCommit` зовётся на `blur`, только если значение отличается от значения на
- * момент `focus` (Решение 3 design.md): проход по форме табом черновиков не
- * порождает.
+ * Под контролом — подпись: источник значения (если поле не правлено), иначе
+ * `hint` поля. Blur-триггера черновика больше нет: любая правка планирует
+ * отправку дебаунсом в корне (Решение 6 design lift-editor-sections-responsive).
  */
-export function LiftEditorField({
-  field,
-  value,
-  options,
-  missing,
-  onChange,
-  onCommit,
-}: LiftEditorFieldProps) {
+export function LiftEditorField({field, value, options, missing, source, onChange}: LiftEditorFieldProps) {
   // datalist привязывается по id — он должен пережить перерисовки поля.
   const listId = React.useMemo(() => `lift-editor-combo-${(comboListSeq += 1)}`, []);
   const text = value === undefined || value === null ? '' : String(value);
-  const focusedText = React.useRef<string | null>(null);
-
-  // Значение на фокусе, а не последний отправленный черновик: единица работы —
-  // редактирование поля, глубокое сравнение документа тут ничего не добавляет.
-  const commitProps = {
-    onFocus: () => {
-      focusedText.current = text;
-    },
-    onBlur: () => {
-      const before = focusedText.current;
-      focusedText.current = null;
-      if (before !== null && before !== text) onCommit?.();
-    },
-  };
-
-  // Целиком `border`, а не `borderColor`: смешивать shorthand с частью
-  // свойства нельзя — React ругается и снятие подсветки работает через раз.
-  const invalidStyle: React.CSSProperties = missing
-    ? {border: `1px solid ${tokens.danger}`, background: tokens.surfaceWarm}
-    : {};
+  const controlClass = `a2ui-le-control${missing ? ' a2ui-le-control--missing' : ''}`;
 
   return (
-    <label style={fieldStyle}>
-      <span style={fieldLabelStyle}>
+    <label className="a2ui-le-field">
+      <span className="a2ui-le-field__label">
         {field.label}
-        {field.required ? <span style={{color: tokens.danger}}> *</span> : null}
+        {field.required ? <span aria-hidden="true"> *</span> : null}
       </span>
       {field.type === 'select' ? (
         <select
           name={field.name}
           value={text}
           onChange={event => onChange(event.target.value)}
-          {...commitProps}
-          style={{...controlStyle, ...invalidStyle}}
+          className={controlClass}
         >
           <option value="">— выберите —</option>
           {options.map(option => (
@@ -74,8 +45,6 @@ export function LiftEditorField({
           name={field.name}
           checked={value === true || value === 'true'}
           onChange={event => onChange(event.target.checked)}
-          {...commitProps}
-          style={{justifySelf: 'start'}}
         />
       ) : field.type === 'combo' ? (
         <>
@@ -86,8 +55,7 @@ export function LiftEditorField({
             value={text}
             placeholder={field.placeholder}
             onChange={event => onChange(event.target.value)}
-            {...commitProps}
-            style={{...controlStyle, ...invalidStyle}}
+            className={controlClass}
           />
           <datalist id={listId}>
             {options.map(option => (
@@ -102,12 +70,13 @@ export function LiftEditorField({
           value={text}
           placeholder={field.placeholder}
           onChange={event => onChange(event.target.value)}
-          {...commitProps}
-          style={{...controlStyle, ...invalidStyle}}
+          className={controlClass}
         />
       )}
-      {field.hint ? (
-        <span style={{fontSize: '0.78rem', color: tokens.textSubtle}}>{field.hint}</span>
+      {source !== undefined ? (
+        <LiftEditorSourceNote source={source} />
+      ) : field.hint ? (
+        <span className="a2ui-le-caption">{field.hint}</span>
       ) : null}
     </label>
   );

@@ -5779,7 +5779,7 @@
       }
     },
     "LiftEditor": {
-      "description": "A tabbed whole-screen editor for a lift (elevator) calculation document: one building tab plus a variable number of lift tabs, or a single lift-group tab, depending on the calculation method. The user switches tabs, adds and removes lifts, and switches the calculation method entirely on the client — every method config, option row and derived-value table is preloaded in props — then submits the whole document ({method, building, lifts}) back to the agent in a single action. Fields support free text entry with normative-row hints (combo), option lists driven by another field, declarative dependent values, and a collapsible group for defaulted parameters.",
+      "description": "A single-screen editor for a lift (elevator) calculation document: a card header with the calculation-method switcher (\"GOST · building kind\"), a collapsible building section on top and lift sections below it (or a single lift-group section, depending on the method). Collapsed sections show a live summary line built from current values; a two-mode footer button navigates to the next incomplete/unreviewed section (\"Next\") and turns into submit once the document has been walked through. Everything happens on the client — every method config, option row and derived-value table is preloaded in props — and the whole document ({method, building, lifts}) goes back to the agent in a single action. Optional provenance blocks (buildingSources/liftSources) caption fields with where their values came from; edits are auto-saved as debounced drafts when draftAction is set. Fields support free text entry with normative-row hints (combo), option lists driven by another field, declarative dependent values, and a collapsible summarised group for defaulted parameters.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/lift-editor.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/LiftEditor",
@@ -5874,6 +5874,11 @@
                   },
                   "advanced": {
                     "type": "boolean"
+                  },
+                  "shortLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
                   },
                   "hint": {
                     "type": "string",
@@ -6041,6 +6046,11 @@
                           "advanced": {
                             "type": "boolean"
                           },
+                          "shortLabel": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                          },
                           "hint": {
                             "type": "string",
                             "minLength": 1,
@@ -6189,6 +6199,11 @@
                           "advanced": {
                             "type": "boolean"
                           },
+                          "shortLabel": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                          },
                           "hint": {
                             "type": "string",
                             "minLength": 1,
@@ -6250,6 +6265,11 @@
                       ]
                     },
                     "liftTabLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "buildingKindLabel": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 80
@@ -6405,6 +6425,76 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120
+              },
+              "headerTitle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "headerContext": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "pendingLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "buildingSources": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "project",
+                        "question",
+                        "suggested",
+                        "default"
+                      ]
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "source"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "liftSources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
               }
             },
             "required": [

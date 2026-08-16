@@ -4,6 +4,50 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.21.0] - 2026-08-16
+
+### Added
+
+- Новые опциональные props схемы `LiftEditor` (change
+  `lift-editor-sections-responsive`), python-зеркала синхронны: `headerTitle` /
+  `headerContext` (шапка карточки), `pendingLabel` (двухрежимная кнопка),
+  `buildingSources` / `liftSources` (источники значений полей,
+  `{source: project|question|suggested|default, note?}` — как `generalSources`
+  теплотеха), `methodConfigs[].buildingKindLabel` (тип здания для текста шапки)
+  и `field.shortLabel` (подпись поля в строке-сводке). Без новых props
+  компонент рисует прежний документ — обратная совместимость эмитентов
+  сохранена, `CATALOG_VERSION` v2 не менялся.
+- Экспорт `LIFT_DRAFT_DEBOUNCE_MS` (500 мс) из `@ai37/a2ui-catalog-react` —
+  окно дебаунса live-черновика для тестов и хостов.
+
+### Changed
+
+- **BREAKING (визуально)** `LiftEditor` — один экран из сворачиваемых секций
+  вместо вкладок: секция «Здание» сверху, ниже секции «Лифт 1…N» /
+  «Лифтовая группа» со строками-сводками из живых значений (`shortLabel ??
+  name`); блок «Параметры по умолчанию» — тем же баннером со сводкой принятых
+  значений. Переключатель методики уехал в шапку карточки текстом
+  «gostLabel · тип здания»; `methodField` больше не рендерится полем секции
+  (в схеме остался). При `pendingLabel` кнопка подвала — «Далее»/«Рассчитать»:
+  навигация по незаполненным и непросмотренным секциям вместо `disabled`.
+- Live-автосейв `LiftEditor` по образцу теплотеха: правка любого поля —
+  debounce 500 мс, структурные действия (add/remove лифта, смена методики,
+  «Далее») — немедленно с отменой отложенного; submit гасит отложенный
+  черновик; дедуп по содержимому сохранён. Триггеры «смена вкладки» и «blur
+  изменённого поля» удалены вместе с вкладками. Payload действий не менялся.
+- Рендереры `LiftEditor` переехали с инлайновых стилей на инжектируемый
+  CSS-слой (`a2ui-le-*`, токены `--a2ui-color-le-*`): корень —
+  `container-type: inline-size`, сетки полей — две колонки от 560px по ширине
+  контейнера, одна — ниже; `FIELD_COLUMN_WIDTH` в `LiftEditor` не применяется.
+
+### Removed
+
+- `lift-editor-tabs.tsx` и `pick-initial-lift-tab.ts` — вкладок больше нет;
+  начальное состояние выбирает первую секцию с незаполненными обязательными
+  полями (`pick-initial-open-section`).
+- Демо-прототип `apps/demo/src/lift-sections-preview` — витрина показывает
+  настоящий `LiftEditor` (обе методики, шапка, provenance, live-draft-логгер).
+
 ## [0.19.0] - 2026-08-15
 
 ### Changed

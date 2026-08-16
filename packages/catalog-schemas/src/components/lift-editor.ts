@@ -1,6 +1,21 @@
 import {z} from 'zod';
+import {constructionsFieldSourceSchema} from './constructions-editor';
 import {formFieldBaseSchema} from './form-card';
 import {type CatalogComponentDefinition} from '../types';
+
+/**
+ * Источник значения поля — тот же контракт, что `generalSources` теплотеха:
+ * словарь словоформ у рендереров общий, поэтому видам источника расходиться
+ * нельзя — схема одна на оба компонента, а не копия.
+ */
+export const liftEditorFieldSourceSchema = constructionsFieldSourceSchema;
+
+// Источники по именам полей одного экрана (здания или лифта). Параллельный
+// блок, а не обёртка над значениями: payload submit'а не меняется.
+export const liftEditorSectionSourcesSchema = z.record(
+  z.string(),
+  liftEditorFieldSourceSchema,
+);
 
 // Режим лифтов методики: перечень вкладок «Лифт 1…N» с add/remove либо одна
 // вкладка лифтовой группы (число лифтов в ней — обычное поле здания).
@@ -21,6 +36,9 @@ export const liftEditorFieldSchema = formFieldBaseSchema
     type: z.enum(['text', 'number', 'select', 'boolean', 'lookup', 'combo']),
     // Поле с осмысленным значением по умолчанию — под экспандер.
     advanced: z.boolean().optional(),
+    // Подпись поля в строке-сводке свёрнутой секции («Vн», «H₀»); без неё
+    // сводка берёт `name`.
+    shortLabel: z.string().min(1).max(40).optional(),
     hint: z.string().min(1).max(160).optional(),
     // Пояснение к варианту ряда («1» → «h 1.5; t123 13.5»); в submit уходит
     // само значение, не текст.
@@ -87,8 +105,11 @@ export const liftEditorMethodConfigSchema = z
     liftTitle: z.string().min(1).max(120),
     liftFields: z.array(liftEditorFieldSchema).min(1),
     liftsMode: liftsModeSchema,
-    // 'Лифт' → «Лифт 1»; в режиме группы — подпись единственной вкладки.
+    // 'Лифт' → «Лифт 1»; в режиме группы — подпись единственной секции.
     liftTabLabel: z.string().min(1).max(80),
+    // Тип здания для текста шапки «gostLabel · тип», когда у ветки нет поля
+    // `buildingType` («жилое здание» для 52941).
+    buildingKindLabel: z.string().min(1).max(80).optional(),
     maxLifts: z.number().int().min(1).max(16).optional(),
     dependentRules: z.array(liftEditorDependentRuleSchema).max(8).optional(),
   })
@@ -115,6 +136,18 @@ export const liftEditorPropsSchema = z
     // Имя action'а автосохранения черновика. Необязательный: без него компонент
     // ведёт себя как раньше — наружу уходит только submit.
     draftAction: z.string().min(1).max(120).optional(),
+    // Шапка карточки: заголовок слева, контекст и переключатель методики
+    // справа. Без `headerTitle` шапки нет — переключатель падает над секции.
+    headerTitle: z.string().min(1).max(120).optional(),
+    headerContext: z.string().min(1).max(200).optional(),
+    // Подпись кнопки-навигации «Далее»: пока есть незаполненные обязательные
+    // поля или непросмотренные секции, кнопка ведёт по секциям и не шлёт
+    // действий. Без пропа кнопка блокируется, как раньше.
+    pendingLabel: z.string().min(1).max(80).optional(),
+    // Источники значений полей — только подписи под контролами; ничего не
+    // блокируют и в payload не уходят. `liftSources` — по индексам лифтов.
+    buildingSources: liftEditorSectionSourcesSchema.optional(),
+    liftSources: z.array(liftEditorSectionSourcesSchema).optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -158,6 +191,8 @@ export const liftEditorPropsSchema = z
   });
 
 export type LiftsMode = z.infer<typeof liftsModeSchema>;
+export type LiftEditorFieldSource = z.infer<typeof liftEditorFieldSourceSchema>;
+export type LiftEditorSectionSources = z.infer<typeof liftEditorSectionSourcesSchema>;
 export type LiftEditorFieldScope = z.infer<typeof liftEditorFieldScopeSchema>;
 export type LiftEditorField = z.infer<typeof liftEditorFieldSchema>;
 export type LiftEditorDependentRule = z.infer<typeof liftEditorDependentRuleSchema>;
@@ -168,6 +203,6 @@ export const liftEditorDefinition: CatalogComponentDefinition<typeof liftEditorP
   name: 'LiftEditor',
   slug: 'lift-editor',
   description:
-    'A tabbed whole-screen editor for a lift (elevator) calculation document: one building tab plus a variable number of lift tabs, or a single lift-group tab, depending on the calculation method. The user switches tabs, adds and removes lifts, and switches the calculation method entirely on the client — every method config, option row and derived-value table is preloaded in props — then submits the whole document ({method, building, lifts}) back to the agent in a single action. Fields support free text entry with normative-row hints (combo), option lists driven by another field, declarative dependent values, and a collapsible group for defaulted parameters.',
+    'A single-screen editor for a lift (elevator) calculation document: a card header with the calculation-method switcher ("GOST · building kind"), a collapsible building section on top and lift sections below it (or a single lift-group section, depending on the method). Collapsed sections show a live summary line built from current values; a two-mode footer button navigates to the next incomplete/unreviewed section ("Next") and turns into submit once the document has been walked through. Everything happens on the client — every method config, option row and derived-value table is preloaded in props — and the whole document ({method, building, lifts}) goes back to the agent in a single action. Optional provenance blocks (buildingSources/liftSources) caption fields with where their values came from; edits are auto-saved as debounced drafts when draftAction is set. Fields support free text entry with normative-row hints (combo), option lists driven by another field, declarative dependent values, and a collapsible summarised group for defaulted parameters.',
   schema: liftEditorPropsSchema,
 };

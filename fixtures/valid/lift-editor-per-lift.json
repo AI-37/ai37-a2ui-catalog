@@ -60,14 +60,16 @@
             "label": "gammaUp — коэф. заполнения при подъёме",
             "type": "number",
             "defaultValue": 0.8,
-            "advanced": true
+            "advanced": true,
+            "shortLabel": "γ↑"
           },
           {
             "name": "gammaDown",
             "label": "gammaDown — коэф. заполнения при спуске",
             "type": "number",
             "defaultValue": 0.8,
-            "advanced": true
+            "advanced": true,
+            "shortLabel": "γ↓"
           }
         ],
         "liftTitle": "Параметры лифта",
@@ -105,19 +107,22 @@
               "2.5": "h 6; t123 14"
             },
             "defaultValue": "1",
-            "hint": "ряд Прил. А — подсказка; своё значение тоже можно (h/t123 тогда вручную)"
+            "hint": "ряд Прил. А — подсказка; своё значение тоже можно (h/t123 тогда вручную)",
+            "shortLabel": "Vн"
           },
           {
             "name": "H0",
             "label": "H0 — отметка нижней остановки от 0,000, м",
             "type": "number",
-            "required": true
+            "required": true,
+            "shortLabel": "H₀"
           },
           {
             "name": "Nn",
             "label": "Nn — этажей без пользования лифтом (0 — все)",
             "type": "number",
-            "required": true
+            "required": true,
+            "shortLabel": "Nн"
           },
           {
             "name": "h",
@@ -141,7 +146,8 @@
             "type": "number",
             "required": true,
             "defaultValue": 1.5,
-            "advanced": true
+            "advanced": true,
+            "shortLabel": "Δt"
           }
         ],
         "liftsMode": "per-lift",
@@ -194,7 +200,8 @@
             ],
             "onNoMatch": "keep"
           }
-        ]
+        ],
+        "buildingKindLabel": "жилое здание"
       },
       {
         "method": "34758",
@@ -213,7 +220,8 @@
               "Жилое"
             ],
             "defaultValue": "Офис",
-            "hint": "выбирает нормативные ряды Прил. Е; состав формы не меняет"
+            "hint": "выбирает нормативные ряды Прил. Е; состав формы не меняет",
+            "shortLabel": "тип"
           },
           {
             "name": "A",
@@ -231,7 +239,8 @@
             "name": "Nl",
             "label": "Nl — число лифтов в группе",
             "type": "number",
-            "required": true
+            "required": true,
+            "shortLabel": "Nл"
           },
           {
             "name": "hf",
@@ -287,7 +296,8 @@
                 ]
               }
             },
-            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный"
+            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный",
+            "shortLabel": "дверь"
           },
           {
             "name": "Vn",
@@ -320,14 +330,16 @@
                 ]
               }
             },
-            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный"
+            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный",
+            "shortLabel": "Vн"
           },
           {
             "name": "tOst",
             "label": "tOst — время на остановку, с",
             "type": "number",
             "required": true,
-            "hint": "авто по Прил. Е (тип здания × doorWidth × Vn); вне таблицы — вручную"
+            "hint": "авто по Прил. Е (тип здания × doorWidth × Vn); вне таблицы — вручную",
+            "shortLabel": "tост"
           },
           {
             "name": "Pk",
@@ -825,6 +837,30 @@
         "t123": 13.5,
         "dt": 1.5
       }
+    ],
+    "headerTitle": "Параметры расчёта",
+    "headerContext": "Проект «ЖК Северный, к.3»",
+    "pendingLabel": "Далее",
+    "buildingSources": {
+      "N": {
+        "source": "question",
+        "note": "из вашего вопроса"
+      },
+      "A": {
+        "source": "question"
+      }
+    },
+    "liftSources": [
+      {
+        "Q": {
+          "source": "suggested",
+          "note": "предложено по классу здания"
+        },
+        "Vn": {
+          "source": "suggested"
+        }
+      },
+      {}
     ]
   }
 }

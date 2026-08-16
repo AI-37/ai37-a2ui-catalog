@@ -20,6 +20,13 @@ export function shiftTouchedAfterRemove(
     }
 
     const index = Number(keyIndex);
+    // Нечисловой сегмент — ключ поля здания (`building-touched-key`): удаление
+    // лифта его не касается.
+    if (Number.isNaN(index)) {
+      next.add(key);
+      continue;
+    }
+
     if (index === removedIndex) continue;
 
     next.add(liftTouchedKey(method, index > removedIndex ? index - 1 : index, rest.join('|')));

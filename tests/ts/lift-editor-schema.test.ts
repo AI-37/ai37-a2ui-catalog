@@ -125,6 +125,109 @@ describe('lift-editor schema', () => {
     expect(liftEditorPropsSchema.safeParse({...props, draftAction: ''}).success).toBe(false);
   });
 
+  it('шапка, pendingLabel и подписи сводки опциональны и валидируются', () => {
+    const {props} = readFixture('valid', 'lift-editor-per-lift.json');
+    const [first, ...rest] = props.methodConfigs;
+
+    // Обратная совместимость: без единого нового пропа схема проходит.
+    const {
+      headerTitle: _h,
+      headerContext: _c,
+      pendingLabel: _p,
+      buildingSources: _b,
+      liftSources: _l,
+      ...legacy
+    } = props as Record<string, unknown> as LiftEditorProps;
+    expect(liftEditorPropsSchema.safeParse(legacy).success).toBe(true);
+
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        headerTitle: 'Параметры расчёта',
+        headerContext: 'Проект «ЖК Северный, к.3»',
+        pendingLabel: 'Далее',
+      }).success,
+    ).toBe(true);
+    expect(liftEditorPropsSchema.safeParse({...props, pendingLabel: ''}).success).toBe(false);
+    expect(liftEditorPropsSchema.safeParse({...props, headerTitle: ''}).success).toBe(false);
+
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        methodConfigs: [{...first!, buildingKindLabel: 'жилое здание'}, ...rest],
+      }).success,
+    ).toBe(true);
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        methodConfigs: [
+          {
+            ...first!,
+            liftFields: [
+              {...first!.liftFields[0]!, shortLabel: 'Q'},
+              ...first!.liftFields.slice(1),
+            ],
+          },
+          ...rest,
+        ],
+      }).success,
+    ).toBe(true);
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        methodConfigs: [
+          {
+            ...first!,
+            liftFields: [
+              {...first!.liftFields[0]!, shortLabel: ''},
+              ...first!.liftFields.slice(1),
+            ],
+          },
+          ...rest,
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('источники значений: валидные принимаются, неизвестный source и лишние ключи режутся', () => {
+    const {props} = readFixture('valid', 'lift-editor-per-lift.json');
+
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        buildingSources: {A: {source: 'question', note: 'из вашего вопроса'}},
+        liftSources: [{Q: {source: 'suggested'}}, {}],
+      }).success,
+    ).toBe(true);
+
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        buildingSources: {A: {source: 'guessed'}},
+      }).success,
+    ).toBe(false);
+
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        liftSources: [{Q: {source: 'suggested', extra: true}}],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      liftEditorPropsSchema.safeParse({
+        ...props,
+        buildingSources: {A: {source: 'default', note: 'x'.repeat(201)}},
+      }).success,
+    ).toBe(false);
+
+    expect(readFixture('invalid', 'lift-editor-unknown-source.json')).toBeTruthy();
+    expect(
+      liftEditorPropsSchema.safeParse(readFixture('invalid', 'lift-editor-unknown-source.json').props)
+        .success,
+    ).toBe(false);
+  });
+
   it('LiftEditor попадает в артефакт каталога', () => {
     const artifact = createCatalogArtifact();
 

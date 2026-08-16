@@ -60,16 +60,14 @@
             "label": "gammaUp — коэф. заполнения при подъёме",
             "type": "number",
             "defaultValue": 0.8,
-            "advanced": true,
-            "shortLabel": "γ↑"
+            "advanced": true
           },
           {
             "name": "gammaDown",
             "label": "gammaDown — коэф. заполнения при спуске",
             "type": "number",
             "defaultValue": 0.8,
-            "advanced": true,
-            "shortLabel": "γ↓"
+            "advanced": true
           }
         ],
         "liftTitle": "Параметры лифта",
@@ -107,22 +105,19 @@
               "2.5": "h 6; t123 14"
             },
             "defaultValue": "1",
-            "hint": "ряд Прил. А — подсказка; своё значение тоже можно (h/t123 тогда вручную)",
-            "shortLabel": "Vн"
+            "hint": "ряд Прил. А — подсказка; своё значение тоже можно (h/t123 тогда вручную)"
           },
           {
             "name": "H0",
             "label": "H0 — отметка нижней остановки от 0,000, м",
             "type": "number",
-            "required": true,
-            "shortLabel": "H₀"
+            "required": true
           },
           {
             "name": "Nn",
             "label": "Nn — этажей без пользования лифтом (0 — все)",
             "type": "number",
-            "required": true,
-            "shortLabel": "Nн"
+            "required": true
           },
           {
             "name": "h",
@@ -146,8 +141,7 @@
             "type": "number",
             "required": true,
             "defaultValue": 1.5,
-            "advanced": true,
-            "shortLabel": "Δt"
+            "advanced": true
           }
         ],
         "liftsMode": "per-lift",
@@ -200,8 +194,7 @@
             ],
             "onNoMatch": "keep"
           }
-        ],
-        "buildingKindLabel": "жилое здание"
+        ]
       },
       {
         "method": "34758",
@@ -220,8 +213,7 @@
               "Жилое"
             ],
             "defaultValue": "Офис",
-            "hint": "выбирает нормативные ряды Прил. Е; состав формы не меняет",
-            "shortLabel": "тип"
+            "hint": "выбирает нормативные ряды Прил. Е; состав формы не меняет"
           },
           {
             "name": "A",
@@ -239,8 +231,7 @@
             "name": "Nl",
             "label": "Nl — число лифтов в группе",
             "type": "number",
-            "required": true,
-            "shortLabel": "Nл"
+            "required": true
           },
           {
             "name": "hf",
@@ -296,8 +287,7 @@
                 ]
               }
             },
-            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный",
-            "shortLabel": "дверь"
+            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный"
           },
           {
             "name": "Vn",
@@ -330,16 +320,14 @@
                 ]
               }
             },
-            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный",
-            "shortLabel": "Vн"
+            "hint": "ряд Прил. Е для выбранного типа здания — подсказка; ввод свободный"
           },
           {
             "name": "tOst",
             "label": "tOst — время на остановку, с",
             "type": "number",
             "required": true,
-            "hint": "авто по Прил. Е (тип здания × doorWidth × Vn); вне таблицы — вручную",
-            "shortLabel": "tост"
+            "hint": "авто по Прил. Е (тип здания × doorWidth × Vn); вне таблицы — вручную"
           },
           {
             "name": "Pk",
@@ -807,42 +795,42 @@
     "removeLabel": "Удалить лифт",
     "submitLabel": "Рассчитать",
     "submitAction": "calc",
-    "method": "34758",
+    "method": "52941",
     "building": {
-      "buildingType": "Офис",
-      "A": 900,
-      "N1": 12,
-      "Nl": 4,
-      "hf": 3.3
+      "N": 17,
+      "A": 340,
+      "hf": 3.3,
+      "i": 6,
+      "kp": 0.8,
+      "kt": 1.05,
+      "gammaUp": 0.8,
+      "gammaDown": 0.8
     },
     "lifts": [
       {
-        "Q": "1000",
-        "doorWidth": "1100",
+        "Q": "630",
         "Vn": "1.6",
-        "tOst": 9.9,
-        "Pk": 10
+        "H0": 0,
+        "Nn": 1,
+        "h": 3,
+        "t123": 12,
+        "dt": 1.5
+      },
+      {
+        "Q": "1000",
+        "Vn": "1",
+        "H0": 0,
+        "Nn": 1,
+        "h": 1.5,
+        "t123": 13.5,
+        "dt": 1.5
       }
     ],
-    "headerTitle": "Параметры расчёта",
-    "headerContext": "Проект «ЖК Северный, к.3»",
-    "pendingLabel": "Далее",
     "buildingSources": {
       "A": {
-        "source": "project",
-        "note": "из проекта"
-      },
-      "N1": {
-        "source": "project"
+        "source": "guessed",
+        "note": "источник вне перечня project|question|suggested|default"
       }
-    },
-    "liftSources": [
-      {
-        "Q": {
-          "source": "suggested",
-          "note": "предложено — середина ряда Табл. Г.1"
-        }
-      }
-    ]
+    }
   }
 }

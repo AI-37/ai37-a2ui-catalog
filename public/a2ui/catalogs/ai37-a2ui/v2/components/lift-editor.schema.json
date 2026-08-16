@@ -92,6 +92,11 @@
             "advanced": {
               "type": "boolean"
             },
+            "shortLabel": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
             "hint": {
               "type": "string",
               "minLength": 1,
@@ -258,6 +263,11 @@
                     "advanced": {
                       "type": "boolean"
                     },
+                    "shortLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
                     "hint": {
                       "type": "string",
                       "minLength": 1,
@@ -406,6 +416,11 @@
                     "advanced": {
                       "type": "boolean"
                     },
+                    "shortLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
                     "hint": {
                       "type": "string",
                       "minLength": 1,
@@ -467,6 +482,11 @@
                 ]
               },
               "liftTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "buildingKindLabel": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80
@@ -622,6 +642,76 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 120
+        },
+        "headerTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "headerContext": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "pendingLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "buildingSources": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "project",
+                  "question",
+                  "suggested",
+                  "default"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "liftSources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "project",
+                    "question",
+                    "suggested",
+                    "default"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "source"
+              ],
+              "additionalProperties": false
+            }
+          }
         }
       },
       "required": [
