@@ -10,6 +10,9 @@ export * from './renderers/constructions-editor';
 // мотали таймеры тем же значением, а не магическим числом.
 export * from './renderers/conditions-draft-debounce-ms';
 export * from './renderers/lift-editor';
+// Окно дебаунса live-черновика LiftEditor: экспортируется, чтобы тесты и хосты
+// мотали таймеры тем же значением, а не магическим числом.
+export * from './renderers/lift-draft-debounce-ms';
 // Live-расчёт Rпр редактора: экспортируется для сверки клиент/сервер
 // (λ-дефолт обязан совпадать с resolve-layer-lambda агента teplo-calc).
 export * from './renderers/resolve-layer-lambda';

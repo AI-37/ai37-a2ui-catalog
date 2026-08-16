@@ -47,6 +47,16 @@ const DEFAULTS = {
   'color-ce-text': '#1f1f1e',
   'color-ce-text-muted': '#6e6e6a',
   'color-ce-accent': '#245a87',
+
+  // Палитра `LiftEditor` (`le`): те же значения макетов SP-AI, но своя группа —
+  // компоненты независимы, и правка палитры одного не должна молча красить
+  // другой (Решение 5 design lift-editor-sections-responsive).
+  'color-le-surface': '#fafaf9',
+  'color-le-surface-sunken': '#f1f1ef',
+  'color-le-border': '#e5e4e1',
+  'color-le-text': '#1f1f1e',
+  'color-le-text-muted': '#6e6e6a',
+  'color-le-accent': '#245a87',
 } as const;
 
 type TokenName = keyof typeof DEFAULTS;
@@ -65,6 +75,12 @@ const INHERITS: Partial<Record<TokenName, TokenName>> = {
   'color-ce-text': 'color-text-strong',
   'color-ce-text-muted': 'color-text-subtle',
   'color-ce-accent': 'color-accent',
+  'color-le-surface': 'color-surface',
+  'color-le-surface-sunken': 'color-surface-muted',
+  'color-le-border': 'color-border',
+  'color-le-text': 'color-text-strong',
+  'color-le-text-muted': 'color-text-subtle',
+  'color-le-accent': 'color-accent',
 };
 
 function cssVar(name: TokenName): string {
@@ -108,6 +124,13 @@ export const tokens = {
   ceText: cssVar('color-ce-text'),
   ceTextMuted: cssVar('color-ce-text-muted'),
   ceAccent: cssVar('color-ce-accent'),
+
+  leSurface: cssVar('color-le-surface'),
+  leSurfaceSunken: cssVar('color-le-surface-sunken'),
+  leBorder: cssVar('color-le-border'),
+  leText: cssVar('color-le-text'),
+  leTextMuted: cssVar('color-le-text-muted'),
+  leAccent: cssVar('color-le-accent'),
 } as const;
 
 /** id для тега <style> с дефолтной темой (если консьюмер решит её объявить). */

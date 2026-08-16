@@ -2,72 +2,118 @@ import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {liftEditorDefinition} from '@ai37/a2ui-catalog-schemas';
 import {applyDependentRules} from './apply-dependent-rules';
+import {buildLiftSectionSummary} from './build-lift-section-summary';
+import {buildingTouchedKey} from './building-touched-key';
 import {createLiftEditorDrafts} from './create-lift-editor-drafts';
-import {findMissingRequired} from './find-missing-required';
+import {createLiftEditorSources} from './create-lift-editor-sources';
+import {findMissingBySection} from './find-missing-by-section';
 import {findRuleTargetsBySource} from './find-rule-targets-by-source';
+import {isEmptyLiftValue} from './is-empty-lift-value';
+import {LIFT_DRAFT_DEBOUNCE_MS} from './lift-draft-debounce-ms';
+import {LiftEditorHeader} from './lift-editor-header';
+import {LiftEditorMethodSwitcher} from './lift-editor-method-switcher';
 import {LiftEditorScreen} from './lift-editor-screen';
-import {LiftEditorTabs} from './lift-editor-tabs';
+import {LiftEditorSection} from './lift-editor-section';
+import {LIFT_EDITOR_CSS, LIFT_EDITOR_STYLE_HREF} from './lift-editor-styles';
 import {liftTouchedKey} from './lift-touched-key';
-import {pickInitialLiftTab} from './pick-initial-lift-tab';
+import {omitTouchedLiftSources} from './omit-touched-lift-sources';
+import {pickInitialOpenSection} from './pick-initial-open-section';
+import {scrollToElement} from './scroll-to-element';
 import {seedLiftValues} from './seed-lift-values';
+import {shiftSectionsAfterRemove} from './shift-sections-after-remove';
 import {shiftTouchedAfterRemove} from './shift-touched-after-remove';
+import {StyleTag} from './style-tag';
 import {useA2uiBaseStyles} from './shared';
-import {tokens} from './tokens';
-import type {LiftEditorDraft, LiftEditorTab} from './lift-editor.types';
-
-const primaryButtonStyle: React.CSSProperties = {
-  padding: '10px 18px',
-  borderRadius: 12,
-  border: 'none',
-  background: tokens.accent,
-  color: tokens.accentContrast,
-  fontWeight: 600,
-  cursor: 'pointer',
-};
+import type {LiftEditorDraft, LiftSectionBadge, LiftSectionKey} from './lift-editor.types';
 
 /**
- * Подбор лифтов одним сообщением: вкладки «Здание» + лифты (или единственная
- * лифтовая группа), переключение методики расчёта, добавление и удаление
- * лифтов, авто-подстановки нормативных значений — всё на клиенте, без единого
- * AG-UI-run до submit. Наружу уходит ровно один `dispatchAction` с полным
- * документом `{method, building, lifts}` активной ветки (Решение 10 design.md).
+ * Подбор лифтов одним экраном: секция «Здание» сверху, под ней секции лифтов
+ * (или единственная лифтовая группа) со строками-сводками из живых значений,
+ * методика — переключателем в шапке карточки. Вкладок нет; раскрытие и
+ * сворачивание секций локальны, введённое их переживает. Наружу уходит ровно
+ * один submit с полным документом `{method, building, lifts}` активной ветки.
  *
- * При заданном `draftAction` тот же документ дополнительно уезжает черновиком
- * на границах экранов (смена вкладки, добавление и удаление лифта, смена
- * методики) и на blur изменённого поля. Без пропа автосейва нет — поведение
- * ровно прежнее.
+ * При заданном `pendingLabel` кнопка подвала двухрежимная: пока есть
+ * незаполненные обязательные поля или непросмотренные секции — «Далее»
+ * (сворачивает всё и раскрывает ровно одну следующую цель, без action'а),
+ * иначе — submit. Без пропа кнопка блокируется, как раньше.
  *
- * Доменных знаний о ГОСТ в компоненте нет: конфиги методик, ряды подсказок и
- * строки зависимых значений целиком приходят в props.
+ * При заданном `draftAction` любая правка поля планирует черновик дебаунсом
+ * (`LIFT_DRAFT_DEBOUNCE_MS`), а структурные действия (add/remove лифта, смена
+ * методики, «Далее») шлют его немедленно, отменяя отложенный; submit тоже
+ * отменяет отложенный. Дедупликация по содержимому. Без пропа автосейва нет.
+ *
+ * `buildingSources`/`liftSources` — только подписи под контролами: правка поля
+ * снимает подпись, в payload источники не уходят. Доменных знаний о ГОСТ в
+ * компоненте нет — конфиги, ряды и правила целиком приходят в props.
  */
 export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({props, context}) => {
   useA2uiBaseStyles();
 
+  const initialConfig = () =>
+    props.methodConfigs.find(config => config.method === props.method) ?? props.methodConfigs[0]!;
+
   const [method, setMethod] = React.useState(props.method);
   const [drafts, setDrafts] = React.useState(() => createLiftEditorDrafts(props));
-  // Поля, правленные вручную: авто-подстановка их не перетирает, пока не
-  // изменится хотя бы один источник правила.
+  const [sources, setSources] = React.useState(() => createLiftEditorSources(props));
+  // Поля, правленные вручную: авто-подстановка их не перетирает, подпись
+  // источника с них снята. Ключи лифтов — `lift-touched-key`, здания —
+  // `building-touched-key`.
   const [touched, setTouched] = React.useState<ReadonlySet<string>>(() => new Set());
-  const [activeTab, setActiveTab] = React.useState<LiftEditorTab>(() =>
-    pickInitialLiftTab(
-      props.methodConfigs.find(config => config.method === props.method) ?? props.methodConfigs[0]!,
-      createLiftEditorDrafts(props)[props.method] ?? {building: {}, lifts: [{}]},
-    ),
+  const [openSections, setOpenSections] = React.useState<ReadonlySet<LiftSectionKey>>(
+    () =>
+      new Set([
+        pickInitialOpenSection(
+          initialConfig(),
+          createLiftEditorDrafts(props)[props.method] ?? {building: {}, lifts: [{}]},
+        ),
+      ]),
+  );
+  // Просмотренные секции: раскрытие любым способом засчитывает просмотр.
+  const [reviewed, setReviewed] = React.useState<ReadonlySet<LiftSectionKey>>(
+    () => new Set(openSections),
   );
 
+  // Якоря секций для прокрутки навигацией «Далее».
+  const sectionRefs = React.useRef(new Map<LiftSectionKey, HTMLElement>());
+  // Отложенный черновик: payload читается из ref в момент срабатывания таймера
+  // — последний ввод побеждает (Решение 6 design.md).
+  const draftTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Сериализация последнего отправленного черновика — дедуп по содержимому.
+  const lastDraft = React.useRef<string | null>(null);
+
+  const cancelPendingDraft = () => {
+    if (draftTimerRef.current === null) return;
+    clearTimeout(draftTimerRef.current);
+    draftTimerRef.current = null;
+  };
+
+  // Таймер не переживает unmount: отправлять черновик уже некому.
+  React.useEffect(() => cancelPendingDraft, []);
+
   // Новое сообщение агента — новый документ: state пересевается из props,
-  // несохранённые правки теряются (как у FormCard/ConstructionsEditor).
-  const propsKey = JSON.stringify([props.method, props.building, props.lifts]);
+  // несохранённые правки и счёт просмотренного теряются (как у FormCard/
+  // ConstructionsEditor). Источники в ключе: новый провенанс — тоже снапшот.
+  const propsKey = JSON.stringify([
+    props.method,
+    props.building,
+    props.lifts,
+    props.buildingSources,
+    props.liftSources,
+  ]);
   const [baseKey, setBaseKey] = React.useState(propsKey);
   if (propsKey !== baseKey) {
     const nextDrafts = createLiftEditorDrafts(props);
-    const nextConfig =
-      props.methodConfigs.find(config => config.method === props.method) ?? props.methodConfigs[0]!;
+    const nextConfig = initialConfig();
+    const nextInitial = pickInitialOpenSection(nextConfig, nextDrafts[props.method]!);
+    cancelPendingDraft();
     setBaseKey(propsKey);
     setMethod(props.method);
     setDrafts(nextDrafts);
+    setSources(createLiftEditorSources(props));
     setTouched(new Set());
-    setActiveTab(pickInitialLiftTab(nextConfig, nextDrafts[props.method]!));
+    setOpenSections(new Set([nextInitial]));
+    setReviewed(new Set([nextInitial]));
   }
 
   const config =
@@ -75,28 +121,21 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
   const draft = drafts[config.method]!;
   const rules = config.dependentRules ?? [];
   const perLift = config.liftsMode === 'per-lift';
-  // Смена методики могла укоротить список лифтов — вкладка не должна повиснуть.
-  const liftIndex =
-    typeof activeTab === 'number' ? Math.min(activeTab, draft.lifts.length - 1) : null;
 
   const updateDraft = (next: LiftEditorDraft) =>
     setDrafts(prev => ({...prev, [config.method]: next}));
 
-  // Документ активной ветки — общий payload submit'а и черновика: у агента одна
-  // ветка merge'а (Решение 4 design.md).
+  // Документ активной ветки — общий payload submit'а и черновика.
   const buildDocument = (nextMethod: string, next: LiftEditorDraft) => ({
     method: nextMethod,
     building: next.building,
     lifts: next.lifts,
   });
 
-  // Сериализация последнего отправленного черновика: blur правки и следом смена
-  // вкладки — два триггера на одно состояние, action один (Решение 6 design.md).
-  const lastDraft = React.useRef<string | null>(null);
+  const draftStateRef = React.useRef({method: config.method, draft});
+  draftStateRef.current = {method: config.method, draft};
 
-  // Автосейв черновика: тот же payload, что у submit'а, но без блокировки
-  // незаполненными обязательными (Решение 5). Нет пропа — no-op.
-  const sendDraft = (next: LiftEditorDraft, nextMethod: string = config.method) => {
+  const dispatchDraft = (nextMethod: string, next: LiftEditorDraft) => {
     if (!props.draftAction) return;
 
     const payload = buildDocument(nextMethod, next);
@@ -107,9 +146,21 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
     void context.dispatchAction({event: {name: props.draftAction, context: payload}});
   };
 
-  const handleSelectTab = (tab: LiftEditorTab) => {
-    setActiveTab(tab);
-    sendDraft(draft);
+  // Немедленный черновик структурных действий: несёт полное состояние,
+  // отложенный после него избыточен — таймер сбрасывается.
+  const sendDraftNow = (next: LiftEditorDraft = draft, nextMethod: string = config.method) => {
+    cancelPendingDraft();
+    dispatchDraft(nextMethod, next);
+  };
+
+  const scheduleDraft = () => {
+    if (!props.draftAction) return;
+    cancelPendingDraft();
+    draftTimerRef.current = setTimeout(() => {
+      draftTimerRef.current = null;
+      const latest = draftStateRef.current;
+      dispatchDraft(latest.method, latest.draft);
+    }, LIFT_DRAFT_DEBOUNCE_MS);
   };
 
   const isTouchedIn = (source: ReadonlySet<string>, index: number) => (field: string) =>
@@ -117,8 +168,10 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
 
   const handleBuildingChange = (name: string, value: string | boolean) => {
     const building = {...draft.building, [name]: value};
-    // Поле здания — источник для полей ВСЕХ лифтов (тип здания → tOst).
     const nextTouched = new Set(touched);
+    // Правка снимает provenance поля независимо от вернувшегося значения.
+    nextTouched.add(buildingTouchedKey(config.method, name));
+    // Поле здания — источник для полей ВСЕХ лифтов (тип здания → tOst).
     const targets = findRuleTargetsBySource(rules, name, 'building');
     draft.lifts.forEach((_unused, index) => {
       for (const target of targets) {
@@ -133,6 +186,7 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
         applyDependentRules({rules, building, lift, isTouched: isTouchedIn(nextTouched, index)}),
       ),
     });
+    scheduleDraft();
   };
 
   const handleLiftChange = (index: number, name: string, value: string | boolean) => {
@@ -156,16 +210,37 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
           : lift,
       ),
     });
+    scheduleDraft();
   };
 
-  // Черновик прежней методики остаётся нетронутым: случайный клик по селекту
-  // не стирает работу, возврат восстанавливает введённое.
+  // Черновик прежней методики остаётся нетронутым: возврат восстанавливает
+  // введённое. Смена методики сбрасывает счёт просмотренного — новая ветка
+  // проходится заново.
   const handleMethodChange = (next: string) => {
-    setMethod(next);
-    setActiveTab('building');
-    // Черновик несёт ВНОВЬ выбранную ветку: прежняя остаётся только на клиенте.
+    const nextConfig = props.methodConfigs.find(candidate => candidate.method === next);
     const nextDraft = drafts[next];
-    if (nextDraft) sendDraft(nextDraft, next);
+    if (!nextConfig || !nextDraft) return;
+
+    const nextInitial = pickInitialOpenSection(nextConfig, nextDraft);
+    setMethod(next);
+    setOpenSections(new Set([nextInitial]));
+    setReviewed(new Set([nextInitial]));
+    // Черновик несёт ВНОВЬ выбранную ветку: прежняя остаётся только на клиенте.
+    sendDraftNow(nextDraft, next);
+  };
+
+  const handleToggle = (key: LiftSectionKey) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+    // Раскрытие = просмотр: бейдж «просмотреть» слетает и не возвращается.
+    setReviewed(prev => new Set(prev).add(key));
   };
 
   const handleAddLift = () => {
@@ -179,30 +254,76 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
       }),
     ];
     const next = {building: draft.building, lifts};
+    const key: LiftSectionKey = `lift-${lifts.length - 1}`;
     updateDraft(next);
-    setActiveTab(lifts.length - 1);
-    sendDraft(next);
+    setSources(prev => {
+      const branch = prev[config.method] ?? {building: {}, lifts: []};
+      return {...prev, [config.method]: {building: branch.building, lifts: [...branch.lifts, {}]}};
+    });
+    // Новая секция раскрыта (её добавили, чтобы заполнить), остальные свёрнуты.
+    setOpenSections(new Set([key]));
+    setReviewed(prev => new Set(prev).add(key));
+    sendDraftNow(next);
   };
 
   const handleRemoveLift = (index: number) => {
     if (draft.lifts.length <= 1) return;
     const next = {building: draft.building, lifts: draft.lifts.filter((_u, i) => i !== index)};
-    setTouched(shiftTouchedAfterRemove(touched, config.method, index));
     updateDraft(next);
-    setActiveTab(0);
-    sendDraft(next);
+    setTouched(shiftTouchedAfterRemove(touched, config.method, index));
+    setSources(prev => {
+      const branch = prev[config.method] ?? {building: {}, lifts: []};
+      return {
+        ...prev,
+        [config.method]: {
+          building: branch.building,
+          lifts: branch.lifts.filter((_u, i) => i !== index),
+        },
+      };
+    });
+    setOpenSections(prev => shiftSectionsAfterRemove(prev, index));
+    setReviewed(prev => shiftSectionsAfterRemove(prev, index));
+    sendDraftNow(next);
   };
 
-  const incomplete = new Set<LiftEditorTab>();
-  if (findMissingRequired(config.buildingFields, draft.building).length > 0) {
-    incomplete.add('building');
-  }
-  draft.lifts.forEach((lift, index) => {
-    if (findMissingRequired(config.liftFields, lift).length > 0) incomplete.add(index);
-  });
+  const missing = findMissingBySection(config, draft);
+  const sectionOrder: LiftSectionKey[] = [
+    'building',
+    ...draft.lifts.map((_unused, index) => `lift-${index}` as LiftSectionKey),
+  ];
+  const hasUnreviewed = sectionOrder.some(key => !reviewed.has(key));
+  // Pending-режим: даже полностью предзаполненный документ проходится по
+  // секциям до submit'а. Без пропа `pendingLabel` режима нет.
+  const pending = props.pendingLabel !== undefined && (missing.size > 0 || hasUnreviewed);
 
+  // «заполните» (пустые обязательные, сильнее) / «просмотреть» (свёрнутая
+  // непросмотренная).
+  const badgeFor = (key: LiftSectionKey): LiftSectionBadge | undefined => {
+    if (missing.has(key)) return 'fill';
+    if (!reviewed.has(key) && !openSections.has(key)) return 'review';
+    return undefined;
+  };
+
+  // «Далее» — навигация, не action: свернуть всё и раскрыть ровно одну
+  // следующую цель — первую секцию с незаполненными обязательными, иначе
+  // первую непросмотренную по порядку экрана, — со скроллом к ней.
+  const handlePendingClick = () => {
+    const target =
+      missing.keys().next().value ?? sectionOrder.find(key => !reviewed.has(key));
+    if (target === undefined) return;
+
+    setOpenSections(new Set([target]));
+    setReviewed(prev => new Set(prev).add(target));
+    scrollToElement(sectionRefs.current.get(target) ?? null);
+    // «Далее» фиксирует заполненную секцию немедленно, не дожидаясь дебаунса.
+    sendDraftNow();
+  };
+
+  // Submit шлёт то же полное состояние — запоздавший черновик после него мог
+  // бы визуально «откатить» форму, поэтому отложенный отменяется.
   const handleSubmit = () => {
-    if (incomplete.size > 0) return;
+    if (props.pendingLabel === undefined && missing.size > 0) return;
+    cancelPendingDraft();
     void context.dispatchAction({
       event: {
         name: props.submitAction,
@@ -212,94 +333,126 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
     });
   };
 
+  const bindSectionRef = (key: LiftSectionKey) => (node: HTMLElement | null) => {
+    if (node === null) {
+      sectionRefs.current.delete(key);
+    } else {
+      sectionRefs.current.set(key, node);
+    }
+  };
+
+  // Тип здания в тексте шапки: живое значение поля `buildingType` активной
+  // ветки, при его отсутствии — `buildingKindLabel` конфига.
+  const kindValue = draft.building['buildingType'];
+  const buildingKind = !isEmptyLiftValue(kindValue)
+    ? String(kindValue)
+    : (config.buildingKindLabel ?? '');
+
+  const methodSources = sources[config.method] ?? {building: {}, lifts: []};
+  const buildingSources = omitTouchedLiftSources(methodSources.building, field =>
+    touched.has(buildingTouchedKey(config.method, field)),
+  );
+
+  const nonAdvanced = (fields: readonly (typeof config.buildingFields)[number][]) =>
+    fields.filter(field => field.advanced !== true);
+
+  const switcher = (
+    <LiftEditorMethodSwitcher
+      configs={props.methodConfigs}
+      method={config.method}
+      fieldLabel={props.methodField.label}
+      buildingKind={buildingKind}
+      onChange={handleMethodChange}
+    />
+  );
+
   return (
-    <div
-      style={{
-        display: 'grid',
-        gap: 14,
-        padding: 18,
-        borderRadius: 18,
-        border: `1px solid ${tokens.border}`,
-        background: tokens.surface,
-        color: tokens.text,
-      }}
-    >
-      <LiftEditorTabs
-        active={liftIndex ?? 'building'}
-        buildingLabel={props.buildingTabLabel}
-        liftTabLabel={config.liftTabLabel}
-        perLift={perLift}
-        liftCount={draft.lifts.length}
-        addLabel={props.addLabel}
-        canAdd={config.maxLifts === undefined || draft.lifts.length < config.maxLifts}
-        incomplete={incomplete}
-        onSelect={handleSelectTab}
-        onAdd={handleAddLift}
-      />
-      {liftIndex === null ? (
+    <div className="a2ui-le">
+      <StyleTag href={LIFT_EDITOR_STYLE_HREF} css={LIFT_EDITOR_CSS} />
+      {props.headerTitle !== undefined ? (
+        <LiftEditorHeader
+          title={props.headerTitle}
+          context={props.headerContext}
+          switcher={switcher}
+        />
+      ) : (
+        // Fallback без шапки: переключатель — первым элементом над секциями.
+        <div>{switcher}</div>
+      )}
+      <LiftEditorSection
+        title={props.buildingTabLabel}
+        summary={buildLiftSectionSummary(nonAdvanced(config.buildingFields), draft.building)}
+        open={openSections.has('building')}
+        badge={badgeFor('building')}
+        onToggle={() => handleToggle('building')}
+        sectionRef={bindSectionRef('building')}
+      >
         <LiftEditorScreen
-          title={config.buildingTitle}
-          gostLabel={config.gostLabel}
           fields={config.buildingFields}
           values={draft.building}
           building={draft.building}
           advancedLabel={props.advancedLabel}
-          methodSelect={{
-            field: props.methodField,
-            value: config.method,
-            // Подписи методик — из конфигов: свой список опций у methodField
-            // разошёлся бы с ключами `method`.
-            options: props.methodConfigs.map(candidate => ({
-              value: candidate.method,
-              label: candidate.label,
-            })),
-            onChange: handleMethodChange,
-          }}
+          sources={buildingSources}
           onChange={handleBuildingChange}
-          onCommit={() => sendDraft(draft)}
         />
-      ) : (
-        <LiftEditorScreen
-          title={perLift ? `${config.liftTitle} ${liftIndex + 1}` : config.liftTitle}
-          gostLabel={config.gostLabel}
-          fields={config.liftFields}
-          values={draft.lifts[liftIndex]!}
-          building={draft.building}
-          advancedLabel={props.advancedLabel}
-          onChange={(name, value) => handleLiftChange(liftIndex, name, value)}
-          onCommit={() => sendDraft(draft)}
-        />
-      )}
-      <footer style={{display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'}}>
-        {perLift && liftIndex !== null && draft.lifts.length > 1 ? (
-          <button
-            type="button"
-            onClick={() => handleRemoveLift(liftIndex)}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 12,
-              border: `1px solid ${tokens.borderStrong}`,
-              background: 'transparent',
-              color: tokens.danger,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+      </LiftEditorSection>
+      {draft.lifts.map((lift, index) => {
+        const key: LiftSectionKey = `lift-${index}`;
+        const liftSources = omitTouchedLiftSources(
+          methodSources.lifts[index] ?? {},
+          isTouchedIn(touched, index),
+        );
+
+        return (
+          <LiftEditorSection
+            key={key}
+            title={perLift ? `${config.liftTabLabel} ${index + 1}` : config.liftTabLabel}
+            summary={buildLiftSectionSummary(nonAdvanced(config.liftFields), lift)}
+            open={openSections.has(key)}
+            badge={badgeFor(key)}
+            onToggle={() => handleToggle(key)}
+            headerAction={
+              perLift && draft.lifts.length > 1 ? (
+                <button
+                  type="button"
+                  className="a2ui-le-link a2ui-le-link--danger"
+                  onClick={() => handleRemoveLift(index)}
+                >
+                  {props.removeLabel}
+                </button>
+              ) : undefined
+            }
+            sectionRef={bindSectionRef(key)}
           >
-            {props.removeLabel}
-          </button>
-        ) : null}
+            <LiftEditorScreen
+              fields={config.liftFields}
+              values={lift}
+              building={draft.building}
+              advancedLabel={props.advancedLabel}
+              sources={liftSources}
+              onChange={(name, value) => handleLiftChange(index, name, value)}
+            />
+          </LiftEditorSection>
+        );
+      })}
+      {perLift ? (
         <button
           type="button"
-          onClick={handleSubmit}
-          disabled={incomplete.size > 0}
-          style={{
-            ...primaryButtonStyle,
-            marginLeft: 'auto',
-            opacity: incomplete.size > 0 ? 0.45 : 1,
-            cursor: incomplete.size > 0 ? 'not-allowed' : 'pointer',
-          }}
+          className="a2ui-le-add"
+          disabled={config.maxLifts !== undefined && draft.lifts.length >= config.maxLifts}
+          onClick={handleAddLift}
         >
-          {props.submitLabel}
+          + {props.addLabel}
+        </button>
+      ) : null}
+      <footer className="a2ui-le__footer">
+        <button
+          type="button"
+          className="a2ui-le-submit"
+          disabled={props.pendingLabel === undefined && missing.size > 0}
+          onClick={pending ? handlePendingClick : handleSubmit}
+        >
+          {pending ? props.pendingLabel : props.submitLabel}
         </button>
       </footer>
     </div>

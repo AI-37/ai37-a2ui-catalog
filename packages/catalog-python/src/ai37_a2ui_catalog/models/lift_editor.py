@@ -16,6 +16,15 @@ LiftEditorFieldScope = Literal["building", "lift"]
 # `combo` — свободный ввод с подсказками ряда; остальное — типы поля FormCard.
 LiftEditorFieldType = Literal["text", "number", "select", "boolean", "lookup", "combo"]
 
+# Источник значения поля — тот же контракт, что `generalSources` теплотеха.
+LiftEditorFieldSourceKind = Literal["project", "question", "suggested", "default"]
+
+
+class LiftEditorFieldSource(StrictModel):
+    source: LiftEditorFieldSourceKind
+    # Человеческое обоснование одной строкой.
+    note: str = Field(default=None, min_length=1, max_length=200)
+
 
 class LiftEditorFieldOptionsBy(StrictModel):
     """Подсказки, зависящие от значения другого поля (ряды Прил. Е по типу здания)."""
@@ -40,6 +49,8 @@ class LiftEditorField(StrictModel):
     defaultValue: str | int | float | bool | FormFieldLookupValue = None
     # Поле со значением по умолчанию — под экспандер.
     advanced: bool = None
+    # Подпись поля в строке-сводке свёрнутой секции; без неё сводка берёт `name`.
+    shortLabel: str = Field(default=None, min_length=1, max_length=40)
     hint: str = Field(default=None, min_length=1, max_length=160)
     # Пояснение к варианту ряда; в submit уходит само значение.
     optionNotes: dict[str, str] = None
@@ -78,6 +89,8 @@ class LiftEditorMethodConfig(StrictModel):
     liftFields: list[LiftEditorField] = Field(min_length=1)
     liftsMode: LiftsMode
     liftTabLabel: str = Field(min_length=1, max_length=80)
+    # Тип здания для текста шапки, когда у ветки нет поля `buildingType`.
+    buildingKindLabel: str = Field(default=None, min_length=1, max_length=80)
     maxLifts: int = Field(default=None, ge=1, le=16)
     dependentRules: list[LiftEditorDependentRule] = Field(default=None, max_length=8)
 
@@ -100,6 +113,14 @@ class LiftEditorProps(StrictModel):
     submitAction: str = Field(min_length=1, max_length=120)
     # Имя action'а автосохранения черновика; без него автосейва нет.
     draftAction: str = Field(default=None, min_length=1, max_length=120)
+    # Шапка карточки; без `headerTitle` переключатель методики падает над секции.
+    headerTitle: str = Field(default=None, min_length=1, max_length=120)
+    headerContext: str = Field(default=None, min_length=1, max_length=200)
+    # Подпись кнопки-навигации «Далее»; без пропа кнопка блокируется, как раньше.
+    pendingLabel: str = Field(default=None, min_length=1, max_length=80)
+    # Источники значений полей — только подписи; в payload не уходят.
+    buildingSources: dict[str, LiftEditorFieldSource] = None
+    liftSources: list[dict[str, LiftEditorFieldSource]] = None
 
     @model_validator(mode="after")
     def validate_document(self) -> "LiftEditorProps":

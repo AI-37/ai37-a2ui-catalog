@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import {useMemo, useState, type ReactNode} from 'react';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
 import {ai37Catalog} from '@ai37/a2ui-catalog-react';
@@ -94,14 +94,14 @@ const examples = [
     key: 'lift-preview',
     title: 'Lift Editor — методика с лифтами',
     description:
-      'Подбор лифтов одним сообщением (ГОСТ Р 52941-2008): вкладки «Здание» и «Лифт 1…N», добавление и удаление лифта, свободный ввод Q/Vн с подсказками нормативного ряда, авто-подстановка h/t123 по Vн с сохранением ручной правки и экспандер параметров по умолчанию. Расчёт по-прежнему один — по «Рассчитать»; в консоли видно, что автосейв черновика уходит на границах экранов (вкладка, add/remove лифта, смена методики) и на blur правки, а проход по полям табом ничего не шлёт.',
+      'Подбор лифтов одним экраном (ГОСТ Р 52941-2008): секция «Здание» и секции «Лифт 1…N» со строками-сводками из живых значений, методика — переключателем в шапке карточки («ГОСТ · жилое здание»), сводка принятых значений в свёрнутых «Параметрах по умолчанию», подписи источников («из вашего вопроса», «предложено по классу здания» — снимаются правкой). Кнопка двухрежимная: «Далее» проводит по секциям, потом «Рассчитать». В консоли видно live-черновик: правка поля уезжает debounce\'ом 500 мс, add/remove лифта, смена методики и «Далее» — сразу. Сузьте окно — сетка полей схлопнется в одну колонку.',
     messages: withLiftDraftAction(liftEditorMessages as A2uiMessage[]),
   },
   {
     key: 'lift-group-preview',
     title: 'Lift Editor — лифтовая группа',
     description:
-      'Та же схема с активной методикой ГОСТ 34758-2021: одна вкладка лифтовой группы без add/remove, тип здания переключает ряды Прил. Е у ширины двери и скорости, tОст считается по трём источникам (тип здания с соседнего экрана), Pk — по Q. Селектор методики наверху экрана «Здание» перестраивает форму без раунд-трипа: наружу уезжает только черновик новой ветки, ответа компонент не ждёт.',
+      'Та же схема с активной методикой ГОСТ 34758-2021: одна секция лифтовой группы без add/remove, тип здания из секции «Здание» живёт в тексте шапки и переключает ряды Прил. Е у ширины двери и скорости, tОст считается по трём источникам, Pk — по Q. Переключатель методики в шапке перестраивает форму без раунд-трипа: наружу уезжает только черновик новой ветки, ответа компонент не ждёт.',
     messages: createLiftEditorMessages({
       ...(liftEditorGroupFixture.props as Record<string, unknown>),
       draftAction: DEMO_LIFT_DRAFT_ACTION,
@@ -270,7 +270,15 @@ function UserBubble() {
   );
 }
 
-function AssistantBubble({surface, theme}: {surface?: unknown; theme: CatalogTheme}) {
+function AssistantBubble({
+  surface,
+  theme,
+  children,
+}: {
+  surface?: unknown;
+  theme: CatalogTheme;
+  children?: ReactNode;
+}) {
   const previewClassName =
     theme === 'dark' ? 'message-preview-card a2ui-theme-dark' : 'message-preview-card';
 
@@ -293,6 +301,7 @@ function AssistantBubble({surface, theme}: {surface?: unknown; theme: CatalogThe
             <A2uiSurface surface={surface as any} />
           </div>
         ) : null}
+        {children ? <div className={previewClassName}>{children}</div> : null}
       </div>
     </MessagePrimitive.Root>
   );
