@@ -24,11 +24,18 @@ import liftEditorMessages from '../../../fixtures/messages/lift-editor-surface.j
 import liftEditorGroupFixture from '../../../fixtures/valid/lift-editor-group.json';
 import thermalReportSingleFixture from '../../../fixtures/valid/thermal-report-single.json';
 import thermalReportMultiFixture from '../../../fixtures/valid/thermal-report-multi.json';
+import keoEditorFixture from '../../../fixtures/valid/keo-editor.json';
+import keoReportFailFixture from '../../../fixtures/valid/keo-report-fail.json';
+import keoReportPassFixture from '../../../fixtures/valid/keo-report-pass.json';
+import insolationEditorFixture from '../../../fixtures/valid/insolation-editor.json';
+import insolationReportPassFixture from '../../../fixtures/valid/insolation-report-pass.json';
+import insolationReportFailFixture from '../../../fixtures/valid/insolation-report-fail.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
 import {createLiftEditorMessages} from './create-lift-editor-messages';
 import {createThermalReportMessages} from './create-thermal-report-messages';
+import {createSurfaceMessages} from './create-surface-messages';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 import {withStatusChipsPreview} from './with-status-chips-preview';
 import {DEMO_LIFT_DRAFT_ACTION, withLiftDraftAction} from './with-lift-draft-action';
@@ -128,6 +135,66 @@ const examples = [
       thermalReportMultiFixture.props as Record<string, unknown>,
     ),
   },
+  {
+    key: 'keo-editor-preview',
+    title: 'Keo Editor — исходные данные КЕО',
+    description:
+      'Сбор данных расчёта КЕО одним экраном: readonly-условия (Тюмень, группа светового климата 1, e_н 0,5 %), помещения вкладками с «+ Добавить помещение», вычисляемая подпись плоскости и точки расчёта (пол Г-0,0 по СП 52 прил. Л, а не УРП 0,8 — смените назначение на «Кухня», подпись пересчитается локально), ветка затенения по схеме N1 раскрывается полем «Противостоящее здание» (переключите на «Нет» — появится предупреждение о допущении), метки источника у каждого поля со счётчиком в футере (правка переводит метку в «изменено вами»), свёрнутый блок принятых коэффициентов со сводкой. Введите глубину 8 м — поля подсветятся пометкой «! проверить» (d_п/h₀₁ ≤ 2,5), но «Рассчитать» останется активным. Наружу уходит РОВНО один submit с полным документом — смотрите консоль.',
+    messages: createSurfaceMessages(
+      'KeoEditor',
+      keoEditorFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'keo-report-fail-preview',
+    title: 'Keo Report — не проходит',
+    description:
+      'Результат расчёта КЕО карточками: вердикт «0,42 % при норме 0,50 %», секция «Что изменить» карточками вариантов (зелёная рамка с кнопкой пересчёта, нейтральный вариант, отвергнутый — detail красным без кнопки), допущения заметкой, исходные данные чипами по источнику («принято системой» — пунктиром) и протокол одной строкой со «Скачать» (клиентский Blob). Кнопки диспатчат действия с payload — смотрите консоль.',
+    messages: createSurfaceMessages(
+      'KeoReport',
+      keoReportFailFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'keo-report-pass-preview',
+    title: 'Keo Report — два помещения проходят',
+    description:
+      'То же наполнение в мультипомещенном режиме: сводный вердикт «Соответствуют 2 помещения из 2», результаты по помещениям со статусными значениями против нормы и кнопкой пересчёта только там, где агент её задал. Без downloadFileName протокол остаётся строкой без «Скачать».',
+    messages: createSurfaceMessages(
+      'KeoReport',
+      keoReportPassFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'insolation-editor-preview',
+    title: 'Insolation Editor — исходные данные инсоляции',
+    description:
+      'Сбор данных расчёта инсоляции: условия с широтной зоной и нормативом (строки от агента, в фикстуре помечены TODO-сверкой с СанПиН), расчётные точки вкладками, затеняющая застройка компактными строками с «+ Добавить здание» и удалением, плашки об упрощённой модели прямоугольных экранов. Отметка центра окна и дата проверки пришли с меткой «рассчитано» — правьте, метка станет «изменено вами», и НИЧЕГО не пересчитается (пересчёт по этажу — знание агента). Один submit с документом `{conditions, points, buildings}` — смотрите консоль.',
+    messages: createSurfaceMessages(
+      'InsolationEditor',
+      insolationEditorFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'insolation-report-pass-preview',
+    title: 'Insolation Report — прерывистая инсоляция',
+    description:
+      'Результат расчёта инсоляции: вердикт «2 ч 40 мин суммарно», суточный таймлайн 8:00–16:00 с пропорциональными сегментами солнце/тень (подпись тени вынесена под ось), проверки по СанПиН со статусными точками и справочной строкой «По квартире» с переходом «Посчитать по проекту», плашки допущений, исходные данные чипами и протокол со «Скачать».',
+    messages: createSurfaceMessages(
+      'InsolationReport',
+      insolationReportPassFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'insolation-report-fail-preview',
+    title: 'Insolation Report — не проходит',
+    description:
+      'Тот же компонент в fail-наполнении: 1 ч 50 мин непрерывно при норме 2 ч 30 мин, один солнечный сегмент и длинная тень здания на таймлайне, две проверки с danger-статусом. Протокол без downloadFileName — строка без кнопки «Скачать».',
+    messages: createSurfaceMessages(
+      'InsolationReport',
+      insolationReportFailFixture.props as Record<string, unknown>,
+    ),
+  },
 ] as const;
 
 const seedMessages: ThreadMessageLike[] = [
@@ -200,7 +267,13 @@ export function App() {
           example.key === 'lift-preview' ||
           example.key === 'lift-group-preview' ||
           example.key === 'thermal-report-single-preview' ||
-          example.key === 'thermal-report-multi-preview'
+          example.key === 'thermal-report-multi-preview' ||
+          example.key === 'keo-editor-preview' ||
+          example.key === 'keo-report-fail-preview' ||
+          example.key === 'keo-report-pass-preview' ||
+          example.key === 'insolation-editor-preview' ||
+          example.key === 'insolation-report-pass-preview' ||
+          example.key === 'insolation-report-fail-preview'
         ) {
           attachDemoActionLogger(processor, 'demo-surface', example.key);
         }

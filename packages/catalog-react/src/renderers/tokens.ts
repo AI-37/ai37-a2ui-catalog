@@ -67,6 +67,43 @@ const DEFAULTS = {
   'color-tr-text': '#1f1f1e',
   'color-tr-text-muted': '#6e6e6a',
   'color-tr-accent': '#245a87',
+
+  // Палитра `KeoEditor` (`ke`): та же тёплая нейтраль макетов SP-AI, своя
+  // группа по канону ce/le/tr.
+  'color-ke-surface': '#fafaf9',
+  'color-ke-surface-sunken': '#f1f1ef',
+  'color-ke-border': '#e5e4e1',
+  'color-ke-text': '#1f1f1e',
+  'color-ke-text-muted': '#6e6e6a',
+  'color-ke-accent': '#245a87',
+
+  // Палитра `KeoReport` (`kr`).
+  'color-kr-surface': '#fafaf9',
+  'color-kr-surface-sunken': '#f1f1ef',
+  'color-kr-border': '#e5e4e1',
+  'color-kr-text': '#1f1f1e',
+  'color-kr-text-muted': '#6e6e6a',
+  'color-kr-accent': '#245a87',
+
+  // Палитра `InsolationEditor` (`ie`).
+  'color-ie-surface': '#fafaf9',
+  'color-ie-surface-sunken': '#f1f1ef',
+  'color-ie-border': '#e5e4e1',
+  'color-ie-text': '#1f1f1e',
+  'color-ie-text-muted': '#6e6e6a',
+  'color-ie-accent': '#245a87',
+
+  // Палитра `InsolationReport` (`ir`) + цвета сегментов таймлайна: солнце
+  // наследует success, тень — приглушённую подложку, чтобы тёмная тема хоста
+  // раскрашивала полосу вместе с остальной карточкой.
+  'color-ir-surface': '#fafaf9',
+  'color-ir-surface-sunken': '#f1f1ef',
+  'color-ir-border': '#e5e4e1',
+  'color-ir-text': '#1f1f1e',
+  'color-ir-text-muted': '#6e6e6a',
+  'color-ir-accent': '#245a87',
+  'color-ir-sun': '#16a34a',
+  'color-ir-shadow': '#6e6e6a',
 } as const;
 
 type TokenName = keyof typeof DEFAULTS;
@@ -97,6 +134,32 @@ const INHERITS: Partial<Record<TokenName, TokenName>> = {
   'color-tr-text': 'color-text-strong',
   'color-tr-text-muted': 'color-text-subtle',
   'color-tr-accent': 'color-accent',
+  'color-ke-surface': 'color-surface',
+  'color-ke-surface-sunken': 'color-surface-muted',
+  'color-ke-border': 'color-border',
+  'color-ke-text': 'color-text-strong',
+  'color-ke-text-muted': 'color-text-subtle',
+  'color-ke-accent': 'color-accent',
+  'color-kr-surface': 'color-surface',
+  'color-kr-surface-sunken': 'color-surface-muted',
+  'color-kr-border': 'color-border',
+  'color-kr-text': 'color-text-strong',
+  'color-kr-text-muted': 'color-text-subtle',
+  'color-kr-accent': 'color-accent',
+  'color-ie-surface': 'color-surface',
+  'color-ie-surface-sunken': 'color-surface-muted',
+  'color-ie-border': 'color-border',
+  'color-ie-text': 'color-text-strong',
+  'color-ie-text-muted': 'color-text-subtle',
+  'color-ie-accent': 'color-accent',
+  'color-ir-surface': 'color-surface',
+  'color-ir-surface-sunken': 'color-surface-muted',
+  'color-ir-border': 'color-border',
+  'color-ir-text': 'color-text-strong',
+  'color-ir-text-muted': 'color-text-subtle',
+  'color-ir-accent': 'color-accent',
+  'color-ir-sun': 'color-success',
+  'color-ir-shadow': 'color-text-subtle',
 };
 
 function cssVar(name: TokenName): string {
@@ -154,6 +217,36 @@ export const tokens = {
   trText: cssVar('color-tr-text'),
   trTextMuted: cssVar('color-tr-text-muted'),
   trAccent: cssVar('color-tr-accent'),
+
+  keSurface: cssVar('color-ke-surface'),
+  keSurfaceSunken: cssVar('color-ke-surface-sunken'),
+  keBorder: cssVar('color-ke-border'),
+  keText: cssVar('color-ke-text'),
+  keTextMuted: cssVar('color-ke-text-muted'),
+  keAccent: cssVar('color-ke-accent'),
+
+  krSurface: cssVar('color-kr-surface'),
+  krSurfaceSunken: cssVar('color-kr-surface-sunken'),
+  krBorder: cssVar('color-kr-border'),
+  krText: cssVar('color-kr-text'),
+  krTextMuted: cssVar('color-kr-text-muted'),
+  krAccent: cssVar('color-kr-accent'),
+
+  ieSurface: cssVar('color-ie-surface'),
+  ieSurfaceSunken: cssVar('color-ie-surface-sunken'),
+  ieBorder: cssVar('color-ie-border'),
+  ieText: cssVar('color-ie-text'),
+  ieTextMuted: cssVar('color-ie-text-muted'),
+  ieAccent: cssVar('color-ie-accent'),
+
+  irSurface: cssVar('color-ir-surface'),
+  irSurfaceSunken: cssVar('color-ir-surface-sunken'),
+  irBorder: cssVar('color-ir-border'),
+  irText: cssVar('color-ir-text'),
+  irTextMuted: cssVar('color-ir-text-muted'),
+  irAccent: cssVar('color-ir-accent'),
+  irSun: cssVar('color-ir-sun'),
+  irShadow: cssVar('color-ir-shadow'),
 } as const;
 
 /** id для тега <style> с дефолтной темой (если консьюмер решит её объявить). */

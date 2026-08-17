@@ -1,0 +1,171 @@
+{
+  "component": "InsolationEditor",
+  "props": {
+    "title": "Параметры расчёта инсоляции",
+    "meta": "ЖК «Северный», секция 2 · СанПиН 1.2.3685-21, методика ГОСТ Р 57795",
+    "conditions": [
+      {
+        "name": "region",
+        "label": "Регион проекта",
+        "value": "Тюмень · центральная широтная зона",
+        "note": "TODO сверить зону и период с текстом СанПиН 1.2.3685-21 (выписок в проекте нет)"
+      },
+      {
+        "name": "norm",
+        "label": "Нормируемая продолжительность",
+        "value": "не менее 2 ч 30 мин непрерывно",
+        "note": "TODO сверить с текстом СанПиН 1.2.3685-21 для центральной зоны"
+      },
+      {
+        "name": "period",
+        "label": "Нормируемый период",
+        "value": "22 апреля — 22 августа",
+        "note": "TODO период и худший день требуют сверки: по предварительным данным этот период относится к северной зоне"
+      }
+    ],
+    "pointTemplate": {
+      "title": "Расчётная точка",
+      "fields": [
+        {
+          "name": "floor",
+          "label": "Этаж",
+          "type": "number",
+          "required": true,
+          "shortLabel": "этаж",
+          "min": 1,
+          "max": 60
+        },
+        {
+          "name": "orientation",
+          "label": "Ориентация окон",
+          "type": "select",
+          "required": true,
+          "options": ["Север", "Северо-восток", "Восток", "Юго-восток", "Юг", "Юго-запад", "Запад", "Северо-запад"],
+          "shortLabel": "румб"
+        },
+        {
+          "name": "azimuth",
+          "label": "Азимут окна, °",
+          "type": "number",
+          "shortLabel": "азимут",
+          "min": 0,
+          "max": 360
+        },
+        {
+          "name": "windowElevation",
+          "label": "Отметка центра окна, м",
+          "type": "number",
+          "shortLabel": "отметка",
+          "hint": "рассчитана по этажу; правка не пересчитывает остальное"
+        },
+        {
+          "name": "checkDate",
+          "label": "Дата проверки",
+          "type": "text",
+          "shortLabel": "дата",
+          "hint": "худший день нормируемого периода"
+        }
+      ]
+    },
+    "points": [
+      {
+        "name": "Точка 1 · комната 3 этажа",
+        "values": {
+          "floor": 3,
+          "orientation": "Юго-восток",
+          "azimuth": 135,
+          "windowElevation": 8.3,
+          "checkDate": "22 апреля"
+        },
+        "sources": {
+          "floor": {"source": "question"},
+          "orientation": {"source": "question"},
+          "azimuth": {"source": "project"},
+          "windowElevation": {
+            "source": "calculated",
+            "note": "рассчитано по этажу 3 и высоте этажа 2,8 м — проверьте отметку ±0,000"
+          },
+          "checkDate": {
+            "source": "calculated",
+            "note": "худший день нормируемого периода (TODO сверить с СанПиН)"
+          }
+        }
+      }
+    ],
+    "pointLabel": "Точка",
+    "addPointLabel": "Добавить расчётную точку",
+    "removePointLabel": "Удалить расчётную точку",
+    "maxPoints": 12,
+    "buildingsTitle": "Затеняющая застройка",
+    "buildingFields": [
+      {
+        "name": "direction",
+        "label": "Направление от окна",
+        "type": "select",
+        "required": true,
+        "options": ["Север", "Северо-восток", "Восток", "Юго-восток", "Юг", "Юго-запад", "Запад", "Северо-запад"],
+        "shortLabel": "направление"
+      },
+      {
+        "name": "distance",
+        "label": "Расстояние, м",
+        "type": "number",
+        "required": true,
+        "shortLabel": "l",
+        "min": 1,
+        "max": 500
+      },
+      {
+        "name": "height",
+        "label": "Высота, м",
+        "type": "number",
+        "required": true,
+        "shortLabel": "H",
+        "min": 1,
+        "max": 200
+      },
+      {
+        "name": "front",
+        "label": "Фронт, м",
+        "type": "number",
+        "required": true,
+        "shortLabel": "a",
+        "min": 1,
+        "max": 400
+      }
+    ],
+    "buildings": [
+      {
+        "values": {
+          "direction": "Юго-восток",
+          "distance": 38,
+          "height": 45,
+          "front": 60
+        },
+        "sources": {
+          "direction": {"source": "question"},
+          "distance": {"source": "question"},
+          "height": {"source": "question"},
+          "front": {"source": "question"}
+        }
+      }
+    ],
+    "addBuildingLabel": "Добавить здание",
+    "removeBuildingLabel": "Удалить",
+    "maxBuildings": 16,
+    "notices": [
+      {
+        "text": "Модель застройки упрощённая: здания считаются прямоугольными экранами без учёта уступов и остеклённых лоджий."
+      },
+      {
+        "text": "Учтено 1 здание из вашего вопроса — сверьте с генпланом: не указанная застройка завышает результат."
+      },
+      {
+        "text": "Загрузка подосновы генплана файлом — в разработке.",
+        "tone": "info"
+      }
+    ],
+    "sourcesLabel": "Источники значений",
+    "submit": {"name": "insolation_calculate", "label": "Рассчитать"}
+  }
+}

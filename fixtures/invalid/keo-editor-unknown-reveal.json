@@ -1,0 +1,40 @@
+{
+  "component": "KeoEditor",
+  "props": {
+    "title": "Параметры расчёта КЕО",
+    "conditions": [
+      {
+        "name": "region",
+        "label": "Регион проекта",
+        "value": "Тюмень · группа светового климата 1"
+      }
+    ],
+    "roomTemplate": {
+      "sections": [
+        {
+          "key": "geometry",
+          "title": "Геометрия помещения",
+          "fields": [
+            {
+              "name": "depth",
+              "label": "d_п — глубина помещения, м",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "distance",
+              "label": "l — расстояние до здания, м",
+              "type": "number",
+              "revealBy": {"field": "shadingPresence", "values": ["Есть"]}
+            }
+          ]
+        }
+      ]
+    },
+    "rooms": [{"values": {"depth": 4.5}}],
+    "roomLabel": "Помещение",
+    "addRoomLabel": "Добавить помещение",
+    "removeRoomLabel": "Удалить помещение",
+    "submit": {"name": "keo_calculate", "label": "Рассчитать"}
+  }
+}

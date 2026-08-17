@@ -1,0 +1,32 @@
+{
+  "component": "InsolationReport",
+  "props": {
+    "verdict": {
+      "status": "pass",
+      "badge": "Соответствует СанПиН 1.2.3685-21",
+      "headline": "Инсоляция — 2 ч 40 мин суммарно"
+    },
+    "timeline": {
+      "title": "Инсоляция 22 апреля · 8:00–16:00",
+      "axisStart": 480,
+      "axisEnd": 960,
+      "ticks": [
+        {"at": 480, "label": "8:00"},
+        {"at": 960, "label": "16:00"}
+      ],
+      "segments": [
+        {"from": 560, "to": 660, "kind": "sun"},
+        {"from": 640, "to": 720, "kind": "shadow", "label": "тень · здание 1"}
+      ]
+    },
+    "inputs": {
+      "groups": [
+        {
+          "label": "Из вашего вопроса",
+          "tone": "normal",
+          "chips": [{"label": "Точка", "value": "3 этаж · юго-восток 135°"}]
+        }
+      ]
+    }
+  }
+}
