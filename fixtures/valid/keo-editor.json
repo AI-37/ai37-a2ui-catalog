@@ -1,0 +1,389 @@
+{
+  "component": "KeoEditor",
+  "props": {
+    "title": "Параметры расчёта КЕО",
+    "meta": "ЖК «Северный», секция 2 · СП 367.1325800.2017",
+    "conditions": [
+      {
+        "name": "region",
+        "label": "Регион проекта",
+        "value": "Тюмень · группа светового климата 1 (СП 52, прил. Е)",
+        "note": "при группе 1 C_N = 1,00 для любой ориентации"
+      },
+      {
+        "name": "norm",
+        "label": "Нормируемое КЕО e_н",
+        "value": "0,5 % — жилые комнаты и кухни",
+        "note": "СП 52.13330.2016, прил. Л, пп. 187–188"
+      },
+      {
+        "name": "method",
+        "label": "Методика",
+        "value": "боковое одностороннее освещение, схема застройки N1"
+      }
+    ],
+    "roomTemplate": {
+      "sections": [
+        {
+          "key": "purpose",
+          "title": "Назначение",
+          "fields": [
+            {
+              "name": "purpose",
+              "label": "Назначение помещения",
+              "type": "select",
+              "required": true,
+              "options": ["Жилая комната", "Кухня"],
+              "shortLabel": "назначение"
+            },
+            {
+              "name": "apartment",
+              "label": "Квартира",
+              "type": "select",
+              "required": true,
+              "options": ["1–3-комнатная", "4+"],
+              "shortLabel": "квартира"
+            },
+            {
+              "name": "orientation",
+              "label": "Ориентация светопроёма",
+              "type": "select",
+              "options": [
+                "Север",
+                "Юг",
+                "Восток",
+                "Запад",
+                "Не указана — принята северная"
+              ],
+              "optionNotes": {
+                "Не указана — принята северная": "СП 367 п. 9.1.2: при неизвестной ориентации C_N принимают для северной"
+              },
+              "shortLabel": "ориентация"
+            }
+          ]
+        },
+        {
+          "key": "geometry",
+          "title": "Геометрия помещения",
+          "fields": [
+            {
+              "name": "depth",
+              "label": "d_п — глубина помещения, м",
+              "type": "number",
+              "required": true,
+              "shortLabel": "d_п",
+              "min": 1,
+              "max": 12
+            },
+            {
+              "name": "width",
+              "label": "b_п — ширина помещения, м",
+              "type": "number",
+              "required": true,
+              "shortLabel": "b_п",
+              "min": 1,
+              "max": 12
+            },
+            {
+              "name": "height",
+              "label": "h — высота помещения, м",
+              "type": "number",
+              "required": true,
+              "shortLabel": "h",
+              "min": 2.2,
+              "max": 4.5
+            }
+          ]
+        },
+        {
+          "key": "window",
+          "title": "Светопроём",
+          "fields": [
+            {
+              "name": "windowWidth",
+              "label": "b_o — ширина окна, м",
+              "type": "number",
+              "required": true,
+              "shortLabel": "b_o",
+              "min": 0.3,
+              "max": 6
+            },
+            {
+              "name": "windowHeight",
+              "label": "h_o — высота окна, м",
+              "type": "number",
+              "required": true,
+              "shortLabel": "h_o",
+              "min": 0.3,
+              "max": 4
+            },
+            {
+              "name": "sillHeight",
+              "label": "h_пд — высота подоконника, м",
+              "type": "number",
+              "shortLabel": "h_пд",
+              "min": 0,
+              "max": 2
+            },
+            {
+              "name": "windowCount",
+              "label": "Количество окон",
+              "type": "number",
+              "shortLabel": "окон",
+              "min": 1,
+              "max": 6
+            },
+            {
+              "name": "glazing",
+              "label": "Остекление",
+              "type": "select",
+              "options": [
+                "Двухкамерный стеклопакет в ПВХ-переплёте",
+                "Однокамерный стеклопакет в ПВХ-переплёте"
+              ],
+              "hint": "τ₀ = τ₁·τ₂·τ₃·τ₄ и MF подставляет агент по табл. А.8/А.9 СП 367",
+              "shortLabel": "остекление"
+            }
+          ]
+        },
+        {
+          "key": "shading",
+          "title": "Затенение",
+          "fields": [
+            {
+              "name": "opposing",
+              "label": "Противостоящее здание",
+              "type": "select",
+              "required": true,
+              "options": [
+                "Есть — здание напротив (схема N1)",
+                "Нет — открытый горизонт"
+              ],
+              "valueWarnings": {
+                "Нет — открытый горизонт": "опасное допущение: не указанная застройка завышает результат — сверьте с генпланом"
+              },
+              "shortLabel": "затенение"
+            },
+            {
+              "name": "distance",
+              "label": "l — расстояние до здания, м",
+              "type": "number",
+              "shortLabel": "l",
+              "min": 1,
+              "max": 300,
+              "revealBy": {"field": "opposing", "values": ["Есть — здание напротив (схема N1)"]}
+            },
+            {
+              "name": "front",
+              "label": "a — длина фронта здания, м",
+              "type": "number",
+              "shortLabel": "a",
+              "min": 1,
+              "max": 400,
+              "revealBy": {"field": "opposing", "values": ["Есть — здание напротив (схема N1)"]}
+            },
+            {
+              "name": "opposingHeight",
+              "label": "Высота противостоящего здания, м",
+              "type": "number",
+              "shortLabel": "H_зд",
+              "min": 1,
+              "max": 200,
+              "revealBy": {"field": "opposing", "values": ["Есть — здание напротив (схема N1)"]}
+            },
+            {
+              "name": "facadeReflection",
+              "label": "ρ_ф — отражение фасада",
+              "type": "number",
+              "shortLabel": "ρ_ф",
+              "defaultValue": 0.5,
+              "min": 0.1,
+              "max": 0.9,
+              "revealBy": {"field": "opposing", "values": ["Есть — здание напротив (схема N1)"]}
+            },
+            {
+              "name": "floor",
+              "label": "Этаж расчётного помещения",
+              "type": "number",
+              "shortLabel": "этаж",
+              "min": 1,
+              "max": 60,
+              "revealBy": {"field": "opposing", "values": ["Есть — здание напротив (схема N1)"]}
+            }
+          ]
+        },
+        {
+          "key": "defaults",
+          "title": "Коэффициенты приняты по умолчанию",
+          "advanced": true,
+          "fields": [
+            {
+              "name": "rhoCeiling",
+              "label": "ρ потолка",
+              "type": "number",
+              "shortLabel": "ρ потолка",
+              "defaultValue": 0.7,
+              "min": 0.1,
+              "max": 0.9
+            },
+            {
+              "name": "rhoWalls",
+              "label": "ρ стен",
+              "type": "number",
+              "shortLabel": "ρ стен",
+              "defaultValue": 0.5,
+              "min": 0.1,
+              "max": 0.9
+            },
+            {
+              "name": "rhoFloor",
+              "label": "ρ пола",
+              "type": "number",
+              "shortLabel": "ρ пола",
+              "defaultValue": 0.3,
+              "min": 0.1,
+              "max": 0.9
+            },
+            {
+              "name": "mf",
+              "label": "MF — коэффициент эксплуатации",
+              "type": "number",
+              "shortLabel": "MF",
+              "defaultValue": 0.83,
+              "min": 0.5,
+              "max": 1
+            },
+            {
+              "name": "wallThickness",
+              "label": "Δ_ст — толщина стены, м",
+              "type": "number",
+              "shortLabel": "Δ_ст",
+              "defaultValue": 0.4,
+              "min": 0.1,
+              "max": 1.2
+            },
+            {
+              "name": "balcony",
+              "label": "Лоджия или балкон (τ₄)",
+              "type": "select",
+              "options": ["Нет", "Лоджия", "Балкон"],
+              "shortLabel": "лоджия"
+            }
+          ]
+        }
+      ]
+    },
+    "rooms": [
+      {
+        "name": "Жилая комната",
+        "values": {
+          "purpose": "Жилая комната",
+          "apartment": "1–3-комнатная",
+          "orientation": "Не указана — принята северная",
+          "depth": 4.5,
+          "width": 3.2,
+          "height": 2.7,
+          "windowWidth": 1.5,
+          "windowHeight": 1.5,
+          "sillHeight": 0.9,
+          "windowCount": 1,
+          "glazing": "Двухкамерный стеклопакет в ПВХ-переплёте",
+          "opposing": "Есть — здание напротив (схема N1)",
+          "distance": 38,
+          "front": 60,
+          "opposingHeight": 45,
+          "facadeReflection": 0.5,
+          "floor": 3,
+          "rhoCeiling": 0.7,
+          "rhoWalls": 0.5,
+          "rhoFloor": 0.3,
+          "mf": 0.83,
+          "wallThickness": 0.4,
+          "balcony": "Нет"
+        },
+        "sources": {
+          "purpose": {"source": "project"},
+          "apartment": {"source": "question"},
+          "orientation": {
+            "source": "suggested",
+            "note": "ориентация не указана — принята северная (СП 367 п. 9.1.2)"
+          },
+          "depth": {"source": "project"},
+          "width": {"source": "project"},
+          "height": {"source": "project"},
+          "windowWidth": {"source": "question"},
+          "windowHeight": {"source": "question"},
+          "sillHeight": {"source": "suggested", "note": "типовая высота подоконника 0,9 м"},
+          "windowCount": {"source": "question"},
+          "glazing": {"source": "suggested", "note": "двухкамерный стеклопакет — типовое решение серии"},
+          "opposing": {"source": "question"},
+          "distance": {"source": "question"},
+          "front": {"source": "question"},
+          "opposingHeight": {"source": "question"},
+          "facadeReflection": {
+            "source": "assumption",
+            "note": "ρ_ф 0,5 — допущение при неизвестной отделке фасада"
+          },
+          "floor": {"source": "question"},
+          "rhoCeiling": {"source": "assumption"},
+          "rhoWalls": {"source": "assumption"},
+          "rhoFloor": {"source": "assumption"},
+          "mf": {
+            "source": "suggested",
+            "note": "MF 0,83 — вертикальные окна жилых зданий (табл. 4.3 СП 52)"
+          },
+          "wallThickness": {"source": "project"},
+          "balcony": {"source": "assumption"}
+        }
+      }
+    ],
+    "roomLabel": "Помещение",
+    "addRoomLabel": "Добавить помещение",
+    "removeRoomLabel": "Удалить помещение",
+    "maxRooms": 8,
+    "computedNotes": {
+      "label": "Плоскость и точка расчёта",
+      "purposeField": "purpose",
+      "apartmentField": "apartment",
+      "byPurpose": {
+        "Жилая комната": {
+          "plane": "плоскость расчёта — пол Г-0,0 (СП 52, прил. Л, пп. 187–188)",
+          "byApartment": {
+            "1–3-комнатная": "расчётная точка — на полу, 1 м от дальней стены",
+            "4+": "расчётная точка — на полу, 1 м от дальней стены; проверяются две комнаты"
+          }
+        },
+        "Кухня": {
+          "plane": "плоскость расчёта — пол Г-0,0 (СП 52, прил. Л, п. 188)",
+          "point": "расчётная точка — на полу, в центре помещения"
+        }
+      }
+    },
+    "validationRules": [
+      {
+        "kind": "ratio-max",
+        "over": ["depth"],
+        "under": ["sillHeight", "windowHeight"],
+        "limit": 2.5,
+        "message": "d_п/h₀₁ ≤ 2,5 для жилых помещений (СП 367 п. 9.1.1)",
+        "targets": ["depth", "windowHeight"]
+      },
+      {
+        "kind": "sum-max",
+        "over": ["sillHeight", "windowHeight"],
+        "limitField": "height",
+        "message": "h_пд + h_o не может превышать высоту помещения",
+        "targets": ["sillHeight", "windowHeight"]
+      },
+      {
+        "kind": "sum-max",
+        "over": ["windowCount"],
+        "limit": 1,
+        "message": "расчёт по каждому проёму с суммированием — вне базового сценария",
+        "targets": ["windowCount"]
+      }
+    ],
+    "sourcesLabel": "Источники значений",
+    "submit": {"name": "keo_calculate", "label": "Рассчитать"}
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "component": "InsolationEditor",
+  "props": {
+    "title": "Параметры расчёта инсоляции",
+    "conditions": [
+      {
+        "name": "region",
+        "label": "Регион проекта",
+        "value": "Тюмень · центральная широтная зона"
+      }
+    ],
+    "pointTemplate": {
+      "title": "Расчётная точка",
+      "fields": [
+        {
+          "name": "floor",
+          "label": "Этаж",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    "points": [
+      {
+        "values": {"floor": 3},
+        "sources": {"floor": {"source": "default"}}
+      }
+    ],
+    "pointLabel": "Точка",
+    "addPointLabel": "Добавить расчётную точку",
+    "removePointLabel": "Удалить расчётную точку",
+    "buildingsTitle": "Затеняющая застройка",
+    "buildingFields": [
+      {
+        "name": "distance",
+        "label": "Расстояние, м",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "buildings": [],
+    "addBuildingLabel": "Добавить здание",
+    "removeBuildingLabel": "Удалить",
+    "submit": {"name": "insolation_calculate", "label": "Рассчитать"}
+  }
+}

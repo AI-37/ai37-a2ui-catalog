@@ -19,6 +19,10 @@ import {FormCard} from './renderers/form-card';
 import {ConstructionsEditor} from './renderers/constructions-editor';
 import {LiftEditor} from './renderers/lift-editor';
 import {ThermalReport} from './renderers/thermal-report';
+import {KeoEditor} from './renderers/keo-editor';
+import {KeoReport} from './renderers/keo-report';
+import {InsolationEditor} from './renderers/insolation-editor';
+import {InsolationReport} from './renderers/insolation-report';
 
 const customComponents: ReactComponentImplementation[] = [
   SimpleTable,
@@ -29,6 +33,10 @@ const customComponents: ReactComponentImplementation[] = [
   ConstructionsEditor,
   LiftEditor,
   ThermalReport,
+  KeoEditor,
+  KeoReport,
+  InsolationEditor,
+  InsolationReport,
 ];
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(

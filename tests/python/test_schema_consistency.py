@@ -17,6 +17,10 @@ COMPONENT_NAMES = (
     "FormCard",
     "ConstructionsEditor",
     "LiftEditor",
+    "KeoEditor",
+    "KeoReport",
+    "InsolationEditor",
+    "InsolationReport",
 )
 
 

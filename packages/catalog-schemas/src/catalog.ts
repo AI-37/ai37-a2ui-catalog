@@ -14,6 +14,10 @@ import {formCardDefinition} from './components/form-card';
 import {constructionsEditorDefinition} from './components/constructions-editor';
 import {liftEditorDefinition} from './components/lift-editor';
 import {thermalReportDefinition} from './components/thermal-report';
+import {keoEditorDefinition} from './components/keo-editor';
+import {keoReportDefinition} from './components/keo-report';
+import {insolationEditorDefinition} from './components/insolation-editor';
+import {insolationReportDefinition} from './components/insolation-report';
 import {getBaseComponentEntries} from './base-components';
 import type {CatalogComponentDefinition, JsonSchema} from './types';
 
@@ -26,6 +30,10 @@ export const componentDefinitions = [
   constructionsEditorDefinition,
   liftEditorDefinition,
   thermalReportDefinition,
+  keoEditorDefinition,
+  keoReportDefinition,
+  insolationEditorDefinition,
+  insolationReportDefinition,
 ] as const satisfies ReadonlyArray<CatalogComponentDefinition<any>>;
 
 export const componentDefinitionMap = new Map(

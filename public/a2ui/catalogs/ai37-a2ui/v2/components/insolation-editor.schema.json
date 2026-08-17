@@ -1,0 +1,563 @@
+{
+  "$ref": "#/definitions/InsolationEditor",
+  "definitions": {
+    "InsolationEditor": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "meta": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "name",
+              "label",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "pointTemplate": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "text",
+                      "number",
+                      "select",
+                      "boolean"
+                    ]
+                  },
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1
+                  },
+                  "referenceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "minChars": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "suggestMode": {
+                    "type": "string",
+                    "enum": [
+                      "action",
+                      "fetch"
+                    ]
+                  },
+                  "placeholder": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "defaultValue": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "hint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "shortLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "optionNotes": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "revealBy": {
+                    "type": "object",
+                    "properties": {
+                      "field": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "minItems": 1
+                      }
+                    },
+                    "required": [
+                      "field",
+                      "values"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "valueWarnings": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "min": {
+                    "type": "number"
+                  },
+                  "max": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "name",
+                  "label",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "title",
+            "fields"
+          ],
+          "additionalProperties": false
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "values": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "sources": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "project",
+                        "question",
+                        "suggested",
+                        "calculated",
+                        "assumption"
+                      ]
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "source"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "values"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "pointLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "addPointLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "removePointLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "maxPoints": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24
+        },
+        "buildingsTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "buildingFields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "number",
+                  "select",
+                  "boolean"
+                ]
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              },
+              "referenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minChars": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "suggestMode": {
+                "type": "string",
+                "enum": [
+                  "action",
+                  "fetch"
+                ]
+              },
+              "placeholder": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "defaultValue": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "hint": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "shortLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "optionNotes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "revealBy": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "values": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "field",
+                  "values"
+                ],
+                "additionalProperties": false
+              },
+              "valueWarnings": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "label",
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "buildings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "values": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "sources": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "project",
+                        "question",
+                        "suggested",
+                        "calculated",
+                        "assumption"
+                      ]
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "source"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "values"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "addBuildingLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "removeBuildingLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "maxBuildings": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "tone": {
+                "type": "string",
+                "enum": [
+                  "warning",
+                  "info"
+                ]
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "sourcesLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "submit": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "name",
+            "label"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "title",
+        "conditions",
+        "pointTemplate",
+        "points",
+        "pointLabel",
+        "addPointLabel",
+        "removePointLabel",
+        "buildingsTitle",
+        "buildingFields",
+        "buildings",
+        "addBuildingLabel",
+        "removeBuildingLabel",
+        "submit"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2019-09/schema#"
+}
