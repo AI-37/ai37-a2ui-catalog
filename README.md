@@ -5,7 +5,7 @@
 
 ## Описание
 
-Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений. В состав входит доменный компонент `ThermalReport`: карточный вывод результата теплотехнического расчёта по СП 50.13330 вместо markdown-простыни — вердикт с бейджем и headline, проверки со статусами или список конструкций с чипами отклонений и действиями, таблица слоёв с итоговой строкой, исходные данные чипами по источнику, допущения и «Протокол расчёта» одной неразворачиваемой строкой: краткий текстовый вывод (`content`) в UI не показывается и остаётся fallback-содержимым скачивания, а полная markdown-простыня (`downloadContent`) в чат не выводится и скачивается клиентским Blob'ом при наличии `downloadFileName`.
+Монорепозиторий каталога A2UI для экосистемы AI-37: канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели валидации, общие фикстуры и тесты. Артефакты каталога публикуются на GitHub Pages и используются для отрисовки и валидации A2UI-сообщений. В составе — доменные карточки результатов расчётов: `ThermalReport` (теплотехнический расчёт по СП 50.13330) и `LiftReport` (расчёт лифтов по ГОСТ Р 52941-2008 / ГОСТ 34758-2021): вердикт с бейджем, блок рекомендаций/проверок, исходные данные по источникам и свёрнутый протокол со «Скачать».
 
 ## Стек
 
@@ -24,6 +24,14 @@ Workspace состоит из пакетов:
 
 `ThermalReport` зарегистрирован в обоих пакетах: zod-схема `components/thermal-report.ts` (strict-объекты; обязательны `verdict` и `inputs`, режим «одна конструкция / список» определяется по наличию секций без флага; единственное число в props — `deviationPct`, остальное — готовые строки) и рендерер `renderers/thermal-report*.tsx/.ts` (корень, verdict, checks, constructions, inputs, layers-table, protocol, styles, action-button, format-deviation-pct). Кнопки-действия диспатчат агенту `{event: {name, context: payload ?? {}}}` через `context.dispatchAction`; «Протокол расчёта» — одна неразворачиваемая строка: лейбл, meta и при `downloadFileName` кнопка «Скачать». Краткий вывод `content` в UI не показывается — он остаётся fallback-содержимым скачивания при отсутствии `downloadContent`. «Скачать» отдаёт клиентским Blob'ом `downloadContent` (полную markdown-простыню; без него — `content`), агент и транспорт не участвуют; без `downloadFileName` кнопка не рендерится. Кнопка действия блока «Исходные данные» использует вариант `link`. Стили — `THERMAL_REPORT_CSS` с префиксом `a2ui-tr-`, цвета — токены группы `tr` (INHERITS на общие токены, как `ce`/`le`). Демо содержит два примера (одна конструкция / 7 конструкций), собранные из `fixtures/valid/thermal-report-*.json` через `create-thermal-report-messages.ts`; действия логируются `attachDemoActionLogger`.
 
+`LiftReport` зарегистрирован в обоих пакетах: zod-схема `components/lift-report.ts` (strict-объекты; обязательны `verdict` и `inputs`, `suggestions` и `protocol` опциональны) и рендерер `renderers/lift-report*.tsx/.ts` (корень, verdict, suggestions, inputs, protocol, action-button, chevron, styles). Секции:
+- `verdict` — статусный бейдж с точкой (status `pass`/`fail`), serif-headline, опциональный `summary`;
+- `suggestions` («Что изменить») — варианты с уже пересчитанным результатом в `detail`; элемент с `action` рендерит кнопку «Пересчитать», без `action` — `statusLabel` тоном (`fail` — danger), `tone: 'pass'` выделяет рекомендуемый вариант акцентной рамкой;
+- `inputs` — контракт идентичен `ThermalReport.inputs` (`{action?, groups: [{label, tone: 'normal'|'warning', chips: [{label, value}], note?}]}`): кнопка `action` в заголовке, группа `tone: 'warning'` — пунктирные чипы, предупреждающий заголовок и note;
+- `protocol` — нативный `<details>`, свёрнутый по умолчанию: строка-сводка (лейбл, `meta`, шеврон) раскрывает краткий вывод `content`; при заданном `downloadUrl` рендерится ссылка «Скачать» (обычный `<a href>` на относительный `/api/agent-resource?resource=…`), download-заголовки ставит сервер агента, клиентский Blob не используется; без `downloadUrl` ссылки нет.
+
+Действия диспатчатся как `{event: {name, context: payload ?? {}}}`; канонические имена в фикстуре — `report_apply_suggestion` (payload `{suggestionId}`) и `report_edit_inputs`. Стили — `LIFT_REPORT_CSS` с префиксом `a2ui-lr-`, цвета — токены группы `lr` (INHERITS на общие). Демо собирает поверхность из `fixtures/valid/lift-report.json` через `create-lift-report-messages.ts` (один файл сообщений на фикстуру, чтобы props не жили в двух копиях); действия логируются `attachDemoActionLogger`.
+
 ```mermaid
 flowchart LR
     S[packages/catalog-schemas] --> G[generate-artifacts.ts]
@@ -37,27 +45,29 @@ flowchart LR
 
 ## Структура каталогов
 
-- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений; dev-middleware мокает fetch-справочники lookup; логгеры черновиков/действий; примеры Thermal Report (single/multi) и помощник `create-thermal-report-messages.ts`;
-- packages/catalog-schemas — канонические Zod-схемы, типы и генерация JSON Schema (включая `components/thermal-report.ts` и регистрацию в `CATALOG_COMPONENT_NAMES`, `constants.ts`, `catalog.ts`, `index.ts`);
-- packages/catalog-react — React-рендереры компонентов каталога (в т.ч. `renderers/thermal-report*.tsx/.ts`, `thermal-report-protocol.tsx`, группа токенов `tr` в `tokens.ts`);
+- apps/demo — Vite-приложение для ручной проверки A2UI-сообщений; dev-middleware мокает fetch-справочники lookup; логгеры черновиков/действий; примеры Thermal Report (single/multi), Lift Report и помощники `create-thermal-report-messages.ts` / `create-lift-report-messages.ts`;
+- packages/catalog-schemas — канонические Zod-схемы, типы и генерация JSON Schema (включая `components/thermal-report.ts`, `components/lift-report.ts` и регистрацию в `CATALOG_COMPONENT_NAMES`, `constants.ts`, `catalog.ts`, `index.ts`);
+- packages/catalog-react — React-рендереры компонентов каталога (в т.ч. `renderers/thermal-report*.tsx/.ts`, `renderers/lift-report*.tsx/.ts`, `thermal-report-protocol.tsx`, `lift-report-protocol.tsx`, группы токенов `tr` и `lr` в `tokens.ts`);
 - packages/catalog-python — Pydantic-модели валидации (зеркало zod-схем);
-- fixtures — валидные, невалидные и сквозные фикстуры A2UI-сообщений (включая `valid/thermal-report-single.json` и `valid/thermal-report-multi.json` — protocol содержит `content` и `downloadContent`);
-- tests — тесты (tests/react — Vitest, включая `thermal-report.test.tsx`; tests/ts — включая `thermal-report-schema.test.ts`; python-часть — Pytest);
-- public/a2ui/catalogs — статические артефакты каталога (catalog.json, JSON Schema компонентов, включая `components/thermal-report.schema.json`) для GitHub Pages;
+- fixtures — валидные, невалидные и сквозные фикстуры A2UI-сообщений (включая `valid/thermal-report-single.json`, `valid/thermal-report-multi.json`, `valid/lift-report.json`);
+- tests — тесты (tests/react — Vitest, включая `thermal-report.test.tsx`, `lift-report.test.tsx`; tests/ts — включая `thermal-report-schema.test.ts`, `lift-report-schema.test.ts`; python-часть — Pytest);
+- public/a2ui/catalogs — статические артефакты каталога (catalog.json, JSON Schema компонентов, включая `components/thermal-report.schema.json` и `components/lift-report.schema.json`) для GitHub Pages;
 - scripts/install-to-consumer.mjs — установка локальной сборки пакетов в потребителя тарболлами;
 - .github/workflows — CI/CD (pages.yml, ci.yml, cd.yml);
 - .npmrc — scoped-реестр @ai37 и авторизация для npm.app.sp-ai.ru;
-- docs, openspec — документация и design-доки (включая openspec/changes/thermal-report и прежние changes).
+- docs, openspec — документация и design-доки (включая openspec/changes/thermal-report, openspec/changes/lift-report и прежние changes).
 
 ## Публичные интерфейсы
 
 Статический A2UI-каталог, публикуемый на GitHub Pages:
 - catalog.json: https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json
-- JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v2/components/*.schema.json (включая `thermal-report.schema.json`) и аналогично для v1.
+- JSON Schema компонентов: .../a2ui/catalogs/ai37-a2ui/v2/components/*.schema.json (включая `thermal-report.schema.json` и `lift-report.schema.json`) и аналогично для v1.
 
 Отдельных публичных HTTP/REST-эндпоинтов, A2A Agent Card (/a2a/v1), MCP-сервера, AG-UI-сервера и CLI наружу нет. Внутренний fetch-канал подсказок lookup-полей — same-origin `GET /api/agent-resource?resource=&query=` (resource = id справочника / `field.referenceId`; BFF потребителя проксирует на REST оркестратора). В dev-middleware apps/demo неизвестный resource — 404 `{error: "unknown_reference"}` (changelog 0.12.0 объявляет контрактный код `unknown_resource`). npm-пакеты workspace (catalog-schemas, catalog-react) публикуются в приватный npm-реестр AI-37 (npm.app.sp-ai.ru), Python-пакет ai37_a2ui_catalog — в приватный PyPI (pypi.app.sp-ai.ru); публичным наружу остаётся статический каталог на GitHub Pages.
 
 В составе каталога v2 — компонент `ThermalReport` (read-mostly): секции `verdict` (обязателен), `checks`/`layersTable` (режим одной конструкции), `constructions`/`excluded`/`assumptions` (режим списка), `inputs` (обязателен), `protocol`. Действия — объект `{name, label, payload?}`; имя в схему не зашито, в фикстурах канонические `report_fix_construction` (payload `{constructionId}`), `report_edit_inputs`, `report_restore_excluded`. Чип отклонения форматируется самим рендерером по знаку `deviationPct`: «−23,3 %» / «+0,6 %» (типографский минус, десятичная запятая, один знак). Группа исходных данных с `tone: 'warning'` («принято системой — проверьте») отличается пунктирными чипами, предупреждающим заголовком и `note`. Протокол — одна неразворачиваемая строка: `content` в UI не показывается; при заданном `downloadFileName` кнопка «Скачать» отдаёт `downloadContent` (полную markdown-простыню, maxLength 120000; без него — `content`) клиентским Blob'ом; без `downloadFileName` кнопка не рендерится.
+
+Компонент `LiftReport` (read-mostly): обязательны `verdict` ({status: 'pass'|'fail', badge, headline, summary?}) и `inputs` (контракт идентичен `ThermalReport.inputs`); опциональны `suggestions` ({title?, items: [{id, title, detail?, tone: 'pass'|'fail'|'neutral', action?, statusLabel?}]}) и `protocol` ({meta?, content, downloadUrl?}). Вердикт рендерится бейджем со статусной точкой (pass — success, fail — danger), serif-headline и summary. В «Что изменить» элемент с `action` рендерит кнопку «Пересчитать» (диспатч `report_apply_suggestion` c `context.suggestionId`), без `action` — статус-лейбл тоном; `tone: 'pass'` — акцентная рамка рекомендуемого варианта. `inputs.action` рендерит кнопку «Изменить и пересчитать» (диспатч `report_edit_inputs`), группа `tone: 'warning'` — пунктирные чипы, warning-заголовок и note. Протокол — нативный `<details>`, раскрывает краткий `content` (maxLength 60000); «Скачать» — обычная ссылка на относительный `downloadUrl` (`/api/agent-resource?resource=…`, maxLength 2000), download-заголовки ставит сервер агента; без `downloadUrl` ссылки нет. Имена действий схема не фиксирует.
 
 ## Зависимости в экосистеме
 
@@ -67,12 +77,12 @@ flowchart LR
 - React 19, Zod, Vite/Vitest, tsup, tsx;
 - Python 3.13+, Pydantic, Poetry 2.3.2, Twine;
 - при сборке/публикации — приватные реестры AI-37: npm.app.sp-ai.ru (npm) и pypi.app.sp-ai.ru (PyPI), а также токены AI37_NPM_TOKEN / AI37_PYPI_TOKEN;
-- в fetch-режиме lookup — same-origin `/api/agent-resource`, который BFF потребителя проксирует на REST оркестратора (тот резолвит resource в ручку агента-владельца справочника);
+- в fetch-режиме lookup — same-origin `/api/agent-resource`, который BFF потребителя проксирует на REST оркестратора (тот резолвит resource в ручку агента-владельца справочника); для скачивания протокола `LiftReport` по `downloadUrl` сервер агента ставит `Content-Disposition: attachment`;
 - внешние сервисы (Authentik, LiteLLM, БД, Redis, S3) в рантайме не используются.
 
 ### От него зависят
 
-По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений). Рендерер ConstructionsEditor рассчитан на агента teplo-calc; proposal `constructions-editor-live-draft` отмечает потребителей spai-teplo-calc, spai-chat-backend и spai-ui — без изменений. Для слотов `group`/`title`/`meta` lookup-опций агент-справочник (например, spai-thermal-calc-agent) должен начать их отдавать; до этого рендер деградирует в однострочный `label`. Компонент `ThermalReport` рассчитан на агента spai-teplo-calc как эмитента отчёта (парный change `thermal-report` там) и на spai-ui как потребителя (bump schemas+react после publish).
+По материалам репозитория прямые вызовы не перечислены; артефакты каталога предназначены для A2UI-потребителей экосистемы AI-37 (UI-рендереры и валидация сообщений). Рендерер ConstructionsEditor рассчитан на агента teplo-calc; proposal `constructions-editor-live-draft` отмечает потребителей spai-teplo-calc, spai-chat-backend и spai-ui — без изменений. Компонент `ThermalReport` рассчитан на агента spai-teplo-calc как эмитента отчёта (парный change `thermal-report` там) и на spai-ui как потребителя (bump schemas+react после publish). Компонент `LiftReport` рассчитан на агента spai-elevator-calc-agent как эмитента отчёта (парный change `lift-report-render` там) и на spai-ui как потребителя (bump schemas+react после publish); для «Скачать» требуется ручка агента с download-заголовками (spec `report-download` elevator-агента) и прохождение относительного URL через санитайзер spai-ui.
 
 ## Конфигурация
 
@@ -80,11 +90,11 @@ flowchart LR
 - AI37_NPM_TOKEN — токен авторизации для приватного npm-реестра npm.app.sp-ai.ru (задан в .npmrc и в CI/CD);
 - AI37_PYPI_TOKEN — токен (password) для публикации Python-пакета через Twine на pypi.app.sp-ai.ru (в cd.yml).
 
-Скоуп @ai37 закреплён за npm.app.sp-ai.ru в .npmrc (always-auth=true). Версии пакетов синхронизируются через `pnpm run version:bump <version>` (текущая версия — 0.24.0); каждый PR также обновляет CHANGELOG.md. Доступные npm-скрипты: pnpm run build, typecheck, test, test:ts, test:python, export:schemas, export:public, verify:public, lint, demo, version:bump, install:consumer. Константа `CONDITIONS_DRAFT_DEBOUNCE_MS = 500` мс экспортируется из @ai37/a2ui-catalog-react (не env; используется тестами и хостами для единого окна дебаунса). Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml. Тематизация рендереров — через CSS-переменные (tokens.ts), включая токены группы `tr` и общие статусные danger/success/warning для ThermalReport.
+Скоуп @ai37 закреплён за npm.app.sp-ai.ru в .npmrc (always-auth=true). Версии пакетов синхронизируются через `pnpm run version:bump <version>` (текущая версия — 0.24.0); каждый PR также обновляет CHANGELOG.md. Доступные npm-скрипты: pnpm run build, typecheck, test, test:ts, test:python, export:schemas, export:public, verify:public, lint, demo, version:bump, install:consumer. Константа `CONDITIONS_DRAFT_DEBOUNCE_MS = 500` мс экспортируется из @ai37/a2ui-catalog-react (не env; используется тестами и хостами для единого окна дебаунса). Конфигурация: package.json (включая overrides), tsconfig.base.json, vitest.config.ts, vite.config.ts, pyproject.toml. Тематизация рендереров — через CSS-переменные (tokens.ts), включая токены групп `tr`/`lr` и общие статусные danger/success/warning для ThermalReport и LiftReport.
 
 ## Данные и хранилища
 
-БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2 (в v2 `components/thermal-report.schema.json` и catalog.json перегенерированы с новым полем `downloadContent` у protocol). Фикстуры: fixtures/valid (включая thermal-report-single.json, thermal-report-multi.json — в protocol теперь `content` (краткий текстовый вывод) и `downloadContent` (полная markdown-простыня)), fixtures/invalid, fixtures/messages.
+БД, Redis и S3 отсутствуют. Статические артефакты каталога: public/a2ui/catalogs/ai37-a2ui/v1 и v2 (в v2 `components/thermal-report.schema.json`, `components/lift-report.schema.json` и catalog.json перегенерированы; для LiftReport JSON Schema отражает strict-контракт с обязательными `verdict` и `inputs`). Фикстуры: fixtures/valid (включая thermal-report-single.json, thermal-report-multi.json — в protocol `content` и `downloadContent`; lift-report.json — с `verdict`, `suggestions`, `inputs`, `protocol` c `downloadUrl`), fixtures/invalid, fixtures/messages.
 
 ## Быстрый старт (локально)
 
@@ -93,20 +103,20 @@ flowchart LR
 - `pnpm install` — зависимости workspace (pnpm >= 10, Node >= 22);
 - `poetry -C packages/catalog-python install` — Python-пакет ai37-a2ui-catalog.
 
-.env.example отсутствует — других env-переменных нет. Отдельного health-check нет; smoke-проверка после установки — `pnpm run test`. Демо-приложение: `pnpm run demo` (Vite + dev-middleware с мок-справочниками) для ручной проверки A2UI-сообщений; в демо доступны примеры Thermal Report — одна конструкция и список из 7 конструкций (действия видны в консоли). Локальная проверка в потребителе без публикации: `pnpm run install:consumer [путь]` (по умолчанию ../spai-ui) — собирает тарболлы пакетов и ставит их в consumer через npm install --no-save.
+.env.example отсутствует — других env-переменных нет. Отдельного health-check нет; smoke-проверка после установки — `pnpm run test`. Демо-приложение: `pnpm run demo` (Vite + dev-middleware с мок-справочниками) для ручной проверки A2UI-сообщений; в демо доступны примеры Thermal Report (одна конструкция и список из 7 конструкций) и Lift Report (действия видны в консоли). Локальная проверка в потребителе без публикации: `pnpm run install:consumer [путь]` (по умолчанию ../spai-ui) — собирает тарболлы пакетов и ставит их в consumer через npm install --no-save.
 
 ## Как запускать тесты
 
 Предварительно: `pnpm install` и `poetry -C packages/catalog-python install`.
 - `pnpm run test` — vitest + pytest;
-- `pnpm run test:ts` — только TypeScript/React-тесты (включая constructions-editor.test.tsx, lookup-option-rich-render.test.tsx, thermal-report.test.tsx, thermal-report-schema.test.ts, parse-lookup-options.test.ts);
+- `pnpm run test:ts` — только TypeScript/React-тесты (включая constructions-editor.test.tsx, lookup-option-rich-render.test.tsx, thermal-report.test.tsx, lift-report.test.tsx, thermal-report-schema.test.ts, lift-report-schema.test.ts, parse-lookup-options.test.ts);
 - `pnpm run test:python` — только Python-тесты;
 - `pnpm run lint` — typecheck.
 
 ## Деплой
 
 GitHub Actions:
-- .github/workflows/pages.yml публикует статические артефакты (включая обновлённые v2 с thermal-report.schema.json) на GitHub Pages;
+- .github/workflows/pages.yml публикует статические артефакты (включая обновлённые v2 с thermal-report.schema.json и lift-report.schema.json) на GitHub Pages;
 - .github/workflows/ci.yml — CI-проверки (Reuse CI), при pnpm install используется AI37_NPM_TOKEN;
 - .github/workflows/cd.yml — CD на push тегов v* или workflow_dispatch:
   - publish_npm: pnpm build и публикация @ai37/a2ui-catalog-* в приватный реестр https://npm.app.sp-ai.ru/ (токен AI37_NPM_TOKEN);
@@ -127,7 +137,11 @@ GitHub Actions:
 - openspec/changes/thermal-report/design.md;
 - openspec/changes/thermal-report/proposal.md;
 - openspec/changes/thermal-report/specs/thermal-report-component/spec.md;
-- openspec/changes/thermal-report/tasks.md.
+- openspec/changes/thermal-report/tasks.md;
+- openspec/changes/lift-report/design.md;
+- openspec/changes/lift-report/proposal.md;
+- openspec/changes/lift-report/specs/lift-report-component/spec.md;
+- openspec/changes/lift-report/tasks.md.
 <!-- ai37:card:end -->
 
 <!-- Ниже — только уникальный человеческий контекст (замысел, инварианты, грабли).
