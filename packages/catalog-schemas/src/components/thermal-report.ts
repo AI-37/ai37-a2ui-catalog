@@ -97,13 +97,20 @@ export const thermalReportInputsSchema = z
 export const thermalReportProtocolSchema = z
   .object({
     meta: z.string().min(1).max(200).optional(),
+    /** Краткий текстовый вывод расчёта — показывается под катом (plain text). */
     content: z.string().min(1).max(60000),
     /**
-     * Имя файла для кнопки «Скачать»: при наличии рендерер отдаёт `content`
+     * Имя файла для кнопки «Скачать»: при наличии рендерер отдаёт файл
      * клиентским Blob'ом (агент и транспорт не участвуют). Нет имени — нет
      * кнопки, протокол только раскрывается.
      */
     downloadFileName: z.string().min(1).max(120).optional(),
+    /**
+     * Содержимое скачиваемого файла (полная markdown-простыня отчёта).
+     * Без него «Скачать» отдаёт `content`. В чат простыня не выводится —
+     * она живёт только здесь.
+     */
+    downloadContent: z.string().min(1).max(120000).optional(),
   })
   .strict();
 

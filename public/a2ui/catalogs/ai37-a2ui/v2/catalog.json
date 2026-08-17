@@ -6876,6 +6876,11 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 120
+                  },
+                  "downloadContent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120000
                   }
                 },
                 "required": [
