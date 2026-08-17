@@ -23,6 +23,7 @@ import {KeoEditor} from './renderers/keo-editor';
 import {KeoReport} from './renderers/keo-report';
 import {InsolationEditor} from './renderers/insolation-editor';
 import {InsolationReport} from './renderers/insolation-report';
+import {LiftReport} from './renderers/lift-report';
 
 const customComponents: ReactComponentImplementation[] = [
   SimpleTable,
@@ -37,6 +38,7 @@ const customComponents: ReactComponentImplementation[] = [
   KeoReport,
   InsolationEditor,
   InsolationReport,
+  LiftReport,
 ];
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(

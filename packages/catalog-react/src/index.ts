@@ -22,3 +22,4 @@ export * from './renderers/keo-editor';
 export * from './renderers/keo-report';
 export * from './renderers/insolation-editor';
 export * from './renderers/insolation-report';
+export * from './renderers/lift-report';

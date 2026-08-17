@@ -17,4 +17,5 @@ export * from './components/keo-editor';
 export * from './components/keo-report';
 export * from './components/insolation-editor';
 export * from './components/insolation-report';
+export * from './components/lift-report';
 export * from './catalog';

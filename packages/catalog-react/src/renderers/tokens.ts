@@ -104,6 +104,16 @@ const DEFAULTS = {
   'color-ir-accent': '#245a87',
   'color-ir-sun': '#16a34a',
   'color-ir-shadow': '#6e6e6a',
+
+  // Палитра `LiftReport` (`lr`): та же тёплая нейтраль макетов SP-AI, своя
+  // группа по канону ce/le/tr — правка палитры отчёта по лифтам не должна
+  // красить теплотехнический. Статусные цвета — общие danger/success/warning.
+  'color-lr-surface': '#fafaf9',
+  'color-lr-surface-sunken': '#f1f1ef',
+  'color-lr-border': '#e5e4e1',
+  'color-lr-text': '#1f1f1e',
+  'color-lr-text-muted': '#6e6e6a',
+  'color-lr-accent': '#245a87',
 } as const;
 
 type TokenName = keyof typeof DEFAULTS;
@@ -160,6 +170,12 @@ const INHERITS: Partial<Record<TokenName, TokenName>> = {
   'color-ir-accent': 'color-accent',
   'color-ir-sun': 'color-success',
   'color-ir-shadow': 'color-text-subtle',
+  'color-lr-surface': 'color-surface',
+  'color-lr-surface-sunken': 'color-surface-muted',
+  'color-lr-border': 'color-border',
+  'color-lr-text': 'color-text-strong',
+  'color-lr-text-muted': 'color-text-subtle',
+  'color-lr-accent': 'color-accent',
 };
 
 function cssVar(name: TokenName): string {
@@ -247,6 +263,13 @@ export const tokens = {
   irAccent: cssVar('color-ir-accent'),
   irSun: cssVar('color-ir-sun'),
   irShadow: cssVar('color-ir-shadow'),
+
+  lrSurface: cssVar('color-lr-surface'),
+  lrSurfaceSunken: cssVar('color-lr-surface-sunken'),
+  lrBorder: cssVar('color-lr-border'),
+  lrText: cssVar('color-lr-text'),
+  lrTextMuted: cssVar('color-lr-text-muted'),
+  lrAccent: cssVar('color-lr-accent'),
 } as const;
 
 /** id для тега <style> с дефолтной темой (если консьюмер решит её объявить). */
