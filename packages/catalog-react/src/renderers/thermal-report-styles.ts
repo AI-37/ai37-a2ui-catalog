@@ -149,8 +149,20 @@ export const THERMAL_REPORT_CSS = `
   border-color: transparent;
   color: ${tokens.trAccent};
 }
+/* Ховер объявляем сами (канон CE, constructions-editor-styles.ts): у хоста
+   он объявлен на элементе (.a2ui-surface button:hover с заливкой и рамкой)
+   и красит серой пилюлей всё, у чего нет своего состояния. */
+.a2ui-tr .a2ui-tr-btn:hover {
+  background: transparent;
+  border-color: ${tokens.trTextMuted};
+}
+.a2ui-tr .a2ui-tr-btn--solid:hover {
+  background: ${tokens.trText};
+  border-color: transparent;
+}
 .a2ui-tr .a2ui-tr-btn--link:hover {
   background: transparent;
+  border-color: transparent;
   text-decoration: underline;
 }
 
@@ -259,42 +271,20 @@ export const THERMAL_REPORT_CSS = `
 .a2ui-tr__chip-label { color: ${tokens.trTextMuted}; }
 .a2ui-tr__chip-value { font-weight: 500; }
 
-/* Протокол */
-.a2ui-tr__protocol { border-radius: 14px; border: 1px solid ${tokens.trBorder}; background: ${tokens.trSurface}; }
-.a2ui-tr__protocol-summary {
+/* Протокол — одна неразворачиваемая строка. */
+.a2ui-tr__protocol {
   display: flex;
   align-items: baseline;
   gap: 10px;
   padding: 14px 20px;
-  cursor: pointer;
-  list-style: none;
+  border-radius: 14px;
+  border: 1px solid ${tokens.trBorder};
+  background: ${tokens.trSurface};
 }
-.a2ui-tr__protocol-summary::-webkit-details-marker { display: none; }
-.a2ui-tr__protocol-summary::before {
-  content: '›';
-  font-weight: 500;
-  color: ${tokens.trTextMuted};
-  transition: transform 0.15s ease;
-  display: inline-block;
-}
-.a2ui-tr__protocol[open] .a2ui-tr__protocol-summary::before { transform: rotate(90deg); }
 .a2ui-tr__protocol-title { font-size: 14px; font-weight: 500; }
 .a2ui-tr__protocol-meta { color: ${tokens.trTextMuted}; font-size: 12.5px; }
 /* От корня: сброс .a2ui-tr .a2ui-tr-btn (margin: 0) специфичнее одного класса. */
 .a2ui-tr .a2ui-tr__protocol-download { margin-left: auto; }
-.a2ui-tr__protocol-content {
-  margin: 0;
-  padding: 14px 20px;
-  border-top: 1px solid ${tokens.trBorder};
-  background: ${tokens.trSurfaceSunken};
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  max-height: 480px;
-  overflow-y: auto;
-}
 `;
 
 export const THERMAL_REPORT_STYLE_HREF = `${THERMAL_REPORT_STYLE_PREFIX}-${hashCss(

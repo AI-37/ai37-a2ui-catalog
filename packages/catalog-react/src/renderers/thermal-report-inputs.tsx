@@ -18,7 +18,7 @@ export function ThermalReportInputsCard({
       <div className="a2ui-tr__inputs-head">
         <span className="a2ui-tr__inputs-title">Исходные данные</span>
         {inputs.action ? (
-          <ThermalReportActionButton action={inputs.action} variant="outline" onAction={onAction} />
+          <ThermalReportActionButton action={inputs.action} variant="link" onAction={onAction} />
         ) : null}
       </div>
       <div className="a2ui-tr__section">

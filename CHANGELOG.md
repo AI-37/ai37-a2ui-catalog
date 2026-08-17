@@ -4,6 +4,31 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.23.0] - 2026-08-17
+
+### Added
+
+- `ThermalReport`: опциональные `protocol.downloadFileName` /
+  `protocol.downloadContent` — кнопка «Скачать» отдаёт полную
+  markdown-простыню клиентским Blob'ом (change `thermal-report`).
+
+### Changed
+
+- `ThermalReport`: `protocol.content` — краткий текстовый вывод расчёта под
+  катом (plain text); полный markdown в чат не выводится, только в
+  `downloadContent`.
+
+## [0.22.0] - 2026-08-17
+
+### Added
+
+- Новый доменный компонент **`ThermalReport`** (change `thermal-report`):
+  результат теплотехнического расчёта карточками — вердикт с бейджем,
+  проверки / список конструкций с чипами отклонений и действиями
+  (`dispatchAction` с payload), таблица слоёв, исходные данные чипами по
+  источнику, протокол под катом (`<details>`). Схема + рендерер (группа
+  токенов `tr`), две витрины в apps/demo, фикстуры и тесты.
+
 ## [0.21.0] - 2026-08-16
 
 ### Added
