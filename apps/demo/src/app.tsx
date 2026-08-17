@@ -30,6 +30,7 @@ import keoReportPassFixture from '../../../fixtures/valid/keo-report-pass.json';
 import insolationEditorFixture from '../../../fixtures/valid/insolation-editor.json';
 import insolationReportPassFixture from '../../../fixtures/valid/insolation-report-pass.json';
 import insolationReportFailFixture from '../../../fixtures/valid/insolation-report-fail.json';
+import liftReportFixture from '../../../fixtures/valid/lift-report.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
@@ -195,6 +196,16 @@ const examples = [
       insolationReportFailFixture.props as Record<string, unknown>,
     ),
   },
+  {
+    key: 'lift-report-preview',
+    title: 'Lift Report — расчёт лифтов',
+    description:
+      'Результат подбора лифтов карточками (ГОСТ Р 52941-2008): вердикт «НЕ СООТВЕТСТВУЕТ ГОСТ» с крупным интервалом движения, блок «Что изменить» с уже пересчитанными вариантами (рекомендуемый — зелёной рамкой с «Пересчитать», непроходящий — статусом «не проходит» без кнопки), исходные данные чипами по источнику («принято системой» — пунктиром с заметкой), протокол под катом со «Скачать» по URL ручки агента. Кнопки диспатчат report_apply_suggestion с suggestionId и report_edit_inputs — смотрите консоль.',
+    messages: createSurfaceMessages(
+      'LiftReport',
+      liftReportFixture.props as Record<string, unknown>,
+    ),
+  },
 ] as const;
 
 const seedMessages: ThreadMessageLike[] = [
@@ -273,7 +284,8 @@ export function App() {
           example.key === 'keo-report-pass-preview' ||
           example.key === 'insolation-editor-preview' ||
           example.key === 'insolation-report-pass-preview' ||
-          example.key === 'insolation-report-fail-preview'
+          example.key === 'insolation-report-fail-preview' ||
+          example.key === 'lift-report-preview'
         ) {
           attachDemoActionLogger(processor, 'demo-surface', example.key);
         }
