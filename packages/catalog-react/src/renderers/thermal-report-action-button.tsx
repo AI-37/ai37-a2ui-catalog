@@ -8,8 +8,8 @@ const VARIANT_CLASS = {
   link: 'a2ui-tr-btn a2ui-tr-btn--link',
 } as const;
 
-/** Кнопка действия отчёта: solid — «Подобрать», outline — «Изменить и
- * пересчитать», link — «Вернуть в расчёт». Диспатч — через колбэк корня. */
+/** Кнопка действия отчёта: solid — «Подобрать», link — «Изменить и
+ * пересчитать», «Вернуть в расчёт». Диспатч — через колбэк корня. */
 export function ThermalReportActionButton({
   action,
   variant,

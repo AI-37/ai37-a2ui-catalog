@@ -53,10 +53,12 @@ describe('ThermalReport', () => {
     expect(
       screen.getByText('R₀ приведённое · с сопротивлениями поверхностей и r 0,92'),
     ).toBeTruthy();
-    // Протокол свёрнут по умолчанию.
-    const details = container.querySelector<HTMLDetailsElement>('details.a2ui-tr__protocol')!;
-    expect(details.open).toBe(false);
+    // Протокол — одна строка без раскрытия: content в UI не показывается.
+    const protocol = container.querySelector('.a2ui-tr__protocol')!;
+    expect(protocol.tagName).not.toBe('DETAILS');
+    expect(container.querySelector('details')).toBeNull();
     expect(screen.getByText('Протокол расчёта')).toBeTruthy();
+    expect(protocol.textContent).not.toContain('ГСОП');
   });
 
   it('renders list filling: deviation chips by sign, actions only where given', () => {
@@ -88,7 +90,7 @@ describe('ThermalReport', () => {
     expect(actions[2]!.name).toBe('report_restore_excluded');
   });
 
-  it('downloads protocol as client-side blob without expanding details', () => {
+  it('downloads protocol as client-side blob', () => {
     const created: string[] = [];
     const originalCreate = URL.createObjectURL;
     const originalRevoke = URL.revokeObjectURL;
@@ -99,18 +101,28 @@ describe('ThermalReport', () => {
     URL.revokeObjectURL = () => {};
 
     try {
-      const {container} = renderReport(readProps('thermal-report-single.json'));
-      const details = container.querySelector<HTMLDetailsElement>('details.a2ui-tr__protocol')!;
+      renderReport(readProps('thermal-report-single.json'));
 
       fireEvent.click(screen.getByRole('button', {name: 'Скачать'}));
 
       expect(created).toHaveLength(1);
       expect(created[0]).toContain('text/markdown');
-      expect(details.open).toBe(false);
     } finally {
       URL.createObjectURL = originalCreate;
       URL.revokeObjectURL = originalRevoke;
     }
+  });
+
+  it('omits the download link when downloadFileName is absent', () => {
+    const props = readProps('thermal-report-single.json');
+    const protocol = props.protocol as Record<string, unknown>;
+    delete protocol.downloadFileName;
+    delete protocol.downloadContent;
+
+    renderReport(props);
+
+    expect(screen.getByText('Протокол расчёта')).toBeTruthy();
+    expect(screen.queryByRole('button', {name: 'Скачать'})).toBeNull();
   });
 
   it('marks system-assumed inputs group with warning tone', () => {
