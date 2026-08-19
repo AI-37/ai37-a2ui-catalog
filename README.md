@@ -117,7 +117,7 @@ flowchart LR
 
 GitHub Actions:
 - .github/workflows/pages.yml публикует статические артефакты (включая обновлённые v2 с thermal-report.schema.json и lift-report.schema.json) на GitHub Pages;
-- .github/workflows/ci.yml — CI-проверки (Reuse CI), при pnpm install используется AI37_NPM_TOKEN;
+- .github/workflows/ci.yml — CI-проверки. Запускается на pull_request, workflow_dispatch и workflow_call (push-триггер снят). При ручном запуске input `runner` позволяет выбрать раннер: `ubuntu-latest` (по умолчанию) или `ai37-self-hosted` → `runs-on: ["self-hosted", "ai37-local-1"]`. На PR и без input `runner` джобы идут на ubuntu-latest. Шаги: checkout, pnpm 10.29.3, Node 22, Python 3.13, Poetry 2.3.2, `pnpm install --frozen-lockfile` (с AI37_NPM_TOKEN), `poetry -C packages/catalog-python install --no-interaction`, `pnpm run test:ts`, `pnpm run test:python`, `pnpm run build`, `pnpm run verify:public`. Шаг «Validate PR version and changelog updates» временно закомментирован.
 - .github/workflows/cd.yml — CD на push тегов v* или workflow_dispatch:
   - publish_npm: pnpm build и публикация @ai37/a2ui-catalog-* в приватный реестр https://npm.app.sp-ai.ru/ (токен AI37_NPM_TOKEN);
   - publish_pypi: poetry build + twine check dist/* + twine upload в https://pypi.app.sp-ai.ru/ (TWINE_USERNAME=ci-publish, TWINE_PASSWORD=AI37_PYPI_TOKEN). Poetry 2.3.2 ставится до setup-python (cache: poetry); run-шаги выполняются из packages/catalog-python.
