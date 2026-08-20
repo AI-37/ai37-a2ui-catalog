@@ -247,6 +247,33 @@ export const LIFT_REPORT_CSS = `
 .a2ui-lr__protocol[open] .a2ui-lr__protocol-chevron { transform: rotate(90deg); }
 /* От корня: сброс .a2ui-lr .a2ui-lr-btn (margin: 0) специфичнее одного класса. */
 .a2ui-lr .a2ui-lr__protocol-download { margin-left: auto; }
+/* «Скачать ▾» — dropdown форматов (download-format-menu, план report-download ред. 2). */
+.a2ui-dfm { position: relative; display: inline-block; }
+.a2ui-dfm__toggle { list-style: none; cursor: pointer; }
+.a2ui-dfm__toggle::-webkit-details-marker { display: none; }
+.a2ui-dfm__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 10;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid ${tokens.lrBorder};
+  background: ${tokens.lrSurface};
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.a2ui-dfm__item {
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: ${tokens.lrText};
+  text-decoration: none;
+  white-space: nowrap;
+}
+.a2ui-dfm__item:hover { background: ${tokens.lrBorder}; }
 .a2ui-lr__protocol-body {
   margin: 0;
   padding: 14px 20px 16px;

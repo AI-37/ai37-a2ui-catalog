@@ -1,5 +1,6 @@
 import React from 'react';
 import type {LiftReportProtocol} from '@ai37/a2ui-catalog-schemas';
+import {DownloadFormatMenu} from './download-format-menu';
 import {LiftReportChevron} from './lift-report-chevron';
 
 /**
@@ -7,10 +8,12 @@ import {LiftReportChevron} from './lift-report-chevron';
  * «Скачать», шеврон) раскрывает краткий вывод `content`. Полная простыня в
  * props не приходит вовсе — она живёт на ручке агента.
  *
- * «Скачать» — обычная ссылка на относительный `downloadUrl`
- * (`/api/agent-resource?…`): download-заголовки ставит сервер агента, а не
- * клиент. Клик по ссылке внутри `<summary>` протокол не раскрывает — activation
- * behavior достаётся вложенному `<a>`, а не `<summary>`. Нет URL — нет ссылки.
+ * «Скачать» — dropdown форматов по относительному `downloadUrl`
+ * (`/api/agent-resource?…`): `.md` — прямая ссылка (download-заголовки ставит
+ * сервер агента), `.docx` — конверт-сервис chat-backend (план
+ * report-download-thread-attachments, ред. 2). Интерактив внутри `<summary>`
+ * протокол не раскрывает — activation behavior достаётся вложенному элементу,
+ * а не `<summary>`. Нет URL — нет меню.
  */
 export function LiftReportProtocolCard({protocol}: {protocol: LiftReportProtocol}) {
   return (
@@ -19,12 +22,12 @@ export function LiftReportProtocolCard({protocol}: {protocol: LiftReportProtocol
         <span className="a2ui-lr__protocol-title">Протокол расчёта</span>
         {protocol.meta ? <span className="a2ui-lr__protocol-meta">{protocol.meta}</span> : null}
         {protocol.downloadUrl !== undefined ? (
-          <a
-            className="a2ui-lr-btn a2ui-lr-btn--link a2ui-lr__protocol-download"
-            href={protocol.downloadUrl}
-          >
-            Скачать
-          </a>
+          <span className="a2ui-lr__protocol-download">
+            <DownloadFormatMenu
+              downloadUrl={protocol.downloadUrl}
+              buttonClassName="a2ui-lr-btn a2ui-lr-btn--link"
+            />
+          </span>
         ) : null}
         <LiftReportChevron />
       </summary>

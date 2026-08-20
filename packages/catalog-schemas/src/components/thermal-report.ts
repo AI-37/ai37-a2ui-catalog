@@ -111,6 +111,13 @@ export const thermalReportProtocolSchema = z
      * она живёт только здесь.
      */
     downloadContent: z.string().min(1).max(120000).optional(),
+    /**
+     * Относительный URL ручки агента (`/api/agent-resource?resource=…`) для
+     * «Скачать»: при наличии рендерер показывает dropdown форматов (`.md` —
+     * прямая ссылка, `.docx` — конверт-сервис chat-backend); Blob-поля выше
+     * остаются fallback'ом для старых payload'ов без URL.
+     */
+    downloadUrl: z.string().min(1).max(2000).optional(),
   })
   .strict();
 

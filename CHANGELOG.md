@@ -4,6 +4,18 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.26.0] - 2026-08-20
+
+### Added
+
+- Кнопка «Скачать ▾» протоколов Thermal/Lift Report — dropdown форматов (план
+  `report-download-thread-attachments`, ред. 2): `.md` — прямая ссылка на
+  `downloadUrl` (`/api/agent-resource`, прод-поведение), `.docx` — конверт-сервис
+  chat-backend (`/api/agent-resource/convert?format=docx`); общий компонент
+  `DownloadFormatMenu` + хелпер `agentResourceConvertUrl`.
+- `ThermalReportProtocol.downloadUrl` (опционально) — как у Lift; Blob-поля
+  `downloadFileName`/`downloadContent` остаются fallback'ом старых payload'ов.
+
 ## [0.25.0] - 2026-08-17
 
 ### Added

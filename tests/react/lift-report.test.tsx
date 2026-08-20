@@ -91,7 +91,7 @@ describe('LiftReport', () => {
     );
   });
 
-  it('collapses the protocol and links «Скачать» to downloadUrl', () => {
+  it('collapses the protocol and shows the format dropdown for downloadUrl', () => {
     const {container} = renderReport(readProps('lift-report.json'));
 
     const protocol = container.querySelector('.a2ui-lr__protocol') as HTMLDetailsElement;
@@ -101,17 +101,22 @@ describe('LiftReport', () => {
       'Интервал = T/n',
     );
 
-    // «Скачать» — обычная ссылка: download-заголовки ставит сервер агента.
-    const download = screen.getByRole('link', {name: 'Скачать'}) as HTMLAnchorElement;
-    expect(download.getAttribute('href')).toBe(
+    // «Скачать ▾» — dropdown форматов: .md — прямая ссылка (download-заголовки ставит
+    // сервер агента), .docx — конверт-сервис chat-backend.
+    const items = container.querySelectorAll<HTMLAnchorElement>('.a2ui-dfm__item');
+    expect(items).toHaveLength(2);
+    expect(items[0]!.getAttribute('href')).toBe(
       '/api/agent-resource?resource=lift-report&taskId=t1',
     );
-    // Клик по ссылке протокол не раскрывает (activation behavior — у <a>).
-    fireEvent.click(download);
+    expect(items[1]!.getAttribute('href')).toBe(
+      '/api/agent-resource/convert?format=docx&resource=lift-report&taskId=t1',
+    );
+    // Клик по пункту меню протокол не раскрывает (activation behavior — у <a>).
+    fireEvent.click(items[0]!);
     expect(protocol.open).toBe(false);
   });
 
-  it('omits the download link when downloadUrl is absent', () => {
+  it('omits the download menu when downloadUrl is absent', () => {
     const props = readProps('lift-report.json');
     const protocol = props.protocol as Record<string, unknown>;
     delete protocol.downloadUrl;
@@ -119,6 +124,6 @@ describe('LiftReport', () => {
     renderReport(props);
 
     expect(screen.getByText('Протокол расчёта')).toBeTruthy();
-    expect(screen.queryByRole('link', {name: 'Скачать'})).toBeNull();
+    expect(document.querySelector('.a2ui-dfm')).toBeNull();
   });
 });
