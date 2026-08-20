@@ -113,6 +113,36 @@ describe('ThermalReport', () => {
     }
   });
 
+  it('downloadUrl → dropdown форматов: .md прямой ссылкой, .docx через конверт-сервис', () => {
+    const props = readProps('thermal-report-single.json');
+    const protocol = props.protocol as Record<string, unknown>;
+    protocol.downloadUrl = '/api/agent-resource?resource=teplo-report&taskId=t1';
+
+    const {container} = renderReport(props);
+
+    const items = container.querySelectorAll<HTMLAnchorElement>('.a2ui-dfm__item');
+    expect(items).toHaveLength(2);
+    expect(items[0]!.getAttribute('href')).toBe(
+      '/api/agent-resource?resource=teplo-report&taskId=t1',
+    );
+    expect(items[1]!.getAttribute('href')).toBe(
+      '/api/agent-resource/convert?format=docx&resource=teplo-report&taskId=t1',
+    );
+    // Blob-кнопки при dropdown нет — путь через сервер, не через клиент.
+    expect(screen.queryByRole('button', {name: 'Скачать'})).toBeNull();
+  });
+
+  it('downloadUrl чужой формы → только пункт .md, без convert-ссылки', () => {
+    const props = readProps('thermal-report-single.json');
+    (props.protocol as Record<string, unknown>).downloadUrl = 'https://elsewhere.example/file.md';
+
+    const {container} = renderReport(props);
+
+    const items = container.querySelectorAll<HTMLAnchorElement>('.a2ui-dfm__item');
+    expect(items).toHaveLength(1);
+    expect(items[0]!.getAttribute('href')).toBe('https://elsewhere.example/file.md');
+  });
+
   it('omits the download link when downloadFileName is absent', () => {
     const props = readProps('thermal-report-single.json');
     const protocol = props.protocol as Record<string, unknown>;

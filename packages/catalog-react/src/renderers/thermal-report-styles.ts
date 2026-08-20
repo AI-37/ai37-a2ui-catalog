@@ -285,6 +285,33 @@ export const THERMAL_REPORT_CSS = `
 .a2ui-tr__protocol-meta { color: ${tokens.trTextMuted}; font-size: 12.5px; }
 /* От корня: сброс .a2ui-tr .a2ui-tr-btn (margin: 0) специфичнее одного класса. */
 .a2ui-tr .a2ui-tr__protocol-download { margin-left: auto; }
+/* «Скачать ▾» — dropdown форматов (download-format-menu, план report-download ред. 2). */
+.a2ui-dfm { position: relative; display: inline-block; }
+.a2ui-dfm__toggle { list-style: none; cursor: pointer; }
+.a2ui-dfm__toggle::-webkit-details-marker { display: none; }
+.a2ui-dfm__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 10;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid ${tokens.trBorder};
+  background: ${tokens.trSurface};
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.a2ui-dfm__item {
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: ${tokens.trText};
+  text-decoration: none;
+  white-space: nowrap;
+}
+.a2ui-dfm__item:hover { background: ${tokens.trBorder}; }
 `;
 
 export const THERMAL_REPORT_STYLE_HREF = `${THERMAL_REPORT_STYLE_PREFIX}-${hashCss(
