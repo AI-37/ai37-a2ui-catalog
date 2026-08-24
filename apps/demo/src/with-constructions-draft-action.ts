@@ -19,7 +19,8 @@ export function withConstructionsDraftAction(messages: A2uiMessage[]): A2uiMessa
       updateComponents: {
         ...update,
         components: update.components.map((component: any) =>
-          component.component === 'ConstructionsEditor'
+          // Оба рендерера экрана конструкций: черновик у них общий, как и схема.
+          String(component.component).startsWith('ConstructionsEditor')
             ? {...component, draftAction: DEMO_DRAFT_ACTION}
             : component,
         ),

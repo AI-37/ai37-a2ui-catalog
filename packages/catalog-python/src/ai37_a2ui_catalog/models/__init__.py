@@ -97,7 +97,13 @@ COMPONENT_MODELS = {
     "ChoiceCard": ChoiceCardProps,
     "FormCard": FormCardProps,
     "ConstructionsEditor": ConstructionsEditorProps,
+    # Новый рендерер того же экрана на новых примитивах: схема props общая со
+    # старым, поэтому и модель одна (change constructions-editor-next).
+    "ConstructionsEditorNext": ConstructionsEditorProps,
     "LiftEditor": LiftEditorProps,
+    # То же и у лифтов: имя новое, схема props общая со старым рендерером
+    # (change lift-editor-next).
+    "LiftEditorNext": LiftEditorProps,
     "KeoEditor": KeoEditorProps,
     "KeoReport": KeoReportProps,
     "InsolationEditor": InsolationEditorProps,

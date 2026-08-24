@@ -16,6 +16,12 @@ export default defineConfig({
       '@a2ui/web_core/v0_9/basic_catalog': require.resolve('@a2ui/web_core/v0_9/basic_catalog'),
       '@a2ui/web_core/v0_9': require.resolve('@a2ui/web_core/v0_9'),
       '@ai37/a2ui-catalog-schemas': path.resolve(process.cwd(), 'packages/catalog-schemas/src/index.ts'),
+      // Подпуть примитивов ДОЛЖЕН стоять раньше корня пакета: vite матчит алиасы
+      // по префиксу в порядке объявления (та же ловушка, что у `@a2ui/web_core`).
+      '@ai37/a2ui-catalog-react/primitives': path.resolve(
+        process.cwd(),
+        'packages/catalog-react/src/primitives/index.ts',
+      ),
       '@ai37/a2ui-catalog-react': path.resolve(process.cwd(), 'packages/catalog-react/src/index.ts'),
     },
   },

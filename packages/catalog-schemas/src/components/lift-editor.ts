@@ -206,3 +206,19 @@ export const liftEditorDefinition: CatalogComponentDefinition<typeof liftEditorP
     'A single-screen editor for a lift (elevator) calculation document: a card header with the calculation-method switcher ("GOST · building kind"), a collapsible building section on top and lift sections below it (or a single lift-group section, depending on the method). Collapsed sections show a live summary line built from current values; a two-mode footer button navigates to the next incomplete/unreviewed section ("Next") and turns into submit once the document has been walked through. Everything happens on the client — every method config, option row and derived-value table is preloaded in props — and the whole document ({method, building, lifts}) goes back to the agent in a single action. Optional provenance blocks (buildingSources/liftSources) caption fields with where their values came from; edits are auto-saved as debounced drafts when draftAction is set. Fields support free text entry with normative-row hints (combo), option lists driven by another field, declarative dependent values, and a collapsible summarised group for defaulted parameters.',
   schema: liftEditorPropsSchema,
 };
+
+/**
+ * Тот же экран подбора лифтов на новом наборе примитивов
+ * (`packages/catalog-react/src/primitives`, интерактивность — `@base-ui/react`).
+ * Схема props общая с `liftEditorDefinition` намеренно: сравнивать «было /
+ * стало» на разном наполнении бессмысленно, поэтому новое имя нужно только
+ * компоненту, не данным. Оба рендерера зарегистрированы одновременно — агент
+ * может адресовать любой.
+ */
+export const liftEditorNextDefinition: CatalogComponentDefinition<typeof liftEditorPropsSchema> = {
+  name: 'LiftEditorNext',
+  slug: 'lift-editor-next',
+  description:
+    'The same lift (elevator) calculation editor as `LiftEditor` — identical props, identical data contract, both calculation methods with the same client-side form rebuild — rendered on the catalog primitive set (cards, buttons, chips, one type scale, tokenised colours) with interaction taken from a headless component library: accordion sections that open with Enter/Space and expose aria-expanded/aria-controls, dropdowns, number fields with arrow-key stepping, and free-text fields with a normative-row hint list. Prefer it when the surface should be navigable without a mouse; emit the same props as for `LiftEditor`.',
+  schema: liftEditorPropsSchema,
+};

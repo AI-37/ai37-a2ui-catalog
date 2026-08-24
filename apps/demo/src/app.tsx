@@ -37,6 +37,8 @@ import {attachDemoDraftLogger} from './attach-demo-draft-logger';
 import {createLiftEditorMessages} from './create-lift-editor-messages';
 import {createThermalReportMessages} from './create-thermal-report-messages';
 import {createSurfaceMessages} from './create-surface-messages';
+import {asConstructionsEditorNext} from './as-constructions-editor-next';
+import {asLiftEditorNext} from './as-lift-editor-next';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 import {withStatusChipsPreview} from './with-status-chips-preview';
 import {DEMO_LIFT_DRAFT_ACTION, withLiftDraftAction} from './with-lift-draft-action';
@@ -80,10 +82,19 @@ const examples = [
   },
   {
     key: 'constructions-preview',
-    title: 'Constructions Editor',
+    title: 'Constructions Editor — нынешний рендерер',
     description:
       'Экран одним сообщением: блок «Условия» в шапке (город из справочника подставляет климат) и конструкции сразу под ним — слои-сводки с формой слоя и явным «Применить», lookup материалов (dev-middleware) и live Rпр; автосейв черновика по коммитам формы слоя (в консоли), подсветка невалидных конструкций и один submit без клиентской блокировки.',
     messages: withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
+  },
+  {
+    key: 'constructions-next-preview',
+    title: 'Constructions Editor Next — тот же экран на новых примитивах',
+    description:
+      'То же наполнение, что у сообщения выше, и та же схема props — отличается только исполнение. Экран собран из примитивов пакета (карточка, кнопка, пилюля, три ступени текста, форма), а поведение пришло из Base UI: «Условия» — Collapsible с подписью, видимой и в свёрнутом виде, конструкции — Accordion с одной раскрытой карточкой за раз, поиск города и материала — Autocomplete (↓ подсвечивает, Enter выбирает, aria-activedescendant выставлен), списки — Select, числа — NumberField со стрелками ↑/↓. Пройдите оба экрана клавиатурой и сравните.',
+    messages: asConstructionsEditorNext(
+      withConstructionsDraftAction(constructionsEditorMessages as A2uiMessage[]),
+    ),
   },
   {
     key: 'constructions-status-preview',
@@ -114,6 +125,23 @@ const examples = [
     description:
       'Та же схема с активной методикой ГОСТ 34758-2021: одна секция лифтовой группы без add/remove, тип здания из секции «Здание» живёт в тексте шапки и переключает ряды Прил. Е у ширины двери и скорости, tОст считается по трём источникам, Pk — по Q. Переключатель методики в шапке перестраивает форму без раунд-трипа: наружу уезжает только черновик новой ветки, ответа компонент не ждёт.',
     messages: createLiftEditorMessages({
+      ...(liftEditorGroupFixture.props as Record<string, unknown>),
+      draftAction: DEMO_LIFT_DRAFT_ACTION,
+    }),
+  },
+  {
+    key: 'lift-next-preview',
+    title: 'Lift Editor Next — тот же экран на новых примитивах',
+    description:
+      'То же наполнение, что у «методики с лифтами» выше, и та же схема props — отличается только исполнение. Экран собран из примитивов пакета (карточка, кнопка, пилюля, ступени текста, форма/поле, секция-раскрывашка со сводкой и пометкой, свёрнутый блок принятых значений), а поведение пришло из Base UI: секции — Accordion с одной раскрытой за раз (Tab между заголовками, Enter · Space раскрывает), методика — Menu с триггером-ссылкой в шапке, списки — Select, числа — NumberField со стрелками ↑/↓, ряды ГОСТ — Autocomplete, который ввод не ограничивает. Пройдите оба экрана клавиатурой и сравните.',
+    messages: asLiftEditorNext(withLiftDraftAction(liftEditorMessages as A2uiMessage[])),
+  },
+  {
+    key: 'lift-next-group-preview',
+    title: 'Lift Editor Next — лифтовая группа',
+    description:
+      'То же наполнение, что у «лифтовой группы» выше, на новых примитивах: одна секция группы без add/remove, тип здания из «Здания» переключает ряды Прил. Е. Переключите методику в шапке — форма перестроится без раунд-трипа, а вернувшись обратно, вы увидите введённое ранее: черновики неактивных веток живут на клиенте, наружу уезжает только активная.',
+    messages: createSurfaceMessages('LiftEditorNext', {
       ...(liftEditorGroupFixture.props as Record<string, unknown>),
       draftAction: DEMO_LIFT_DRAFT_ACTION,
     }),
@@ -271,12 +299,14 @@ export function App() {
         if (example.key === 'form-preview') {
           attachDemoLookupHost(processor, 'demo-surface');
         }
-        if (example.key === 'constructions-preview') {
+        if (example.key === 'constructions-preview' || example.key === 'constructions-next-preview') {
           attachDemoDraftLogger(processor, 'demo-surface', DEMO_DRAFT_ACTION);
         }
         if (
           example.key === 'lift-preview' ||
           example.key === 'lift-group-preview' ||
+          example.key === 'lift-next-preview' ||
+          example.key === 'lift-next-group-preview' ||
           example.key === 'thermal-report-single-preview' ||
           example.key === 'thermal-report-multi-preview' ||
           example.key === 'keo-editor-preview' ||

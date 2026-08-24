@@ -5778,6 +5778,593 @@
         "$schema": "https://json-schema.org/draft/2019-09/schema#"
       }
     },
+    "ConstructionsEditorNext": {
+      "description": "The same building-envelope constructions editor as `ConstructionsEditor` — identical props, identical data contract — rendered on the catalog primitive set (cards, buttons, chips, one type scale, tokenised colours) with interaction taken from a headless component library: reference search that is fully keyboard-operable (arrow keys highlight, Enter picks, aria-activedescendant is exposed), dropdowns, number fields, and disclosure sections. Prefer it when the surface should be navigable without a mouse; emit the same props as for `ConstructionsEditor`.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/constructions-editor-next.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/ConstructionsEditorNext",
+        "definitions": {
+          "ConstructionsEditorNext": {
+            "type": "object",
+            "properties": {
+              "constructions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "steny",
+                        "pokrytiya",
+                        "cherdachnye_podval_grunt",
+                        "okna",
+                        "fonari",
+                        "dver"
+                      ]
+                    },
+                    "subtype": {
+                      "type": "string",
+                      "enum": [
+                        "cherdak",
+                        "podval_vent",
+                        "podval_nevent",
+                        "pol_po_gruntu"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "layers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "material": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "thicknessMm": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "exclusiveMinimum": true,
+                                "minimum": 0
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "material",
+                              "vent-gap",
+                              "closed-gap"
+                            ]
+                          },
+                          "materialKey": {
+                            "type": "string"
+                          },
+                          "lambdaA": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "lambdaB": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "lambdaManual": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "material",
+                          "thicknessMm"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 50
+                    },
+                    "rprPassport": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "confirm",
+                        "confirm-passport"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "layers"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "typeConfigs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "steny",
+                        "pokrytiya",
+                        "cherdachnye_podval_grunt",
+                        "okna",
+                        "fonari",
+                        "dver"
+                      ]
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "hasLayers": {
+                      "type": "boolean"
+                    },
+                    "rnorm": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0
+                    },
+                    "alphaV": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0
+                    },
+                    "alphaN": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "exclusiveMinimum": true,
+                          "minimum": 0
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "propertyNames": {
+                            "enum": [
+                              "cherdak",
+                              "podval_vent",
+                              "podval_nevent",
+                              "pol_po_gruntu"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "label",
+                    "hasLayers"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "general": {
+                "type": "object",
+                "properties": {
+                  "buildingType": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "city": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "tot": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "zot": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "tn": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "tv": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "condition": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "А",
+                          "Б"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "gsop": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "buildingType",
+                  "city",
+                  "tot",
+                  "zot",
+                  "tn",
+                  "tv",
+                  "condition"
+                ],
+                "additionalProperties": false
+              },
+              "generalSources": {
+                "type": "object",
+                "properties": {
+                  "buildingType": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "city": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tot": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "zot": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tn": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "tv": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "condition": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "gsop": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "conditionsCollapsed": {
+                "type": "boolean"
+              },
+              "headerTitle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "headerContext": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "buildingTypeOptions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "maxItems": 50
+              },
+              "cityReferenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "generalTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "constructionsTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "condition": {
+                "type": "string",
+                "enum": [
+                  "А",
+                  "Б"
+                ]
+              },
+              "materialsReferenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "minChars": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "addLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "submitLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "nextLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "pendingLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "submitAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "backLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "backAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "backActionContext": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "draftAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "constructions",
+              "typeConfigs",
+              "materialsReferenceId",
+              "addLabel",
+              "submitLabel",
+              "submitAction"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
     "LiftEditor": {
       "description": "A single-screen editor for a lift (elevator) calculation document: a card header with the calculation-method switcher (\"GOST · building kind\"), a collapsible building section on top and lift sections below it (or a single lift-group section, depending on the method). Collapsed sections show a live summary line built from current values; a two-mode footer button navigates to the next incomplete/unreviewed section (\"Next\") and turns into submit once the document has been walked through. Everything happens on the client — every method config, option row and derived-value table is preloaded in props — and the whole document ({method, building, lifts}) goes back to the agent in a single action. Optional provenance blocks (buildingSources/liftSources) caption fields with where their values came from; edits are auto-saved as debounced drafts when draftAction is set. Fields support free text entry with normative-row hints (combo), option lists driven by another field, declarative dependent values, and a collapsible summarised group for defaulted parameters.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/lift-editor.schema.json",
@@ -5785,6 +6372,744 @@
         "$ref": "#/definitions/LiftEditor",
         "definitions": {
           "LiftEditor": {
+            "type": "object",
+            "properties": {
+              "methodField": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "text",
+                      "number",
+                      "select",
+                      "boolean",
+                      "lookup",
+                      "combo"
+                    ]
+                  },
+                  "required": {
+                    "type": "boolean"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1
+                  },
+                  "referenceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "minChars": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "suggestMode": {
+                    "type": "string",
+                    "enum": [
+                      "action",
+                      "fetch"
+                    ]
+                  },
+                  "placeholder": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "defaultValue": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "advanced": {
+                    "type": "boolean"
+                  },
+                  "shortLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40
+                  },
+                  "hint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "optionNotes": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "optionsBy": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "scope": {
+                        "type": "string",
+                        "enum": [
+                          "building",
+                          "lift"
+                        ]
+                      },
+                      "options": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "minItems": 1
+                        }
+                      }
+                    },
+                    "required": [
+                      "source",
+                      "options"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "name",
+                  "label",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              "methodConfigs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "method": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "gostLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    },
+                    "buildingTitle": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "buildingFields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "number",
+                              "select",
+                              "boolean",
+                              "lookup",
+                              "combo"
+                            ]
+                          },
+                          "required": {
+                            "type": "boolean"
+                          },
+                          "options": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          },
+                          "referenceId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "minChars": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10
+                          },
+                          "suggestMode": {
+                            "type": "string",
+                            "enum": [
+                              "action",
+                              "fetch"
+                            ]
+                          },
+                          "placeholder": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "defaultValue": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "value",
+                                  "label"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          "advanced": {
+                            "type": "boolean"
+                          },
+                          "shortLabel": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                          },
+                          "hint": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "optionNotes": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          },
+                          "optionsBy": {
+                            "type": "object",
+                            "properties": {
+                              "source": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "scope": {
+                                "type": "string",
+                                "enum": [
+                                  "building",
+                                  "lift"
+                                ]
+                              },
+                              "options": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "minItems": 1
+                                }
+                              }
+                            },
+                            "required": [
+                              "source",
+                              "options"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "label",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    },
+                    "liftTitle": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "liftFields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "text",
+                              "number",
+                              "select",
+                              "boolean",
+                              "lookup",
+                              "combo"
+                            ]
+                          },
+                          "required": {
+                            "type": "boolean"
+                          },
+                          "options": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          },
+                          "referenceId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "minChars": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10
+                          },
+                          "suggestMode": {
+                            "type": "string",
+                            "enum": [
+                              "action",
+                              "fetch"
+                            ]
+                          },
+                          "placeholder": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "defaultValue": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "value": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "value",
+                                  "label"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          "advanced": {
+                            "type": "boolean"
+                          },
+                          "shortLabel": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 40
+                          },
+                          "hint": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 160
+                          },
+                          "optionNotes": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          },
+                          "optionsBy": {
+                            "type": "object",
+                            "properties": {
+                              "source": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "scope": {
+                                "type": "string",
+                                "enum": [
+                                  "building",
+                                  "lift"
+                                ]
+                              },
+                              "options": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "minItems": 1
+                                }
+                              }
+                            },
+                            "required": [
+                              "source",
+                              "options"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "label",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1
+                    },
+                    "liftsMode": {
+                      "type": "string",
+                      "enum": [
+                        "per-lift",
+                        "group"
+                      ]
+                    },
+                    "liftTabLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "buildingKindLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "maxLifts": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 16
+                    },
+                    "dependentRules": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "sources": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 80
+                                },
+                                "scope": {
+                                  "type": "string",
+                                  "enum": [
+                                    "building",
+                                    "lift"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "field"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 1,
+                            "maxItems": 4
+                          },
+                          "rows": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "when": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": [
+                                      "string",
+                                      "number"
+                                    ]
+                                  },
+                                  "minItems": 1
+                                },
+                                "set": {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": [
+                                      "string",
+                                      "number"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "when",
+                                "set"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 1
+                          },
+                          "onNoMatch": {
+                            "type": "string",
+                            "enum": [
+                              "keep",
+                              "clear"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "sources",
+                          "rows"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 8
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "label",
+                    "gostLabel",
+                    "buildingTitle",
+                    "buildingFields",
+                    "liftTitle",
+                    "liftFields",
+                    "liftsMode",
+                    "liftTabLabel"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "method": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "building": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "lifts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "buildingTabLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "advancedLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "addLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "removeLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "submitLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "submitAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "draftAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "headerTitle": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "headerContext": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "pendingLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "buildingSources": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "project",
+                        "question",
+                        "suggested",
+                        "default"
+                      ]
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "source"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "liftSources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "project",
+                          "question",
+                          "suggested",
+                          "default"
+                        ]
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            },
+            "required": [
+              "methodField",
+              "methodConfigs",
+              "method",
+              "building",
+              "lifts",
+              "buildingTabLabel",
+              "advancedLabel",
+              "addLabel",
+              "removeLabel",
+              "submitLabel",
+              "submitAction"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "LiftEditorNext": {
+      "description": "The same lift (elevator) calculation editor as `LiftEditor` — identical props, identical data contract, both calculation methods with the same client-side form rebuild — rendered on the catalog primitive set (cards, buttons, chips, one type scale, tokenised colours) with interaction taken from a headless component library: accordion sections that open with Enter/Space and expose aria-expanded/aria-controls, dropdowns, number fields with arrow-key stepping, and free-text fields with a normative-row hint list. Prefer it when the surface should be navigable without a mouse; emit the same props as for `LiftEditor`.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/lift-editor-next.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/LiftEditorNext",
+        "definitions": {
+          "LiftEditorNext": {
             "type": "object",
             "properties": {
               "methodField": {

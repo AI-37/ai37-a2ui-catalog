@@ -11,8 +11,11 @@ import {latexFormulaDefinition} from './components/latex-formula';
 import {simpleTableDefinition} from './components/simple-table';
 import {choiceCardDefinition} from './components/choice-card';
 import {formCardDefinition} from './components/form-card';
-import {constructionsEditorDefinition} from './components/constructions-editor';
-import {liftEditorDefinition} from './components/lift-editor';
+import {
+  constructionsEditorDefinition,
+  constructionsEditorNextDefinition,
+} from './components/constructions-editor';
+import {liftEditorDefinition, liftEditorNextDefinition} from './components/lift-editor';
 import {thermalReportDefinition} from './components/thermal-report';
 import {keoEditorDefinition} from './components/keo-editor';
 import {keoReportDefinition} from './components/keo-report';
@@ -29,7 +32,9 @@ export const componentDefinitions = [
   choiceCardDefinition,
   formCardDefinition,
   constructionsEditorDefinition,
+  constructionsEditorNextDefinition,
   liftEditorDefinition,
+  liftEditorNextDefinition,
   thermalReportDefinition,
   keoEditorDefinition,
   keoReportDefinition,
