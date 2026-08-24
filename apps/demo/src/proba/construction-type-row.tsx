@@ -1,5 +1,5 @@
 import React from 'react';
-import {ProposedButton} from './proposed-button';
+import {Button} from '@ai37/a2ui-catalog-react/primitives';
 
 /** Строка типа конструкции над слоями. У конструкций без типа не рендерится. */
 export function ConstructionTypeRow({type}: {type: string | undefined}) {
@@ -10,7 +10,7 @@ export function ConstructionTypeRow({type}: {type: string | undefined}) {
   return (
     <div style={rowStyle}>
       <span className="a2ui-t--sub">{type}</span>
-      <ProposedButton size="sm">Изменить</ProposedButton>
+      <Button size="sm">Изменить</Button>
     </div>
   );
 }

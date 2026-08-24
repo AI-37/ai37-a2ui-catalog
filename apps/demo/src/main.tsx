@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client';
 import 'katex/dist/katex.min.css';
 import {App} from './app';
 import {AssemblyPage} from './proba/assembly-page';
+import {LiftAssemblyPage} from './proba/lift-assembly-page';
+import {LookupPage} from './proba/lookup-page';
+import {ReportAssemblyPage} from './proba/report-assembly-page';
 import {RevisionPage} from './proba/revision-page';
 import {SystemPage} from './proba/system-page';
 import './styles.css';
@@ -23,6 +26,9 @@ const PAGES: Record<string, React.ReactNode> = {
   '/proba': <SystemPage />,
   '/proba/system': <SystemPage />,
   '/proba/assembly': <AssemblyPage />,
+  '/proba/lift-assembly': <LiftAssemblyPage />,
+  '/proba/report-assembly': <ReportAssemblyPage />,
+  '/proba/lookup': <LookupPage />,
   '/proba/revision': <RevisionPage />,
 };
 

@@ -1,8 +1,12 @@
 import React from 'react';
 import {ButtonsSystem} from './buttons-system';
 import {CardsSystem} from './cards-system';
+import {DisclosureSystem} from './disclosure-system';
 import {FormSystem} from './form-system';
+import {MenuSystem} from './menu-system';
+import {NotesSystem} from './notes-system';
 import {ProbaShell} from './proba-shell';
+import {ReportSystem} from './report-system';
 import {TypographySystem} from './typography-system';
 
 /** `/proba/system` — готовый набор примитивов без разборов и обоснований. */
@@ -12,12 +16,16 @@ export function SystemPage() {
       route="/proba/system"
       eyebrow="AI37 A2UI CATALOG"
       title="Готовое"
-      lead="Примитивы каталога в предлагаемом виде."
+      lead="Примитивы каталога в предлагаемом виде: оформление наше, поведение из Base UI."
     >
       <TypographySystem />
       <ButtonsSystem />
       <CardsSystem />
       <FormSystem />
+      <DisclosureSystem />
+      <MenuSystem />
+      <NotesSystem />
+      <ReportSystem />
     </ProbaShell>
   );
 }

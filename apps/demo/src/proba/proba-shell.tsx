@@ -5,6 +5,9 @@ import type {ProbaShellProps} from './proba-shell.types';
 export const PROBA_ROUTES: Array<[string, string]> = [
   ['/proba/system', 'Готовое'],
   ['/proba/assembly', 'Сборка'],
+  ['/proba/lift-assembly', 'Лифты'],
+  ['/proba/report-assembly', 'Отчёты'],
+  ['/proba/lookup', 'Поиск'],
   ['/proba/revision', 'Ревизия'],
 ];
 
@@ -41,7 +44,9 @@ const pageStyle: React.CSSProperties = {
   color: '#0f172a',
 };
 
-const navStyle: React.CSSProperties = {display: 'flex', gap: 8};
+/* Переносится: разделов шесть, и в узком окне ряд вкладок распирал страницу
+   до горизонтального скролла — по нему потом «ехала» и вёрстка отчётов. */
+const navStyle: React.CSSProperties = {display: 'flex', flexWrap: 'wrap', gap: 8};
 
 const tabStyle: React.CSSProperties = {
   padding: '6px 14px',

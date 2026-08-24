@@ -1,9 +1,7 @@
 import React from 'react';
-import {PROBA_TYPOGRAPHY_CSS} from './proba-typography-css';
-import {PROPOSED_BUTTON_CSS} from './proposed-button-css';
-import {ProposedButton} from './proposed-button';
-import {DownloadIcon, PencilIcon, PlusIcon, RefreshIcon, TrashIcon} from './proba-icons';
-import type {ButtonSize, ButtonVariant} from './proposed-button.types';
+import {Button, DownloadIcon, KitStyles, PencilIcon, PlusIcon, RefreshIcon, TrashIcon} from '@ai37/a2ui-catalog-react/primitives';
+import type {ButtonSize, ButtonVariant} from '@ai37/a2ui-catalog-react/primitives';
+import {SYSTEM_SECTION_STYLE, SystemHeading} from './system-section';
 
 const VARIANTS: ButtonVariant[] = ['filled', 'outline', 'link'];
 const SIZES: ButtonSize[] = ['sm', 'md', 'lg'];
@@ -11,57 +9,50 @@ const SIZES: ButtonSize[] = ['sm', 'md', 'lg'];
 /** Готовая кнопка: матрица `variant × size`, тон, иконка, состояния. */
 export function ButtonsSystem() {
   return (
-    <section className="a2ui-proba" style={sectionStyle}>
-      <style href="proba-typography" precedence="default">
-        {PROBA_TYPOGRAPHY_CSS}
-      </style>
-      <style href="proba-proposed-button" precedence="default">
-        {PROPOSED_BUTTON_CSS}
-      </style>
+    <section className="a2ui-kit" style={SYSTEM_SECTION_STYLE}>
+      <KitStyles />
 
-      <h2 style={h2Style}>
-        Кнопка <code style={codeStyle}>variant · size · tone</code>
-      </h2>
+      <SystemHeading title="Кнопка" axes="variant · size · tone" />
 
       <div style={gridStyle}>
         {VARIANTS.map(variant => (
           <Cell key={variant} label={variant}>
             {SIZES.map(size => (
-              <ProposedButton key={size} variant={variant} size={size}>
+              <Button key={size} variant={variant} size={size}>
                 Применить
-              </ProposedButton>
+              </Button>
             ))}
           </Cell>
         ))}
 
         <Cell label="accent">
-          <ProposedButton variant="filled" tone="accent">Открыть</ProposedButton>
-          <ProposedButton tone="accent">Показать</ProposedButton>
-          <ProposedButton variant="link" tone="accent">Скачать</ProposedButton>
+          <Button variant="filled" tone="accent">Открыть</Button>
+          <Button tone="accent">Показать</Button>
+          <Button variant="link" tone="accent">Скачать</Button>
         </Cell>
         <Cell label="danger">
-          <ProposedButton variant="filled" tone="danger">Удалить</ProposedButton>
-          <ProposedButton tone="danger">Удалить</ProposedButton>
-          <ProposedButton variant="link" tone="danger">Удалить слой</ProposedButton>
+          <Button variant="filled" tone="danger">Удалить</Button>
+          <Button tone="danger">Удалить</Button>
+          <Button variant="link" tone="danger">Удалить слой</Button>
         </Cell>
         <Cell label="disabled">
-          <ProposedButton variant="filled" disabled>Далее</ProposedButton>
-          <ProposedButton disabled>Отмена</ProposedButton>
-          <ProposedButton variant="link" disabled>Скачать</ProposedButton>
+          <Button variant="filled" disabled>Далее</Button>
+          <Button disabled>Отмена</Button>
+          <Button variant="link" disabled>Скачать</Button>
         </Cell>
 
         <Cell label="icon">
-          <ProposedButton variant="filled" icon={<RefreshIcon />}>Пересчитать</ProposedButton>
-          <ProposedButton icon={<PencilIcon />}>Изменить</ProposedButton>
-          <ProposedButton variant="link" tone="accent" icon={<DownloadIcon />}>Скачать</ProposedButton>
+          <Button variant="filled" icon={<RefreshIcon />}>Пересчитать</Button>
+          <Button icon={<PencilIcon />}>Изменить</Button>
+          <Button variant="link" tone="accent" icon={<DownloadIcon />}>Скачать</Button>
         </Cell>
         <Cell label="icon-only">
-          <ProposedButton icon={<PencilIcon />} aria-label="Изменить" />
-          <ProposedButton icon={<TrashIcon />} tone="danger" aria-label="Удалить" />
-          <ProposedButton variant="filled" icon={<PlusIcon />} aria-label="Добавить" />
+          <Button icon={<PencilIcon />} aria-label="Изменить" />
+          <Button icon={<TrashIcon />} tone="danger" aria-label="Удалить" />
+          <Button variant="filled" icon={<PlusIcon />} aria-label="Добавить" />
         </Cell>
         <Cell label="dashed">
-          <ProposedButton dashed icon={<PlusIcon />}>Добавить конструкцию</ProposedButton>
+          <Button dashed icon={<PlusIcon />}>Добавить конструкцию</Button>
         </Cell>
       </div>
     </section>
@@ -77,18 +68,6 @@ function Cell({label, children}: {label: string; children: React.ReactNode}) {
     </div>
   );
 }
-
-const sectionStyle: React.CSSProperties = {
-  display: 'grid',
-  gap: 16,
-  padding: 24,
-  borderRadius: 16,
-  border: '1px solid rgba(15, 23, 42, 0.1)',
-  background: '#ffffff',
-};
-
-const h2Style: React.CSSProperties = {margin: 0, fontSize: 15, fontWeight: 600, color: '#0f172a'};
-const codeStyle: React.CSSProperties = {fontSize: 13, color: '#64748b', fontWeight: 400};
 
 const gridStyle: React.CSSProperties = {
   display: 'grid',

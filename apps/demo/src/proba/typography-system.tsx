@@ -1,15 +1,13 @@
 import React from 'react';
-import {PROBA_TYPOGRAPHY_CSS} from './proba-typography-css';
+import {KitStyles} from '@ai37/a2ui-catalog-react/primitives';
 import {TYPE_MODIFIERS, TYPE_PROPOSAL} from './type-inventory';
 import {TEXT_COLORS} from './text-color-inventory';
 
 /** Готовая типографика: три ступени, два модификатора, семь цветов. */
 export function TypographySystem() {
   return (
-    <section className="a2ui-proba" style={sectionStyle}>
-      <style href="proba-typography" precedence="default">
-        {PROBA_TYPOGRAPHY_CSS}
-      </style>
+    <section className="a2ui-kit" style={sectionStyle}>
+      <KitStyles />
 
       <h2 style={h2Style}>Типографика</h2>
 

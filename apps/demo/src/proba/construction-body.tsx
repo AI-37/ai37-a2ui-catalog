@@ -1,17 +1,13 @@
 import React from 'react';
-import {Card} from './proposed-card';
-import {CardBody} from './proposed-card-body';
+import {Button, Card, CardBody, PlusIcon} from '@ai37/a2ui-catalog-react/primitives';
 import {ConstructionTypeRow} from './construction-type-row';
-import {PlusIcon} from './proba-icons';
-import {ProposedButton} from './proposed-button';
 import type {ConstructionEntry} from './construction-card.types';
 
-/** Тело карточки конструкции: тип, слои, «Слой». Свёрнутая карточка тела не рендерит. */
-export function ConstructionBody({entry, open}: {entry: ConstructionEntry; open: boolean}) {
-  if (!open) {
-    return null;
-  }
-
+/**
+ * Тело карточки конструкции: тип, слои, «Слой». Показом тела владеет панель
+ * аккордеона, поэтому состояния раскрытия здесь нет.
+ */
+export function ConstructionBody({entry}: {entry: ConstructionEntry}) {
   return (
     <CardBody>
       <ConstructionTypeRow type={entry.type} />
@@ -26,9 +22,9 @@ export function ConstructionBody({entry, open}: {entry: ConstructionEntry; open:
       ))}
 
       <div style={{justifySelf: 'start'}}>
-        <ProposedButton dashed size="sm" icon={<PlusIcon />}>
+        <Button variant="link" tone="accent" size="sm" icon={<PlusIcon />}>
           Слой
-        </ProposedButton>
+        </Button>
       </div>
     </CardBody>
   );

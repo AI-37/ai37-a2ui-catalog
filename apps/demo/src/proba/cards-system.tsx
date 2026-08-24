@@ -1,27 +1,14 @@
 import React from 'react';
-import {Card} from './proposed-card';
-import {CardHeader} from './proposed-card-header';
-import {CardBody} from './proposed-card-body';
-import {Chip} from './proba-chip';
-import {ProposedButton} from './proposed-button';
-import {CloseIcon} from './proba-icons';
-import {PROPOSED_CARD_CSS} from './proposed-card-css';
-import {PROBA_CHIP_CSS} from './proba-chip-css';
-import {PROBA_TYPOGRAPHY_CSS} from './proba-typography-css';
-import {PROPOSED_BUTTON_CSS} from './proposed-button-css';
+import {Button, Card, CardBody, CardHeader, CardTitle, Chip, CloseIcon, KitStyles} from '@ai37/a2ui-catalog-react/primitives';
+import {SYSTEM_SECTION_STYLE, SystemHeading} from './system-section';
 
 /** Готовая карточка: уровни, тон, модификаторы, шапка со слотами. */
 export function CardsSystem() {
   return (
-    <section className="a2ui-proba" style={sectionStyle}>
-      <style href="proba-typography" precedence="default">{PROBA_TYPOGRAPHY_CSS}</style>
-      <style href="proba-proposed-button" precedence="default">{PROPOSED_BUTTON_CSS}</style>
-      <style href="proba-proposed-card" precedence="default">{PROPOSED_CARD_CSS}</style>
-      <style href="proba-chip" precedence="default">{PROBA_CHIP_CSS}</style>
+    <section className="a2ui-kit" style={SYSTEM_SECTION_STYLE}>
+      <KitStyles />
 
-      <h2 style={h2Style}>
-        Карточка <code style={codeStyle}>tone · flat · invalid</code>
-      </h2>
+      <SystemHeading title="Карточка" axes="tone · flat · invalid" />
 
       <div style={gridStyle}>
         <Cell label="вложенность">
@@ -29,41 +16,42 @@ export function CardsSystem() {
             <div style={{padding: 12, display: 'grid', gap: 8}}>
               <span className="a2ui-t--sub a2ui-t--muted">уровень 1 · surface · r14</span>
               <Card>
-                <div style={{padding: 12}}>
+                <div style={{padding: 12, display: 'grid', gap: 8}}>
                   <span className="a2ui-t--sub a2ui-t--muted">уровень 2 · sunken · r10</span>
+                  <Card>
+                    <div style={{padding: 12}}>
+                      <span className="a2ui-t--sub a2ui-t--muted">уровень 3 · снова светлый</span>
+                    </div>
+                  </Card>
                 </div>
               </Card>
             </div>
           </Card>
         </Cell>
 
+        {/* Кликабельная целиком — только там, где в шапке нет своих кнопок:
+            кнопка внутри кнопки невалидна. Со слотом «Показать» карточка
+            остаётся секцией, а кликом владеет заголовок-раскрывашка. */}
         <Cell label="flat · кликабельная">
           <Card tone="sunken" flat onClick={() => undefined}>
-            <CardHeader
-              open={false}
-              onToggle={() => undefined}
-              title="Условия расчёта"
-              action={<ProposedButton variant="link" tone="accent">Показать</ProposedButton>}
-            />
+            <CardHeader title={<CardTitle title="Условия расчёта" />} />
           </Card>
         </Cell>
 
         <Cell label="invalid">
           <Card tone="sunken" invalid>
             <CardHeader
-              title="Стена из распознавания"
+              title={<CardTitle title="Стена из распознавания" />}
               badge={<Chip tone="danger">Rпр 0.16 &lt; 3.19</Chip>}
-              action={<ProposedButton variant="link" icon={<CloseIcon />} aria-label="Удалить" />}
+              action={<Button variant="link" icon={<CloseIcon />} aria-label="Удалить" />}
             />
           </Card>
         </Cell>
 
-        <Cell label="раскрытая">
+        <Cell label="шапка и тело">
           <Card tone="sunken">
             <CardHeader
-              open
-              onToggle={() => undefined}
-              title="Наружная стена (кирпич + минвата)"
+              title={<CardTitle title="Наружная стена (кирпич + минвата)" />}
               badge={<Chip tone="success">Rпр 4.09 ≥ 3.19</Chip>}
             />
             <CardBody>
@@ -89,18 +77,6 @@ function Cell({label, children}: {label: string; children: React.ReactNode}) {
     </div>
   );
 }
-
-const sectionStyle: React.CSSProperties = {
-  display: 'grid',
-  gap: 16,
-  padding: 24,
-  borderRadius: 16,
-  border: '1px solid rgba(15, 23, 42, 0.1)',
-  background: '#ffffff',
-};
-
-const h2Style: React.CSSProperties = {margin: 0, fontSize: 15, fontWeight: 600, color: '#0f172a'};
-const codeStyle: React.CSSProperties = {fontSize: 13, color: '#64748b', fontWeight: 400};
 
 const gridStyle: React.CSSProperties = {
   display: 'grid',
