@@ -12,11 +12,14 @@ import type {MenuProps} from './menu.types';
  * «Скачать ▾» на `<details>` роли `menu`/`menuitem` проставлены, а поведения
  * под ними нет.
  */
-export function Menu({label, icon, ariaLabel, trigger = 'button', items}: MenuProps) {
+export function Menu({label, icon, ariaLabel, trigger = 'button', side = 'bottom', items}: MenuProps) {
   // Триггер-ссылка и icon-only живут в правом краю шапки: попап от их левого
   // края уезжал бы за карточку. Триггер-кнопка с подписью стоит в потоке слева,
   // ему естественнее start.
   const linkTrigger = label === undefined || trigger === 'link';
+  // Меню, растущее вверх, стоит в правом краю последней карточки — от левого
+  // края триггера оно уезжало бы за карточку так же, как триггер-ссылка.
+  const alignEnd = linkTrigger || side === 'top';
 
   return (
     <BaseMenu.Root>
@@ -34,7 +37,7 @@ export function Menu({label, icon, ariaLabel, trigger = 'button', items}: MenuPr
       </BaseMenu.Trigger>
 
       <BaseMenu.Portal>
-        <BaseMenu.Positioner sideOffset={4} align={linkTrigger ? 'end' : 'start'}>
+        <BaseMenu.Positioner side={side} sideOffset={4} align={alignEnd ? 'end' : 'start'}>
           <BaseMenu.Popup className="a2ui-popup a2ui-popup--wide">
             {items.map(item => (
               <MenuEntry key={item.label} item={item} />

@@ -8229,6 +8229,394 @@
         "$schema": "https://json-schema.org/draft/2019-09/schema#"
       }
     },
+    "ThermalReportNext": {
+      "description": "The same thermal-calculation result card as `ThermalReport` — identical props, identical data contract — rendered on the catalog primitive set (report row, two-part data chip, status pill, serif verdict headline, layer table with a total row, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: the protocol is a single non-expanding row (`protocol.content` is never printed, it only feeds the downloaded file), status words for `pass | fail | info` are fixed by the renderer so both reports say the same thing, and the accept-the-suggestion button is `outline`. Prefer it when the surface should read as one system with `LiftReportNext`; emit the same props as for `ThermalReport`.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/thermal-report-next.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/ThermalReportNext",
+        "definitions": {
+          "ThermalReportNext": {
+            "type": "object",
+            "properties": {
+              "verdict": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "badge": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  }
+                },
+                "required": [
+                  "status",
+                  "badge",
+                  "headline"
+                ],
+                "additionalProperties": false
+              },
+              "checks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail",
+                        "info"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "layersTable": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "meta": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "columns": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    },
+                    "minItems": 1
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 200
+                      }
+                    },
+                    "minItems": 1
+                  },
+                  "footer": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "title",
+                  "columns",
+                  "rows",
+                  "footer"
+                ],
+                "additionalProperties": false
+              },
+              "constructions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "deviationPct": {
+                      "type": "number"
+                    },
+                    "action": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "payload": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "detail"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "excluded": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "detail": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "payload": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string",
+                          "maxLength": 200
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
+              },
+              "assumptions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "minItems": 1
+              },
+              "inputs": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "payload": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string",
+                          "maxLength": 200
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "tone": {
+                          "type": "string",
+                          "enum": [
+                            "normal",
+                            "warning"
+                          ]
+                        },
+                        "chips": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 1
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        }
+                      },
+                      "required": [
+                        "label",
+                        "tone",
+                        "chips"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "groups"
+                ],
+                "additionalProperties": false
+              },
+              "protocol": {
+                "type": "object",
+                "properties": {
+                  "meta": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "content": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60000
+                  },
+                  "downloadFileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "downloadContent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "content"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "verdict",
+              "inputs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
     "KeoEditor": {
       "description": "A single-message editor that collects the input data of a daylight-factor (KEO, SP 367.1325800) calculation: read-only project conditions on top, then one tab per room (\"Room 1…N\", add and remove locally) with sections for purpose, geometry, the window opening, opposing-building shading (revealed by a trigger field) and a collapsed group of defaulted coefficients. Every value carries a provenance caption (from the project / from your question / suggested / calculated / assumption) and the footer counts them; the calculation plane and reference-point captions are computed on the client from ready-made strings, and parameterised rules highlight suspicious geometry with a non-blocking \"check this\" mark. No normative tables live in the component — they come in props — and the whole document ({conditions, rooms}) goes back to the agent in a single submit action.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-editor.schema.json",
@@ -9914,6 +10302,259 @@
         "$ref": "#/definitions/LiftReport",
         "definitions": {
           "LiftReport": {
+            "type": "object",
+            "properties": {
+              "verdict": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "badge": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  }
+                },
+                "required": [
+                  "status",
+                  "badge",
+                  "headline"
+                ],
+                "additionalProperties": false
+              },
+              "suggestions": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "detail": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "tone": {
+                          "type": "string",
+                          "enum": [
+                            "pass",
+                            "fail",
+                            "neutral"
+                          ]
+                        },
+                        "action": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "label": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "payload": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "string",
+                                "maxLength": 200
+                              }
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "label"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "statusLabel": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "tone"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "items"
+                ],
+                "additionalProperties": false
+              },
+              "inputs": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "payload": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string",
+                          "maxLength": 200
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "tone": {
+                          "type": "string",
+                          "enum": [
+                            "normal",
+                            "warning"
+                          ]
+                        },
+                        "chips": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 1
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        }
+                      },
+                      "required": [
+                        "label",
+                        "tone",
+                        "chips"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "groups"
+                ],
+                "additionalProperties": false
+              },
+              "protocol": {
+                "type": "object",
+                "properties": {
+                  "meta": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "content": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "content"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "verdict",
+              "inputs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "LiftReportNext": {
+      "description": "The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single non-expanding row without `<details>`/`<pre>` (`protocol.content` is never printed on screen), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/lift-report-next.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/LiftReportNext",
+        "definitions": {
+          "LiftReportNext": {
             "type": "object",
             "properties": {
               "verdict": {

@@ -1,0 +1,249 @@
+{
+  "$ref": "#/definitions/LiftReportNext",
+  "definitions": {
+    "LiftReportNext": {
+      "type": "object",
+      "properties": {
+        "verdict": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "pass",
+                "fail"
+              ]
+            },
+            "badge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "headline": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            }
+          },
+          "required": [
+            "status",
+            "badge",
+            "headline"
+          ],
+          "additionalProperties": false
+        },
+        "suggestions": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "detail": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "tone": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail",
+                      "neutral"
+                    ]
+                  },
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "payload": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string",
+                          "maxLength": 200
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "statusLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "tone"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        "inputs": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "payload": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "label"
+              ],
+              "additionalProperties": false
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "tone": {
+                    "type": "string",
+                    "enum": [
+                      "normal",
+                      "warning"
+                    ]
+                  },
+                  "chips": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "value": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        }
+                      },
+                      "required": [
+                        "label",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "label",
+                  "tone",
+                  "chips"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "groups"
+          ],
+          "additionalProperties": false
+        },
+        "protocol": {
+          "type": "object",
+          "properties": {
+            "meta": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60000
+            },
+            "downloadUrl": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "content"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "verdict",
+        "inputs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2019-09/schema#"
+}
