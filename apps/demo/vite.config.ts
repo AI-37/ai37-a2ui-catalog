@@ -61,6 +61,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@ai37/a2ui-catalog-schemas': path.resolve(__dirname, '../../packages/catalog-schemas/src/index.ts'),
+      // Подпуть примитивов раньше корня пакета: алиасы матчатся по префиксу в
+      // порядке объявления, иначе `…/primitives` склеится с путём до index.ts.
+      '@ai37/a2ui-catalog-react/primitives': path.resolve(
+        __dirname,
+        '../../packages/catalog-react/src/primitives/index.ts',
+      ),
       '@ai37/a2ui-catalog-react': path.resolve(__dirname, '../../packages/catalog-react/src/index.ts'),
     },
   },
