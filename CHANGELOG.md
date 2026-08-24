@@ -4,7 +4,7 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
-## [Unreleased]
+## [0.28.0] - 2026-08-25
 
 ### Added
 
