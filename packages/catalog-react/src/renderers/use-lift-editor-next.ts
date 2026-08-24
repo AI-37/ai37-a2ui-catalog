@@ -1,6 +1,7 @@
 import React from 'react';
 import type {LiftEditorProps} from '@ai37/a2ui-catalog-schemas';
 import {applyDependentRules} from './apply-dependent-rules';
+import {applyRecommendVariant} from './apply-recommend-variant';
 import {buildingTouchedKey} from './building-touched-key';
 import {createLiftEditorDrafts} from './create-lift-editor-drafts';
 import {createLiftEditorSources} from './create-lift-editor-sources';
@@ -337,6 +338,54 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
       scrollToElement(sectionNodes.current.get(target) ?? null);
       // «Далее» фиксирует заполненное немедленно, не дожидаясь дебаунса.
       sendDraftNow();
+    },
+
+    // Применение варианта подбора — структурное действие, как добавление
+    // лифта: секции перестраиваются, черновик уходит немедленно (отложенный
+    // отменяется), раскрывается первая лифтовая — пользователь смотрит, что
+    // ему подставили.
+    applyRecommendation: variant => {
+      const next = applyRecommendVariant({draft, config, variant});
+      const nextTouched = new Set(touched);
+
+      // Пометка `touched` обязательна по двум причинам: `dependentRules` иначе
+      // перетрут h/t123 подставленными по Vн, а подписи источников должны
+      // сняться — значение теперь не «из вашего вопроса».
+      for (const name of Object.keys(variant.apply.buildingValues ?? {})) {
+        nextTouched.add(buildingTouchedKey(config.method, name));
+      }
+      next.lifts.forEach((_unused, index) => {
+        for (const name of Object.keys(variant.apply.values)) {
+          nextTouched.add(liftTouchedKey(config.method, index, name));
+        }
+      });
+
+      // Правила всё же прогоняются: поля, которых вариант не несёт, у новой
+      // секции иначе остались бы пустыми. Помеченное они не трогают.
+      const applied = {
+        building: next.building,
+        lifts: next.lifts.map((lift, index) =>
+          applyDependentRules({
+            rules,
+            building: next.building,
+            lift,
+            isTouched: isTouchedIn(nextTouched, index),
+          }),
+        ),
+      };
+
+      setTouched(nextTouched);
+      updateDraft(applied);
+      // Массив источников идёт за числом секций: подпись не должна переехать
+      // на соседний лифт или остаться от удалённого.
+      setSources(prev => {
+        const branch = prev[config.method] ?? {building: {}, lifts: []};
+        const lifts = applied.lifts.map((_unused, index) => branch.lifts[index] ?? {});
+        return {...prev, [config.method]: {building: branch.building, lifts}};
+      });
+      setOpenSections(['lift-0']);
+      setReviewed(prev => new Set(prev).add('lift-0'));
+      sendDraftNow(applied);
     },
 
     bindSection: key => node => {

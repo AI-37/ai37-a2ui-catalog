@@ -20,8 +20,14 @@ export * from './renderers/lift-draft-debounce-ms';
 export * from './renderers/resolve-layer-lambda';
 export * from './renderers/compute-live-rpr';
 export * from './renderers/thermal-report';
+export * from './renderers/thermal-report-next';
+// Экран отчёта без a2ui-хоста: песочница ставит его на страницу и подменяет
+// dispatchAction консолью — второй экземпляр экрана разошёлся бы с рендерером.
+export * from './renderers/thermal-report-next-screen';
 export * from './renderers/keo-editor';
 export * from './renderers/keo-report';
 export * from './renderers/insolation-editor';
 export * from './renderers/insolation-report';
 export * from './renderers/lift-report';
+export * from './renderers/lift-report-next';
+export * from './renderers/lift-report-next-screen';

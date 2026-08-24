@@ -11,6 +11,7 @@ export * from './components/form-card-lookup-fetch';
 export * from './components/form-card-lookup-fetch.types';
 export * from './components/constructions-editor';
 export * from './components/lift-editor';
+export * from './components/lift-editor-recommend';
 export * from './components/thermal-report';
 export * from './components/calc-editor-common';
 export * from './components/keo-editor';

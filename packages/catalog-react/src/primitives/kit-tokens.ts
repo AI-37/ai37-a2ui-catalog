@@ -9,6 +9,8 @@
  */
 export const KIT_TOKENS: Array<[string, string]> = [
   ['--a2ui-font', 'system-ui, -apple-system, "Segoe UI", sans-serif'],
+  // Ось семейства, а не вторая шкала: её носит заголовок вердикта отчёта.
+  ['--a2ui-font-serif', 'Georgia, "Times New Roman", serif'],
 
   // --- шкала: три ступени и один модификатор начертания -------------------
   ['--a2ui-text-size-display', '26px'],

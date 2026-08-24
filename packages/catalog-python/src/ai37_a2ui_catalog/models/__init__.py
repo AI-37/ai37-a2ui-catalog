@@ -85,6 +85,8 @@ from .lift_editor import (
     LiftEditorFieldType,
     LiftEditorMethodConfig,
     LiftEditorProps,
+    LiftEditorRecommend,
+    LiftEditorRecommendParam,
     LiftsMode,
 )
 from .shared import CellPrimitive, StrictModel, TextAlign
@@ -188,6 +190,8 @@ __all__ = [
     "LiftEditorFieldType",
     "LiftEditorMethodConfig",
     "LiftEditorProps",
+    "LiftEditorRecommend",
+    "LiftEditorRecommendParam",
     "LiftsMode",
     "LookupSuggestMode",
     "SimpleTableColumn",

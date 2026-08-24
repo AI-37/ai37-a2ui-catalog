@@ -1,6 +1,7 @@
 import {z} from 'zod';
 import {constructionsFieldSourceSchema} from './constructions-editor';
 import {formFieldBaseSchema} from './form-card';
+import {liftEditorRecommendSchema} from './lift-editor-recommend';
 import {type CatalogComponentDefinition} from '../types';
 
 /**
@@ -148,6 +149,9 @@ export const liftEditorPropsSchema = z
     // блокируют и в payload не уходят. `liftSources` — по индексам лифтов.
     buildingSources: liftEditorSectionSourcesSchema.optional(),
     liftSources: z.array(liftEditorSectionSourcesSchema).optional(),
+    // Блок подбора конфигураций. Без пропа компонент ведёт себя как раньше:
+    // сети не трогает и блока не показывает — это и есть путь отката.
+    recommend: liftEditorRecommendSchema.optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

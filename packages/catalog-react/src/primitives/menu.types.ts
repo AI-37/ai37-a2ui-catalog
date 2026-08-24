@@ -20,6 +20,13 @@ export interface MenuItem {
  */
 export type MenuTrigger = 'button' | 'link';
 
+/**
+ * Сторона попапа. 'bottom' — обычное меню в потоке. 'top' — меню в
+ * последней карточке сообщения («Скачать» протокола): список, растущий вниз,
+ * вылезает за нижний край сообщения, то есть за край треда.
+ */
+export type MenuSide = 'top' | 'bottom';
+
 export interface MenuProps {
   /** Подпись триггера. Без неё триггер icon-only и требует `ariaLabel`. */
   label?: string;
@@ -28,5 +35,6 @@ export interface MenuProps {
   /** Доступное имя для icon-only триггера. */
   ariaLabel?: string;
   trigger?: MenuTrigger;
+  side?: MenuSide;
   items: MenuItem[];
 }

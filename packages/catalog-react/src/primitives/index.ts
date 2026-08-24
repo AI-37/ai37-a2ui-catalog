@@ -28,6 +28,12 @@ export * from './card.types';
 export * from './chip';
 export * from './chip-css';
 export * from './chip.types';
+export * from './data-chip';
+export * from './data-chip-css';
+export * from './data-chip.types';
+export * from './status-pill';
+export * from './status-pill-css';
+export * from './status-pill.types';
 
 export * from './section-item';
 export * from './section-item.types';
@@ -58,6 +64,24 @@ export * from './lookup-highlight';
 export * from './lookup-option-content';
 export * from './lookup-option-slot';
 export * from './find-option-by-label';
+
+// Части отчёта: строка списка, serif-заголовок вердикта, таблица с итогом,
+// заметка на утопленном фоне и карточка протокола. Общие у ThermalReportNext
+// и LiftReportNext — второго набора «почти таких же» не заводится.
+export * from './report-row';
+export * from './report-row-css';
+export * from './report-row-detail';
+export * from './report-row.types';
+export * from './report-headline';
+export * from './report-table';
+export * from './report-table-css';
+export * from './report-table.types';
+export * from './report-note';
+export * from './report-note-css';
+export * from './report-protocol-card';
+export * from './report-protocol-card.types';
+export * from './report-protocol-css';
+export * from './report-protocol-meta';
 
 export * from './menu';
 export * from './menu-entry';

@@ -30,6 +30,10 @@ export const KIT_TYPOGRAPHY_CSS = `
 
 .a2ui-kit .a2ui-t--strong { font-weight: var(--a2ui-text-weight-strong); }
 
+/* Семейство — ось существующей ступени, а не четвёртая ступень шкалы:
+   'display' + 'serif' и есть заголовок вердикта отчёта. */
+.a2ui-kit .a2ui-t--serif { font-family: var(--a2ui-font-serif); }
+
 .a2ui-kit .a2ui-t--overline {
   font-weight: var(--a2ui-text-weight-strong);
   letter-spacing: var(--a2ui-text-overline-tracking);

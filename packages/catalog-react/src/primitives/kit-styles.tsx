@@ -4,8 +4,14 @@ import {StyleTag} from '../renderers/style-tag';
 import {KIT_BUTTON_CSS} from './button-css';
 import {KIT_CARD_CSS} from './card-css';
 import {KIT_CHIP_CSS} from './chip-css';
+import {KIT_DATA_CHIP_CSS} from './data-chip-css';
 import {KIT_FORM_CSS} from './form-css';
 import {KIT_POPUP_CSS} from './popup-css';
+import {KIT_REPORT_NOTE_CSS} from './report-note-css';
+import {KIT_REPORT_PROTOCOL_CSS} from './report-protocol-css';
+import {KIT_REPORT_ROW_CSS} from './report-row-css';
+import {KIT_REPORT_TABLE_CSS} from './report-table-css';
+import {KIT_STATUS_PILL_CSS} from './status-pill-css';
 import {KIT_TOKENS_CSS} from './kit-tokens-css';
 import {KIT_TYPOGRAPHY_CSS} from './kit-typography-css';
 
@@ -21,6 +27,12 @@ const LAYERS: Array<[string, string]> = [
   ['a2ui-kit-chip', KIT_CHIP_CSS],
   ['a2ui-kit-form', KIT_FORM_CSS],
   ['a2ui-kit-popup', KIT_POPUP_CSS],
+  ['a2ui-kit-data-chip', KIT_DATA_CHIP_CSS],
+  ['a2ui-kit-status-pill', KIT_STATUS_PILL_CSS],
+  ['a2ui-kit-report-row', KIT_REPORT_ROW_CSS],
+  ['a2ui-kit-report-table', KIT_REPORT_TABLE_CSS],
+  ['a2ui-kit-report-note', KIT_REPORT_NOTE_CSS],
+  ['a2ui-kit-report-protocol', KIT_REPORT_PROTOCOL_CSS],
 ];
 
 /**
