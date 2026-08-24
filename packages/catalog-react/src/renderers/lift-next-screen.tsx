@@ -9,6 +9,7 @@ import {LiftNextFields} from './lift-next-fields';
 import {LiftNextHeaderContext} from './lift-next-header-context';
 import {LiftNextMethodSwitcher} from './lift-next-method-switcher';
 import {LiftNextRemoveButton} from './lift-next-remove-button';
+import {LiftNextRecommendSlot} from './lift-next-recommend-slot';
 import {useLiftEditorNext} from './use-lift-editor-next';
 import type {LiftSectionKey} from './lift-editor.types';
 import type {LiftNextSink} from './lift-next.types';
@@ -34,6 +35,16 @@ export function LiftNextScreen({props, sink}: {props: LiftEditorProps; sink: Lif
   // панель.
   const scope = React.useId();
   const panelId = (key: LiftSectionKey) => `${scope}-${key}`;
+
+  // Секции разрезаны на два аккордеона: между ними стоит блок подбора, а он
+  // не секция. Значение раскрытия у обоих общее и управляемое, поэтому
+  // «раскрыта одна за раз» продолжает действовать через границу.
+  const accordion = {
+    multiple: false as const,
+    value: control.openSections,
+    onValueChange: (next: string[]) => control.setOpenSections(next as LiftSectionKey[]),
+    style: listStyle,
+  };
 
   // Поля экспандера в сводку не идут: сводка обещает заполненное, а дефолты
   // видны своей строкой внутри секции.
@@ -68,12 +79,7 @@ export function LiftNextScreen({props, sink}: {props: LiftEditorProps; sink: Lif
             />
           </Card>
 
-          <Accordion.Root
-            multiple={false}
-            value={control.openSections}
-            onValueChange={next => control.setOpenSections(next as LiftSectionKey[])}
-            style={listStyle}
-          >
+          <Accordion.Root {...accordion}>
             <SectionItem
               value="building"
               panelId={panelId('building')}
@@ -92,7 +98,20 @@ export function LiftNextScreen({props, sink}: {props: LiftEditorProps; sink: Lif
                 onChange={(name, value) => control.changeValue('building', name, value)}
               />
             </SectionItem>
+          </Accordion.Root>
 
+          {/* Блок подбора между «Зданием» и лифтами: он не секция аккордеона,
+              поэтому список секций разрезан на две части, а не свёрнут в один
+              `Accordion.Root`. В навигации «Далее» и в счёте просмотренного
+              блок не участвует. */}
+          <LiftNextRecommendSlot
+            recommend={props.recommend}
+            building={draft.building}
+            lift={draft.lifts[0] ?? {}}
+            onApply={control.applyRecommendation}
+          />
+
+          <Accordion.Root {...accordion}>
             {draft.lifts.map((lift, index) => {
               const key: LiftSectionKey = `lift-${index}`;
 

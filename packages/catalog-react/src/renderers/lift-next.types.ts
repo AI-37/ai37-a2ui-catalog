@@ -6,6 +6,7 @@ import type {
   LiftEditorSectionSources,
 } from '@ai37/a2ui-catalog-schemas';
 import type {LiftEditorDraft, LiftFieldOption, LiftFieldValues, LiftSectionKey} from './lift-editor.types';
+import type {OnApplyRecommendation} from './recommend.types';
 
 /** Значение поля редактора: числовое поле отдаёт `null`, остальные — строку. */
 export type LiftNextFieldValue = string | number | boolean | null;
@@ -58,6 +59,8 @@ export interface LiftNextControl {
   changeValue: (key: LiftSectionKey, name: string, value: LiftNextFieldValue) => void;
   addLift: () => void;
   removeLift: (index: number) => void;
+  /** Применение варианта подбора: перестраивает лифтовые секции и шлёт черновик. */
+  applyRecommendation: OnApplyRecommendation;
   /** Кнопка подвала: «Далее» ведёт по секциям, «Рассчитать» отправляет. */
   submit: () => void;
   bindSection: (key: LiftSectionKey) => (node: HTMLElement | null) => void;

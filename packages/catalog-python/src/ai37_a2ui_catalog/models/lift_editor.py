@@ -95,6 +95,35 @@ class LiftEditorMethodConfig(StrictModel):
     dependentRules: list[LiftEditorDependentRule] = Field(default=None, max_length=8)
 
 
+class LiftEditorRecommendParam(StrictModel):
+    """Поле, значение которого уходит в query подбора."""
+
+    name: str = Field(min_length=1, max_length=80)
+    # С какого экрана брать значение: 'building' по умолчанию.
+    scope: LiftEditorFieldScope = None
+    # Без обязательного поля запрос не уходит вовсе — блока нет.
+    required: bool = None
+
+
+class LiftEditorRecommend(StrictModel):
+    """Блок подбора конфигураций: обобщённая ручка ресурсов и подписи блока.
+
+    Какие поля уходят в query — декларативно списком, а не зашито: состав
+    параметров у методик разный, и про ГОСТ компонент ничего не знает.
+    """
+
+    resource: str = Field(min_length=1, max_length=120)
+    taskId: str = Field(default=None, min_length=1, max_length=200)
+    params: list[LiftEditorRecommendParam] = Field(min_length=1, max_length=24)
+    title: str = Field(min_length=1, max_length=120)
+    # Подпись кнопки карточки; у списка выбора кнопки нет.
+    applyLabel: str = Field(min_length=1, max_length=80)
+    loadingLabel: str = Field(min_length=1, max_length=120)
+    emptyLabel: str = Field(min_length=1, max_length=200)
+    # Сколько вариантов показать карточками. Остальные не показываются вовсе.
+    topCount: int = Field(default=None, ge=1, le=4)
+
+
 class LiftEditorProps(StrictModel):
     # Управляет активным конфигом, поэтому отдельный проп, а не поле здания.
     methodField: LiftEditorField
@@ -121,6 +150,8 @@ class LiftEditorProps(StrictModel):
     # Источники значений полей — только подписи; в payload не уходят.
     buildingSources: dict[str, LiftEditorFieldSource] = None
     liftSources: list[dict[str, LiftEditorFieldSource]] = None
+    # Блок подбора. Без пропа компонент ведёт себя как раньше — путь отката.
+    recommend: LiftEditorRecommend = None
 
     @model_validator(mode="after")
     def validate_document(self) -> "LiftEditorProps":

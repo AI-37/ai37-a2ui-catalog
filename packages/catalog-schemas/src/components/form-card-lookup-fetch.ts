@@ -1,3 +1,5 @@
+import {AGENT_RESOURCE_ROUTE} from './lift-editor-recommend';
+
 /**
  * Контракт fetch-канала lookup-поля FormCard (suggestMode: 'fetch').
  *
@@ -13,8 +15,12 @@
  * а не через отдельный `/api/reference-suggest`.
  */
 
-/** Same-origin путь suggest-запросов fetch-режима lookup-поля (обобщённая ручка ресурсов). */
-export const LOOKUP_SUGGEST_ROUTE = '/api/agent-resource';
+/**
+ * Same-origin путь suggest-запросов fetch-режима lookup-поля. Значение не
+ * своё: обобщённая ручка ресурсов одна на все downstream-чтения каталога, и
+ * живёт она в `lift-editor-recommend.ts` — два литерала разъехались бы молча.
+ */
+export const LOOKUP_SUGGEST_ROUTE = AGENT_RESOURCE_ROUTE;
 
 /** Задержка debounce перед запросом подсказок (оба режима lookup), мс. */
 export const LOOKUP_DEBOUNCE_MS = 300;

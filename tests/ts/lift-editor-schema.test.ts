@@ -2,8 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {describe, expect, it} from 'vitest';
 import {
+  AGENT_RESOURCE_ROUTE,
+  LOOKUP_SUGGEST_ROUTE,
   createCatalogArtifact,
   liftEditorPropsSchema,
+  recommendResourceVariantSchema,
   type LiftEditorProps,
 } from '@ai37/a2ui-catalog-schemas';
 
@@ -254,5 +257,71 @@ describe('lift-editor schema', () => {
 
     expect(component.component).toBe('LiftEditor');
     expect(liftEditorPropsSchema.safeParse(props).success).toBe(true);
+  });
+});
+
+describe('lift-editor recommend', () => {
+  it('props без recommend валиден — это путь отката', () => {
+    const perLift = readFixture('valid', 'lift-editor-per-lift.json');
+
+    expect('recommend' in perLift.props).toBe(false);
+    expect(liftEditorPropsSchema.safeParse(perLift.props).success).toBe(true);
+  });
+
+  it('принимает полный recommend', () => {
+    const fixture = readFixture('valid', 'lift-editor-recommend.json');
+    const parsed = liftEditorPropsSchema.safeParse(fixture.props);
+
+    expect(parsed.success).toBe(true);
+    expect(fixture.props.recommend?.resource).toBe('lift-recommend');
+    expect(fixture.props.recommend?.params).toHaveLength(4);
+    expect(fixture.props.recommend?.params[2]?.scope).toBe('lift');
+    expect(fixture.props.recommend?.topCount).toBe(2);
+  });
+
+  it('отвергает пустой resource и пустой params', () => {
+    for (const fileName of [
+      'lift-editor-recommend-empty-resource.json',
+      'lift-editor-recommend-empty-params.json',
+    ]) {
+      expect(liftEditorPropsSchema.safeParse(readFixture('invalid', fileName).props).success).toBe(
+        false,
+      );
+    }
+  });
+
+  it('отвергает лишний ключ внутри recommend', () => {
+    const fixture = readFixture('valid', 'lift-editor-recommend.json');
+    const withExtra = {
+      ...fixture.props,
+      recommend: {...fixture.props.recommend, unknownKey: 'x'},
+    };
+
+    expect(liftEditorPropsSchema.safeParse(withExtra).success).toBe(false);
+  });
+
+  it('вариант ответа терпит лишние ключи, но требует apply.values', () => {
+    const variant = {
+      id: 'v1',
+      title: 'ЩЛЗ ПП-1026ЕН · 3 лифта',
+      subtitle: '1000 кг · 1,6 м/с',
+      notes: ['tи 62 с'],
+      tone: 'ok',
+      apply: {count: 3, values: {Q: 1000, Vn: 1.6}, buildingValues: {Nl: 3}},
+      // Ручка агента вправе дописать своё: версия каталога не должна ронять
+      // из-за этого весь список.
+      debug: {sweepMs: 12},
+    };
+
+    expect(recommendResourceVariantSchema.safeParse(variant).success).toBe(true);
+    expect(
+      recommendResourceVariantSchema.safeParse({id: 'v2', title: 'Без apply', apply: {count: 2}})
+        .success,
+    ).toBe(false);
+  });
+
+  it('путь ручки ресурсов один на lookup и подбор', () => {
+    expect(AGENT_RESOURCE_ROUTE).toBe('/api/agent-resource');
+    expect(LOOKUP_SUGGEST_ROUTE).toBe(AGENT_RESOURCE_ROUTE);
   });
 });
