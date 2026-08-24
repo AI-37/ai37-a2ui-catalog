@@ -22,6 +22,7 @@ import constructionsEditorMessages from '../../../fixtures/messages/construction
 import constructionsConditionsMessages from '../../../fixtures/messages/constructions-editor-conditions-surface.json';
 import liftEditorMessages from '../../../fixtures/messages/lift-editor-surface.json';
 import liftEditorGroupFixture from '../../../fixtures/valid/lift-editor-group.json';
+import liftEditorPerLiftFixture from '../../../fixtures/valid/lift-editor-per-lift.json';
 import thermalReportSingleFixture from '../../../fixtures/valid/thermal-report-single.json';
 import thermalReportMultiFixture from '../../../fixtures/valid/thermal-report-multi.json';
 import keoEditorFixture from '../../../fixtures/valid/keo-editor.json';
@@ -42,6 +43,7 @@ import {asLiftEditorNext} from './as-lift-editor-next';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 import {withStatusChipsPreview} from './with-status-chips-preview';
 import {DEMO_LIFT_DRAFT_ACTION, withLiftDraftAction} from './with-lift-draft-action';
+import {withLiftRecommend} from './with-lift-recommend';
 
 const examples = [
   {
@@ -137,6 +139,19 @@ const examples = [
     messages: asLiftEditorNext(withLiftDraftAction(liftEditorMessages as A2uiMessage[])),
   },
   {
+    key: 'lift-recommend-preview',
+    title: 'Lift Editor Next — блок подбора конфигураций',
+    description:
+      'Тот же экран с пропом recommend: заполненные «Здание» (N и A) поднимают между «Зданием» и лифтами блок подбора. Список компонент забирает сам, побочным каналом GET /api/agent-resource — ходом диалога его отдать нельзя, ответный снапшот пересеял бы локальное состояние формы. Топ-2 варианта карточками, остальные — списком выбора без кнопки подтверждения: выбор и есть применение. Клик перестраивает лифтовые секции под вариант и шлёт один черновик — видно в консоли. Правьте N или A: блок гаснет приглушённым и обновляется. В dev наполнение отдаёт стаб, а с AGENT_RECOMMEND_URL=http://localhost:8081/api/recommend — живой подбор агента spai-elevator-calc-agent; в собранной статике ручки нет и блока просто не будет.',
+    messages: createSurfaceMessages(
+      'LiftEditorNext',
+      withLiftRecommend({
+        ...(liftEditorPerLiftFixture.props as Record<string, unknown>),
+        draftAction: DEMO_LIFT_DRAFT_ACTION,
+      }),
+    ),
+  },
+  {
     key: 'lift-next-group-preview',
     title: 'Lift Editor Next — лифтовая группа',
     description:
@@ -156,11 +171,31 @@ const examples = [
     ),
   },
   {
+    key: 'thermal-report-single-next-preview',
+    title: 'Thermal Report Next — одна конструкция на новых примитивах',
+    description:
+      'То же наполнение, что у сообщения выше, и та же схема props — отличается только исполнение. Экран собран из примитивов пакета (строка списка, двухчастный чип, статусная пилюля, serif-заголовок вердикта, таблица с итогом, заметка на утопленном фоне, карточка протокола), своего листа стилей у рендерера нет. Канон отчётов применён: протокол — одна строка без раскрытия («Скачать ⌄» раскрывается вверх, форматы .md и .docx приходят из downloadUrl, а при клиентском Blob\'е формат один), слова статуса зашиты в рендерер, а кнопка роли — outline: единственный акцент экрана — вердикт.',
+    messages: createSurfaceMessages(
+      'ThermalReportNext',
+      thermalReportSingleFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
     key: 'thermal-report-multi-preview',
     title: 'Thermal Report — 7 конструкций',
     description:
       'Тот же компонент в наполнении списка: вердикт «Соответствуют 2 из 7», конструкции с чипами отклонения по знаку (−53,9 % красным, +0,6 % зелёным) и «Подобрать» только у непроходящих, строка исключённых с «Вернуть в расчёт», допущения жёлтой заметкой. Все кнопки диспатчат действия с payload (constructionId) — смотрите консоль.',
     messages: createThermalReportMessages(
+      thermalReportMultiFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'thermal-report-multi-next-preview',
+    title: 'Thermal Report Next — 7 конструкций',
+    description:
+      'Тот же список на новых примитивах: отклонение считается из числа (знак, запятая и тон — из deviationPct), «Подобрать» — outline у непроходящих, строка исключённых с уходом в редактор ссылкой, допущения заметкой. Рамка строки молчит: о состоянии говорит правый слот, а список из семи красных рамок перестал бы что-либо значить. Сузьте окно — таблица и строки останутся внутри карточки, страница вбок не поедет.',
+    messages: createSurfaceMessages(
+      'ThermalReportNext',
       thermalReportMultiFixture.props as Record<string, unknown>,
     ),
   },
@@ -231,6 +266,16 @@ const examples = [
       'Результат подбора лифтов карточками (ГОСТ Р 52941-2008): вердикт «НЕ СООТВЕТСТВУЕТ ГОСТ» с крупным интервалом движения, блок «Что изменить» с уже пересчитанными вариантами (рекомендуемый — зелёной рамкой с «Пересчитать», непроходящий — статусом «не проходит» без кнопки), исходные данные чипами по источнику («принято системой» — пунктиром с заметкой), протокол под катом со «Скачать» по URL ручки агента. Кнопки диспатчат report_apply_suggestion с suggestionId и report_edit_inputs — смотрите консоль.',
     messages: createSurfaceMessages(
       'LiftReport',
+      liftReportFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'lift-report-next-preview',
+    title: 'Lift Report Next — тот же расчёт на новых примитивах',
+    description:
+      'То же наполнение, что у сообщения выше, и та же схема props. Экран собран из тех же примитивов, что и Thermal Report Next: вердикт, строка списка, исходные данные и протокол у двух отчётов написаны один раз. Расхождения с теплотехом сняты: протокол больше не раскрывается в <pre> (простыня уезжает файлом), слово статуса варианта зашито в рендерер — непроходящий вариант говорит «Не соответствует» ровно как проверка теплотеха, а не своё «не проходит»; акцентная рамка осталась только у рекомендованного варианта. Кнопки диспатчат те же действия с тем же контекстом — смотрите консоль.',
+    messages: createSurfaceMessages(
+      'LiftReportNext',
       liftReportFixture.props as Record<string, unknown>,
     ),
   },
@@ -306,6 +351,7 @@ export function App() {
           example.key === 'lift-preview' ||
           example.key === 'lift-group-preview' ||
           example.key === 'lift-next-preview' ||
+          example.key === 'lift-recommend-preview' ||
           example.key === 'lift-next-group-preview' ||
           example.key === 'thermal-report-single-preview' ||
           example.key === 'thermal-report-multi-preview' ||

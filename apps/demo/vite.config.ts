@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import {LOOKUP_SUGGEST_ROUTE} from '../../packages/catalog-schemas/src/components/form-card-lookup-fetch';
 import {DEMO_CITIES} from './src/demo-cities';
+import {DEMO_LIFT_RECOMMEND, DEMO_LIFT_RECOMMEND_RESOURCE} from './src/demo-lift-recommend';
 import {DEMO_MATERIALS} from './src/demo-materials';
 
 /**
@@ -41,6 +42,45 @@ function referenceSuggestMiddleware(): Plugin {
             ),
           );
           res.end(JSON.stringify({options}));
+          return;
+        }
+
+        // Подбор конфигураций лифтов: ручка агента (`/api/recommend`) в dev
+        // не поднята, а блок редактора ходит в ту же обобщённую ручку
+        // ресурсов. `echo` возвращаем нормализованным числом — рендерер
+        // обязан пережить «17» → 17, иначе свежий ответ считался бы протухшим.
+        if (referenceId === DEMO_LIFT_RECOMMEND_RESOURCE) {
+          // Живой агент вместо стаба: с `AGENT_RECOMMEND_URL` (напр.
+          // http://localhost:8081/api/recommend от spai-elevator-calc-agent в
+          // dev) середина цепочки повторяет оркестратор — форвардит весь query,
+          // кроме служебного `resource`, и отдаёт ответ как есть. Так блок
+          // видно на настоящем подборе, а не на пяти выдуманных строках.
+          const agentUrl = process.env.AGENT_RECOMMEND_URL;
+          if (agentUrl) {
+            const target = new URL(agentUrl);
+            for (const [name, value] of url.searchParams) {
+              if (name === 'resource') continue;
+              target.searchParams.set(name, value);
+            }
+            void fetch(target)
+              .then(async agentRes => {
+                res.statusCode = agentRes.status;
+                res.end(await agentRes.text());
+              })
+              .catch(() => {
+                // Агент не поднят — та же тихая деградация, что в проде.
+                res.statusCode = 502;
+                res.end(JSON.stringify({error: 'agent_unreachable'}));
+              });
+            return;
+          }
+
+          const echo: Record<string, string | number> = {};
+          for (const [name, value] of url.searchParams) {
+            if (name === 'resource' || name === 'taskId') continue;
+            echo[name] = value.trim() !== '' && !Number.isNaN(Number(value)) ? Number(value) : value;
+          }
+          res.end(JSON.stringify({echo, variants: DEMO_LIFT_RECOMMEND}));
           return;
         }
 
