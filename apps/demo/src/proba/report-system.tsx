@@ -1,11 +1,16 @@
 import React from 'react';
-import {Button, KitStyles} from '@ai37/a2ui-catalog-react/primitives';
-import {DataChip} from './data-chip';
-import {ReportHeadline} from './report-headline';
-import {ReportNote} from './report-note';
-import {ReportRow} from './report-row';
-import {ReportTable} from './report-table';
-import {StatusPill} from './status-pill';
+import {
+  Button,
+  DataChip,
+  KitStyles,
+  Menu,
+  ReportHeadline,
+  ReportNote,
+  ReportProtocolCard,
+  ReportRow,
+  ReportTable,
+  StatusPill,
+} from '@ai37/a2ui-catalog-react/primitives';
 import {SYSTEM_SECTION_STYLE, SystemHeading} from './system-section';
 
 /** Таблица витрины — три слоя стены: короче настоящей, устройство то же. */
@@ -18,8 +23,14 @@ const TABLE = {
   footer: {label: 'R₀ приведённое · с сопротивлениями поверхностей', value: '3,21'},
 };
 
+/** Форматы «Скачать» витрины: тот же список, что у протокола с ручкой агента. */
+const DOWNLOAD_ITEMS = [
+  {label: 'Markdown (.md)', href: '#md'},
+  {label: 'Word (.docx)', href: '#docx'},
+];
+
 /**
- * Части отчёта: шесть мест, которых у набора не было. Все шесть — про чтение,
+ * Части отчёта: семь мест, которых у набора не было. Все семь — про чтение,
  * а не про ввод: отчёт read-mostly, и вся его интерактивность живёт в
  * кнопках и меню, которые уже показаны соседними блоками витрины.
  */
@@ -30,7 +41,7 @@ export function ReportSystem() {
 
       <SystemHeading
         title="Отчёт"
-        axes="ReportRow (main · side · accent) · DataChip (сплошной · пунктирный) · StatusPill (pass · fail · warning · neutral × badge · row) · ReportHeadline (display + serif) · ReportTable · ReportNote"
+        axes="ReportRow (main · side · accent) · DataChip (сплошной · пунктирный) · StatusPill (pass · fail · warning · neutral × badge · row) · ReportHeadline (display + serif) · ReportTable · ReportNote · ReportProtocolCard (+ Menu side=top)"
       />
 
       {/* Вердикт: пилюля ступени badge и serif-заголовок. Ступень у заголовка
@@ -90,6 +101,16 @@ export function ReportSystem() {
         <ReportNote>
           Допущения: условие эксплуатации Б принято с запасом (зона влажности не задана)
         </ReportNote>
+      </div>
+
+      {/* Протокол: одна строка без раскрытия. Меню «Скачать» — ось `side` у
+          Menu набора: список растёт вверх, внутрь карточки. */}
+      <div style={stageColumnStyle}>
+        <ReportProtocolCard
+          label="Протокол расчёта"
+          meta="СП 50.13330.2024 · Прил. Г · 9 шагов"
+          action={<Menu label="Скачать" side="top" items={DOWNLOAD_ITEMS} />}
+        />
       </div>
     </section>
   );

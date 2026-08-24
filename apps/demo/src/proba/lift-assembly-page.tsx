@@ -2,7 +2,6 @@ import React from 'react';
 import {LIFT_BRANCHES} from './lift-assembly-fixture';
 import {LiftAssembly} from './lift-assembly';
 import {ProbaShell} from './proba-shell';
-import {RecommendSlot} from './recommend-slot';
 
 /**
  * `/proba/lift-assembly` — экран подбора лифтов на новых примитивах в двух
@@ -16,7 +15,7 @@ export function LiftAssemblyPage() {
       route="/proba/lift-assembly"
       eyebrow="AI37 A2UI CATALOG"
       title="Лифты"
-      lead="Экран LiftEditor из готовых примитивов: две методики, у каждой свой состав формы."
+      lead="Экран LiftEditor из готовых примитивов: две методики, у каждой свой состав формы. У ветки 52941 между «Зданием» и лифтами стоит блок подбора — его наполнение отдаёт dev-стаб обобщённой ручки ресурсов."
     >
       {LIFT_BRANCHES.map(branch => (
         <section key={branch.id} style={blockStyle}>
@@ -25,7 +24,6 @@ export function LiftAssemblyPage() {
             <p style={leadStyle}>{branch.lead}</p>
           </header>
           <LiftAssembly branch={branch} />
-          <RecommendSlot branchId={branch.id} />
         </section>
       ))}
     </ProbaShell>

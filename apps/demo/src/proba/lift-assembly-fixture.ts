@@ -1,6 +1,6 @@
 import {liftEditorPropsSchema} from '@ai37/a2ui-catalog-schemas';
 import groupFixture from '../../../../fixtures/valid/lift-editor-group.json';
-import perLiftFixture from '../../../../fixtures/valid/lift-editor-per-lift.json';
+import perLiftFixture from '../../../../fixtures/valid/lift-editor-recommend.json';
 import type {LiftBranch} from './lift-assembly.types';
 
 /**
