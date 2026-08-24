@@ -15,7 +15,7 @@ import {
   constructionsEditorDefinition,
   constructionsEditorNextDefinition,
 } from './components/constructions-editor';
-import {liftEditorDefinition} from './components/lift-editor';
+import {liftEditorDefinition, liftEditorNextDefinition} from './components/lift-editor';
 import {thermalReportDefinition} from './components/thermal-report';
 import {keoEditorDefinition} from './components/keo-editor';
 import {keoReportDefinition} from './components/keo-report';
@@ -34,6 +34,7 @@ export const componentDefinitions = [
   constructionsEditorDefinition,
   constructionsEditorNextDefinition,
   liftEditorDefinition,
+  liftEditorNextDefinition,
   thermalReportDefinition,
   keoEditorDefinition,
   keoReportDefinition,

@@ -19,6 +19,7 @@ import {FormCard} from './renderers/form-card';
 import {ConstructionsEditor} from './renderers/constructions-editor';
 import {ConstructionsEditorNext} from './renderers/constructions-editor-next';
 import {LiftEditor} from './renderers/lift-editor';
+import {LiftEditorNext} from './renderers/lift-editor-next';
 import {ThermalReport} from './renderers/thermal-report';
 import {KeoEditor} from './renderers/keo-editor';
 import {KeoReport} from './renderers/keo-report';
@@ -37,6 +38,9 @@ const customComponents: ReactComponentImplementation[] = [
   // сравнение «было / стало» не закончено (change constructions-editor-next).
   ConstructionsEditorNext,
   LiftEditor,
+  // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока
+  // сравнение «было / стало» не закончено (change lift-editor-next).
+  LiftEditorNext,
   ThermalReport,
   KeoEditor,
   KeoReport,

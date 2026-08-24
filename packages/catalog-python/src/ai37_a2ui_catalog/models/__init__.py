@@ -101,6 +101,9 @@ COMPONENT_MODELS = {
     # старым, поэтому и модель одна (change constructions-editor-next).
     "ConstructionsEditorNext": ConstructionsEditorProps,
     "LiftEditor": LiftEditorProps,
+    # То же и у лифтов: имя новое, схема props общая со старым рендерером
+    # (change lift-editor-next).
+    "LiftEditorNext": LiftEditorProps,
     "KeoEditor": KeoEditorProps,
     "KeoReport": KeoReportProps,
     "InsolationEditor": InsolationEditorProps,

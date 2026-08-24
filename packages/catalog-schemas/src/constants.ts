@@ -40,6 +40,7 @@ export const CATALOG_COMPONENT_NAMES = [
   'ConstructionsEditor',
   'ConstructionsEditorNext',
   'LiftEditor',
+  'LiftEditorNext',
   'ThermalReport',
   'KeoEditor',
   'KeoReport',
