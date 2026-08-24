@@ -38,15 +38,14 @@ export const CATALOG_COMPONENT_NAMES = [
   'ChoiceCard',
   'FormCard',
   'ConstructionsEditor',
+  'ConstructionsEditorNext',
   'LiftEditor',
   'ThermalReport',
-  'ThermalReportNext',
   'KeoEditor',
   'KeoReport',
   'InsolationEditor',
   'InsolationReport',
   'LiftReport',
-  'LiftReportNext',
 ] as const;
 
 export type CatalogComponentName = (typeof CATALOG_COMPONENT_NAMES)[number];

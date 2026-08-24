@@ -17,6 +17,7 @@ import {LatexFormula} from './renderers/latex-formula';
 import {ChoiceCard} from './renderers/choice-card';
 import {FormCard} from './renderers/form-card';
 import {ConstructionsEditor} from './renderers/constructions-editor';
+import {ConstructionsEditorNext} from './renderers/constructions-editor-next';
 import {LiftEditor} from './renderers/lift-editor';
 import {ThermalReport} from './renderers/thermal-report';
 import {KeoEditor} from './renderers/keo-editor';
@@ -32,6 +33,9 @@ const customComponents: ReactComponentImplementation[] = [
   ChoiceCard,
   FormCard,
   ConstructionsEditor,
+  // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока
+  // сравнение «было / стало» не закончено (change constructions-editor-next).
+  ConstructionsEditorNext,
   LiftEditor,
   ThermalReport,
   KeoEditor,

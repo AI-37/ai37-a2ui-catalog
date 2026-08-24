@@ -213,3 +213,20 @@ export const constructionsEditorDefinition: CatalogComponentDefinition<
     'A whole-screen editor for building envelope constructions (walls, roofs, floors, windows) with variable-length layer tables, headed by a collapsible "conditions" block with the climate and building inputs (region with agent-computed HDD, room purpose, indoor temperature, operating condition). Every general value may carry its provenance (from the project, from the question, suggested by the agent, taken by default) shown as a caption under the control. The user edits everything on the client — add/remove rows and cards, per-row material lookup with reference-backed autocomplete, city lookup that fills climate values, live reduced thermal resistance (R) feedback against the normative value — and submits the whole state back to the agent in a single action, without client-side blocking.',
   schema: constructionsEditorPropsSchema,
 };
+
+/**
+ * Тот же экран на новом наборе примитивов (`packages/catalog-react/src/primitives`,
+ * интерактивность — `@base-ui/react`). Схема props общая с
+ * `constructionsEditorDefinition` намеренно: сравнивать «было / стало» на разном
+ * наполнении бессмысленно, поэтому новое имя нужно только компоненту, не данным.
+ * Оба рендерера зарегистрированы одновременно — агент может адресовать любой.
+ */
+export const constructionsEditorNextDefinition: CatalogComponentDefinition<
+  typeof constructionsEditorPropsSchema
+> = {
+  name: 'ConstructionsEditorNext',
+  slug: 'constructions-editor-next',
+  description:
+    'The same building-envelope constructions editor as `ConstructionsEditor` — identical props, identical data contract — rendered on the catalog primitive set (cards, buttons, chips, one type scale, tokenised colours) with interaction taken from a headless component library: reference search that is fully keyboard-operable (arrow keys highlight, Enter picks, aria-activedescendant is exposed), dropdowns, number fields, and disclosure sections. Prefer it when the surface should be navigable without a mouse; emit the same props as for `ConstructionsEditor`.',
+  schema: constructionsEditorPropsSchema,
+};

@@ -6,6 +6,7 @@ export * from './renderers/latex-formula';
 export * from './renderers/choice-card';
 export * from './renderers/form-card';
 export * from './renderers/constructions-editor';
+export * from './renderers/constructions-editor-next';
 // Окно дебаунса автодрафта условий: экспортируется, чтобы тесты и хосты
 // мотали таймеры тем же значением, а не магическим числом.
 export * from './renderers/conditions-draft-debounce-ms';
