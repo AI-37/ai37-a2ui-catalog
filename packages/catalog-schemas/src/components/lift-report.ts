@@ -122,3 +122,11 @@ export const liftReportDefinition: CatalogComponentDefinition<typeof liftReportP
     'A lift-calculation result card (GOST R 52941-2008 / GOST 34758-2021): verdict badge with headline, a "what to change" list of pre-computed options with recalculate actions or status labels, input-data chips grouped by source, and a collapsed calculation protocol with a download link. Use it to present the finished interval/capacity comparison instead of a markdown report.',
   schema: liftReportPropsSchema,
 };
+
+export const liftReportNextDefinition: CatalogComponentDefinition<typeof liftReportPropsSchema> = {
+  name: 'LiftReportNext',
+  slug: 'lift-report-next',
+  description:
+    'The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single non-expanding row without `<details>`/`<pre>` (`protocol.content` is never printed on screen), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.',
+  schema: liftReportPropsSchema,
+};

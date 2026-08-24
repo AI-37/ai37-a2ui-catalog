@@ -161,3 +161,13 @@ export const thermalReportDefinition: CatalogComponentDefinition<
     'A thermal-calculation result card (SP 50.13330): verdict badge with headline, per-check statuses or a per-construction list with deviation chips and fix actions, layer table, input-data chips grouped by source, and a collapsed calculation protocol. Use it to present the finished Rnorm/Rpr comparison instead of a markdown report.',
   schema: thermalReportPropsSchema,
 };
+
+export const thermalReportNextDefinition: CatalogComponentDefinition<
+  typeof thermalReportPropsSchema
+> = {
+  name: 'ThermalReportNext',
+  slug: 'thermal-report-next',
+  description:
+    'The same thermal-calculation result card as `ThermalReport` — identical props, identical data contract — rendered on the catalog primitive set (report row, two-part data chip, status pill, serif verdict headline, layer table with a total row, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: the protocol is a single non-expanding row (`protocol.content` is never printed, it only feeds the downloaded file), status words for `pass | fail | info` are fixed by the renderer so both reports say the same thing, and the accept-the-suggestion button is `outline`. Prefer it when the surface should read as one system with `LiftReportNext`; emit the same props as for `ThermalReport`.',
+  schema: thermalReportPropsSchema,
+};
