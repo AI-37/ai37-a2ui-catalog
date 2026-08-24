@@ -4,7 +4,7 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
-## [0.27.0] - 2026-08-24
+## [Unreleased]
 
 ### Added
 
@@ -54,6 +54,32 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
   рядом-подсказкой), `SourceNote` (подпись источника значения), тон
   `Chip tone="warning"` и ось триггера `Menu trigger="link"`. Все показаны на
   `/proba/system`.
+- **Рендереры `ThermalReportNext` и `LiftReportNext`** — те же два отчёта, что
+  `ThermalReport` и `LiftReport`, собранные из общего набора примитивов
+  каталога (change `reports-next`). Регистрируются **рядом** со старыми и
+  принимают **те же схемы props** (`thermalReportPropsSchema`,
+  `liftReportPropsSchema`): одно наполнение рендерится обоими, агентам менять
+  нечего. Контракт действий тот же — каждая кнопка диспатчит
+  `{event: {name, context: payload ?? {}}}`. Своего листа стилей у новых
+  рендереров нет: у двух экранов один набор примитивов вместо двух листов CSS.
+  Что изменилось в исполнении (канон change'а `proba-report-assembly`):
+  протокол — одна строка без раскрытия, `protocol.content` на экране не
+  выводится и участвует только в скачивании (`<details>` с `<pre>` у лифтов
+  не переносится); «Скачать ⌄» — один триггер на оба отчёта, список форматов
+  зависит от наполнения (`.md` + `.docx` при `downloadUrl`, один `.md` при
+  клиентском Blob'е, ничего — триггера нет), меню растёт вверх; слова статуса,
+  сводимого к перечислению, зашиты в рендерер (`statusLabel` чтится только вне
+  перечисления), поэтому оба отчёта говорят об одном состоянии одинаково;
+  статус строки и вердикт — одна пилюля, кнопка роли — `outline`, акцентная
+  рамка осталась только у рекомендованного варианта «Что изменить».
+- **Примитивы набора пополнились** переносом отчётов: `ReportRow` (строка
+  списка со слотами `main`/`side` и акцентной рамкой), `DataChip`
+  (двухчастная пилюля исходных данных, сплошная и пунктирная), `StatusPill`
+  (точка + слово, оси тона и кегля), `ReportHeadline` (ступень `display` с
+  новой осью семейства `--a2ui-font-serif`), `ReportTable` (итоговая строка и
+  скролл внутри своего контейнера), `ReportNote` (заметка на утопленном фоне),
+  `ReportProtocolCard` (строка протокола) и ось `Menu side="top"` (попап растёт
+  вверх). Все показаны на `/proba/system`.
 
 ### Changed
 
@@ -64,6 +90,13 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
   Хост обязан уметь разрешить её как обычную транзитивную зависимость.
 - `ConstructionsEditor` (нынешний) **не тронут** — разметка, стили и тесты
   прежние; вывод его из обращения — отдельное решение после сравнения.
+- `ThermalReport` и `LiftReport` (нынешние) **не тронуты** — разметка, стили и
+  тесты прежние; вывод их из обращения и удаление их листов CSS
+  (`thermal-report-styles.ts`, `lift-report-styles.ts`) — отдельное решение
+  после сравнения. Чтобы увидеть новые отчёты на стенде, `spai-teplo-calc` и
+  `spai-elevator-calc-agent` должны уметь адресовать `ThermalReportNext` и
+  `LiftReportNext` (переключатель имени по образцу `CONSTRUCTIONS_EDITOR_NEXT`)
+  — правки в тех репозиториях, здесь только зависимость.
 - `LiftEditor` (нынешний) **не тронут** — разметка, стили и тесты прежние;
   вывод его из обращения — отдельное решение после сравнения. Чтобы увидеть
   новый экран на стенде, `spai-elevator-calc-agent` должен уметь адресовать
