@@ -58,6 +58,8 @@ export * from './combo';
 export * from './combo.types';
 
 export * from './popup-css';
+export * from './use-popup-scheme';
+export * from './use-popup-scheme.types';
 export * from './lookup';
 export * from './lookup.types';
 export * from './lookup-highlight';

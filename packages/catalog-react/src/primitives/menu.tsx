@@ -4,6 +4,7 @@ import {ButtonIcon} from './button-icon';
 import {buttonClassName} from './button-class-name';
 import {MenuCaret} from './menu-caret';
 import {MenuEntry} from './menu-entry';
+import {usePopupScheme} from './use-popup-scheme';
 import type {MenuProps} from './menu.types';
 
 /**
@@ -13,6 +14,7 @@ import type {MenuProps} from './menu.types';
  * под ними нет.
  */
 export function Menu({label, icon, ariaLabel, trigger = 'button', side = 'bottom', items}: MenuProps) {
+  const {anchorRef, popupRef} = usePopupScheme<HTMLButtonElement>();
   // Триггер-ссылка и icon-only живут в правом краю шапки: попап от их левого
   // края уезжал бы за карточку. Триггер-кнопка с подписью стоит в потоке слева,
   // ему естественнее start.
@@ -24,6 +26,7 @@ export function Menu({label, icon, ariaLabel, trigger = 'button', side = 'bottom
   return (
     <BaseMenu.Root>
       <BaseMenu.Trigger
+        ref={anchorRef}
         className={buttonClassName({
           variant: linkTrigger ? 'link' : 'outline',
           tone: label === undefined ? 'neutral' : 'accent',
@@ -38,7 +41,7 @@ export function Menu({label, icon, ariaLabel, trigger = 'button', side = 'bottom
 
       <BaseMenu.Portal>
         <BaseMenu.Positioner side={side} sideOffset={4} align={alignEnd ? 'end' : 'start'}>
-          <BaseMenu.Popup className="a2ui-popup a2ui-popup--wide">
+          <BaseMenu.Popup ref={popupRef} className="a2ui-popup a2ui-popup--wide">
             {items.map(item => (
               <MenuEntry key={item.label} item={item} />
             ))}
