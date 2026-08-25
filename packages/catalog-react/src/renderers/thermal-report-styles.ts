@@ -123,13 +123,13 @@ export const THERMAL_REPORT_CSS = `
 .a2ui-tr__deviation--pass { color: ${tokens.success}; }
 .a2ui-tr__deviation--fail { color: ${tokens.danger}; }
 
-/* Кнопки — канон CE: 13px, радиус 9px, без жирности; тёмная — как
+/* Кнопки — канон CE: 13px, радиус 8px, без жирности; тёмная — как
    ce-btn--commit (border transparent + заливка текстовым цветом). */
 .a2ui-tr .a2ui-tr-btn {
   appearance: none;
   margin: 0;
   padding: 8px 14px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid ${tokens.trBorder};
   background: transparent;
   color: ${tokens.trText};

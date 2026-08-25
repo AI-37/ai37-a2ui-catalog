@@ -117,13 +117,13 @@ export const LIFT_REPORT_CSS = `
 .a2ui-lr__status--fail { color: ${tokens.danger}; }
 .a2ui-lr__status--neutral { color: ${tokens.lrTextMuted}; }
 
-/* Кнопки — канон отчёта: 13px, радиус 9px, без жирности; тёмная — border
+/* Кнопки — канон отчёта: 13px, радиус 8px, без жирности; тёмная — border
    transparent + заливка текстовым цветом. */
 .a2ui-lr .a2ui-lr-btn {
   appearance: none;
   margin: 0;
   padding: 8px 14px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid ${tokens.lrBorder};
   background: transparent;
   color: ${tokens.lrText};
