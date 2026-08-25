@@ -48,11 +48,14 @@ export function CalcEditorField({
           ))}
         </select>
       ) : field.type === 'boolean' ? (
+        // alignSelf: у `-field` колоночный flex, а его align-items по умолчанию
+        // stretch — без этого квадрат чекбокса растягивается во всю ширину поля.
         <input
           type="checkbox"
           name={field.name}
           checked={value === true || value === 'true'}
           onChange={event => onChange(event.target.checked)}
+          style={{alignSelf: 'start'}}
         />
       ) : (
         <input
