@@ -1,12 +1,5 @@
 # Темизация каталога (`@ai37/a2ui-catalog-react`)
 
-> Этот документ — про **старые рендереры** и их токены `--a2ui-color-*`.
-> Семейство `*Next` (`ConstructionsEditorNext`, `LiftEditorNext`,
-> `ThermalReportNext`, `LiftReportNext`) собрано на наборе примитивов и темизуется
-> иначе: пара `light-dark()` в токене плюс наследуемый `color-scheme`
-> (атрибут `data-a2ui-theme` или прямое объявление хоста). См. раздел
-> «Тема семейства `*Next`» в `README.md`.
-
 Рендереры каталога не хардкодят цвета. Каждый цвет берётся из CSS-переменной с
 fallback'ом:
 

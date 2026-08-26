@@ -90,5 +90,5 @@ const cellStyle: React.CSSProperties = {
   alignContent: 'start',
   padding: '12px 14px',
   borderRadius: 10,
-  background: 'light-dark(#f8fafc, #141413)',
+  background: '#f8fafc',
 };

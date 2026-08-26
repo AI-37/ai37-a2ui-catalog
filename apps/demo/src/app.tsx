@@ -35,7 +35,6 @@ import liftReportFixture from '../../../fixtures/valid/lift-report.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
-import {attachDemoKeoDraftHost} from './attach-demo-keo-draft-host';
 import {createLiftEditorMessages} from './create-lift-editor-messages';
 import {createThermalReportMessages} from './create-thermal-report-messages';
 import {createSurfaceMessages} from './create-surface-messages';
@@ -43,7 +42,6 @@ import {asConstructionsEditorNext} from './as-constructions-editor-next';
 import {asLiftEditorNext} from './as-lift-editor-next';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 import {withStatusChipsPreview} from './with-status-chips-preview';
-import {DEMO_KEO_DRAFT_ACTION, withKeoDraftAction} from './with-keo-draft-action';
 import {DEMO_LIFT_DRAFT_ACTION, withLiftDraftAction} from './with-lift-draft-action';
 import {withLiftRecommend} from './with-lift-recommend';
 
@@ -212,15 +210,6 @@ const examples = [
     ),
   },
   {
-    key: 'keo-editor-next-preview',
-    title: 'Keo Editor Next — тот же опросник на новых примитивах',
-    description:
-      'То же наполнение, что у сообщения выше, и та же схема props. Помещения — секции-раскрывашки, а не вкладки: второе видно строкой со своей сводкой, и счётчик футера, считающий весь документ, перестаёт расходиться с тем, что на экране. Условия стали полем: город — поиск по справочнику, и правка меняет расчёт, а не проект. Поправьте город — значение в сводке группы обновится. Витрина включает черновик, поэтому строка про группу светового климата НЕ гаснет: её пересчитает агент и вернёт снапшотом на месте; без черновика она исчезала бы до его ответа. «Далее» ведёт по секциям, пока непросмотренные есть, затем становится «Рассчитать». Списки, числовые поля и раскрывашки ходят с клавиатуры. В консоли видно оба потока: черновик уезжает после паузы ввода, добавление помещения и «Далее» шлют его сразу, а раскрытие секции не шлёт ничего; submit с полным документом по-прежнему один.',
-    messages: withKeoDraftAction(
-      createSurfaceMessages('KeoEditorNext', keoEditorFixture.props as Record<string, unknown>),
-    ),
-  },
-  {
     key: 'keo-report-fail-preview',
     title: 'Keo Report — не проходит',
     description:
@@ -231,32 +220,12 @@ const examples = [
     ),
   },
   {
-    key: 'keo-report-fail-next-preview',
-    title: 'Keo Report Next — тот же расчёт на новых примитивах',
-    description:
-      'То же наполнение, что у сообщения выше, и та же схема props. Экран собран из тех же примитивов, что Thermal Report Next и Lift Report Next: вердикт, строка списка, исходные данные и протокол у трёх отчётов написаны один раз, своего листа стилей у рендерера нет. Расхождения с двумя другими отчётами сняты: вариант «Что изменить» — строка списка, а не своя карточка; кнопка принятия — outline (единственный акцент экрана — вердикт); отвергнутый вариант говорит «Не соответствует» ровно как проверка теплотеха, а не красным detail; акцентная рамка осталась только у рекомендованного; «Скачать» — меню форматов, растущее вверх. Кнопки диспатчат те же действия с тем же контекстом — смотрите консоль.',
-    messages: createSurfaceMessages(
-      'KeoReportNext',
-      keoReportFailFixture.props as Record<string, unknown>,
-    ),
-  },
-  {
     key: 'keo-report-pass-preview',
     title: 'Keo Report — два помещения проходят',
     description:
       'То же наполнение в мультипомещенном режиме: сводный вердикт «Соответствуют 2 помещения из 2», результаты по помещениям со статусными значениями против нормы и кнопкой пересчёта только там, где агент её задал. Без downloadFileName протокол остаётся строкой без «Скачать».',
     messages: createSurfaceMessages(
       'KeoReport',
-      keoReportPassFixture.props as Record<string, unknown>,
-    ),
-  },
-  {
-    key: 'keo-report-pass-next-preview',
-    title: 'Keo Report Next — два помещения на новых примитивах',
-    description:
-      'Мультипомещенный режим на примитивах: значение помещения — статусная пилюля в том же правом слоте, где у теплотеха стоит чип отклонения, норма ушла в пояснение строки, «Пересчитать» — outline там, где агент задал действие. Протокол без downloadFileName остаётся строкой без «Скачать» — триггера нет вовсе, а не пустая кнопка.',
-    messages: createSurfaceMessages(
-      'KeoReportNext',
       keoReportPassFixture.props as Record<string, unknown>,
     ),
   },
@@ -378,15 +347,6 @@ export function App() {
         if (example.key === 'constructions-preview' || example.key === 'constructions-next-preview') {
           attachDemoDraftLogger(processor, 'demo-surface', DEMO_DRAFT_ACTION);
         }
-        if (example.key === 'keo-editor-next-preview') {
-          attachDemoDraftLogger(processor, 'demo-surface', DEMO_KEO_DRAFT_ACTION);
-          attachDemoKeoDraftHost(
-            processor,
-            'demo-surface',
-            DEMO_KEO_DRAFT_ACTION,
-            keoEditorFixture.props as never,
-          );
-        }
         if (
           example.key === 'lift-preview' ||
           example.key === 'lift-group-preview' ||
@@ -396,11 +356,8 @@ export function App() {
           example.key === 'thermal-report-single-preview' ||
           example.key === 'thermal-report-multi-preview' ||
           example.key === 'keo-editor-preview' ||
-          example.key === 'keo-editor-next-preview' ||
           example.key === 'keo-report-fail-preview' ||
-          example.key === 'keo-report-fail-next-preview' ||
           example.key === 'keo-report-pass-preview' ||
-          example.key === 'keo-report-pass-next-preview' ||
           example.key === 'insolation-editor-preview' ||
           example.key === 'insolation-report-pass-preview' ||
           example.key === 'insolation-report-fail-preview' ||
@@ -511,11 +468,6 @@ function AssistantBubble({
 }) {
   const previewClassName =
     theme === 'dark' ? 'message-preview-card a2ui-theme-dark' : 'message-preview-card';
-  // Тумблер один, семей под ним две: старые рендереры темнеют классом
-  // `.a2ui-theme-dark` (переопределение `--a2ui-color-*`), `*Next` — атрибутом,
-  // который набор отображает в `color-scheme`. Атрибут стоит на том же узле,
-  // чтобы расхождение тем было видно в одном скриншоте, а не через переход.
-  const previewTheme = theme;
 
   return (
     <MessagePrimitive.Root className="message-row message-row-assistant">
@@ -532,15 +484,11 @@ function AssistantBubble({
           }}
         </MessagePrimitive.Parts>
         {surface ? (
-          <div className={previewClassName} data-a2ui-theme={previewTheme}>
+          <div className={previewClassName}>
             <A2uiSurface surface={surface as any} />
           </div>
         ) : null}
-        {children ? (
-          <div className={previewClassName} data-a2ui-theme={previewTheme}>
-            {children}
-          </div>
-        ) : null}
+        {children ? <div className={previewClassName}>{children}</div> : null}
       </div>
     </MessagePrimitive.Root>
   );

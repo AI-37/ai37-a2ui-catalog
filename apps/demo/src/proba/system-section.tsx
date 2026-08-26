@@ -6,8 +6,8 @@ export const SYSTEM_SECTION_STYLE: React.CSSProperties = {
   gap: 16,
   padding: 24,
   borderRadius: 16,
-  border: '1px solid light-dark(rgba(15, 23, 42, 0.1), rgba(237, 237, 234, 0.14))',
-  background: 'light-dark(#ffffff, #1c1c1b)',
+  border: '1px solid rgba(15, 23, 42, 0.1)',
+  background: '#ffffff',
 };
 
 /** Заголовок блока витрины: имя примитива и его оси. */
@@ -19,5 +19,5 @@ export function SystemHeading({title, axes}: {title: string; axes: string}) {
   );
 }
 
-const h2Style: React.CSSProperties = {margin: 0, fontSize: 15, fontWeight: 600, color: 'light-dark(#0f172a, #ededea)'};
-const codeStyle: React.CSSProperties = {fontSize: 13, color: 'light-dark(#64748b, #a0a09b)', fontWeight: 400};
+const h2Style: React.CSSProperties = {margin: 0, fontSize: 15, fontWeight: 600, color: '#0f172a'};
+const codeStyle: React.CSSProperties = {fontSize: 13, color: '#64748b', fontWeight: 400};

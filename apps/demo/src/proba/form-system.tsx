@@ -34,7 +34,7 @@ export function FormSystem() {
 
       <SystemHeading
         title="Форма"
-        axes="Form (1 · 2 · 3 колонки) · Field (wide) · Input · Autocomplete · Combo · Select · NumberField · Static (голый · boxed)"
+        axes="Form (1 · 2 · 3 колонки) · Field (wide) · Input · Autocomplete · Combo · Select · NumberField · Static"
       />
 
       <Form columns={2}>
@@ -73,11 +73,6 @@ export function FormSystem() {
         </Field>
         <Field label="ГСОП — градусо-сутки отопит. периода, °C·сут/год">
           <Static>—</Static>
-        </Field>
-        {/* boxed: значение пришло готовым и правится не здесь. Голым текстом
-            оно теряется в ряду полей — подпись есть, а поля будто нет. */}
-        <Field label="Регион проекта">
-          <Static boxed>Тюмень · группа светового климата 1</Static>
         </Field>
       </Form>
 

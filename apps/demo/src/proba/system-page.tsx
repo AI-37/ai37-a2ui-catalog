@@ -9,11 +9,7 @@ import {ProbaShell} from './proba-shell';
 import {ReportSystem} from './report-system';
 import {TypographySystem} from './typography-system';
 
-/**
- * `/proba/system` — готовый набор примитивов без разборов и обоснований.
- * Тумблер темы обязателен: примитив, показанный только в одной теме, считается
- * непроверенным ровно так же, как примитив, которого на витрине нет.
- */
+/** `/proba/system` — готовый набор примитивов без разборов и обоснований. */
 export function SystemPage() {
   return (
     <ProbaShell
@@ -21,7 +17,6 @@ export function SystemPage() {
       eyebrow="AI37 A2UI CATALOG"
       title="Готовое"
       lead="Примитивы каталога в предлагаемом виде: оформление наше, поведение из Base UI."
-      themeToggle
     >
       <TypographySystem />
       <ButtonsSystem />

@@ -123,7 +123,7 @@ const stageStyle: React.CSSProperties = {
   gap: 10,
   padding: '12px 14px',
   borderRadius: 10,
-  background: 'light-dark(#f8fafc, #141413)',
+  background: '#f8fafc',
 };
 
 const stageColumnStyle: React.CSSProperties = {
@@ -132,5 +132,5 @@ const stageColumnStyle: React.CSSProperties = {
   justifyItems: 'start',
   padding: '12px 14px',
   borderRadius: 10,
-  background: 'light-dark(#f8fafc, #141413)',
+  background: '#f8fafc',
 };
