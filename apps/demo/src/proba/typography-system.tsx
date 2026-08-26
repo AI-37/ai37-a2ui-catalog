@@ -46,11 +46,11 @@ const sectionStyle: React.CSSProperties = {
   gap: 16,
   padding: 24,
   borderRadius: 16,
-  border: '1px solid rgba(15, 23, 42, 0.1)',
-  background: '#ffffff',
+  border: '1px solid light-dark(rgba(15, 23, 42, 0.1), rgba(237, 237, 234, 0.14))',
+  background: 'light-dark(#ffffff, #1c1c1b)',
 };
 
-const h2Style: React.CSSProperties = {margin: 0, fontSize: 15, fontWeight: 600, color: '#0f172a'};
+const h2Style: React.CSSProperties = {margin: 0, fontSize: 15, fontWeight: 600, color: 'light-dark(#0f172a, #ededea)'};
 
 const listStyle: React.CSSProperties = {display: 'grid', gap: 2};
 
@@ -69,10 +69,10 @@ const metaStyle: React.CSSProperties = {display: 'grid', gap: 2, minWidth: 0};
 const tokenStyle: React.CSSProperties = {
   fontSize: 12,
   fontFamily: 'ui-monospace, monospace',
-  color: '#1d4ed8',
+  color: 'light-dark(#1d4ed8, #7cb0de)',
   wordBreak: 'break-all',
 };
-const dimStyle: React.CSSProperties = {fontSize: 11, color: '#94a3b8'};
+const dimStyle: React.CSSProperties = {fontSize: 11, color: 'light-dark(#94a3b8, #8a8a85)'};
 
 const swatchGridStyle: React.CSSProperties = {
   display: 'grid',
@@ -86,12 +86,12 @@ const swatchStyle: React.CSSProperties = {
   justifyItems: 'start',
   padding: '10px 12px',
   borderRadius: 10,
-  background: '#f8fafc',
+  background: 'light-dark(#f8fafc, #141413)',
 };
 
 /* Светлый текст читается только на заливке. */
 const onFillStyle: React.CSSProperties = {
   padding: '2px 8px',
   borderRadius: 6,
-  background: '#1f1f1e',
+  background: 'light-dark(#1f1f1e, #ededea)',
 };

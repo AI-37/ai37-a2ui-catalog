@@ -468,6 +468,11 @@ function AssistantBubble({
 }) {
   const previewClassName =
     theme === 'dark' ? 'message-preview-card a2ui-theme-dark' : 'message-preview-card';
+  // Тумблер один, семей под ним две: старые рендереры темнеют классом
+  // `.a2ui-theme-dark` (переопределение `--a2ui-color-*`), `*Next` — атрибутом,
+  // который набор отображает в `color-scheme`. Атрибут стоит на том же узле,
+  // чтобы расхождение тем было видно в одном скриншоте, а не через переход.
+  const previewTheme = theme;
 
   return (
     <MessagePrimitive.Root className="message-row message-row-assistant">
@@ -484,11 +489,15 @@ function AssistantBubble({
           }}
         </MessagePrimitive.Parts>
         {surface ? (
-          <div className={previewClassName}>
+          <div className={previewClassName} data-a2ui-theme={previewTheme}>
             <A2uiSurface surface={surface as any} />
           </div>
         ) : null}
-        {children ? <div className={previewClassName}>{children}</div> : null}
+        {children ? (
+          <div className={previewClassName} data-a2ui-theme={previewTheme}>
+            {children}
+          </div>
+        ) : null}
       </div>
     </MessagePrimitive.Root>
   );
