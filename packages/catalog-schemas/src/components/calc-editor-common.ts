@@ -71,15 +71,50 @@ export const calcEditorFieldSchema = formFieldBaseSchema
   })
   .strict();
 
-/** Readonly-строка блока «Условия»: значение приходит готовой строкой. */
+/**
+ * Строка блока «Условия». Значение приходит готовой строкой; с `type` строка
+ * становится КОНТРОЛОМ и правится на месте, а правленое значение уходит в
+ * submit тем же ключом `name`.
+ *
+ * Почему правится вообще: город (регион строительства) агент берёт из проекта,
+ * но проект бывает не тот — «изменить только для расчёта» на макете и означает,
+ * что правка меняет расчёт, а не данные проекта. Без `type` строка остаётся
+ * readonly — так приходят ВЫВЕДЕННЫЕ значения (норматив e_н, методика): их
+ * правка не имеет смысла, их пересчитывает агент.
+ */
 export const calcConditionSchema = z
   .object({
     name: z.string().min(1).max(80),
     label: z.string().min(1).max(120),
     value: z.string().min(1).max(200),
     note: z.string().min(1).max(200).optional(),
+    // Без `type` — readonly-строка (прежнее поведение, ключ аддитивный).
+    type: z.enum(['text', 'select', 'lookup']).optional(),
+    options: z.array(z.string().min(1).max(200)).min(1).optional(),
+    // Справочник для `lookup`: город строительства выбирается из справочника
+    // СП 131, а не набирается руками — опечатка в городе меняет весь расчёт.
+    referenceId: z.string().min(1).max(80).optional(),
+    // Откуда значение: подпись под контролом и слагаемое счётчика футера.
+    source: calcFieldSourceSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.type === 'select' && (value.options?.length ?? 0) === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'condition of type "select" requires "options"',
+        path: ['options'],
+      });
+    }
+
+    if (value.type === 'lookup' && value.referenceId === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'condition of type "lookup" requires "referenceId"',
+        path: ['referenceId'],
+      });
+    }
+  });
 
 /** Единственный action расчётного редактора — «Рассчитать». */
 export const calcSubmitSchema = z

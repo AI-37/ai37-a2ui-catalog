@@ -8,6 +8,7 @@ export const PROBA_ROUTES: Array<[string, string]> = [
   ['/proba/system', 'Готовое'],
   ['/proba/assembly', 'Сборка'],
   ['/proba/lift-assembly', 'Лифты'],
+  ['/proba/keo-assembly', 'КЕО'],
   ['/proba/report-assembly', 'Отчёты'],
   ['/proba/lookup', 'Поиск'],
   ['/proba/revision', 'Ревизия'],

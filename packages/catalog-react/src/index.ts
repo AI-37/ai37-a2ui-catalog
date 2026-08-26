@@ -25,7 +25,13 @@ export * from './renderers/thermal-report-next';
 // dispatchAction консолью — второй экземпляр экрана разошёлся бы с рендерером.
 export * from './renderers/thermal-report-next-screen';
 export * from './renderers/keo-editor';
+export * from './renderers/keo-editor-next';
+// Экран КЕО без a2ui-хоста: песочница ставит его на страницу и подменяет
+// dispatchAction консолью — второй экземпляр экрана разошёлся бы с рендерером.
+export * from './renderers/keo-next-screen';
 export * from './renderers/keo-report';
+export * from './renderers/keo-report-next';
+export * from './renderers/keo-report-next-screen';
 export * from './renderers/insolation-editor';
 export * from './renderers/insolation-report';
 export * from './renderers/lift-report';

@@ -47,6 +47,38 @@ describe('keo-editor schema', () => {
     expect(keoEditorPropsSchema.safeParse(props).success).toBe(false);
   });
 
+  it('keeps a filling made before the labels were added valid (аддитивность)', () => {
+    const fixture = readFixture('valid', 'keo-editor.json');
+    const {nextLabel, conditionsLabel, ...before} = fixture.props;
+
+    expect(nextLabel).toBeDefined();
+    expect(conditionsLabel).toBeDefined();
+    expect(keoEditorPropsSchema.safeParse(before).success).toBe(true);
+  });
+
+  it('rejects an empty nextLabel', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-next-label.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
+  it('rejects an empty conditionsLabel', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-conditions-label.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
+  it('caps the labels at the lengths of their neighbours', () => {
+    const fixture = readFixture('valid', 'keo-editor.json');
+
+    expect(
+      keoEditorPropsSchema.safeParse({...fixture.props, nextLabel: 'д'.repeat(81)}).success,
+    ).toBe(false);
+    expect(
+      keoEditorPropsSchema.safeParse({...fixture.props, conditionsLabel: 'у'.repeat(121)}).success,
+    ).toBe(false);
+  });
+
   it('rejects a source kind outside the calc dictionary', () => {
     const fixture = readFixture('valid', 'keo-editor.json');
     const rooms = [

@@ -4,7 +4,8 @@ import {ReportBlock} from './report-block';
 import {REPORT_BLOCKS} from './report-assembly-fixture';
 
 /**
- * `/proba/report-assembly` — три отчёта на новых примитивах, один под другим.
+ * `/proba/report-assembly` — пять наполнений трёх отчётов на новых
+ * примитивах, одно под другим.
  * Переключателя здесь нет намеренно: отчёты read-mostly, и ценность страницы в
  * том, чтобы видеть их одновременно. Расхождение «протокол строкой против
  * `<details>`» существует только между двумя экранами — спрячь один за
@@ -16,7 +17,7 @@ export function ReportAssemblyPage() {
       route="/proba/report-assembly"
       eyebrow="AI37 A2UI CATALOG"
       title="Отчёты"
-      lead="ThermalReport в двух режимах и LiftReport из готовых примитивов: у трёх экранов одна шапка, одна строка списка и один протокол."
+      lead="ThermalReport в двух режимах, LiftReport и KeoReport в двух режимах из готовых примитивов: у пяти экранов одна шапка, одна строка списка и один протокол."
     >
       {REPORT_BLOCKS.map(block => (
         <section key={block.id} style={blockStyle}>

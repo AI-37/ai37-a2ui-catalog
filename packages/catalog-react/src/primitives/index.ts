@@ -49,6 +49,7 @@ export * from './form.types';
 export * from './field';
 export * from './input';
 export * from './static-value';
+export * from './static.types';
 export * from './select';
 export * from './select.types';
 export * from './select-options';

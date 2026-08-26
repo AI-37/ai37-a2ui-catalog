@@ -30,8 +30,13 @@ def load_fixture(group: str, name: str):
         ("lift-editor-group.json", "LiftEditor"),
         ("lift-editor-recommend.json", "LiftEditorNext"),
         ("keo-editor.json", "KeoEditor"),
+        # Новый рендерер на той же схеме props (change keo-editor-next):
+        # подписи «Далее» и «Условия» обязаны быть и в зеркале.
+        ("keo-editor.json", "KeoEditorNext"),
         ("keo-report-fail.json", "KeoReport"),
         ("keo-report-pass.json", "KeoReport"),
+        # Новый рендерер на той же схеме props (change keo-report-next).
+        ("keo-report-fail.json", "KeoReportNext"),
         ("insolation-editor.json", "InsolationEditor"),
         ("insolation-report-pass.json", "InsolationReport"),
         ("insolation-report-fail.json", "InsolationReport"),
@@ -65,6 +70,8 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("lift-editor-recommend-empty-resource.json", "LiftEditorNext"),
         ("lift-editor-recommend-empty-params.json", "LiftEditorNext"),
         ("keo-editor-unknown-reveal.json", "KeoEditor"),
+        ("keo-editor-empty-next-label.json", "KeoEditorNext"),
+        ("keo-editor-empty-conditions-label.json", "KeoEditorNext"),
         ("insolation-editor-unknown-source.json", "InsolationEditor"),
         ("insolation-report-overlapping-segments.json", "InsolationReport"),
     ],

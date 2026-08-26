@@ -210,6 +210,16 @@ const examples = [
     ),
   },
   {
+    key: 'keo-editor-next-preview',
+    title: 'Keo Editor Next — тот же опросник на новых примитивах',
+    description:
+      'То же наполнение, что у сообщения выше, и та же схема props. Помещения — секции-раскрывашки, а не вкладки: второе видно строкой со своей сводкой, и счётчик футера, считающий весь документ, перестаёт расходиться с тем, что на экране. Условия стали полем: город — поиск по справочнику, и правка меняет расчёт, а не проект. Поправьте город — значение в сводке группы обновится, а строка про группу светового климата исчезнет: считал её агент по прежнему городу, и до его ответа компонент про климат молчит. «Далее» ведёт по секциям, пока непросмотренные есть, затем становится «Рассчитать». Списки, числовые поля и раскрывашки ходят с клавиатуры. Наружу уходит тот же один submit с полным документом — смотрите консоль.',
+    messages: createSurfaceMessages(
+      'KeoEditorNext',
+      keoEditorFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
     key: 'keo-report-fail-preview',
     title: 'Keo Report — не проходит',
     description:
@@ -220,12 +230,32 @@ const examples = [
     ),
   },
   {
+    key: 'keo-report-fail-next-preview',
+    title: 'Keo Report Next — тот же расчёт на новых примитивах',
+    description:
+      'То же наполнение, что у сообщения выше, и та же схема props. Экран собран из тех же примитивов, что Thermal Report Next и Lift Report Next: вердикт, строка списка, исходные данные и протокол у трёх отчётов написаны один раз, своего листа стилей у рендерера нет. Расхождения с двумя другими отчётами сняты: вариант «Что изменить» — строка списка, а не своя карточка; кнопка принятия — outline (единственный акцент экрана — вердикт); отвергнутый вариант говорит «Не соответствует» ровно как проверка теплотеха, а не красным detail; акцентная рамка осталась только у рекомендованного; «Скачать» — меню форматов, растущее вверх. Кнопки диспатчат те же действия с тем же контекстом — смотрите консоль.',
+    messages: createSurfaceMessages(
+      'KeoReportNext',
+      keoReportFailFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
     key: 'keo-report-pass-preview',
     title: 'Keo Report — два помещения проходят',
     description:
       'То же наполнение в мультипомещенном режиме: сводный вердикт «Соответствуют 2 помещения из 2», результаты по помещениям со статусными значениями против нормы и кнопкой пересчёта только там, где агент её задал. Без downloadFileName протокол остаётся строкой без «Скачать».',
     messages: createSurfaceMessages(
       'KeoReport',
+      keoReportPassFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'keo-report-pass-next-preview',
+    title: 'Keo Report Next — два помещения на новых примитивах',
+    description:
+      'Мультипомещенный режим на примитивах: значение помещения — статусная пилюля в том же правом слоте, где у теплотеха стоит чип отклонения, норма ушла в пояснение строки, «Пересчитать» — outline там, где агент задал действие. Протокол без downloadFileName остаётся строкой без «Скачать» — триггера нет вовсе, а не пустая кнопка.',
+    messages: createSurfaceMessages(
+      'KeoReportNext',
       keoReportPassFixture.props as Record<string, unknown>,
     ),
   },
@@ -356,8 +386,11 @@ export function App() {
           example.key === 'thermal-report-single-preview' ||
           example.key === 'thermal-report-multi-preview' ||
           example.key === 'keo-editor-preview' ||
+          example.key === 'keo-editor-next-preview' ||
           example.key === 'keo-report-fail-preview' ||
+          example.key === 'keo-report-fail-next-preview' ||
           example.key === 'keo-report-pass-preview' ||
+          example.key === 'keo-report-pass-next-preview' ||
           example.key === 'insolation-editor-preview' ||
           example.key === 'insolation-report-pass-preview' ||
           example.key === 'insolation-report-fail-preview' ||

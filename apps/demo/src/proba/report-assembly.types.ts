@@ -1,6 +1,10 @@
-import type {LiftReportProps, ThermalReportProps} from '@ai37/a2ui-catalog-schemas';
+import type {
+  KeoReportProps,
+  LiftReportProps,
+  ThermalReportProps,
+} from '@ai37/a2ui-catalog-schemas';
 
-/** Подпись блока страницы: одна на все три наполнения. */
+/** Подпись блока страницы: одна на все наполнения. */
 interface ReportBlockMeta {
   id: string;
   title: string;
@@ -17,4 +21,9 @@ export interface LiftReportBlock extends ReportBlockMeta {
   props: LiftReportProps;
 }
 
-export type ReportAssemblyBlock = ThermalReportBlock | LiftReportBlock;
+export interface KeoReportBlock extends ReportBlockMeta {
+  kind: 'keo';
+  props: KeoReportProps;
+}
+
+export type ReportAssemblyBlock = ThermalReportBlock | LiftReportBlock | KeoReportBlock;

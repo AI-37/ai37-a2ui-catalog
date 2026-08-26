@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .form_card import FormFieldLookupValue, LookupSuggestMode
 from .shared import StrictModel
@@ -15,6 +15,9 @@ CalcFieldSourceKind = Literal["project", "question", "suggested", "calculated", 
 
 # Тип поля расчётного редактора: `lookup` не нужен — справочники живут у агента.
 CalcEditorFieldType = Literal["text", "number", "select", "boolean"]
+
+# Тип правимого условия. Без него строка условий readonly — прежнее поведение.
+CalcConditionType = Literal["text", "select", "lookup"]
 
 
 class CalcFieldSource(StrictModel):
@@ -57,12 +60,34 @@ class CalcEditorField(StrictModel):
 
 
 class CalcCondition(StrictModel):
-    """Readonly-строка блока «Условия»: значение приходит готовой строкой."""
+    """Строка блока «Условия».
+
+    Значение приходит готовой строкой; с `type` строка становится контролом и
+    правится на месте, а правленое значение уходит в submit тем же ключом
+    `name`. Город (регион строительства) агент берёт из проекта, но проект
+    бывает не тот — правка меняет расчёт, а не данные проекта. Без `type`
+    строка остаётся readonly: так приходят выведенные значения (норматив,
+    методика), их пересчитывает агент.
+    """
 
     name: str = Field(min_length=1, max_length=80)
     label: str = Field(min_length=1, max_length=120)
     value: str = Field(min_length=1, max_length=200)
     note: str = Field(default=None, min_length=1, max_length=200)
+    type: CalcConditionType = Field(default=None)
+    options: list[Annotated[str, Field(min_length=1, max_length=200)]] = Field(
+        default=None, min_length=1
+    )
+    referenceId: str = Field(default=None, min_length=1, max_length=80)
+    source: CalcFieldSource = Field(default=None)
+
+    @model_validator(mode="after")
+    def validate_control(self) -> "CalcCondition":
+        if self.type == "select" and not self.options:
+            raise ValueError('options are required when type is "select"')
+        if self.type == "lookup" and not isinstance(self.referenceId, str):
+            raise ValueError('referenceId is required when type is "lookup"')
+        return self
 
 
 class CalcSubmit(StrictModel):

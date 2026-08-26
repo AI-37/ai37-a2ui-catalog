@@ -1,14 +1,20 @@
 import React from 'react';
-import type {LiftEditorFieldSource} from '@ai37/a2ui-catalog-schemas';
+import type {CalcFieldSource, LiftEditorFieldSource} from '@ai37/a2ui-catalog-schemas';
 import {Chip, KitStyles, SourceNote} from '@ai37/a2ui-catalog-react/primitives';
 import {SYSTEM_SECTION_STYLE, SystemHeading} from './system-section';
 
-/** Все виды провенанса каталога: два акцентных, один с оговоркой, один без `note`. */
-const SOURCES: LiftEditorFieldSource[] = [
+/**
+ * Все шесть видов провенанса каталога: два акцентных, два с оговоркой и два
+ * без `note` — словом из словаря. Последние два (`calculated`, `assumption`)
+ * нужны расчётным редакторам; `assumption` несёт точку-маркер.
+ */
+const SOURCES: Array<LiftEditorFieldSource | CalcFieldSource> = [
   {source: 'question', note: 'из вашего вопроса'},
   {source: 'suggested', note: 'предложено по классу здания'},
   {source: 'project', note: 'из проекта, лист АР-12'},
   {source: 'default'},
+  {source: 'calculated', note: 'отметка центра окна посчитана по этажу'},
+  {source: 'assumption'},
 ];
 
 /**
@@ -22,7 +28,7 @@ export function NotesSystem() {
 
       <SystemHeading
         title="Пометки"
-        axes="Chip (neutral · success · danger · warning) · SourceNote (question · suggested · project · default)"
+        axes="Chip (neutral · success · danger · warning) · SourceNote (question · suggested · project · default · calculated · assumption)"
       />
 
       <div style={stageStyle}>
