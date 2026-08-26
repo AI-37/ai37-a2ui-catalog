@@ -69,9 +69,16 @@ export const FormCard = createComponentImplementation(formCardDefinition, ({prop
             ) : field.type === 'select' ? (
               <select
                 name={field.name}
-                defaultValue={field.defaultValue as string | number | undefined}
+                // Нетронутый <select> отдаёт ПЕРВУЮ опцию — агент получал бы выбор, которого
+                // пользователь не делал. Для полей вида «да/нет» это утверждение, попадающее
+                // в документ. Пустая опция делает «не выбрано» отличимым: submit вернёт '',
+                // как уже принято у lookup. Явный defaultValue поведение не меняет.
+                defaultValue={(field.defaultValue as string | number | undefined) ?? ''}
                 style={inputStyle}
               >
+                {field.defaultValue === undefined ? (
+                  <option value="">{field.placeholder ?? 'Не выбрано'}</option>
+                ) : null}
                 {(field.options ?? []).map(option => (
                   <option key={option} value={option}>
                     {option}

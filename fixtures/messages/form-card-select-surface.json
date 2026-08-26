@@ -1,0 +1,62 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "demo-surface",
+      "catalogId": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "demo-surface",
+      "components": [
+        {
+          "id": "root",
+          "component": "FormCard",
+          "title": "Сведения об обработке",
+          "fields": [
+            {
+              "name": "special_categories",
+              "label": "Обрабатываются специальные категории ПДн",
+              "type": "select",
+              "required": true,
+              "options": [
+                "да",
+                "нет"
+              ]
+            },
+            {
+              "name": "kii_sphere",
+              "label": "Сфера деятельности субъекта КИИ",
+              "type": "select",
+              "required": true,
+              "options": [
+                "здравоохранение",
+                "транспорт",
+                "энергетика"
+              ],
+              "placeholder": "Выберите сферу"
+            },
+            {
+              "name": "consent_kind",
+              "label": "Вид согласия",
+              "type": "select",
+              "required": true,
+              "options": [
+                "работника",
+                "клиента (физлица)",
+                "посетителя сайта"
+              ],
+              "defaultValue": "работника"
+            }
+          ],
+          "submit": {
+            "label": "Применить",
+            "action": "apply_details"
+          }
+        }
+      ]
+    }
+  }
+]
