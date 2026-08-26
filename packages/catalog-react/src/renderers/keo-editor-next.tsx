@@ -15,8 +15,8 @@ import {useA2uiBaseStyles} from './shared';
  *
  * Контракт данных не меняется. Наружу уходит один submit с полным документом
  * `{conditions, rooms}`, и условия в нём — живые: правка города и есть смысл
- * «изменить только для расчёта». Черновиков у этого экрана нет — в схеме
- * `KeoEditor` второго action не объявлено.
+ * «изменить только для расчёта». При заданном `draftAction` тот же документ
+ * уезжает черновиком: правка поля — дебаунсом, структурное действие — сразу.
  *
  * Доменных знаний о СП 367 и СП 52 здесь нет — нормативы, справочники,
  * готовые строки плоскости и правила предупреждающей валидации целиком
@@ -27,10 +27,19 @@ export const KeoEditorNext = createComponentImplementation(
   ({props, context}) => {
     useA2uiBaseStyles();
 
+    const draftAction = props.draftAction;
+
     return (
       <KeoNextScreen
         props={props}
         sink={{
+          // Без `draftAction` автосейва нет: получателя не существует, и
+          // черновик не собирается вовсе.
+          onDraft: draftAction
+            ? document => {
+                void context.dispatchAction({event: {name: draftAction, context: document}});
+              }
+            : undefined,
           onSubmit: document => {
             void context.dispatchAction({event: {name: props.submit.name, context: document}});
           },

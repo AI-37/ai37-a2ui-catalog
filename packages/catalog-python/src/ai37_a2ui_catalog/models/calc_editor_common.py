@@ -68,11 +68,16 @@ class CalcCondition(StrictModel):
     бывает не тот — правка меняет расчёт, а не данные проекта. Без `type`
     строка остаётся readonly: так приходят выведенные значения (норматив,
     методика), их пересчитывает агент.
+
+    Пустое `value` — отсутствие ответа, и допустимо оно только у правимого
+    условия: иначе агент изобретает заглушку («—»), а она уезжает в submit как
+    настоящее значение. Выведенное условие пустым не бывает — не вычислилось,
+    значит строку не присылать вовсе.
     """
 
     name: str = Field(min_length=1, max_length=80)
     label: str = Field(min_length=1, max_length=120)
-    value: str = Field(min_length=1, max_length=200)
+    value: str = Field(max_length=200)
     note: str = Field(default=None, min_length=1, max_length=200)
     type: CalcConditionType = Field(default=None)
     options: list[Annotated[str, Field(min_length=1, max_length=200)]] = Field(
@@ -83,6 +88,8 @@ class CalcCondition(StrictModel):
 
     @model_validator(mode="after")
     def validate_control(self) -> "CalcCondition":
+        if self.value == "" and self.type is None:
+            raise ValueError('a non-empty "value" is required when "type" is absent')
         if self.type == "select" and not self.options:
             raise ValueError('options are required when type is "select"')
         if self.type == "lookup" and not isinstance(self.referenceId, str):

@@ -8809,7 +8809,6 @@
                     },
                     "value": {
                       "type": "string",
-                      "minLength": 1,
                       "maxLength": 200
                     },
                     "note": {
@@ -9254,6 +9253,11 @@
                 "maxLength": 80
               },
               "conditionsLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "draftAction": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120
@@ -9331,7 +9335,6 @@
                     },
                     "value": {
                       "type": "string",
-                      "minLength": 1,
                       "maxLength": 200
                     },
                     "note": {
@@ -9776,6 +9779,11 @@
                 "maxLength": 80
               },
               "conditionsLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "draftAction": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120
@@ -10481,7 +10489,6 @@
                     },
                     "value": {
                       "type": "string",
-                      "minLength": 1,
                       "maxLength": 200
                     },
                     "note": {

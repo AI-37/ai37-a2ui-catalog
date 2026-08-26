@@ -1,6 +1,6 @@
 import React from 'react';
 import {KeoNextScreen} from '../../../../packages/catalog-react/src/renderers/keo-next-screen';
-import {KEO_PROPS} from './keo-assembly-fixture';
+import {KEO_FIRST_MOVE_PROPS, KEO_PROPS} from './keo-assembly-fixture';
 import {ProbaShell} from './proba-shell';
 
 /**
@@ -23,6 +23,18 @@ export function KeoAssemblyPage() {
       title="КЕО"
       lead="Экран KeoEditor из готовых примитивов: условия и помещения — секции-раскрывашки, вкладок нет, счётчик источников считает весь документ."
     >
+      {/* Первый ход агента стоит ПЕРВЫМ: правило `keo-condition-unfilled`
+          видно только на пустом наполнении — раскрыты «Условия», а не
+          «Помещение 1», и у них пометка «заполните». На заполненной фикстуре
+          ниже обе секции ведут себя одинаково, и проверить правило нечем. */}
+      <KeoNextScreen
+        props={KEO_FIRST_MOVE_PROPS}
+        sink={{
+          onSubmit: document =>
+            console.info('[proba/keo-assembly] first-move', KEO_FIRST_MOVE_PROPS.submit.name, document),
+        }}
+      />
+
       <KeoNextScreen
         props={KEO_PROPS}
         sink={{onSubmit: document => console.info('[proba/keo-assembly]', KEO_PROPS.submit.name, document)}}

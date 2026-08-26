@@ -35,6 +35,7 @@ import liftReportFixture from '../../../fixtures/valid/lift-report.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
+import {attachDemoKeoDraftHost} from './attach-demo-keo-draft-host';
 import {createLiftEditorMessages} from './create-lift-editor-messages';
 import {createThermalReportMessages} from './create-thermal-report-messages';
 import {createSurfaceMessages} from './create-surface-messages';
@@ -42,6 +43,7 @@ import {asConstructionsEditorNext} from './as-constructions-editor-next';
 import {asLiftEditorNext} from './as-lift-editor-next';
 import {DEMO_DRAFT_ACTION, withConstructionsDraftAction} from './with-constructions-draft-action';
 import {withStatusChipsPreview} from './with-status-chips-preview';
+import {DEMO_KEO_DRAFT_ACTION, withKeoDraftAction} from './with-keo-draft-action';
 import {DEMO_LIFT_DRAFT_ACTION, withLiftDraftAction} from './with-lift-draft-action';
 import {withLiftRecommend} from './with-lift-recommend';
 
@@ -213,10 +215,9 @@ const examples = [
     key: 'keo-editor-next-preview',
     title: 'Keo Editor Next — тот же опросник на новых примитивах',
     description:
-      'То же наполнение, что у сообщения выше, и та же схема props. Помещения — секции-раскрывашки, а не вкладки: второе видно строкой со своей сводкой, и счётчик футера, считающий весь документ, перестаёт расходиться с тем, что на экране. Условия стали полем: город — поиск по справочнику, и правка меняет расчёт, а не проект. Поправьте город — значение в сводке группы обновится, а строка про группу светового климата исчезнет: считал её агент по прежнему городу, и до его ответа компонент про климат молчит. «Далее» ведёт по секциям, пока непросмотренные есть, затем становится «Рассчитать». Списки, числовые поля и раскрывашки ходят с клавиатуры. Наружу уходит тот же один submit с полным документом — смотрите консоль.',
-    messages: createSurfaceMessages(
-      'KeoEditorNext',
-      keoEditorFixture.props as Record<string, unknown>,
+      'То же наполнение, что у сообщения выше, и та же схема props. Помещения — секции-раскрывашки, а не вкладки: второе видно строкой со своей сводкой, и счётчик футера, считающий весь документ, перестаёт расходиться с тем, что на экране. Условия стали полем: город — поиск по справочнику, и правка меняет расчёт, а не проект. Поправьте город — значение в сводке группы обновится. Витрина включает черновик, поэтому строка про группу светового климата НЕ гаснет: её пересчитает агент и вернёт снапшотом на месте; без черновика она исчезала бы до его ответа. «Далее» ведёт по секциям, пока непросмотренные есть, затем становится «Рассчитать». Списки, числовые поля и раскрывашки ходят с клавиатуры. В консоли видно оба потока: черновик уезжает после паузы ввода, добавление помещения и «Далее» шлют его сразу, а раскрытие секции не шлёт ничего; submit с полным документом по-прежнему один.',
+    messages: withKeoDraftAction(
+      createSurfaceMessages('KeoEditorNext', keoEditorFixture.props as Record<string, unknown>),
     ),
   },
   {
@@ -376,6 +377,15 @@ export function App() {
         }
         if (example.key === 'constructions-preview' || example.key === 'constructions-next-preview') {
           attachDemoDraftLogger(processor, 'demo-surface', DEMO_DRAFT_ACTION);
+        }
+        if (example.key === 'keo-editor-next-preview') {
+          attachDemoDraftLogger(processor, 'demo-surface', DEMO_KEO_DRAFT_ACTION);
+          attachDemoKeoDraftHost(
+            processor,
+            'demo-surface',
+            DEMO_KEO_DRAFT_ACTION,
+            keoEditorFixture.props as never,
+          );
         }
         if (
           example.key === 'lift-preview' ||

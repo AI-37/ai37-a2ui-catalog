@@ -1,9 +1,11 @@
 import React from 'react';
 import type {CalcEditorField, KeoEditorProps} from '@ai37/a2ui-catalog-schemas';
+import {buildKeoDocument} from './build-keo-document';
 import {calcFieldRangeWarning} from './calc-field-range-warning';
 import {calcTouchedKey} from './calc-touched-key';
 import {countCalcSources} from './count-calc-sources';
 import {createCalcScreens} from './create-calc-screens';
+import {CONDITIONS_DRAFT_DEBOUNCE_MS} from './conditions-draft-debounce-ms';
 import {createLocalId} from './create-local-id';
 import {evaluateKeoRules} from './evaluate-keo-rules';
 import {formatCalcSourceCounter} from './format-calc-source-counter';
@@ -12,10 +14,12 @@ import {resolveKeoComputedNote} from './resolve-keo-computed-note';
 import {seedCalcValues} from './seed-calc-values';
 import {findMissingKeoTargets} from './find-missing-keo-targets';
 import {KEO_CONDITIONS_KEY} from './keo-conditions-key';
+import {keoDocumentKey} from './keo-document-key';
 import {keoNavigationTargets} from './keo-navigation-targets';
 import {keoOpenWithRoom} from './keo-open-with-room';
+import {keoRoomLabels} from './keo-room-labels';
 import {keoTargetRoom} from './keo-target-room';
-import type {KeoControl, KeoRoomDraft, KeoSink} from './keo-next.types';
+import type {KeoControl, KeoDocument, KeoRoomDraft, KeoSink} from './keo-next.types';
 
 /**
  * Состояние экрана КЕО: помещения, раскрытие, просмотр секций и счётчик
@@ -29,6 +33,11 @@ import type {KeoControl, KeoRoomDraft, KeoSink} from './keo-next.types';
  * живёт ОДНИМ множеством на весь экран, хотя аккордеонов на нём много, —
  * иначе «Далее», раскрывающее секцию в другом помещении, пришлось бы
  * рассылать по нескольким состояниям.
+ *
+ * При заданном `onDraft` правка поля или условия планирует черновик дебаунсом,
+ * а структурное действие — добавление и удаление помещения, «Далее» — шлёт его
+ * немедленно, отменяя отложенный. Раскрытие и отметка просмотра не шлют ничего:
+ * черновик про данные.
  */
 export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoControl {
   const sections = props.roomTemplate.sections;
@@ -42,7 +51,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
 
   const seed = (source: KeoEditorProps) => {
     const rooms = createCalcScreens(source.rooms);
-    const missing = findMissingKeoTargets(rooms, sections);
+    const missing = findMissingKeoTargets(rooms, sections, source.conditions, collapsibleConditions);
     const targets = keoNavigationTargets(rooms, sections, collapsibleConditions);
     // Раскрыта первая цель с незаполненными обязательными полями; таких нет —
     // первая по порядку (канон `pickInitialOpenSection` лифтов).
@@ -60,26 +69,95 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
   const [touched, setTouched] = React.useState<ReadonlySet<string>>(() => new Set());
   const [reviewed, setReviewed] = React.useState<ReadonlySet<string>>(() => new Set(state.open));
 
+  const draftTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Сериализация последнего отправленного черновика — дедуп по содержимому:
+  // «Далее» сразу после паузы ввода иначе слало бы то же самое дважды.
+  const lastDraft = React.useRef<string | null>(null);
+
+  const cancelPendingDraft = () => {
+    if (draftTimer.current === null) return;
+    clearTimeout(draftTimer.current);
+    draftTimer.current = null;
+  };
+
+  // Таймер не переживает unmount: отправлять черновик уже некому.
+  React.useEffect(() => cancelPendingDraft, []);
+
   // Новое сообщение агента — новый документ: state пересевается из props,
   // несохранённые правки и счёт просмотренного теряются (канон FormCard/CE/LE).
+  //
+  // Но пересев считается по ДОКУМЕНТУ, а не по всякой смене props: ответ на
+  // собственный черновик приносит новые props по своей природе — в них меняется
+  // ровно подпись климата, ради которой всё и затевалось. Пересевать по ней
+  // значило бы схлопывать секцию под руками у пользователя (Решение 5 design
+  // `keo-editor-draft`).
   const propsKey = JSON.stringify([props.rooms, props.roomTemplate, props.conditions]);
   const [baseKey, setBaseKey] = React.useState(propsKey);
   if (propsKey !== baseKey) {
     const next = seed(props);
     setBaseKey(propsKey);
-    setState(next);
-    setTouched(new Set());
-    setReviewed(new Set(next.open));
+
+    if (keoDocumentKey(next) !== keoDocumentKey(state)) {
+      cancelPendingDraft();
+      setState(next);
+      setTouched(new Set());
+      setReviewed(new Set(next.open));
+    }
   }
 
   const {rooms, conditions, open} = state;
-  const roomLabels = rooms.map((room, position) => room.name ?? `${props.roomLabel} ${position + 1}`);
+  const roomLabels = keoRoomLabels(rooms, props.roomLabel);
   const targets = keoNavigationTargets(rooms, sections, collapsibleConditions);
-  const missing = findMissingKeoTargets(rooms, sections);
+  // Условия берутся ЖИВЫЕ: стёртый пользователем город возвращает пометку
+  // «заполните» так же, как непришедший пустым (открытый вопрос 1 design).
+  // Раскрытие при этом не перескакивает — оно пересевается только на новом
+  // снапшоте props.
+  const missing = findMissingKeoTargets(
+    rooms,
+    sections,
+    props.conditions.map(condition => ({
+      ...condition,
+      value: conditions[condition.name] ?? condition.value,
+    })),
+    collapsibleConditions,
+  );
   // Кнопка ведёт по секциям, пока есть незаполненные обязательные поля или
   // непросмотренные цели. Без подписи режима нет: кнопка сразу отправляет.
   const pending = walkthrough && (missing.size > 0 || targets.some(target => !reviewed.has(target)));
   const outerKeys = new Set([KEO_CONDITIONS_KEY, ...rooms.map(room => room.id)]);
+
+  // Отложенный черновик читает документ из ref в момент срабатывания —
+  // побеждает последний ввод, а не тот, что запланировал таймер.
+  const latest = React.useRef<KeoDocument>(buildKeoDocument(conditions, rooms, props.roomLabel));
+  latest.current = buildKeoDocument(conditions, rooms, props.roomLabel);
+
+  const dispatchDraft = (document: KeoDocument) => {
+    if (sink.onDraft === undefined) return;
+
+    const serialized = JSON.stringify(document);
+    if (serialized === lastDraft.current) return;
+
+    lastDraft.current = serialized;
+    sink.onDraft(document);
+  };
+
+  // Структурное действие несёт полное состояние — отложенный черновик после
+  // него избыточен, поэтому таймер сбрасывается. Документ передают явно: до
+  // следующего рендера ref ещё держит состояние ДО действия.
+  const sendDraftNow = (document: KeoDocument = latest.current) => {
+    cancelPendingDraft();
+    dispatchDraft(document);
+  };
+
+  const scheduleDraft = () => {
+    if (sink.onDraft === undefined) return;
+
+    cancelPendingDraft();
+    draftTimer.current = setTimeout(() => {
+      draftTimer.current = null;
+      dispatchDraft(latest.current);
+    }, CONDITIONS_DRAFT_DEBOUNCE_MS);
+  };
 
   // Предупреждения правил считаются один раз на помещение за рендер: полей у
   // помещения 23, и гонять правила на каждое незачем.
@@ -179,9 +257,16 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
 
     isConditionEdited: name => touched.has(calcTouchedKey(KEO_CONDITIONS_KEY, name)),
 
+    // Без автосохранения пересчитать следствие некому, и правленое значение
+    // делает его неверным — пустая строка честнее. С автосохранением оно
+    // придёт пересчитанным ответом на черновик, и гасить нечего.
+    isConditionNoteStale: name =>
+      sink.onDraft === undefined && touched.has(calcTouchedKey(KEO_CONDITIONS_KEY, name)),
+
     changeCondition: (name, value) => {
       setTouched(prev => new Set(prev).add(calcTouchedKey(KEO_CONDITIONS_KEY, name)));
       setState(prev => ({...prev, conditions: {...prev.conditions, [name]: value}}));
+      scheduleDraft();
     },
 
     changeValue: (roomId, name, value) => {
@@ -192,6 +277,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
           room.id === roomId ? {...room, values: {...room.values, [name]: value}} : room,
         ),
       }));
+      scheduleDraft();
     },
 
     addRoom: () => {
@@ -208,20 +294,24 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
       const first = sections[0];
       if (first !== undefined) next.add(calcTouchedKey(room.id, first.key));
 
-      setState(prev => ({...prev, rooms: [...prev.rooms, room], open: next}));
+      const nextRooms = [...rooms, room];
+      setState(prev => ({...prev, rooms: nextRooms, open: next}));
       review(next);
+      sendDraftNow(buildKeoDocument(conditions, nextRooms, props.roomLabel));
     },
 
     removeRoom: roomId => {
       if (rooms.length <= 1) return;
       const mine = (key: string) => key === roomId || keoTargetRoom(key) === roomId;
+      const nextRooms = rooms.filter(room => room.id !== roomId);
 
       setState(prev => ({
         ...prev,
-        rooms: prev.rooms.filter(room => room.id !== roomId),
+        rooms: nextRooms,
         open: new Set([...prev.open].filter(key => !mine(key))),
       }));
       setReviewed(prev => new Set([...prev].filter(key => !mine(key))));
+      sendDraftNow(buildKeoDocument(conditions, nextRooms, props.roomLabel));
     },
 
     // «Далее» — навигация, а не отправка: закрыть текущую цель и раскрыть
@@ -234,18 +324,16 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
         : undefined;
 
       if (target === undefined) {
-        sink.onSubmit({
-          // Живые значения, а не присланные: правка города и есть смысл
-          // «изменить только для расчёта».
-          conditions,
-          rooms: rooms.map((room, position) => ({
-            name: roomLabels[position]!,
-            values: room.values,
-          })),
-        });
+        // Отложенный черновик после submit'а избыточен: тот же документ уезжает
+        // сейчас, и живые значения в нём те же — правка города и есть смысл
+        // «изменить только для расчёта».
+        cancelPendingDraft();
+        sink.onSubmit(latest.current);
         return;
       }
 
+      // «Далее» — структурный шаг: черновик уходит сразу, без паузы.
+      sendDraftNow();
       replaceOpen(keoOpenWithRoom(target));
     },
   };

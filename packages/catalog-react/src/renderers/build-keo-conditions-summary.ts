@@ -14,6 +14,10 @@ import type {KeoConditionsLive} from './keo-next.types';
  * Поэтому у правленого условия следствие гаснет (Решение 5 design): агент
  * считал его по прежнему значению, и до нового снапшота props строка про
  * климат относилась бы не к тому городу. Молчание честнее неверной строки.
+ *
+ * Гаснет — только там, где пересчитать некому. При автосохранении черновика
+ * следствие приходит пересчитанным ответом, и прятать его незачем: судит об
+ * этом `isConditionNoteStale` (Решение 6 design `keo-editor-draft`).
  */
 export function buildKeoConditionsSummary(
   conditions: readonly CalcCondition[],
@@ -22,7 +26,7 @@ export function buildKeoConditionsSummary(
   return conditions
     .map(condition => {
       const value = live.conditionValue(condition.name);
-      const note = live.isConditionEdited(condition.name) ? undefined : condition.note;
+      const note = live.isConditionNoteStale(condition.name) ? undefined : condition.note;
 
       return note === undefined ? value : `${value} · ${note}`;
     })

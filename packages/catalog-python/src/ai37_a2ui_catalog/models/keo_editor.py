@@ -81,6 +81,8 @@ class KeoEditorProps(StrictModel):
     nextLabel: str = Field(default=None, min_length=1, max_length=80)
     # Заголовок группы условий; без него группа стоит блоком без раскрывашки.
     conditionsLabel: str = Field(default=None, min_length=1, max_length=120)
+    # Имя action'а автосохранения черновика; без него наружу уходит только submit.
+    draftAction: str = Field(default=None, min_length=1, max_length=120)
     submit: CalcSubmit
 
     @model_validator(mode="after")

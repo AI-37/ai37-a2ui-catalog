@@ -79,6 +79,50 @@ describe('keo-editor schema', () => {
     ).toBe(false);
   });
 
+  it('validates the first-move filling: город пуст, помещение пустое', () => {
+    const fixture = readFixture('valid', 'keo-editor-first-move.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(true);
+  });
+
+  it('rejects an empty value on a condition without "type" (выведенное)', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-condition-value.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
+  it('keeps the filling valid when the empty value belongs to a control (правимое)', () => {
+    const fixture = readFixture('valid', 'keo-editor.json');
+    const conditions = [
+      // `type` задан — пустое значение это отсутствие ответа пользователя.
+      {name: 'region', label: 'Город', value: '', type: 'lookup', referenceId: 'cities'},
+      // `type` не задан — пустой строке взяться неоткуда.
+      {name: 'method', label: 'Методика', value: 'СП 367.1325800.2017'},
+    ];
+
+    expect(keoEditorPropsSchema.safeParse({...fixture.props, conditions}).success).toBe(true);
+  });
+
+  it('validates the filling with draftAction', () => {
+    const fixture = readFixture('valid', 'keo-editor-draft.json');
+
+    expect(fixture.props.draftAction).toBe('keo:draft');
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(true);
+  });
+
+  it('keeps a filling without draftAction valid (аддитивность)', () => {
+    const fixture = readFixture('valid', 'keo-editor-draft.json');
+    const {draftAction, ...before} = fixture.props;
+
+    expect(keoEditorPropsSchema.safeParse(before).success).toBe(true);
+  });
+
+  it('rejects an empty draftAction', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-draft-action.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
   it('rejects a source kind outside the calc dictionary', () => {
     const fixture = readFixture('valid', 'keo-editor.json');
     const rooms = [

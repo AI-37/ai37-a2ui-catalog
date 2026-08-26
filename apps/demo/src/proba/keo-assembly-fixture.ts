@@ -1,5 +1,6 @@
 import {keoEditorPropsSchema} from '@ai37/a2ui-catalog-schemas';
 import fixture from '../../../../fixtures/valid/keo-editor.json';
+import firstMoveFixture from '../../../../fixtures/valid/keo-editor-first-move.json';
 
 /**
  * Наполнение экрана — валидная фикстура каталога, а не выдуманные данные.
@@ -20,3 +21,13 @@ export const KEO_PROPS = keoEditorPropsSchema.parse({
     ),
   ],
 });
+
+/**
+ * Первый ход агента: города нет, помещение пустое. Наполнение, на котором
+ * видно правило change'а `keo-condition-unfilled` — незаполненное правимое
+ * условие раскрывается первым и несёт пометку «заполните».
+ *
+ * На полной фикстуре это не проверить: там заполнено всё, и «Условия» с
+ * «Помещением 1» ведут себя одинаково.
+ */
+export const KEO_FIRST_MOVE_PROPS = keoEditorPropsSchema.parse(firstMoveFixture.props);

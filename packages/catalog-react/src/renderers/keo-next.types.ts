@@ -25,6 +25,11 @@ export interface KeoDocument {
  */
 export interface KeoSink {
   onSubmit: (document: KeoDocument) => void;
+  /**
+   * Автосохранение черновика. Необязательно: без `draftAction` получателя не
+   * существует, и черновик не собирается вовсе.
+   */
+  onDraft?: ((document: KeoDocument) => void) | undefined;
 }
 
 /** Пометка секции: незаполненные обязательные поля либо непросмотренная свёрнутая. */
@@ -54,6 +59,13 @@ export interface KeoControl {
   /** Живое значение условия: правленое пользователем либо присланное агентом. */
   conditionValue: (name: string) => string;
   isConditionEdited: (name: string) => boolean;
+  /**
+   * Следствие условия (`note`) считалось агентом по ПРЕЖНЕМУ значению.
+   * Устарело — значит показывать его нельзя. С автосохранением не устаревает
+   * никогда: ответ на черновик принесёт пересчитанное (Решение 6 design
+   * `keo-editor-draft`).
+   */
+  isConditionNoteStale: (name: string) => boolean;
   changeCondition: (name: string, value: string) => void;
   isEdited: (roomId: string, field: string) => boolean;
   /** Предупреждения поля: правила из props плюс границы значения. */
@@ -196,4 +208,7 @@ export interface KeoFooterProps {
  * а его следствие (`note`) — нет, потому что считал его агент по прежнему
  * значению (Решение 5 design).
  */
-export type KeoConditionsLive = Pick<KeoControl, 'conditionValue' | 'isConditionEdited'>;
+export type KeoConditionsLive = Pick<
+  KeoControl,
+  'conditionValue' | 'isConditionEdited' | 'isConditionNoteStale'
+>;

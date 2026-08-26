@@ -117,6 +117,11 @@ export const keoEditorPropsSchema = z
     // Заголовок группы условий («Условия»). Без него группа стоит первым
     // блоком без раскрывашки и заголовка: русских слов компонент не сочиняет.
     conditionsLabel: z.string().min(1).max(120).optional(),
+    // Имя action'а автосохранения черновика. Необязательный: без него компонент
+    // ведёт себя как раньше — наружу уходит только submit. Ключ тот же и с той
+    // же оговоркой, что у `ConstructionsEditor` и `LiftEditor`: агент, который
+    // черновик хранить не умеет, просто не присылает его.
+    draftAction: z.string().min(1).max(120).optional(),
     submit: calcSubmitSchema,
   })
   .strict()

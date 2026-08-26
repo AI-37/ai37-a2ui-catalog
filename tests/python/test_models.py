@@ -33,6 +33,12 @@ def load_fixture(group: str, name: str):
         # Новый рендерер на той же схеме props (change keo-editor-next):
         # подписи «Далее» и «Условия» обязаны быть и в зеркале.
         ("keo-editor.json", "KeoEditorNext"),
+        # Первый ход: города нет, помещение пустое — пустое значение правимого
+        # условия валидно (change keo-condition-unfilled).
+        ("keo-editor-first-move.json", "KeoEditorNext"),
+        # Автосохранение черновика — аддитивный `draftAction`
+        # (change keo-editor-draft).
+        ("keo-editor-draft.json", "KeoEditorNext"),
         ("keo-report-fail.json", "KeoReport"),
         ("keo-report-pass.json", "KeoReport"),
         # Новый рендерер на той же схеме props (change keo-report-next).
@@ -72,6 +78,8 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("keo-editor-unknown-reveal.json", "KeoEditor"),
         ("keo-editor-empty-next-label.json", "KeoEditorNext"),
         ("keo-editor-empty-conditions-label.json", "KeoEditorNext"),
+        ("keo-editor-empty-condition-value.json", "KeoEditorNext"),
+        ("keo-editor-empty-draft-action.json", "KeoEditorNext"),
         ("insolation-editor-unknown-source.json", "InsolationEditor"),
         ("insolation-report-overlapping-segments.json", "InsolationReport"),
     ],

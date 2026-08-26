@@ -2,10 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
 import {act, fireEvent, render, screen} from '@testing-library/react';
-import {describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
-import {ai37Catalog} from '@ai37/a2ui-catalog-react';
+import {CONDITIONS_DRAFT_DEBOUNCE_MS, ai37Catalog} from '@ai37/a2ui-catalog-react';
 
 const CATALOG_ID =
   'https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json';
@@ -23,16 +23,37 @@ function keoProps() {
   ).props as Record<string, unknown>;
 }
 
+/** Первый ход агента: города нет, помещение пустое. */
+function firstMoveProps() {
+  return JSON.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), 'fixtures', 'valid', 'keo-editor-first-move.json'),
+      'utf8',
+    ),
+  ).props as Record<string, unknown>;
+}
+
+/** Наполнение с автосохранением черновика (`draftAction`). */
+function draftProps() {
+  return JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), 'fixtures', 'valid', 'keo-editor-draft.json'), 'utf8'),
+  ).props as Record<string, unknown>;
+}
+
+function updateMessage(props: Record<string, unknown>) {
+  return {
+    version: 'v0.9',
+    updateComponents: {
+      surfaceId: 'demo-surface',
+      components: [{id: 'root', component: 'KeoEditorNext', ...props}],
+    },
+  } as unknown as A2uiMessage;
+}
+
 function renderEditor(props: Record<string, unknown>) {
   const messages: A2uiMessage[] = [
     {version: 'v0.9', createSurface: {surfaceId: 'demo-surface', catalogId: CATALOG_ID}},
-    {
-      version: 'v0.9',
-      updateComponents: {
-        surfaceId: 'demo-surface',
-        components: [{id: 'root', component: 'KeoEditorNext', ...props}],
-      },
-    },
+    updateMessage(props),
   ] as unknown as A2uiMessage[];
 
   const processor = new MessageProcessor([ai37Catalog]);
@@ -45,7 +66,14 @@ function renderEditor(props: Record<string, unknown>) {
   });
 
   const utils = render(<A2uiSurface surface={surface} />);
-  return {actions, ...utils};
+  return {actions, processor, ...utils};
+}
+
+/** Новый снапшот props от агента: тот же surface, обновлённый компонент. */
+async function updateProps(processor: MessageProcessor<any>, props: Record<string, unknown>) {
+  await act(async () => {
+    processor.processMessages([updateMessage(props)]);
+  });
 }
 
 /** Заголовок секции — одна кнопка: доступное имя склеивает титул и сводку. */
@@ -59,6 +87,18 @@ function section(title: string) {
 
 function querySection(title: string) {
   return screen.queryByRole('button', {name: sectionName(title)});
+}
+
+/**
+ * Шапка секции целиком: пометка стоит рядом с кнопкой-заголовком, а не внутри
+ * неё (иначе попала бы в доступное имя), поэтому её ищем по общему контейнеру.
+ */
+function header(title: string) {
+  return section(title).closest('.a2ui-card__header') as HTMLElement;
+}
+
+function isOpen(title: string) {
+  return section(title).getAttribute('aria-expanded') === 'true';
 }
 
 async function flush(run: () => void) {
@@ -248,6 +288,71 @@ describe('KeoEditorNext: следствие условия', () => {
   });
 });
 
+describe('KeoEditorNext: незаполненное условие', () => {
+  it('города нет — раскрыты условия, а не помещение, и у них «заполните»', () => {
+    renderEditor(firstMoveProps());
+
+    expect(isOpen('Условия')).toBe(true);
+    expect(isOpen('Помещение 1')).toBe(false);
+    expect(header('Условия').textContent).toContain('заполните');
+  });
+
+  it('город заполнен — раскрывается первая секция помещения', () => {
+    const props = firstMoveProps();
+    const conditions = (props.conditions as Array<Record<string, unknown>>).map(condition => ({
+      ...condition,
+      value: 'Тюмень',
+    }));
+
+    renderEditor({...props, conditions});
+
+    expect(isOpen('Условия')).toBe(false);
+    expect(header('Условия').textContent).not.toContain('заполните');
+    expect(isOpen('Помещение 1')).toBe(true);
+    expect(isOpen('Назначение')).toBe(true);
+  });
+
+  it('стёртый пользователем город возвращает пометку, экран не перескакивает', async () => {
+    const props = firstMoveProps();
+    const conditions = (props.conditions as Array<Record<string, unknown>>).map(condition => ({
+      ...condition,
+      value: 'Тюмень',
+    }));
+
+    renderEditor({...props, conditions});
+    expect(isOpen('Помещение 1')).toBe(true);
+
+    await typeCity('');
+
+    expect(header('Условия').textContent).toContain('заполните');
+    // Раскрытие пересевается только на новом снапшоте props — правка условия
+    // экран не перекладывает.
+    expect(isOpen('Помещение 1')).toBe(true);
+  });
+
+  it('без conditionsLabel пустое условие целью не становится', async () => {
+    // Наполнение полное — незаполнен только город: если бы блок без заголовка
+    // попадал в цели, «Далее» висело бы на нём вечно и не отдало бы кнопку
+    // «Рассчитать».
+    const {conditionsLabel, ...props} = keoProps();
+    const conditions = (props.conditions as Array<Record<string, unknown>>).map(condition => ({
+      ...condition,
+      value: '',
+    }));
+    const {actions} = renderEditor({...props, conditions});
+
+    // Блок без заголовка стоит раскрытым: пометку рисовать негде, и «Далее»
+    // не должно висеть на цели, которой нет среди секций.
+    expect(querySection('Условия')).toBeNull();
+    await walkThroughSections();
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+    });
+
+    expect(actions).toHaveLength(1);
+  });
+});
+
 describe('KeoEditorNext: revealBy', () => {
   it('ветка затенения появляется и исчезает по полю-триггеру', async () => {
     const {container} = renderEditor(keoProps());
@@ -287,6 +392,157 @@ describe('KeoEditorNext: подписи задаёт агент', () => {
     expect(querySection('Условия')).toBeNull();
     // Блок на месте: поле города видно без раскрывания.
     expect(screen.getByPlaceholderText('Город')).toBeTruthy();
+  });
+});
+
+describe('KeoEditorNext: черновик', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const ROOM_1 = 'Помещение 1';
+  const GEOMETRY = 'Геометрия помещения';
+
+  async function tick(ms: number) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ms);
+    });
+  }
+
+  it('серия правок схлопывается в одну отправку', async () => {
+    const {actions, container} = renderEditor(draftProps());
+    const root = container as HTMLElement;
+
+    // Поля живут в DOM и у свёрнутой секции (`keepMounted`) — раскрывать её
+    // незачем: раскрытие само по себе черновик не шлёт.
+    for (const value of ['5', '6', '7']) {
+      await act(async () => {
+        fireEvent.change(fieldIn(root, 'depth'), {target: {value}});
+      });
+    }
+    expect(actions).toHaveLength(0);
+
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe('keo:draft');
+    const rooms = actions[0]!.context.rooms as Array<{values: Record<string, unknown>}>;
+    expect(rooms[0]!.values.depth).toBe(7);
+  });
+
+  it('добавление помещения уходит сразу, без паузы', async () => {
+    const {actions} = renderEditor(draftProps());
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Добавить помещение'}));
+    });
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe('keo:draft');
+    expect((actions[0]!.context.rooms as unknown[]).length).toBe(2);
+  });
+
+  it('раскрытие секции не отправляет ничего', async () => {
+    const {actions} = renderEditor(draftProps());
+
+    await act(async () => {
+      fireEvent.click(section(ROOM_1));
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    expect(actions).toHaveLength(0);
+  });
+
+  it('без draftAction правки не уезжают никуда', async () => {
+    const {draftAction, ...props} = draftProps();
+    const {actions, container} = renderEditor(props);
+
+    await act(async () => {
+      fireEvent.change(fieldIn(container as HTMLElement, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    expect(actions).toHaveLength(0);
+  });
+
+  it('ответ на черновик не сбрасывает состояние экрана', async () => {
+    const {actions, container, processor} = renderEditor(draftProps());
+    const root = container as HTMLElement;
+
+    await openRoomSection(ROOM_1, GEOMETRY);
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    expect(actions).toHaveLength(1);
+    expect(screen.getByText(/Источники значений: /).textContent).toContain('1 изменено вами');
+
+    // Агент кладёт черновик в состояние задачи и отвечает снапшотом на месте:
+    // те же значения, пересчитанное следствие условия.
+    const draft = actions[0]!.context as {rooms: Array<{values: Record<string, unknown>}>};
+    await updateProps(processor, {
+      ...draftProps(),
+      rooms: draft.rooms,
+      conditions: [
+        {
+          ...(draftProps().conditions as Array<Record<string, unknown>>)[0],
+          note: 'группа светового климата 1 — пересчитано',
+        },
+      ],
+    });
+
+    expect(isOpen(ROOM_1)).toBe(true);
+    expect(isOpen(GEOMETRY)).toBe(true);
+    expect(screen.getByText(/Источники значений: /).textContent).toContain('1 изменено вами');
+    expect(section('Условия').textContent).toContain('пересчитано');
+  });
+
+  it('новое сообщение агента по-прежнему пересевает состояние', async () => {
+    const {container, processor} = renderEditor(draftProps());
+    const root = container as HTMLElement;
+
+    await openRoomSection(ROOM_1, GEOMETRY);
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+
+    // Другой документ — не ответ на черновик: значения помещения другие.
+    await updateProps(processor, {...draftProps(), rooms: [{values: {depth: 9}}]});
+
+    expect(fieldIn(root, 'depth').value).toBe('9');
+    expect(isOpen(ROOM_1)).toBe(false);
+    expect(screen.getByText(/Источники значений: /).textContent).not.toContain('изменено вами');
+  });
+});
+
+describe('KeoEditorNext: подпись условия при автосохранении', () => {
+  it('с draftAction следствие не гаснет, а заменяется присланным', async () => {
+    const {processor} = renderEditor(draftProps());
+
+    expect(section('Условия').textContent).toContain('группа светового климата 1');
+
+    await typeCity('Петербург');
+
+    // Гасить незачем: пересчитанное следствие придёт ответом на черновик.
+    expect(section('Условия').textContent).toContain('Петербург');
+    expect(section('Условия').textContent).toContain('группа светового климата 1');
+
+    await updateProps(processor, {
+      ...draftProps(),
+      conditions: [
+        {
+          ...(draftProps().conditions as Array<Record<string, unknown>>)[0],
+          value: 'Петербург',
+          note: 'группа светового климата 3 — C_N = 1,00 для любой ориентации',
+        },
+      ],
+    });
+
+    expect(section('Условия').textContent).toContain('группа светового климата 3');
   });
 });
 

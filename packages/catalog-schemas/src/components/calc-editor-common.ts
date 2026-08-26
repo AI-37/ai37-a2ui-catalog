@@ -81,12 +81,18 @@ export const calcEditorFieldSchema = formFieldBaseSchema
  * что правка меняет расчёт, а не данные проекта. Без `type` строка остаётся
  * readonly — так приходят ВЫВЕДЕННЫЕ значения (норматив e_н, методика): их
  * правка не имеет смысла, их пересчитывает агент.
+ *
+ * Пустое `value` — это ОТСУТСТВИЕ ОТВЕТА, и допустимо оно только у правимого
+ * условия. Иначе агенту приходится изобретать заглушку («—», «не указан»), а
+ * компоненту — знать словарь заглушек каждого агента; заглушка вдобавок уезжает
+ * в submit как настоящее значение. У выведенного условия (без `type`) пустоте
+ * взяться неоткуда: не вычислилось — строку не присылать вовсе.
  */
 export const calcConditionSchema = z
   .object({
     name: z.string().min(1).max(80),
     label: z.string().min(1).max(120),
-    value: z.string().min(1).max(200),
+    value: z.string().max(200),
     note: z.string().min(1).max(200).optional(),
     // Без `type` — readonly-строка (прежнее поведение, ключ аддитивный).
     type: z.enum(['text', 'select', 'lookup']).optional(),
@@ -99,6 +105,14 @@ export const calcConditionSchema = z
   })
   .strict()
   .superRefine((value, ctx) => {
+    if (value.value === '' && value.type === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'condition without "type" requires a non-empty "value"',
+        path: ['value'],
+      });
+    }
+
     if (value.type === 'select' && (value.options?.length ?? 0) === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
