@@ -20,8 +20,8 @@ import {
   thermalReportDefinition,
   thermalReportNextDefinition,
 } from './components/thermal-report';
-import {keoEditorDefinition} from './components/keo-editor';
-import {keoReportDefinition} from './components/keo-report';
+import {keoEditorDefinition, keoEditorNextDefinition} from './components/keo-editor';
+import {keoReportDefinition, keoReportNextDefinition} from './components/keo-report';
 import {insolationEditorDefinition} from './components/insolation-editor';
 import {insolationReportDefinition} from './components/insolation-report';
 import {liftReportDefinition, liftReportNextDefinition} from './components/lift-report';
@@ -41,7 +41,9 @@ export const componentDefinitions = [
   thermalReportDefinition,
   thermalReportNextDefinition,
   keoEditorDefinition,
+  keoEditorNextDefinition,
   keoReportDefinition,
+  keoReportNextDefinition,
   insolationEditorDefinition,
   insolationReportDefinition,
   liftReportDefinition,

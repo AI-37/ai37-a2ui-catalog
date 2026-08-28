@@ -107,7 +107,13 @@ COMPONENT_MODELS = {
     # (change lift-editor-next).
     "LiftEditorNext": LiftEditorProps,
     "KeoEditor": KeoEditorProps,
+    # То же и у КЕО: имя новое, схема props общая со старым рендерером
+    # (change keo-editor-next).
+    "KeoEditorNext": KeoEditorProps,
     "KeoReport": KeoReportProps,
+    # Новый рендерер того же отчёта на примитивах каталога: схема props общая
+    # со старым, поэтому и модель одна (change keo-report-next).
+    "KeoReportNext": KeoReportProps,
     "InsolationEditor": InsolationEditorProps,
     "InsolationReport": InsolationReportProps,
 }

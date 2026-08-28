@@ -1,0 +1,35 @@
+{
+  "component": "KeoEditorNext",
+  "props": {
+    "title": "Параметры расчёта КЕО",
+    "conditions": [
+      {
+        "name": "region",
+        "label": "Город",
+        "value": "Тюмень"
+      }
+    ],
+    "roomTemplate": {
+      "sections": [
+        {
+          "key": "geometry",
+          "title": "Геометрия помещения",
+          "fields": [
+            {
+              "name": "depth",
+              "label": "d_п — глубина помещения, м",
+              "type": "number",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    "rooms": [{"values": {"depth": 4.5}}],
+    "roomLabel": "Помещение",
+    "addRoomLabel": "Добавить помещение",
+    "removeRoomLabel": "Удалить помещение",
+    "nextLabel": "",
+    "submit": {"name": "keo_calculate", "label": "Рассчитать"}
+  }
+}
