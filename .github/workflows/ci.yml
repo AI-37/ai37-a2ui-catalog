@@ -75,3 +75,16 @@ jobs:
       # Падает, если забыли `pnpm run export:public` + commit после правки компонентов/бампа версии.
       - name: Verify ./public is up to date with source
         run: pnpm run verify:public
+
+  # Aggregate "green" check with a UNIFORM name across all AI-37 repos, so one org/branch ruleset can
+  # require a single context (`ci-green`) regardless of each repo's job names, and the doc-bot review
+  # trigger keys off it. Fails if any real CI job above failed or was cancelled.
+  ci-green:
+    if: always()
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: gate
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "one or more required CI jobs did not succeed"; exit 1
