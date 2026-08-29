@@ -66,6 +66,7 @@ flowchart LR
 - scripts/install-to-consumer.mjs — установка локальной сборки пакетов в потребителя тарболлами;
 - .github/workflows — CI/CD (pages.yml, ci.yml, cd.yml);
 - .npmrc — scoped-реестр @ai37 и авторизация для npm.app.sp-ai.ru;
+- REVIEW.md — репозиторный оверлей для AI-37 doc-bot PR-ревьюера: роль/стек, тест-команды, ключевые инварианты (схема-контракт, тройная парность Zod↔Pydantic↔рендерер, регистрация в двух местах, синхронизированная версия+CHANGELOG, аккуратность с `workspace:^`, генерируемые артефакты каталога), чувствительные пути и порог автономии; общий контракт ревью — в AI-37/docs plans/doc-bot-pr-review/reviews/_common.md;
 - docs, openspec — документация и design-доки (включая openspec/changes/thermal-report, openspec/changes/lift-report и прежние changes).
 
 ## Публичные интерфейсы
@@ -121,7 +122,7 @@ flowchart LR
 ## Как запускать тесты
 
 Предварительно: `pnpm install` и `poetry -C packages/catalog-python install`.
-- `pnpm run test` — vitest + pytest;
+- `pnpm run test` — `vitest run` + `poetry -C packages/catalog-python run pytest ../../tests/python`;
 - `pnpm run test:ts` — только TypeScript/React-тесты (включая constructions-editor.test.tsx, lookup-option-rich-render.test.tsx, thermal-report.test.tsx, lift-report.test.tsx, thermal-report-schema.test.ts, lift-report-schema.test.ts, parse-lookup-options.test.ts);
 - `pnpm run test:python` — только Python-тесты;
 - `pnpm run lint` — typecheck.
@@ -130,7 +131,7 @@ flowchart LR
 
 GitHub Actions:
 - .github/workflows/pages.yml публикует статические артефакты (включая обновлённые v2 с thermal-report.schema.json и lift-report.schema.json) на GitHub Pages;
-- .github/workflows/ci.yml — CI-проверки. Запускается на pull_request, workflow_dispatch и workflow_call (push-триггер снят). При ручном запуске input `runner` позволяет выбрать раннер: `ubuntu-latest` (по умолчанию) или `ai37-self-hosted` → `runs-on: ["self-hosted", "ai37-local-1"]`. На PR и без input `runner` джобы идут на ubuntu-latest. Шаги: checkout, pnpm 10.29.3, Node 22, Python 3.13, Poetry 2.3.2, `pnpm install --frozen-lockfile` (с AI37_NPM_TOKEN), `poetry -C packages/catalog-python install --no-interaction`, `pnpm run test:ts`, `pnpm run test:python`, `pnpm run build`, `pnpm run verify:public`. Шаг «Validate PR version and changelog updates» временно закомментирован.
+- .github/workflows/ci.yml — CI-проверки. Запускается на pull_request, workflow_dispatch и workflow_call (push-триггер снят). При ручном запуске input `runner` позволяет выбрать раннер: `ubuntu-latest` (по умолчанию) или `ai37-self-hosted` → `runs-on: ["self-hosted", "ai37-local-1"]`. На PR и без input `runner` джобы идут на ubuntu-latest. Шаги (джоба test): checkout, pnpm 10.29.3, Node 22, Python 3.13, Poetry 2.3.2, `pnpm install --frozen-lockfile` (с AI37_NPM_TOKEN), `poetry -C packages/catalog-python install --no-interaction`, `pnpm run test:ts`, `pnpm run test:python`, `pnpm run build`, `pnpm run verify:public`. Шаг «Validate PR version and changelog updates» временно закомментирован. Отдельная агрегирующая джоба `ci-green` (`if: always()`, `needs: [test]`, ubuntu-latest) имеет единое имя во всех AI-37-репозиториях: падает (exit 1), если реальные CI-джобы завершились failure/cancelled — единый контекст для org/branch ruleset и триггера doc-bot review;
 - .github/workflows/cd.yml — CD на push тегов v* или workflow_dispatch:
   - publish_npm: pnpm build и публикация @ai37/a2ui-catalog-* в приватный реестр https://npm.app.sp-ai.ru/ (токен AI37_NPM_TOKEN);
   - publish_pypi: poetry build + twine check dist/* + twine upload в https://pypi.app.sp-ai.ru/ (TWINE_USERNAME=ci-publish, TWINE_PASSWORD=AI37_PYPI_TOKEN). Poetry 2.3.2 ставится до setup-python (cache: poetry); run-шаги выполняются из packages/catalog-python.
