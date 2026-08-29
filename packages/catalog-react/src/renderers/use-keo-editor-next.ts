@@ -73,6 +73,9 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
   // Сериализация последнего отправленного черновика — дедуп по содержимому:
   // «Далее» сразу после паузы ввода иначе слало бы то же самое дважды.
   const lastDraft = React.useRef<string | null>(null);
+  // Документный ключ того же черновика — для узнавания СВОЕГО эха. Отдельно от
+  // `lastDraft`: дедуп различает имена помещений, эхо по ним не отличают.
+  const lastDraftKey = React.useRef<string | null>(null);
 
   const cancelPendingDraft = () => {
     if (draftTimer.current === null) return;
@@ -91,13 +94,19 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
   // ровно подпись климата, ради которой всё и затевалось. Пересевать по ней
   // значило бы схлопывать секцию под руками у пользователя (Решение 5 design
   // `keo-editor-draft`).
+  // Эхо может ОТСТАВАТЬ от живого ввода: пользователь печатает дальше, пока
+  // черновик в полёте, и состояние уже не равно снапшоту. Поэтому своё эхо
+  // узнаётся по ПОСЛЕДНЕМУ ОТПРАВЛЕННОМУ черновику, а не по текущему состоянию:
+  // совпало — это ack, пересев которого стёр бы свежие нажатия под руками.
   const propsKey = JSON.stringify([props.rooms, props.roomTemplate, props.conditions]);
   const [baseKey, setBaseKey] = React.useState(propsKey);
   if (propsKey !== baseKey) {
     const next = seed(props);
     setBaseKey(propsKey);
 
-    if (keoDocumentKey(next) !== keoDocumentKey(state)) {
+    const nextKey = keoDocumentKey(next);
+    const ownEcho = nextKey === lastDraftKey.current || nextKey === keoDocumentKey(state);
+    if (!ownEcho) {
       cancelPendingDraft();
       setState(next);
       setTouched(new Set());
@@ -138,6 +147,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
     if (serialized === lastDraft.current) return;
 
     lastDraft.current = serialized;
+    lastDraftKey.current = keoDocumentKey(document);
     sink.onDraft(document);
   };
 
