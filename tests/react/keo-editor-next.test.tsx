@@ -501,6 +501,71 @@ describe('KeoEditorNext: черновик', () => {
     expect(section('Условия').textContent).toContain('пересчитано');
   });
 
+  /**
+   * Наполнение с ДВУМЯ полями помещения: на одном ключе порядок неразличим, а
+   * пересортировка ключей jsonb'ом — ровно про порядок.
+   */
+  function twoFieldProps() {
+    const props = draftProps();
+    const section = (props.roomTemplate as {sections: Array<Record<string, unknown>>}).sections[0]!;
+    const fields = section.fields as Array<Record<string, unknown>>;
+    section.fields = [...fields, {...fields[0], name: 'height', label: 'Высота'}];
+    props.rooms = [{values: {depth: 4.5, height: 3}}];
+
+    return props;
+  }
+
+  it('эхо с другим порядком ключей — тот же документ, а не новый', async () => {
+    const {actions, container, processor} = renderEditor(twoFieldProps());
+    const root = container as HTMLElement;
+
+    await openRoomSection(ROOM_1, GEOMETRY);
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    // Снапшот из истории треда проходит через jsonb Postgres, который
+    // пересортировывает ключи объекта, — содержание от этого не меняется.
+    const draft = actions[0]!.context as {rooms: Array<{values: Record<string, unknown>}>};
+    await updateProps(processor, {
+      ...twoFieldProps(),
+      rooms: draft.rooms.map(room => ({
+        ...room,
+        values: Object.fromEntries(Object.entries(room.values).reverse()),
+      })),
+    });
+
+    expect(isOpen(ROOM_1)).toBe(true);
+    expect(isOpen(GEOMETRY)).toBe(true);
+    expect(screen.getByText(/Источники значений: /).textContent).toContain('1 изменено вами');
+  });
+
+  it('эхо, отставшее от живого ввода, — ack: свежие нажатия не стираются', async () => {
+    const {actions, container, processor} = renderEditor(draftProps());
+    const root = container as HTMLElement;
+
+    await openRoomSection(ROOM_1, GEOMETRY);
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    expect(actions).toHaveLength(1);
+
+    // Пользователь печатает дальше, пока черновик в полёте…
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+
+    // …и эхо ПЕРВОГО черновика (со старым значением) догоняет экран.
+    const draft = actions[0]!.context as {rooms: Array<{values: Record<string, unknown>}>};
+    await updateProps(processor, {...draftProps(), rooms: draft.rooms});
+
+    expect(fieldIn(root, 'depth').value).toBe('6');
+    expect(isOpen(ROOM_1)).toBe(true);
+    expect(isOpen(GEOMETRY)).toBe(true);
+  });
+
   it('новое сообщение агента по-прежнему пересевает состояние', async () => {
     const {container, processor} = renderEditor(draftProps());
     const root = container as HTMLElement;
