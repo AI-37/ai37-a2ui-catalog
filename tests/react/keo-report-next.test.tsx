@@ -61,11 +61,94 @@ describe('KeoReportNext', () => {
     expect(recommended).toHaveLength(1);
     expect(recommended[0]!.textContent).toContain('Окно 1,8 × 1,5 м');
 
-    // Допущения — одной заметкой, исходные данные — карточкой.
-    expect(container.textContent).toContain('C_N принят для северной');
+    // Допущения — одной заметкой, исходные данные — карточкой. Индекс в
+    // заметке подстрочный, как и в чипах: '_' на экране не остаётся.
+    expect(container.textContent).toContain('CN принят для северной');
+    expect(container.querySelector('.a2ui-note')!.textContent).not.toContain('_');
     expect(screen.getByText('Исходные данные')).toBeTruthy();
   });
 
+  /**
+   * Карточка «Исходные данные» с подменёнными группами: ни чипа с несколькими
+   * индексами, ни note про ε в фикстурах пока нет — их шлёт агент, и правило
+   * надо закрыть до того, как он до них доедет.
+   */
+  function renderInputs(groups: unknown[]) {
+    const props = readProps('keo-report-fail.json');
+
+    return renderReport('KeoReportNext', {
+      ...props,
+      inputs: {...(props.inputs as Record<string, unknown>), groups},
+    });
+  }
+
+  it('подпись чипа рендерит индексы подстрочными, подчёркивание не видно', () => {
+    const {container} = renderInputs([
+      {label: 'Из проекта', tone: 'normal', chips: [{label: 'd_п · b_п · h, м', value: '4,5 × 3,2 × 2,7'}]},
+    ]);
+
+    const chip = container.querySelector('.a2ui-chip__label')!;
+    expect(Array.from(chip.querySelectorAll('sub')).map(node => node.textContent)).toEqual([
+      'п',
+      'п',
+    ]);
+    expect(chip.textContent).toBe('dп · bп · h, м');
+  });
+
+  it('note группы идёт по тому же правилу', () => {
+    const {container} = renderInputs([
+      {
+        label: 'Принято системой — проверьте',
+        tone: 'warning',
+        chips: [{label: 'Затенение', value: 'нет'}],
+        note: 'ε_б взят по схеме N1, ε_зд подставлен по умолчанию.',
+      },
+    ]);
+
+    // Заметок на экране две — допущения отчёта и оговорка группы; берём свою.
+    const note = Array.from(container.querySelectorAll('.a2ui-note')).find(node =>
+      node.textContent!.includes('схеме N1'),
+    )!;
+    expect(Array.from(note.querySelectorAll('sub')).map(node => node.textContent)).toEqual([
+      'б',
+      'зд',
+    ]);
+    expect(note.textContent).not.toContain('_');
+  });
+
+  it('подпись без индексов и значения чипов не меняются', () => {
+    const {container} = renderInputs([
+      {label: 'Из проекта', tone: 'normal', chips: [{label: 'Ориентация', value: 'северная'}]},
+    ]);
+
+    expect(container.querySelector('.a2ui-chip__label')!.textContent).toBe('Ориентация');
+    expect(container.querySelector('.a2ui-chip__value')!.textContent).toBe('северная');
+    expect(container.querySelectorAll('.a2ui-chip__label sub')).toHaveLength(0);
+  });
+
+  it('LaTeX от неподновлённого агента проходит насквозь, а не ломается', () => {
+    // Правило узкое и долларов не трогает: пока агент не почистил свои строки
+    // (`keo-report-label-notation`), экран остаётся прежним, а не портится.
+    const latex = '$d_п$ · $b_п$';
+    const {container} = renderInputs([
+      {label: 'Из проекта', tone: 'normal', chips: [{label: latex, value: '4,5 × 3,2'}]},
+    ]);
+
+    const chip = container.querySelector('.a2ui-chip__label')!;
+    expect(chip.textContent).toBe(latex);
+    expect(chip.querySelectorAll('sub')).toHaveLength(0);
+  });
+
+  it('подпись кнопки действия — один флекс-элемент, а не россыпь кусков', () => {
+    // `.a2ui-btn` — inline-flex с зазором под иконку: без обёртки куски
+    // «Пересчитать с h_пд 0,6» разъехались бы (канон next-label-subscripts).
+    renderReport('KeoReportNext', readProps('keo-report-fail.json'));
+
+    const button = screen.getByRole('button', {name: 'Пересчитать с hпд 0,6'});
+
+    expect(button.querySelector('sub')!.textContent).toBe('пд');
+    expect(button.querySelector('sub')!.parentElement).not.toBe(button);
+  });
   it('слово состояния варианта зашито в рендерер, у neutral его нет', () => {
     const {container} = renderReport('KeoReportNext', readProps('keo-report-fail.json'));
 
@@ -74,7 +157,7 @@ describe('KeoReportNext', () => {
     expect(failing.textContent).toBe('Не соответствует');
 
     // tone: 'neutral' с действием — только кнопка, статуса у него нет.
-    expect(screen.getByRole('button', {name: 'Пересчитать с h_пд 0,6'})).toBeTruthy();
+    expect(screen.getByRole('button', {name: 'Пересчитать с hпд 0,6'})).toBeTruthy();
     expect(container.querySelectorAll('.a2ui-pill.a2ui-t--strong')).toHaveLength(1);
   });
 
