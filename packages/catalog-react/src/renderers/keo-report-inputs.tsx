@@ -1,11 +1,17 @@
 import React from 'react';
 import type {KeoReportInputs} from '@ai37/a2ui-catalog-schemas';
 import {KeoReportActionButton} from './keo-report-action-button';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import type {KeoReportOnAction} from './keo-report.types';
 
 /** Карточка «Исходные данные»: группы чипов по источнику значения.
  * `tone: 'warning'` («принято системой — проверьте») — пунктирные чипы,
- * предупреждающий заголовок и note под чипами (канон ThermalReport). */
+ * предупреждающий заголовок и note под чипами (канон ThermalReport).
+ *
+ * Подписи, заголовки групп и note приходят от агента плоской нотацией
+ * (`ρ_ф`, `e_н`, `ε_зд`) и идут через `renderLabelSubscripts` — тем же
+ * правилом, что подписи полей формы. Значения чипов не трогаются: там числа
+ * и текст без индексов. */
 export function KeoReportInputsCard({
   inputs,
   onAction,
@@ -27,11 +33,11 @@ export function KeoReportInputsCard({
             key={`${group.label}-${index}`}
             className={`a2ui-kr__group${group.tone === 'warning' ? ' a2ui-kr__group--warning' : ''}`}
           >
-            <p className="a2ui-kr__group-label">{group.label}</p>
+            <p className="a2ui-kr__group-label">{renderLabelSubscripts(group.label)}</p>
             <div className="a2ui-kr__chips">
               {group.chips.map((chip, chipIndex) => (
                 <span key={`${chip.label}-${chipIndex}`} className="a2ui-kr__chip">
-                  <span className="a2ui-kr__chip-label">{chip.label}</span>
+                  <span className="a2ui-kr__chip-label">{renderLabelSubscripts(chip.label)}</span>
                   <span className="a2ui-kr__chip-value">{chip.value}</span>
                 </span>
               ))}
@@ -39,7 +45,7 @@ export function KeoReportInputsCard({
             {group.note ? (
               <div className="a2ui-kr__note">
                 <span className="a2ui-kr__note-dot" aria-hidden="true" />
-                <span>{group.note}</span>
+                <span>{renderLabelSubscripts(group.note)}</span>
               </div>
             ) : null}
           </div>

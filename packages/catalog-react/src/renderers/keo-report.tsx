@@ -2,6 +2,7 @@ import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {keoReportDefinition, type KeoReportAction} from '@ai37/a2ui-catalog-schemas';
 import {KeoReportInputsCard} from './keo-report-inputs';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import {KeoReportProtocolCard} from './keo-report-protocol';
 import {KeoReportRecommendationsSection} from './keo-report-recommendations';
 import {KeoReportRoomsSection} from './keo-report-rooms';
@@ -46,7 +47,7 @@ export const KeoReport = createComponentImplementation(keoReportDefinition, ({pr
           <section className="a2ui-kr__section">
             <div className="a2ui-kr__note">
               <span className="a2ui-kr__note-dot" aria-hidden="true" />
-              <span>{props.assumptions.join(' · ')}</span>
+              <span>{renderLabelSubscripts(props.assumptions.join(' · '))}</span>
             </div>
           </section>
         ) : null}

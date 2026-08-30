@@ -1,5 +1,6 @@
 import React from 'react';
 import {ReportNote} from '../primitives';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 
 /** Оговорка группы исходных данных. Нет оговорки — нет и заметки. */
 export function ReportNextGroupNote({note}: {note: string | undefined}) {
@@ -7,5 +8,5 @@ export function ReportNextGroupNote({note}: {note: string | undefined}) {
     return null;
   }
 
-  return <ReportNote>{note}</ReportNote>;
+  return <ReportNote>{renderLabelSubscripts(note)}</ReportNote>;
 }
