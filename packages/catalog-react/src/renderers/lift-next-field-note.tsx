@@ -1,6 +1,6 @@
 import React from 'react';
 import {SourceNote} from '../primitives';
-import {renderLabelSubscripts} from './render-label-subscripts';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import type {LiftNextFieldNoteProps} from './lift-next.types';
 
 /**

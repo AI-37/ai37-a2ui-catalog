@@ -4,7 +4,7 @@ import {Card} from './card';
 import {CardBody} from './card-body';
 import {CardTriggerLabel} from './card-trigger-label';
 import {buttonClassName} from './button-class-name';
-import {renderLabelSubscripts} from '../renderers/render-label-subscripts';
+import {renderLabelSubscripts} from './render-label-subscripts';
 import type {SummaryCollapsibleProps} from './summary-collapsible.types';
 
 /**
@@ -18,7 +18,12 @@ export function SummaryCollapsible({panelId, label, summary, children}: SummaryC
   const [open, setOpen] = React.useState(false);
   // Строковую сводку вызывающий собрал из плоской нотации; JSX-сводка
   // свёрстана им же, и трогать в ней нечего.
-  const text = typeof summary === 'string' ? renderLabelSubscripts(summary) : summary;
+  //
+  // Обёртка обязательна: шапка выложена `flex` с зазором, а хелпер возвращает
+  // массив узлов — без неё куски строки стали бы отдельными флекс-элементами
+  // (design, Решение 6).
+  const text =
+    typeof summary === 'string' ? <span>{renderLabelSubscripts(summary)}</span> : summary;
 
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen}>

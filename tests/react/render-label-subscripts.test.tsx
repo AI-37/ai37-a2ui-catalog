@@ -1,7 +1,7 @@
 import React from 'react';
 import {render} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
-import {renderLabelSubscripts} from '../../packages/catalog-react/src/renderers/render-label-subscripts';
+import {renderLabelSubscripts} from '../../packages/catalog-react/src/primitives/render-label-subscripts';
 
 /**
  * Правило узкое намеренно: подпись — человеческий текст, и жадное правило

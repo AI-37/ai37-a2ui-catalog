@@ -1,6 +1,6 @@
 import React from 'react';
 import type {CalcEditorField} from '@ai37/a2ui-catalog-schemas';
-import {renderLabelSubscripts} from './render-label-subscripts';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 
 /**
  * Предупреждение о значении САМОГО поля («нет — открытый горизонт»): подпись

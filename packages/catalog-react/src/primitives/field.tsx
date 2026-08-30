@@ -1,6 +1,6 @@
 import React from 'react';
 import {Field as BaseField} from '@base-ui/react/field';
-import {renderLabelSubscripts} from '../renderers/render-label-subscripts';
+import {renderLabelSubscripts} from './render-label-subscripts';
 import type {FieldProps} from './form.types';
 
 /**

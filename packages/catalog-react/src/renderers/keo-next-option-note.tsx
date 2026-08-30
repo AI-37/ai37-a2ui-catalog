@@ -1,6 +1,6 @@
 import React from 'react';
 import type {CalcEditorField} from '@ai37/a2ui-catalog-schemas';
-import {renderLabelSubscripts} from './render-label-subscripts';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 
 /** Пояснение к выбранному варианту списка: текст от агента, не от клиента. */
 export function KeoNextOptionNote({field, value}: {field: CalcEditorField; value: string}) {

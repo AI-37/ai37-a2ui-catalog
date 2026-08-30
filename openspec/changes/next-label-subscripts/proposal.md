@@ -39,7 +39,7 @@ Teplo выглядит правильно не потому, что пробле
 
 ## Impact
 
-- `packages/catalog-react/src/renderers/render-label-subscripts.tsx` — новый.
+- `packages/catalog-react/src/primitives/render-label-subscripts.tsx` — новый.
 - `packages/catalog-react/src/primitives/field.tsx` — строковый `label`.
 - `packages/catalog-react/src/primitives/summary-collapsible.tsx` — строковый
   `summary`.

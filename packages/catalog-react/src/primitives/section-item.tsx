@@ -5,7 +5,7 @@ import {CardHeader} from './card-header';
 import {CardTriggerLabel} from './card-trigger-label';
 import {buttonClassName} from './button-class-name';
 import {cardClassName} from './card-class-name';
-import {renderLabelSubscripts} from '../renderers/render-label-subscripts';
+import {renderLabelSubscripts} from './render-label-subscripts';
 import type {SectionItemProps} from './section-item.types';
 
 /**

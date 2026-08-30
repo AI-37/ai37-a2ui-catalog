@@ -1,5 +1,5 @@
 import React from 'react';
-import {renderLabelSubscripts} from './render-label-subscripts';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 
 /**
  * Пометки «! проверить»: правила геометрии из props и выход числа за границы

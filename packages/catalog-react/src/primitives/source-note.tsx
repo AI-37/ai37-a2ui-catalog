@@ -1,7 +1,7 @@
 import React from 'react';
 import type {CalcFieldSource, LiftEditorFieldSource} from '@ai37/a2ui-catalog-schemas';
 import {fieldSourceLabel} from './field-source-label';
-import {renderLabelSubscripts} from '../renderers/render-label-subscripts';
+import {renderLabelSubscripts} from './render-label-subscripts';
 
 /**
  * Подпись под контролом: откуда взялось значение. Обоснование агента (`note`)
