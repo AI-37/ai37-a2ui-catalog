@@ -4,6 +4,7 @@ import {Card} from './card';
 import {CardBody} from './card-body';
 import {CardTriggerLabel} from './card-trigger-label';
 import {buttonClassName} from './button-class-name';
+import {renderLabelSubscripts} from '../renderers/render-label-subscripts';
 import type {SummaryCollapsibleProps} from './summary-collapsible.types';
 
 /**
@@ -15,6 +16,9 @@ import type {SummaryCollapsibleProps} from './summary-collapsible.types';
  */
 export function SummaryCollapsible({panelId, label, summary, children}: SummaryCollapsibleProps) {
   const [open, setOpen] = React.useState(false);
+  // Строковую сводку вызывающий собрал из плоской нотации; JSX-сводка
+  // свёрстана им же, и трогать в ней нечего.
+  const text = typeof summary === 'string' ? renderLabelSubscripts(summary) : summary;
 
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen}>
@@ -30,7 +34,7 @@ export function SummaryCollapsible({panelId, label, summary, children}: SummaryC
                 осмысленно. */}
             <CardTriggerLabel title={<span style={labelStyle}>{label}</span>} />
           </Collapsible.Trigger>
-          {open ? null : summary}
+          {open ? null : text}
         </div>
         <Collapsible.Panel keepMounted id={panelId} className="a2ui-card__panel">
           <CardBody>{children}</CardBody>

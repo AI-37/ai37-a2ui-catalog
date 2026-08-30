@@ -199,6 +199,62 @@ describe('KeoEditorNext: состав экрана', () => {
   });
 });
 
+describe('KeoEditorNext: подстрочные индексы', () => {
+  /** Подпись поля целиком — вместе с пометкой обязательного. */
+  function labelOf(container: HTMLElement, name: string) {
+    return container
+      .querySelector(`input[name="${name}"]`)!
+      .closest('.a2ui-field')!
+      .querySelector('.a2ui-field__label')! as HTMLElement;
+  }
+
+  it('подпись поля показывает индекс подстрочным, а не через подчёркивание', () => {
+    const {container} = renderEditor(keoProps());
+
+    const label = labelOf(container as HTMLElement, 'depth');
+
+    expect(label.querySelector('sub')?.textContent).toBe('п');
+    expect(label.textContent).toContain('dп — глубина помещения, м');
+    expect(label.textContent).not.toContain('_');
+  });
+
+  it('сводка свёрнутой секции идёт по тому же правилу', async () => {
+    renderEditor(keoProps());
+
+    await openSection(ROOM);
+    const summary = section('Геометрия помещения');
+
+    expect(Array.from(summary.querySelectorAll('sub')).map(node => node.textContent)).toEqual([
+      'п',
+      'п',
+    ]);
+    expect(summary.textContent).not.toContain('_');
+  });
+
+  it('подписи под контролом идут по тому же правилу', async () => {
+    const {container} = renderEditor(keoProps());
+
+    await openRoomSection(ROOM, 'Затенение');
+    const note = (container as HTMLElement)
+      .querySelector('input[name="facadeReflection"]')!
+      .closest('.a2ui-field')!
+      .querySelector('.a2ui-t--sub:not(.a2ui-field__label)')! as HTMLElement;
+
+    expect(note.querySelector('sub')?.textContent).toBe('ф');
+    expect(note.textContent).toContain('ρф 0,5 — допущение');
+    expect(note.textContent).not.toContain('_');
+    // Подпись допущения выложена `inline-flex` с зазором: без обёртки куски
+    // строки стали бы отдельными флекс-элементами — «ρ  ф  0,5».
+    expect(note.querySelector('sub')!.parentElement).not.toBe(note);
+  });
+
+  it('подпись без индексов не меняется', () => {
+    const {container} = renderEditor(keoProps());
+
+    expect(labelOf(container as HTMLElement, 'glazing').textContent).toContain('Остекление');
+  });
+});
+
 describe('KeoEditorNext: submit', () => {
   it('«Далее» ведёт по секциям и не отправляет, «Рассчитать» отправляет документ', async () => {
     const {actions} = renderEditor(keoProps());
@@ -651,7 +707,7 @@ describe('KeoEditorNext: проход отдаёт каретку цели', () 
     });
 
     expect(isOpen('Геометрия помещения')).toBe(true);
-    expect(document.activeElement).toBe(controlByLabel('Геометрия помещения', /d_п/));
+    expect(document.activeElement).toBe(controlByLabel('Геометрия помещения', /^dп — глубина/));
   });
 
   it('шаг отправки каретку не двигает', async () => {
