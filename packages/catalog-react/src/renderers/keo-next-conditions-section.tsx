@@ -30,6 +30,7 @@ export function KeoNextConditionsSection({
       title={label}
       summary={buildKeoConditionsSummary(conditions, control)}
       badge={<KeoNextBadge tone={control.badgeFor(KEO_CONDITIONS_KEY)} />}
+      sectionRef={control.bindSection(KEO_CONDITIONS_KEY)}
     >
       <KeoNextConditions control={control} conditions={conditions} />
     </SectionItem>

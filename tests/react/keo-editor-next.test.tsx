@@ -611,6 +611,68 @@ describe('KeoEditorNext: подпись условия при автосохра
   });
 });
 
+/**
+ * Проход по секциям обязан вести не только глазами: раскрытая цель получает
+ * каретку. Панели живут `keepMounted`, поэтому цель ищется по РАСКРЫТОЙ
+ * панели, а не по наличию узла в DOM.
+ */
+describe('KeoEditorNext: проход отдаёт каретку цели', () => {
+  const nextButton = () => screen.getByRole('button', {name: 'Далее'});
+
+  /** Раскрытая панель секции; свёрнутая стоит `hidden` и целью не бывает. */
+  function openPanel(title: string) {
+    const card = section(title).closest('.a2ui-card') as HTMLElement;
+
+    return card.querySelector<HTMLElement>('.a2ui-card__panel:not([hidden])');
+  }
+
+  it('каждый шаг ставит каретку в раскрытую секцию', async () => {
+    renderEditor(keoProps());
+
+    await flush(() => {
+      nextButton().focus();
+      fireEvent.click(nextButton());
+    });
+
+    expect(isOpen('Назначение')).toBe(true);
+    expect(openPanel('Назначение')!.contains(document.activeElement)).toBe(true);
+
+    await flush(() => {
+      fireEvent.click(nextButton());
+    });
+
+    expect(isOpen('Геометрия помещения')).toBe(true);
+    expect(openPanel('Геометрия помещения')!.contains(document.activeElement)).toBe(true);
+  });
+
+  it('шаг отправки каретку не двигает', async () => {
+    renderEditor(keoProps());
+
+    await walkThroughSections();
+    const submit = screen.getByRole('button', {name: 'Рассчитать'});
+
+    await flush(() => {
+      submit.focus();
+      fireEvent.click(submit);
+    });
+
+    expect(document.activeElement).toBe(submit);
+  });
+
+  it('раскрытие заголовком не уводит каретку из поля', async () => {
+    renderEditor(keoProps());
+    const city = screen.getByPlaceholderText('Город');
+
+    await flush(() => {
+      city.focus();
+    });
+    await openSection(ROOM);
+
+    expect(isOpen(ROOM)).toBe(true);
+    expect(document.activeElement).toBe(city);
+  });
+});
+
 describe('KeoEditorNext: клавиатура и aria', () => {
   it('свёрнутая секция — кнопка с aria-expanded и aria-controls на свою панель', () => {
     const {container} = renderEditor(keoProps());

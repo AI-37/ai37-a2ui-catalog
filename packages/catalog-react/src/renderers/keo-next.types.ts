@@ -79,6 +79,11 @@ export interface KeoControl {
   removeRoom: (roomId: string) => void;
   /** Кнопка подвала: «Далее» ведёт по секциям, «Рассчитать» отправляет. */
   submit: () => void;
+  /**
+   * Якорь цели прохода: «Далее» переводит в раскрытую цель каретку. Ключ тот
+   * же, что у раскрытия: `conditions` либо `{id помещения}::{секция}`.
+   */
+  bindSection: (key: string) => (node: HTMLElement | null) => void;
 }
 
 /**

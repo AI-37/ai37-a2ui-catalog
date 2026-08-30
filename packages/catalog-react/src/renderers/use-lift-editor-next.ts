@@ -14,6 +14,7 @@ import {MIN_EDITOR_ITEMS} from './min-editor-items';
 import {omitTouchedLiftSources} from './omit-touched-lift-sources';
 import {pickInitialOpenSection} from './pick-initial-open-section';
 import {scrollToElement} from './scroll-to-element';
+import {useWalkthroughFocus} from './use-walkthrough-focus';
 import {resolveAddItemState} from './resolve-add-item-state';
 import {seedLiftValues} from './seed-lift-values';
 import {shiftSectionsAfterRemove} from './shift-sections-after-remove';
@@ -60,8 +61,9 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
     () => new Set(openSections),
   );
 
-  // Якоря секций для прокрутки навигацией «Далее».
-  const sectionNodes = React.useRef(new Map<LiftSectionKey, HTMLElement>());
+  // Якоря секций: по ним навигация «Далее» и прокручивает к цели, и отдаёт
+  // ей каретку (change `next-walkthrough-focus`).
+  const walkthroughFocus = useWalkthroughFocus<LiftSectionKey>();
   const draftTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   // Сериализация последнего отправленного черновика — дедуп по содержимому.
   const lastDraft = React.useRef<string | null>(null);
@@ -341,7 +343,9 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
 
       setOpenSections([target]);
       setReviewed(prev => new Set(prev).add(target));
-      scrollToElement(sectionNodes.current.get(target) ?? null);
+      scrollToElement(walkthroughFocus.nodeFor(target));
+      // Каретка переедет в цель эффектом: сейчас её панель ещё скрыта.
+      walkthroughFocus.aimAt(target);
       // «Далее» фиксирует заполненное немедленно, не дожидаясь дебаунса.
       sendDraftNow();
     },
@@ -394,12 +398,6 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
       sendDraftNow(applied);
     },
 
-    bindSection: key => node => {
-      if (node === null) {
-        sectionNodes.current.delete(key);
-      } else {
-        sectionNodes.current.set(key, node);
-      }
-    },
+    bindSection: walkthroughFocus.bindSection,
   };
 }
