@@ -338,7 +338,7 @@ describe('LiftEditorNext: проход отдаёт каретку цели', ()
     return sectionPanel(title).querySelector<HTMLElement>('.a2ui-card__panel:not([hidden])');
   }
 
-  it('шаг прохода ставит каретку в раскрытую секцию', async () => {
+  it('шаг прохода ставит каретку на первый контрол раскрытой секции', async () => {
     renderEditor(groupProps());
 
     await flush(() => {
@@ -347,7 +347,9 @@ describe('LiftEditorNext: проход отдаёт каретку цели', ()
     });
 
     expect(section('Лифт').getAttribute('aria-expanded')).toBe('true');
-    expect(openPanel('Лифт')!.contains(document.activeElement)).toBe(true);
+    // Каретка проверяется конкретным узлом: поле ищется по подписи, которую
+    // Base UI `Field` связывает с ВИДИМЫМ контролом.
+    expect(document.activeElement).toBe(within(openPanel('Лифт')!).getByLabelText(/Q — грузоподъёмность/));
   });
 
   it('шаг отправки каретку не двигает', async () => {

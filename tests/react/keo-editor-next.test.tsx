@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, within} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
@@ -626,7 +626,16 @@ describe('KeoEditorNext: проход отдаёт каретку цели', () 
     return card.querySelector<HTMLElement>('.a2ui-card__panel:not([hidden])');
   }
 
-  it('каждый шаг ставит каретку в раскрытую секцию', async () => {
+  /**
+   * Каретка проверяется КОНКРЕТНЫМ узлом, а не «где-то внутри панели»: поля
+   * ищутся по подписи, которую Base UI `Field` связывает с видимым контролом.
+   * Проверка «внутри» пропустила бы фокус на служебном узле — у числового поля
+   * скрытый `input` стоит в разметке раньше видимого.
+   */
+  const controlByLabel = (title: string, label: RegExp) =>
+    within(openPanel(title)!).getByLabelText(label);
+
+  it('каждый шаг ставит каретку на первый контрол раскрытой секции', async () => {
     renderEditor(keoProps());
 
     await flush(() => {
@@ -635,14 +644,14 @@ describe('KeoEditorNext: проход отдаёт каретку цели', () 
     });
 
     expect(isOpen('Назначение')).toBe(true);
-    expect(openPanel('Назначение')!.contains(document.activeElement)).toBe(true);
+    expect(document.activeElement).toBe(controlByLabel('Назначение', /Назначение помещения/));
 
     await flush(() => {
       fireEvent.click(nextButton());
     });
 
     expect(isOpen('Геометрия помещения')).toBe(true);
-    expect(openPanel('Геометрия помещения')!.contains(document.activeElement)).toBe(true);
+    expect(document.activeElement).toBe(controlByLabel('Геометрия помещения', /d_п/));
   });
 
   it('шаг отправки каретку не двигает', async () => {
