@@ -10,9 +10,11 @@ import {findRuleTargetsBySource} from './find-rule-targets-by-source';
 import {isEmptyLiftValue} from './is-empty-lift-value';
 import {LIFT_DRAFT_DEBOUNCE_MS} from './lift-draft-debounce-ms';
 import {liftTouchedKey} from './lift-touched-key';
+import {MIN_EDITOR_ITEMS} from './min-editor-items';
 import {omitTouchedLiftSources} from './omit-touched-lift-sources';
 import {pickInitialOpenSection} from './pick-initial-open-section';
 import {scrollToElement} from './scroll-to-element';
+import {resolveAddItemState} from './resolve-add-item-state';
 import {seedLiftValues} from './seed-lift-values';
 import {shiftSectionsAfterRemove} from './shift-sections-after-remove';
 import {shiftTouchedAfterRemove} from './shift-touched-after-remove';
@@ -216,7 +218,11 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
     buildingKind,
     pending,
     blocked: props.pendingLabel === undefined && missing.size > 0,
-    canAddLift: config.maxLifts === undefined || draft.lifts.length < config.maxLifts,
+    addLiftState: resolveAddItemState({
+      count: draft.lifts.length,
+      max: config.maxLifts,
+      minCount: MIN_EDITOR_ITEMS,
+    }),
 
     // «заполните» (пустые обязательные) перекрывает «просмотреть» (свёрнутая
     // непросмотренная); раскрытая секция обходится без пометки.
@@ -297,7 +303,7 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
     },
 
     removeLift: index => {
-      if (draft.lifts.length <= 1) return;
+      if (draft.lifts.length <= MIN_EDITOR_ITEMS) return;
       const next = {building: draft.building, lifts: draft.lifts.filter((_u, i) => i !== index)};
 
       updateDraft(next);

@@ -636,3 +636,48 @@ describe('KeoEditorNext: клавиатура и aria', () => {
     expect(new Set(ids).size).toBe(2);
   });
 });
+
+/**
+ * Предел бывает двух видов, и кнопка добавления реагирует на вид, а не на
+ * значение `maxRooms` (change next-add-item-limit): временный предел гасит
+ * кнопку, постоянный убирает её из разметки.
+ */
+describe('KeoEditorNext: предел помещений', () => {
+  it('предела нет — кнопка доступна', () => {
+    const props = keoProps();
+    delete props.maxRooms;
+    renderEditor(props);
+
+    const add = screen.getByRole('button', {name: 'Добавить помещение'}) as HTMLButtonElement;
+    expect(add.disabled).toBe(false);
+  });
+
+  it('предел в одно помещение — кнопки нет в разметке', () => {
+    // Боевой набор агента КЕО. Последнее помещение не удаляется, значит
+    // кнопка не оживёт ни при каком действии пользователя.
+    renderEditor({...keoProps(), maxRooms: 1});
+
+    expect(screen.queryByRole('button', {name: 'Добавить помещение'})).toBeNull();
+  });
+
+  it('предел достигнут, но удаление возможно — кнопка на месте и отключена', async () => {
+    renderEditor({...keoProps(), maxRooms: 2});
+
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Добавить помещение'}));
+    });
+
+    const add = screen.getByRole('button', {name: 'Добавить помещение'}) as HTMLButtonElement;
+    expect(add.disabled).toBe(true);
+
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Действия: Помещение 2'}));
+    });
+    await flush(() => {
+      fireEvent.click(screen.getByRole('menuitem', {name: 'Удалить помещение'}));
+    });
+
+    const back = screen.getByRole('button', {name: 'Добавить помещение'}) as HTMLButtonElement;
+    expect(back.disabled).toBe(false);
+  });
+});

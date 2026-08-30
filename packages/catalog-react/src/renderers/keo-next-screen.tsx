@@ -7,6 +7,7 @@ import {KeoNextConditionsSection} from './keo-next-conditions-section';
 import {KeoNextConditionsSlot} from './keo-next-conditions-slot';
 import {KeoNextFooter} from './keo-next-footer';
 import {KeoNextRoom} from './keo-next-room';
+import {MIN_EDITOR_ITEMS} from './min-editor-items';
 import {useKeoEditorNext} from './use-keo-editor-next';
 import type {KeoScreenProps} from './keo-next.types';
 
@@ -82,7 +83,7 @@ export function KeoNextScreen({props, sink}: KeoScreenProps) {
                 control={control}
                 room={room}
                 title={control.roomLabels[position]!}
-                removable={control.rooms.length > 1}
+                removable={control.rooms.length > MIN_EDITOR_ITEMS}
                 removeLabel={props.removeRoomLabel}
                 panelId={panelId}
                 computedLabel={props.computedNotes?.label}
@@ -93,7 +94,7 @@ export function KeoNextScreen({props, sink}: KeoScreenProps) {
 
           <KeoNextAddRoom
             label={props.addRoomLabel}
-            disabled={!control.canAddRoom}
+            state={control.addRoomState}
             onClick={control.addRoom}
           />
 

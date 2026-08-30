@@ -5,6 +5,7 @@ import type {
   KeoEditorProps,
   KeoEditorSection,
 } from '@ai37/a2ui-catalog-schemas';
+import type {AddItemState} from './add-item-state.types';
 import type {CalcFieldValues, CalcScreenState} from './calc-editor.types';
 
 /** Значение поля экрана: числовое отдаёт `number | null`, список — строку. */
@@ -52,7 +53,8 @@ export interface KeoControl {
   counter: string;
   /** Остались непросмотренные или незаполненные цели — кнопка «Далее». */
   pending: boolean;
-  canAddRoom: boolean;
+  /** Состояние кнопки «+ Добавить помещение»: видна, отключена или её нет. */
+  addRoomState: AddItemState;
   setOpen: (keys: readonly string[], scope: KeoOpenScope) => void;
   badgeFor: (key: string) => KeoBadgeTone | undefined;
   sourceFor: (roomId: string, field: string) => CalcFieldSource | undefined;
@@ -188,7 +190,7 @@ export interface KeoRoomMenuProps {
 
 export interface KeoAddRoomProps {
   label: string;
-  disabled: boolean;
+  state: AddItemState;
   onClick: () => void;
 }
 

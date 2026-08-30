@@ -18,6 +18,8 @@ import {keoDocumentKey} from './keo-document-key';
 import {keoNavigationTargets} from './keo-navigation-targets';
 import {keoOpenWithRoom} from './keo-open-with-room';
 import {keoRoomLabels} from './keo-room-labels';
+import {MIN_EDITOR_ITEMS} from './min-editor-items';
+import {resolveAddItemState} from './resolve-add-item-state';
 import {keoTargetRoom} from './keo-target-room';
 import type {KeoControl, KeoDocument, KeoRoomDraft, KeoSink} from './keo-next.types';
 
@@ -218,7 +220,11 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
       ]),
     ),
     pending,
-    canAddRoom: props.maxRooms === undefined || rooms.length < props.maxRooms,
+    addRoomState: resolveAddItemState({
+      count: rooms.length,
+      max: props.maxRooms,
+      minCount: MIN_EDITOR_ITEMS,
+    }),
 
     // Замена значения трогает только ключи своего списка: аккордеонов на экране
     // много, и общее множество иначе схлопывало бы соседний.
@@ -311,7 +317,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
     },
 
     removeRoom: roomId => {
-      if (rooms.length <= 1) return;
+      if (rooms.length <= MIN_EDITOR_ITEMS) return;
       const mine = (key: string) => key === roomId || keoTargetRoom(key) === roomId;
       const nextRooms = rooms.filter(room => room.id !== roomId);
 
