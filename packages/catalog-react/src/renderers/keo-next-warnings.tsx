@@ -1,4 +1,5 @@
 import React from 'react';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 
 /**
  * Пометки «! проверить»: правила геометрии из props и выход числа за границы
@@ -15,7 +16,7 @@ export function KeoNextWarnings({warnings}: {warnings: readonly string[]}) {
     <>
       {warnings.map(warning => (
         <span key={warning} className="a2ui-t--sub a2ui-t--warning">
-          ! проверить — {warning}
+          ! проверить — {renderLabelSubscripts(warning)}
         </span>
       ))}
     </>

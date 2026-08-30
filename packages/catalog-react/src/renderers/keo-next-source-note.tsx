@@ -1,6 +1,7 @@
 import React from 'react';
 import {SourceNote} from '../primitives';
 import {CALC_EDITED_LABEL} from './calc-field-source-label';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import type {KeoSourceNoteProps} from './keo-next.types';
 
 /**
@@ -23,5 +24,5 @@ export function KeoNextSourceNote({source, edited, hint}: KeoSourceNoteProps) {
     return null;
   }
 
-  return <span className="a2ui-t--sub a2ui-t--muted">{hint}</span>;
+  return <span className="a2ui-t--sub a2ui-t--muted">{renderLabelSubscripts(hint)}</span>;
 }
