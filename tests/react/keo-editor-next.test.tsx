@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, within} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
@@ -608,6 +608,77 @@ describe('KeoEditorNext: подпись условия при автосохра
     });
 
     expect(section('Условия').textContent).toContain('группа светового климата 3');
+  });
+});
+
+/**
+ * Проход по секциям обязан вести не только глазами: раскрытая цель получает
+ * каретку. Панели живут `keepMounted`, поэтому цель ищется по РАСКРЫТОЙ
+ * панели, а не по наличию узла в DOM.
+ */
+describe('KeoEditorNext: проход отдаёт каретку цели', () => {
+  const nextButton = () => screen.getByRole('button', {name: 'Далее'});
+
+  /** Раскрытая панель секции; свёрнутая стоит `hidden` и целью не бывает. */
+  function openPanel(title: string) {
+    const card = section(title).closest('.a2ui-card') as HTMLElement;
+
+    return card.querySelector<HTMLElement>('.a2ui-card__panel:not([hidden])');
+  }
+
+  /**
+   * Каретка проверяется КОНКРЕТНЫМ узлом, а не «где-то внутри панели»: поля
+   * ищутся по подписи, которую Base UI `Field` связывает с видимым контролом.
+   * Проверка «внутри» пропустила бы фокус на служебном узле — у числового поля
+   * скрытый `input` стоит в разметке раньше видимого.
+   */
+  const controlByLabel = (title: string, label: RegExp) =>
+    within(openPanel(title)!).getByLabelText(label);
+
+  it('каждый шаг ставит каретку на первый контрол раскрытой секции', async () => {
+    renderEditor(keoProps());
+
+    await flush(() => {
+      nextButton().focus();
+      fireEvent.click(nextButton());
+    });
+
+    expect(isOpen('Назначение')).toBe(true);
+    expect(document.activeElement).toBe(controlByLabel('Назначение', /Назначение помещения/));
+
+    await flush(() => {
+      fireEvent.click(nextButton());
+    });
+
+    expect(isOpen('Геометрия помещения')).toBe(true);
+    expect(document.activeElement).toBe(controlByLabel('Геометрия помещения', /d_п/));
+  });
+
+  it('шаг отправки каретку не двигает', async () => {
+    renderEditor(keoProps());
+
+    await walkThroughSections();
+    const submit = screen.getByRole('button', {name: 'Рассчитать'});
+
+    await flush(() => {
+      submit.focus();
+      fireEvent.click(submit);
+    });
+
+    expect(document.activeElement).toBe(submit);
+  });
+
+  it('раскрытие заголовком не уводит каретку из поля', async () => {
+    renderEditor(keoProps());
+    const city = screen.getByPlaceholderText('Город');
+
+    await flush(() => {
+      city.focus();
+    });
+    await openSection(ROOM);
+
+    expect(isOpen(ROOM)).toBe(true);
+    expect(document.activeElement).toBe(city);
   });
 });
 

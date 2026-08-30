@@ -12,6 +12,7 @@ import {formatCalcSourceCounter} from './format-calc-source-counter';
 import {isRevealedField} from './is-revealed-field';
 import {resolveKeoComputedNote} from './resolve-keo-computed-note';
 import {seedCalcValues} from './seed-calc-values';
+import {useWalkthroughFocus} from './use-walkthrough-focus';
 import {findMissingKeoTargets} from './find-missing-keo-targets';
 import {KEO_CONDITIONS_KEY} from './keo-conditions-key';
 import {keoDocumentKey} from './keo-document-key';
@@ -66,6 +67,10 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
       open: keoOpenWithRoom(initial),
     };
   };
+
+  // Проход ведёт не только глазами: цель шага получает каретку (change
+  // `next-walkthrough-focus`).
+  const walkthroughFocus = useWalkthroughFocus<string>();
 
   const [state, setState] = React.useState(() => seed(props));
   const [touched, setTouched] = React.useState<ReadonlySet<string>>(() => new Set());
@@ -350,7 +355,11 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
 
       // «Далее» — структурный шаг: черновик уходит сразу, без паузы.
       sendDraftNow();
+      // Каретка переедет в цель эффектом: сейчас её панель ещё скрыта.
+      walkthroughFocus.aimAt(target);
       replaceOpen(keoOpenWithRoom(target));
     },
+
+    bindSection: walkthroughFocus.bindSection,
   };
 }
