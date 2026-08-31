@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
+from .keo_drawings import KeoDrawings
 from .shared import StrictModel
 
 
@@ -78,4 +79,6 @@ class KeoReportProps(StrictModel):
         default=None, min_length=1
     )
     inputs: KeoReportInputs
+    # Модель чертежей Данилюка числами; нет поля — секции «Чертежи» нет.
+    drawings: KeoDrawings = None
     protocol: KeoReportProtocol = None

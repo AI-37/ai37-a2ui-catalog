@@ -269,6 +269,211 @@
           ],
           "additionalProperties": false
         },
+        "drawings": {
+          "type": "object",
+          "properties": {
+            "section": {
+              "type": "object",
+              "properties": {
+                "roomDepth": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 200
+                },
+                "roomHeight": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 200
+                },
+                "wallThickness": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 200
+                },
+                "sillHeight": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 200
+                },
+                "windowTop": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 200
+                },
+                "point": {
+                  "type": "object",
+                  "properties": {
+                    "lt": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 200
+                    },
+                    "height": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 200
+                    }
+                  },
+                  "required": [
+                    "lt",
+                    "height"
+                  ],
+                  "additionalProperties": false
+                },
+                "alphaDeg": {
+                  "type": "number",
+                  "minimum": -89.9,
+                  "maximum": 89.9
+                },
+                "betaDeg": {
+                  "type": "number",
+                  "minimum": -89.9,
+                  "maximum": 89.9
+                },
+                "opposing": {
+                  "type": "object",
+                  "properties": {
+                    "distance": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 200
+                    },
+                    "height": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 200
+                    }
+                  },
+                  "required": [
+                    "distance",
+                    "height"
+                  ],
+                  "additionalProperties": false
+                },
+                "skyVisible": {
+                  "type": "boolean"
+                },
+                "n1": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "required": [
+                "roomDepth",
+                "roomHeight",
+                "wallThickness",
+                "sillHeight",
+                "windowTop",
+                "point",
+                "alphaDeg",
+                "skyVisible"
+              ],
+              "additionalProperties": false
+            },
+            "plan": {
+              "type": "object",
+              "properties": {
+                "roomWidth": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 200
+                },
+                "roomDepth": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 200
+                },
+                "wallThickness": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 200
+                },
+                "window": {
+                  "type": "object",
+                  "properties": {
+                    "width": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 200
+                    },
+                    "offset": {
+                      "type": "number",
+                      "minimum": -200,
+                      "maximum": 200
+                    }
+                  },
+                  "required": [
+                    "width",
+                    "offset"
+                  ],
+                  "additionalProperties": false
+                },
+                "point": {
+                  "type": "object",
+                  "properties": {
+                    "lt": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 200
+                    }
+                  },
+                  "required": [
+                    "lt"
+                  ],
+                  "additionalProperties": false
+                },
+                "thetaDeg": {
+                  "type": "number",
+                  "minimum": -89.9,
+                  "maximum": 89.9
+                },
+                "fanRayAnglesDeg": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 89.9
+                  },
+                  "minItems": 1,
+                  "maxItems": 49
+                },
+                "psi1Deg": {
+                  "type": "number",
+                  "minimum": -89.9,
+                  "maximum": 89.9
+                },
+                "psi2Deg": {
+                  "type": "number",
+                  "minimum": -89.9,
+                  "maximum": 89.9
+                },
+                "n2": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              },
+              "required": [
+                "roomWidth",
+                "roomDepth",
+                "wallThickness",
+                "window",
+                "point",
+                "thetaDeg",
+                "fanRayAnglesDeg",
+                "psi1Deg",
+                "psi2Deg"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "section",
+            "plan"
+          ],
+          "additionalProperties": false
+        },
         "protocol": {
           "type": "object",
           "properties": {

@@ -3,6 +3,7 @@ import type {KeoReportProps} from '@ai37/a2ui-catalog-schemas';
 import {Card, KIT_SCOPE, KitStyles} from '../primitives';
 import {KeoReportNextRecommendations} from './keo-report-next-recommendations';
 import {KeoReportNextRooms} from './keo-report-next-rooms';
+import {KeoDrawingsSection} from './keo-drawing';
 import {ReportNextAssumptions} from './report-next-assumptions';
 import {ReportNextInputsCard} from './report-next-inputs-card';
 import {ReportNextProtocolCard} from './report-next-protocol';
@@ -14,6 +15,9 @@ import type {ReportNextActionSink} from './report-next.types';
  * у теплотеха и лифтов: вердикт, исходные данные и протокол здесь не
  * переписаны, а взяты готовыми; допущения — общая заметка. Своих у КЕО две:
  * «Что изменить» карточками вариантов и «Помещения».
+ *
+ * Шестая появляется только с моделью чертежей: «Чертежи» фолдом — разрез и
+ * план Данилюка. Без `drawings` секции нет, и карточка та же, что была.
  *
  * Отдельно от рендерера по той же причине, что у двух других отчётов:
  * страница песочницы ставит его без a2ui-хоста, наружу — один `onAction`.
@@ -41,6 +45,7 @@ export function KeoReportNextScreen({
         </div>
       </Card>
 
+      <KeoDrawingsSection drawings={props.drawings} />
       <ReportNextInputsCard inputs={props.inputs} onAction={onAction} />
       <ReportNextProtocolCard protocol={props.protocol} />
     </div>
