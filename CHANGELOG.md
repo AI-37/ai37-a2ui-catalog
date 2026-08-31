@@ -4,6 +4,26 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.32.0] - 2026-08-31
+
+### Added
+
+- **Протокол отчёта КЕО принимает `downloadUrl` — «Скачать» даёт .md и .docx**
+  (change `keo-report-download-url`). КЕО был единственным из трёх отчётов,
+  чей протокол нельзя унести из чата: рендерер уже общий с теплотехом и
+  лифтами, но `keoReportProtocolSchema` знала только `downloadFileName` /
+  `downloadContent`, а схема `strict` — агент физически не мог прислать URL
+  своей ручки.
+
+  Поле дословно как у `thermalReportProtocolSchema`. **Кода рендерера change
+  не добавляет** — путь `downloadUrl` давно написан общими
+  `report-next-download` / `report-next-url-items`; новое здесь только то,
+  что третий отчёт на него наконец попадает. Blob-поля остаются fallback'ом
+  для старых наполнений.
+
+  Зеркало Pydantic обновлено вместе со схемой — у КЕО оно есть (в отличие от
+  теплотеха), и тест сверки JSON Schema без него бы упал.
+
 ## [0.31.0] - 2026-08-31
 
 ### Added

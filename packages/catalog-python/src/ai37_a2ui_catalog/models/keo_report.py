@@ -67,6 +67,8 @@ class KeoReportProtocol(StrictModel):
     # Без имени файла кнопки «Скачать» нет.
     downloadFileName: str = Field(default=None, min_length=1, max_length=120)
     downloadContent: str = Field(default=None, min_length=1, max_length=120000)
+    # Относительный URL ручки агента для «Скачать» — меню форматов .md/.docx.
+    downloadUrl: str = Field(default=None, min_length=1, max_length=2000)
 
 
 class KeoReportProps(StrictModel):
