@@ -224,4 +224,40 @@ describe('KeoReportNext', () => {
     expect(container.textContent).toContain('Протокол расчёта');
     expect(screen.queryAllByRole('button', {name: /^Скачать/})).toHaveLength(1);
   });
+  it('протокол ручкой агента — два формата, как у теплотеха и лифтов', async () => {
+    // Кода рендерера change не добавляет: путь `downloadUrl` уже написан
+    // общими `report-next-download` / `report-next-url-items`. Тест
+    // проверяет, что третий отчёт наконец на него попадает — до поля схема
+    // `strict` физически не давала агенту прислать URL.
+    const props = readProps('keo-report-fail.json');
+    const protocol = {...(props.protocol as Record<string, unknown>)};
+    delete protocol.downloadFileName;
+    delete protocol.downloadContent;
+    protocol.downloadUrl = '/api/agent-resource?resource=keo-report&id=r1';
+
+    renderReport('KeoReportNext', {...props, protocol});
+
+    const trigger = screen.getByRole('button', {name: /^Скачать/});
+    await flush(() => {
+      trigger.focus();
+      fireEvent.keyDown(trigger, {key: 'ArrowDown'});
+    });
+
+    expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([
+      'Markdown (.md)',
+      'Word (.docx)',
+    ]);
+  });
+
+  it('без downloadUrl и без имени файла триггера «Скачать» нет', () => {
+    const props = readProps('keo-report-fail.json');
+    const protocol = {...(props.protocol as Record<string, unknown>)};
+    delete protocol.downloadFileName;
+    delete protocol.downloadContent;
+
+    const {container} = renderReport('KeoReportNext', {...props, protocol});
+
+    expect(container.textContent).toContain('Протокол расчёта');
+    expect(screen.queryByRole('button', {name: /^Скачать/})).toBeNull();
+  });
 });

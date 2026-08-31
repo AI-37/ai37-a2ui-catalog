@@ -89,6 +89,14 @@ export const keoReportProtocolSchema = z
     downloadFileName: z.string().min(1).max(120).optional(),
     /** Полный протокол (состав таблиц А.1/Б.1/Б.2 ГОСТ Р 21.514) формирует агент. */
     downloadContent: z.string().min(1).max(120000).optional(),
+    /**
+     * Относительный URL ручки агента (`/api/agent-resource?resource=…`) для
+     * «Скачать»: при наличии рендерер показывает меню форматов (`.md` —
+     * прямая ссылка, `.docx` — конверт-сервис chat-backend). Blob-поля выше
+     * остаются fallback'ом для старых наполнений без URL. Дословно как у
+     * `thermalReportProtocolSchema` — третий отчёт получает ту же ручку.
+     */
+    downloadUrl: z.string().min(1).max(2000).optional(),
   })
   .strict();
 
