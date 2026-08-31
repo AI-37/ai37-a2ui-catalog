@@ -16,14 +16,14 @@ function readProps(fileName: string) {
   ).props as Record<string, unknown>;
 }
 
-function renderReport(props: Record<string, unknown>) {
+function renderReport(props: Record<string, unknown>, component = 'KeoReportNext') {
   const messages = [
     {version: 'v0.9', createSurface: {surfaceId: 'demo-surface', catalogId: CATALOG_ID}},
     {
       version: 'v0.9',
       updateComponents: {
         surfaceId: 'demo-surface',
-        components: [{id: 'root', component: 'KeoReportNext', ...props}],
+        components: [{id: 'root', component, ...props}],
       },
     },
   ] as unknown as A2uiMessage[];
@@ -177,6 +177,19 @@ describe('KeoReportNext — чертежи Данилюка', () => {
     expect(section.querySelectorAll('polygon')).toHaveLength(1);
     expect(sectionTexts.some(text => text!.startsWith('β'))).toBe(false);
     expect(sectionTexts).toContain('α = 20,0° — верх проёма');
+  });
+
+  it('старый KeoReport с моделью чертежей рендерится как прежде', () => {
+    // Схема у двух рендереров общая намеренно («identical props» — весь смысл
+    // семейства *Next), поэтому `drawings` доезжает и до старого рендерера.
+    // Он их не рисует — и это решение, а не случайность: тест пришпиливает
+    // поведение, чтобы «молча игнорирует» не превратилось в «однажды упал».
+    // Куда смотреть агенту, сказано в `description` определения KeoReport.
+    const {container} = renderReport(readProps('keo-report-drawings.json'), 'KeoReport');
+
+    expect(screen.getByText('КЕО — 0,38 % при норме 0,50 %')).toBeTruthy();
+    expect(screen.queryByText('Чертежи')).toBeNull();
+    expect(container.querySelectorAll('svg[aria-label]')).toHaveLength(0);
   });
 
   it('слепок обеих проекций', () => {
