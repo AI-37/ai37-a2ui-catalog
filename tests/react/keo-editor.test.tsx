@@ -50,8 +50,7 @@ describe('KeoEditor', () => {
   it('renders read-only conditions and the room tab', () => {
     const {container} = renderEditor(readProps());
 
-    expect(screen.getByText('Тюмень · группа светового климата 1 (СП 52, прил. Е)')).toBeTruthy();
-    expect(screen.getByText('0,5 % — жилые комнаты и кухни')).toBeTruthy();
+    expect(screen.getByText('Тюмень')).toBeTruthy();
     expect(screen.getByRole('tab', {name: 'Жилая комната'})).toBeTruthy();
     // Редактируемого поля «рабочая плоскость» в компоненте нет намеренно.
     expect(container.textContent).not.toContain('Рабочая плоскость');
@@ -147,15 +146,28 @@ describe('KeoEditor', () => {
   });
 
   it('collapses the defaults section into a summary of accepted values', () => {
-    const {container} = renderEditor(readProps());
+    // Секция `advanced` — механизм схемы, а не свойство фикстуры: в наполнении
+    // КЕО коэффициенты разложены по своим секциям, поэтому props собираются здесь.
+    const props = readProps() as any;
+    props.roomTemplate.sections = [
+      ...props.roomTemplate.sections,
+      {
+        key: 'defaults',
+        title: 'Коэффициенты приняты по умолчанию',
+        advanced: true,
+        fields: [{name: 'kz', label: 'Кз', type: 'number', shortLabel: 'Кз', defaultValue: 1.2}],
+      },
+    ];
+    props.rooms = props.rooms.map((room: any) => ({...room, values: {...room.values, kz: 1.2}}));
+    const {container} = renderEditor(props);
 
     const banner = screen.getByRole('button', {name: /Коэффициенты приняты по умолчанию/});
-    expect(banner.textContent).toContain('MF 0.83');
+    expect(banner.textContent).toContain('Кз 1.2');
     // Свёрнутая секция не рендерит контролы.
-    expect(container.querySelector('[name="mf"]')).toBeNull();
+    expect(container.querySelector('[name="kz"]')).toBeNull();
 
     fireEvent.click(banner);
 
-    expect(field(container, 'mf')).toBeTruthy();
+    expect(field(container, 'kz')).toBeTruthy();
   });
 });

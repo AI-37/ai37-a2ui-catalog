@@ -326,6 +326,67 @@ describe('LiftEditorNext: подписи источников', () => {
   });
 });
 
+/**
+ * Тот же проход, что у `KeoEditorNext`, и то же требование: цель шага
+ * получает каретку (change next-walkthrough-focus). Панели живут
+ * `keepMounted`, поэтому цель ищется по РАСКРЫТОЙ панели.
+ */
+describe('LiftEditorNext: проход отдаёт каретку цели', () => {
+  const nextButton = () => screen.getByRole('button', {name: 'Далее'});
+
+  function openPanel(title: string) {
+    return sectionPanel(title).querySelector<HTMLElement>('.a2ui-card__panel:not([hidden])');
+  }
+
+  it('шаг прохода ставит каретку на первый контрол раскрытой секции', async () => {
+    renderEditor(groupProps());
+
+    await flush(() => {
+      nextButton().focus();
+      fireEvent.click(nextButton());
+    });
+
+    expect(section('Лифт').getAttribute('aria-expanded')).toBe('true');
+    // Каретка проверяется конкретным узлом: поле ищется по подписи, которую
+    // Base UI `Field` связывает с ВИДИМЫМ контролом.
+    expect(document.activeElement).toBe(within(openPanel('Лифт')!).getByLabelText(/Q — грузоподъёмность/));
+  });
+
+  it('шаг отправки каретку не двигает', async () => {
+    renderEditor(groupProps());
+
+    await flush(() => {
+      fireEvent.click(nextButton());
+    });
+    const submit = screen.getByRole('button', {name: 'Рассчитать'});
+
+    await flush(() => {
+      submit.focus();
+      fireEvent.click(submit);
+    });
+
+    expect(document.activeElement).toBe(submit);
+  });
+
+  it('раскрытие заголовком не уводит каретку из поля', async () => {
+    renderEditor(perLiftProps());
+
+    await flush(() => {
+      fieldIn('Здание', 'N').focus();
+    });
+    // Каретку запоминаем ПОСЛЕ фокуса: у числового поля Base UI держит свой
+    // служебный input и переводит фокус с него на видимый.
+    const caret = document.activeElement;
+
+    await flush(() => {
+      openSection('Лифт 1');
+    });
+
+    expect(section('Лифт 1').getAttribute('aria-expanded')).toBe('true');
+    expect(document.activeElement).toBe(caret);
+  });
+});
+
 describe('LiftEditorNext: клавиатура и aria', () => {
   it('секция — кнопка с aria-expanded и aria-controls на свою панель', () => {
     const {container} = renderEditor(perLiftProps());
@@ -366,5 +427,47 @@ describe('LiftEditorNext: клавиатура и aria', () => {
     const option = screen.getAllByRole('option')[0]!;
     expect(container.contains(option)).toBe(false);
     expect(document.body.contains(option)).toBe(true);
+  });
+});
+
+/**
+ * То же правило, что у `KeoEditorNext`: кнопка добавления реагирует на вид
+ * предела, а не на значение `maxLifts` (change next-add-item-limit).
+ */
+/** `maxLifts` живёт в конфиге активной методики, а не в корне props. */
+function withMaxLifts(props: Record<string, unknown>, maxLifts: number) {
+  const configs = (props.methodConfigs as Array<Record<string, unknown>>).map(config =>
+    config.method === props.method ? {...config, maxLifts} : config,
+  );
+  return {...props, methodConfigs: configs};
+}
+
+describe('LiftEditorNext: предел лифтов', () => {
+  it('предела нет — кнопка доступна', () => {
+    renderEditor(perLiftProps());
+
+    const add = screen.getByRole('button', {name: 'Добавить лифт'}) as HTMLButtonElement;
+    expect(add.disabled).toBe(false);
+  });
+
+  it('предел в один лифт — кнопки нет в разметке', () => {
+    const props = withMaxLifts(perLiftProps(), 1);
+    renderEditor({...props, lifts: (props.lifts as unknown[]).slice(0, 1)});
+
+    expect(screen.queryByRole('button', {name: 'Добавить лифт'})).toBeNull();
+  });
+
+  it('предел достигнут, но удаление возможно — кнопка на месте и отключена', async () => {
+    renderEditor({...withMaxLifts(perLiftProps(), 2), draftAction: DRAFT_ACTION});
+
+    const add = screen.getByRole('button', {name: 'Добавить лифт'}) as HTMLButtonElement;
+    expect(add.disabled).toBe(true);
+
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Удалить лифт 2'}));
+    });
+
+    const back = screen.getByRole('button', {name: 'Добавить лифт'}) as HTMLButtonElement;
+    expect(back.disabled).toBe(false);
   });
 });

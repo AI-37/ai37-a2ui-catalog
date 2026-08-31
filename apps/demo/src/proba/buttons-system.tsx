@@ -81,7 +81,7 @@ const cellStyle: React.CSSProperties = {
   alignContent: 'start',
   padding: '12px 14px',
   borderRadius: 10,
-  background: '#f8fafc',
+  background: 'light-dark(#f8fafc, #141413)',
 };
 
 /* align-items: center — образцы разного кегля стоят на одной оси. */

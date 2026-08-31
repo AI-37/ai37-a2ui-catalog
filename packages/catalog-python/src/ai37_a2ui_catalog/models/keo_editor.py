@@ -77,6 +77,12 @@ class KeoEditorProps(StrictModel):
     computedNotes: KeoComputedNotes = None
     validationRules: list[KeoValidationRule] = Field(default=None, max_length=8)
     sourcesLabel: str = Field(default=None, min_length=1, max_length=80)
+    # Подпись первого режима кнопки подвала («Далее»); без неё кнопка одна.
+    nextLabel: str = Field(default=None, min_length=1, max_length=80)
+    # Заголовок группы условий; без него группа стоит блоком без раскрывашки.
+    conditionsLabel: str = Field(default=None, min_length=1, max_length=120)
+    # Имя action'а автосохранения черновика; без него наружу уходит только submit.
+    draftAction: str = Field(default=None, min_length=1, max_length=120)
     submit: CalcSubmit
 
     @model_validator(mode="after")

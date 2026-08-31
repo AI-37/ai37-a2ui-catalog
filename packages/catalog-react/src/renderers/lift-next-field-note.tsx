@@ -1,5 +1,6 @@
 import React from 'react';
 import {SourceNote} from '../primitives';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import type {LiftNextFieldNoteProps} from './lift-next.types';
 
 /**
@@ -16,5 +17,5 @@ export function LiftNextFieldNote({source, hint}: LiftNextFieldNoteProps) {
     return null;
   }
 
-  return <span className="a2ui-t--sub a2ui-t--muted">{hint}</span>;
+  return <span className="a2ui-t--sub a2ui-t--muted">{renderLabelSubscripts(hint)}</span>;
 }

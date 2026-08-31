@@ -151,7 +151,7 @@ export function LiftNextScreen({props, sink}: {props: LiftEditorProps; sink: Lif
           <LiftNextAddButton
             perLift={perLift}
             label={props.addLabel}
-            disabled={!control.canAddLift}
+            state={control.addLiftState}
             onClick={control.addLift}
           />
 

@@ -106,6 +106,19 @@ export const KIT_FORM_CSS = `
   padding: 8px 0;
 }
 
+/* Значение пришло готовым — из проекта или посчитанным агентом: та же коробка
+   контрола, залитая и без рамки. Не новая идея: ровно так с первого макета
+   живёт .a2ui-ce-control--project в ConstructionsEditor, в набор заливку
+   просто не перенесли. Читать можно, править незачем — и в ряду белых полей
+   видно, что это значение не ваше.
+
+   Два класса, чтобы перебить .a2ui-control: правила равной специфичности
+   разрешаются порядком, а он зависит от порядка слоёв в KitStyles. */
+.a2ui-kit .a2ui-control.a2ui-control--ready {
+  border-color: transparent;
+  background: var(--a2ui-control-surface-ready);
+}
+
 .a2ui-kit .a2ui-field__index {
   font-size: 0.85em;
   vertical-align: sub;

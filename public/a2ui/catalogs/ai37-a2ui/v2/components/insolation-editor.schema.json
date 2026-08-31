@@ -31,13 +31,58 @@
               },
               "value": {
                 "type": "string",
-                "minLength": 1,
                 "maxLength": 200
               },
               "note": {
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "select",
+                  "lookup"
+                ]
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "minItems": 1
+              },
+              "referenceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "project",
+                      "question",
+                      "suggested",
+                      "calculated",
+                      "assumption"
+                    ]
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "source"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [

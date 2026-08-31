@@ -6,6 +6,11 @@ import {POPUP_TOKEN_NAMES} from './kit-tokens';
  * Токены объявлены на нём самом — попап уезжает в портал и слоя поверхности не
  * видит. Набор — подмножество общего слоя (`POPUP_TOKEN_NAMES`), значения
  * берутся из того же массива, поэтому разойтись им нечем.
+ *
+ * Тему попап тоже не видит по той же причине: `color-scheme` наследуется, а
+ * предка с темой у портального узла нет. Схему кладёт на узел `usePopupScheme`
+ * от якоря — вторых значений темы это не заводит, приезжает только то, как
+ * читать уже объявленные пары.
  */
 export const KIT_POPUP_CSS = `
 .a2ui-popup {
@@ -18,7 +23,7 @@ ${declareTokens(POPUP_TOKEN_NAMES)}
   border: 1px solid var(--a2ui-card-border);
   border-radius: 10px;
   background: var(--a2ui-card-surface-plain);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 24px var(--a2ui-shadow-popup);
   font-family: var(--a2ui-font);
   color: var(--a2ui-text-color);
   font-size: var(--a2ui-text-size-body);

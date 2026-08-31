@@ -1,5 +1,6 @@
 import React from 'react';
 import type {KeoReportAction} from '@ai37/a2ui-catalog-schemas';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import type {KeoReportOnAction} from './keo-report.types';
 
 const VARIANT_CLASS = {
@@ -26,7 +27,7 @@ export function KeoReportActionButton({
       data-action={action.name}
       onClick={() => onAction(action)}
     >
-      {action.label}
+      {renderLabelSubscripts(action.label)}
     </button>
   );
 }

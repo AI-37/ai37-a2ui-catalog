@@ -4,6 +4,7 @@ import type {LookupOption} from '@ai37/a2ui-catalog-schemas';
 import {useLookupSuggest} from '../renderers/use-lookup-suggest';
 import {findOptionByLabel} from './find-option-by-label';
 import {LookupOptionContent} from './lookup-option-content';
+import {usePopupScheme} from './use-popup-scheme';
 import type {LookupProps} from './lookup.types';
 
 /**
@@ -23,6 +24,7 @@ export function Lookup({
   onTextChange,
   onPick,
 }: LookupProps) {
+  const {anchorRef, popupRef} = usePopupScheme<HTMLInputElement>();
   const [selected, setSelected] = React.useState<LookupOption | null>(null);
   const [dismissed, setDismissed] = React.useState(false);
   const {options, loading, queried, handleInputText, closeOptions} = useLookupSuggest({
@@ -72,12 +74,16 @@ export function Lookup({
       // отдельным скрытым полем, как в нашем LookupCombobox.
       itemToStringValue={(option: LookupOption) => option.label}
     >
-      <Autocomplete.Input className="a2ui-control a2ui-t--body" placeholder={placeholder} />
+      <Autocomplete.Input
+        ref={anchorRef}
+        className="a2ui-control a2ui-t--body"
+        placeholder={placeholder}
+      />
       <input type="hidden" name={name} value={selected?.value ?? ''} />
 
       <Autocomplete.Portal>
         <Autocomplete.Positioner sideOffset={4}>
-          <Autocomplete.Popup className="a2ui-popup a2ui-popup--anchored">
+          <Autocomplete.Popup ref={popupRef} className="a2ui-popup a2ui-popup--anchored">
             <Autocomplete.Status className="a2ui-popup__status">
               {loading ? 'Ищем…' : null}
             </Autocomplete.Status>
