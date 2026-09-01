@@ -4,6 +4,21 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.34.0] - 2026-09-01
+
+### Added
+
+- **`KeoEditor`/`KeoEditorNext`: optional `draftUrl` — черновик REST-каналом**
+  (спайк `keo-draft-rest-channel` агента КЕО, план AI-37/docs#264). При заданном
+  `draftUrl` черновик уезжает `fetch` POST'ом по цепочке `/api/agent-resource`
+  вместо диалогового `dispatchAction` — пауза ввода не поднимает индикатор
+  выполнения run'а AG-UI. Ответ агента несёт `notes` по имени условия (подпись
+  светового климата) — применяются локально, эха формы нет. На монтировании GET
+  того же ресурса сеет форму сохранённым черновиком — иначе перезагрузка теряла
+  бы его (артефакты истории перезаписывал только AG-UI-путь). `draftAction`
+  остаётся путём отката: без URL канал прежний, диалоговый. Ключ аддитивный,
+  прежние эмитенты не затронуты.
+
 ## [0.33.0] - 2026-08-31
 
 ### Changed
