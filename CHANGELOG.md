@@ -4,6 +4,17 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.34.2] - 2026-09-01
+
+### Changed
+
+- **`draftUrl` — строго относительный путь и только `KeoEditorNext`** (по
+  ревью PR #65). Схема ограничивает значение одним ведущим `/` (абсолютный и
+  протокол-относительный `//host` URL отклоняются — значение уходит в fetch,
+  чужой origin запрещён); поддержка канала явно ограничена `KeoEditorNext` —
+  прежний `KeoEditor` ключ игнорирует, устаревший рендерер канал не получает.
+  Плюс тест защитной ветви: поздний ответ GET посева не затирает живой ввод.
+
 ## [0.34.1] - 2026-09-01
 
 ### Fixed
@@ -21,7 +32,9 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
 
 ### Added
 
-- **`KeoEditor`/`KeoEditorNext`: optional `draftUrl` — черновик REST-каналом**
+- **`KeoEditorNext`: optional `draftUrl` — черновик REST-каналом** (ключ в
+  общей схеме, но канал реализует только Next; прежний `KeoEditor` его
+  игнорирует — уточнено в 0.34.2)
   (спайк `keo-draft-rest-channel` агента КЕО, план AI-37/docs#264). При заданном
   `draftUrl` черновик уезжает `fetch` POST'ом по цепочке `/api/agent-resource`
   вместо диалогового `dispatchAction` — пауза ввода не поднимает индикатор

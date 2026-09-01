@@ -487,7 +487,8 @@
         "draftUrl": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 500
+          "maxLength": 500,
+          "pattern": "^\\/(?:$|[^\\/])"
         },
         "submit": {
           "type": "object",

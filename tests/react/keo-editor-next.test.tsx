@@ -939,6 +939,37 @@ describe('KeoEditorNext: черновик REST-каналом (спайк keo-dr
     expect(section('Помещение 1').getAttribute('aria-expanded')).toBe(wasOpen);
   });
 
+  it('поздний ответ GET посева не затирает живой ввод', async () => {
+    // Защитная ветвь activeRef: пользователь начал печатать (и POST уже ушёл),
+    // пока GET посева ещё в полёте — его поздний ответ игнорируется.
+    let resolveSeed!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? Promise.resolve(jsonResponse({notes: {}}))
+        : new Promise<Response>(resolve => {
+            resolveSeed = resolve;
+          }),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS); // POST ушёл — activeRef взведён
+
+    await act(async () => {
+      resolveSeed(
+        jsonResponse({
+          draft: {conditions: {region: 'Тюмень'}, rooms: [{name: 'Помещение 1', values: {depth: 9.9}}]},
+        }),
+      );
+    });
+    await tick(0);
+
+    expect(fieldIn(root, 'depth').value).toBe('6');
+  });
+
   it('после перезагрузки форма сеется сохранённым черновиком из GET', async () => {
     fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
       init?.method === 'POST'
