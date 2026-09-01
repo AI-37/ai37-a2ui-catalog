@@ -61,6 +61,15 @@ from .keo_editor import (
     KeoValidationRule,
     KeoValidationRuleKind,
 )
+from .keo_drawings import (
+    KeoDrawingOpposing,
+    KeoDrawingPlanPoint,
+    KeoDrawingPoint,
+    KeoDrawings,
+    KeoDrawingWindow,
+    KeoPlanDrawing,
+    KeoSectionDrawing,
+)
 from .keo_report import (
     KeoReportAction,
     KeoReportInputChip,
@@ -173,6 +182,12 @@ __all__ = [
     "KeoEditorRoom",
     "KeoEditorRoomTemplate",
     "KeoEditorSection",
+    "KeoDrawingOpposing",
+    "KeoDrawingPlanPoint",
+    "KeoDrawingPoint",
+    "KeoDrawingWindow",
+    "KeoDrawings",
+    "KeoPlanDrawing",
     "KeoReportAction",
     "KeoReportInputChip",
     "KeoReportInputGroup",
@@ -182,6 +197,7 @@ __all__ = [
     "KeoReportRecommendation",
     "KeoReportRoom",
     "KeoReportVerdict",
+    "KeoSectionDrawing",
     "KeoValidationRule",
     "KeoValidationRuleKind",
     "LatexFormulaProps",

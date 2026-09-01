@@ -32,6 +32,10 @@ export * from './renderers/keo-next-screen';
 export * from './renderers/keo-report';
 export * from './renderers/keo-report-next';
 export * from './renderers/keo-report-next-screen';
+// Блок чертежей Данилюка без отчёта: витрина ревизии ставит его на страницу с
+// живой формой параметров. Компонентом КАТАЛОГА он при этом не становится —
+// в catalog.ts не зарегистрирован (Non-goals change'а keo-report-drawings).
+export {KeoDrawingsSection} from './renderers/keo-drawing';
 export * from './renderers/insolation-editor';
 export * from './renderers/insolation-report';
 export * from './renderers/lift-report';

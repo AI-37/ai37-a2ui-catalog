@@ -43,6 +43,10 @@ def load_fixture(group: str, name: str):
         ("keo-report-pass.json", "KeoReport"),
         # Новый рендерер на той же схеме props (change keo-report-next).
         ("keo-report-fail.json", "KeoReportNext"),
+        # Модель чертежей Данилюка — аддитивное поле `drawings`
+        # (change keo-report-drawings): небо видно и небо перекрыто.
+        ("keo-report-drawings.json", "KeoReportNext"),
+        ("keo-report-drawings-blocked.json", "KeoReportNext"),
         ("insolation-editor.json", "InsolationEditor"),
         ("insolation-report-pass.json", "InsolationReport"),
         ("insolation-report-fail.json", "InsolationReport"),

@@ -9826,7 +9826,7 @@
       }
     },
     "KeoReport": {
-      "description": "A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a \"what to change\" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed \"assumed by the system — check it\" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent.",
+      "description": "A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a \"what to change\" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed \"assumed by the system — check it\" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent. The optional `drawings` model is NOT rendered by this renderer — for the Danilyuk section/plan sheets emit `KeoReportNext`.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-report.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/KeoReport",
@@ -10099,6 +10099,211 @@
                 ],
                 "additionalProperties": false
               },
+              "drawings": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "object",
+                    "properties": {
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomHeight": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "sillHeight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 200
+                      },
+                      "windowTop": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "alphaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "betaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "opposing": {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "distance",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "skyVisible": {
+                        "type": "boolean"
+                      },
+                      "n1": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomDepth",
+                      "roomHeight",
+                      "wallThickness",
+                      "sillHeight",
+                      "windowTop",
+                      "point",
+                      "alphaDeg",
+                      "skyVisible"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "plan": {
+                    "type": "object",
+                    "properties": {
+                      "roomWidth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "window": {
+                        "type": "object",
+                        "properties": {
+                          "width": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "offset": {
+                            "type": "number",
+                            "minimum": -200,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "width",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "thetaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "fanRayAnglesDeg": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 89.9
+                        },
+                        "minItems": 1,
+                        "maxItems": 49
+                      },
+                      "psi1Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "psi2Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "n2": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomWidth",
+                      "roomDepth",
+                      "wallThickness",
+                      "window",
+                      "point",
+                      "thetaDeg",
+                      "fanRayAnglesDeg",
+                      "psi1Deg",
+                      "psi2Deg"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "section",
+                  "plan"
+                ],
+                "additionalProperties": false
+              },
               "protocol": {
                 "type": "object",
                 "properties": {
@@ -10121,6 +10326,11 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 120000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
                   }
                 },
                 "required": [
@@ -10140,7 +10350,7 @@
       }
     },
     "KeoReportNext": {
-      "description": "The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent) and the protocol download is a menu. Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`.",
+      "description": "The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent) and the protocol download is a menu. Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`. It also renders the optional `drawings` model — the Danilyuk section and plan of the room as numbers (room sizes, opening, calculation point, angles, sector edges, n1/n2 and the graph II fan azimuths) — as a collapsed \"Чертежи\" fold; send numbers in metres and degrees, never raw SVG.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-report-next.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/KeoReportNext",
@@ -10413,6 +10623,211 @@
                 ],
                 "additionalProperties": false
               },
+              "drawings": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "object",
+                    "properties": {
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomHeight": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "sillHeight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 200
+                      },
+                      "windowTop": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "alphaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "betaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "opposing": {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "distance",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "skyVisible": {
+                        "type": "boolean"
+                      },
+                      "n1": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomDepth",
+                      "roomHeight",
+                      "wallThickness",
+                      "sillHeight",
+                      "windowTop",
+                      "point",
+                      "alphaDeg",
+                      "skyVisible"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "plan": {
+                    "type": "object",
+                    "properties": {
+                      "roomWidth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "window": {
+                        "type": "object",
+                        "properties": {
+                          "width": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "offset": {
+                            "type": "number",
+                            "minimum": -200,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "width",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "thetaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "fanRayAnglesDeg": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 89.9
+                        },
+                        "minItems": 1,
+                        "maxItems": 49
+                      },
+                      "psi1Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "psi2Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "n2": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomWidth",
+                      "roomDepth",
+                      "wallThickness",
+                      "window",
+                      "point",
+                      "thetaDeg",
+                      "fanRayAnglesDeg",
+                      "psi1Deg",
+                      "psi2Deg"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "section",
+                  "plan"
+                ],
+                "additionalProperties": false
+              },
               "protocol": {
                 "type": "object",
                 "properties": {
@@ -10435,6 +10850,11 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 120000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
                   }
                 },
                 "required": [
