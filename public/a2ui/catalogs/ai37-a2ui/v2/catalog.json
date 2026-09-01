@@ -9262,6 +9262,11 @@
                 "minLength": 1,
                 "maxLength": 120
               },
+              "draftUrl": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
               "submit": {
                 "type": "object",
                 "properties": {
@@ -9787,6 +9792,11 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120
+              },
+              "draftUrl": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
               },
               "submit": {
                 "type": "object",

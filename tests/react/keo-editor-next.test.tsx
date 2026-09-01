@@ -808,3 +808,125 @@ describe('KeoEditorNext: предел помещений', () => {
     expect(back.disabled).toBe(false);
   });
 });
+
+describe('KeoEditorNext: черновик REST-каналом (спайк keo-draft-rest-channel)', () => {
+  const DRAFT_URL = '/api/agent-resource?resource=keo-draft&taskId=t-1';
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  async function tick(ms: number) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ms);
+    });
+  }
+
+  const jsonResponse = (body: unknown) =>
+    ({ok: true, json: async () => body}) as unknown as Response;
+
+  it('пауза ввода шлёт POST на draftUrl, диалоговый action не уходит', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({notes: {}}));
+    const {actions, container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.change(fieldIn(container as HTMLElement, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    // Черновик уехал REST'ом: run AG-UI не поднимался, действий в тред нет.
+    // (Помимо POST на монтировании уходит GET посева — отфильтровываем.)
+    expect(actions).toHaveLength(0);
+    const posts = fetchMock.mock.calls.filter(
+      call => (call[1] as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(posts).toHaveLength(1);
+    const [url, init] = posts[0]! as [string, RequestInit];
+    expect(url).toBe(DRAFT_URL);
+    expect(init.method).toBe('POST');
+    const body = JSON.parse(init.body as string) as {rooms: Array<{values: Record<string, unknown>}>};
+    expect(body.rooms[0]!.values.depth).toBe(5);
+  });
+
+  it('notes ответа применяются к подписи условия локально, без эха формы', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({notes: {region: 'группа светового климата 4 — из ответа'}}),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.change(fieldIn(container as HTMLElement, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    // Микрозадачи ответа fetch: setState живёт в then-цепочке.
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('из ответа');
+  });
+
+  it('submit уходит прежним диалоговым action — REST-канал только про черновик', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({notes: {}}));
+    const props = draftProps();
+    delete (props as Record<string, unknown>).nextLabel;
+    const {actions} = renderEditor({...props, draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+    });
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe('keo_calculate');
+  });
+
+  it('сбой канала тих: подпись прежняя, следующая пауза шлёт снова', async () => {
+    fetchMock.mockRejectedValue(new Error('network down'));
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('группа светового климата 1');
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    const posts = fetchMock.mock.calls.filter(
+      call => (call[1] as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(posts).toHaveLength(2);
+  });
+
+  it('после перезагрузки форма сеется сохранённым черновиком из GET', async () => {
+    fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? jsonResponse({notes: {}})
+        : jsonResponse({
+            draft: {
+              conditions: {region: 'Тюмень'},
+              rooms: [{name: 'Помещение 1', values: {depth: 7.5}}],
+            },
+          }),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    // Микрозадачи ответа GET: посев живёт в then-цепочке эффекта монтирования.
+    await tick(0);
+
+    expect(fieldIn(container as HTMLElement, 'depth').value).toBe('7.5');
+    expect((screen.getByPlaceholderText('Город') as HTMLInputElement).value).toBe('Тюмень');
+  });
+});

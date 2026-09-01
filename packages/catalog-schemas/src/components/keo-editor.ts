@@ -122,6 +122,12 @@ export const keoEditorPropsSchema = z
     // же оговоркой, что у `ConstructionsEditor` и `LiftEditor`: агент, который
     // черновик хранить не умеет, просто не присылает его.
     draftAction: z.string().min(1).max(120).optional(),
+    // СПАЙК keo-draft-rest-channel: относительный URL приёма черновика REST'ом
+    // (цепочка /api/agent-resource, как downloadUrl протокола). Задан — черновик
+    // уезжает POST'ом туда, вне диалогового run'а, и рендерер применяет `notes`
+    // ответа локально; `draftAction` при этом остаётся путём отката для старых
+    // клиентов. Относительный путь — такой проходит санитайзер хоста.
+    draftUrl: z.string().min(1).max(500).optional(),
     submit: calcSubmitSchema,
   })
   .strict()
