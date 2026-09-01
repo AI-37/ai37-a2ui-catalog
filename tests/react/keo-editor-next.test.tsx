@@ -910,6 +910,35 @@ describe('KeoEditorNext: черновик REST-каналом (спайк keo-dr
     expect(posts).toHaveLength(2);
   });
 
+  it('ответ с ИЗМЕНЁННОЙ подписью не схлопывает секции и не откатывает ввод', async () => {
+    // Прод-репро 2026-09-01: «ввожу значение — через мгновение всё
+    // схлопывается». Ответ на POST меняет note при старых значениях в props;
+    // ключ пересева с подписью считал это новым сообщением.
+    fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? jsonResponse({notes: {region: 'группа светового климата 3 — пересчитано'}})
+        : jsonResponse({draft: null}),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.click(section('Помещение 1'));
+    });
+    const wasOpen = section('Помещение 1').getAttribute('aria-expanded');
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    await tick(0); // микрозадачи ответа POST: оверрайд подписи применяется здесь
+
+    expect(section('Условия').textContent).toContain('пересчитано');
+    // Ввод и раскрытие пережили ответ: пересева не было.
+    expect(fieldIn(root, 'depth').value).toBe('5');
+    expect(section('Помещение 1').getAttribute('aria-expanded')).toBe(wasOpen);
+  });
+
   it('после перезагрузки форма сеется сохранённым черновиком из GET', async () => {
     fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
       init?.method === 'POST'
