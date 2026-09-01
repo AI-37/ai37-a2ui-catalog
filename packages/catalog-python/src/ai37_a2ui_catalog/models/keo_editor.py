@@ -83,6 +83,9 @@ class KeoEditorProps(StrictModel):
     conditionsLabel: str = Field(default=None, min_length=1, max_length=120)
     # Имя action'а автосохранения черновика; без него наружу уходит только submit.
     draftAction: str = Field(default=None, min_length=1, max_length=120)
+    # URL приёма черновика REST-каналом (спайк keo-draft-rest-channel): задан —
+    # черновик уезжает POST'ом вне диалогового run'а, draftAction — путь отката.
+    draftUrl: str = Field(default=None, min_length=1, max_length=500)
     submit: CalcSubmit
 
     @model_validator(mode="after")
