@@ -5,6 +5,7 @@ import type {
   LiftEditorMethodConfig,
   LiftEditorSectionSources,
 } from '@ai37/a2ui-catalog-schemas';
+import type {AddItemState} from './add-item-state.types';
 import type {LiftEditorDraft, LiftFieldOption, LiftFieldValues, LiftSectionKey} from './lift-editor.types';
 import type {OnApplyRecommendation} from './recommend.types';
 
@@ -53,7 +54,8 @@ export interface LiftNextControl {
    * секциям ведёт «Далее».
    */
   blocked: boolean;
-  canAddLift: boolean;
+  /** Состояние кнопки «Добавить лифт»: видна, отключена или её нет. */
+  addLiftState: AddItemState;
   setOpenSections: (next: LiftSectionKey[]) => void;
   changeMethod: (method: string) => void;
   changeValue: (key: LiftSectionKey, name: string, value: LiftNextFieldValue) => void;
@@ -123,7 +125,7 @@ export interface LiftNextAdvancedSummaryProps {
 export interface LiftNextAddButtonProps {
   perLift: boolean;
   label: string;
-  disabled: boolean;
+  state: AddItemState;
   onClick: () => void;
 }
 

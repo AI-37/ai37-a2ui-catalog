@@ -1,9 +1,9 @@
 import React from 'react';
 import {KIT_SCOPE, KitStyles} from '../primitives';
+import {ReportNextAssumptions} from './report-next-assumptions';
 import {ReportNextInputsCard} from './report-next-inputs-card';
 import {ReportNextProtocolCard} from './report-next-protocol';
 import {ReportNextVerdictSection} from './report-next-verdict';
-import {ThermalReportNextAssumptions} from './thermal-report-next-assumptions';
 import {ThermalReportNextChecks} from './thermal-report-next-checks';
 import {ThermalReportNextConstructions} from './thermal-report-next-constructions';
 import {ThermalReportNextLayers} from './thermal-report-next-layers';
@@ -34,7 +34,7 @@ export function ThermalReportNextScreen({props, onAction}: ThermalReportNextScre
             excluded={props.excluded}
             onAction={onAction}
           />
-          <ThermalReportNextAssumptions assumptions={props.assumptions} />
+          <ReportNextAssumptions assumptions={props.assumptions} />
         </div>
       </Card>
 

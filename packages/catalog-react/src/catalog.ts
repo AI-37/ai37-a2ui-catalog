@@ -23,7 +23,9 @@ import {LiftEditorNext} from './renderers/lift-editor-next';
 import {ThermalReport} from './renderers/thermal-report';
 import {ThermalReportNext} from './renderers/thermal-report-next';
 import {KeoEditor} from './renderers/keo-editor';
+import {KeoEditorNext} from './renderers/keo-editor-next';
 import {KeoReport} from './renderers/keo-report';
+import {KeoReportNext} from './renderers/keo-report-next';
 import {InsolationEditor} from './renderers/insolation-editor';
 import {InsolationReport} from './renderers/insolation-report';
 import {LiftReport} from './renderers/lift-report';
@@ -48,7 +50,13 @@ const customComponents: ReactComponentImplementation[] = [
   // сравнение «было / стало» не закончено (change reports-next).
   ThermalReportNext,
   KeoEditor,
+  // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока
+  // сравнение «было / стало» не закончено (change keo-editor-next).
+  KeoEditorNext,
   KeoReport,
+  // Рядом со старым — тот же набор примитивов, что у ThermalReportNext и
+  // LiftReportNext (change keo-report-next).
+  KeoReportNext,
   InsolationEditor,
   InsolationReport,
   LiftReport,

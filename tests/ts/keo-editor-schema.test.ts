@@ -47,6 +47,82 @@ describe('keo-editor schema', () => {
     expect(keoEditorPropsSchema.safeParse(props).success).toBe(false);
   });
 
+  it('keeps a filling made before the labels were added valid (аддитивность)', () => {
+    const fixture = readFixture('valid', 'keo-editor.json');
+    const {nextLabel, conditionsLabel, ...before} = fixture.props;
+
+    expect(nextLabel).toBeDefined();
+    expect(conditionsLabel).toBeDefined();
+    expect(keoEditorPropsSchema.safeParse(before).success).toBe(true);
+  });
+
+  it('rejects an empty nextLabel', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-next-label.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
+  it('rejects an empty conditionsLabel', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-conditions-label.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
+  it('caps the labels at the lengths of their neighbours', () => {
+    const fixture = readFixture('valid', 'keo-editor.json');
+
+    expect(
+      keoEditorPropsSchema.safeParse({...fixture.props, nextLabel: 'д'.repeat(81)}).success,
+    ).toBe(false);
+    expect(
+      keoEditorPropsSchema.safeParse({...fixture.props, conditionsLabel: 'у'.repeat(121)}).success,
+    ).toBe(false);
+  });
+
+  it('validates the first-move filling: город пуст, помещение пустое', () => {
+    const fixture = readFixture('valid', 'keo-editor-first-move.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(true);
+  });
+
+  it('rejects an empty value on a condition without "type" (выведенное)', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-condition-value.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
+  it('keeps the filling valid when the empty value belongs to a control (правимое)', () => {
+    const fixture = readFixture('valid', 'keo-editor.json');
+    const conditions = [
+      // `type` задан — пустое значение это отсутствие ответа пользователя.
+      {name: 'region', label: 'Город', value: '', type: 'lookup', referenceId: 'cities'},
+      // `type` не задан — пустой строке взяться неоткуда.
+      {name: 'method', label: 'Методика', value: 'СП 367.1325800.2017'},
+    ];
+
+    expect(keoEditorPropsSchema.safeParse({...fixture.props, conditions}).success).toBe(true);
+  });
+
+  it('validates the filling with draftAction', () => {
+    const fixture = readFixture('valid', 'keo-editor-draft.json');
+
+    expect(fixture.props.draftAction).toBe('keo:draft');
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(true);
+  });
+
+  it('keeps a filling without draftAction valid (аддитивность)', () => {
+    const fixture = readFixture('valid', 'keo-editor-draft.json');
+    const {draftAction, ...before} = fixture.props;
+
+    expect(keoEditorPropsSchema.safeParse(before).success).toBe(true);
+  });
+
+  it('rejects an empty draftAction', () => {
+    const fixture = readFixture('invalid', 'keo-editor-empty-draft-action.json');
+
+    expect(keoEditorPropsSchema.safeParse(fixture.props).success).toBe(false);
+  });
+
   it('rejects a source kind outside the calc dictionary', () => {
     const fixture = readFixture('valid', 'keo-editor.json');
     const rooms = [

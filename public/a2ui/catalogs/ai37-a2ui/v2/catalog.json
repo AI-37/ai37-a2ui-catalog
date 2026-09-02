@@ -8809,13 +8809,58 @@
                     },
                     "value": {
                       "type": "string",
-                      "minLength": 1,
                       "maxLength": 200
                     },
                     "note": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 200
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "select",
+                        "lookup"
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "minItems": 1
+                    },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "project",
+                            "question",
+                            "suggested",
+                            "calculated",
+                            "assumption"
+                          ]
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "source"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -9202,6 +9247,547 @@
                 "minLength": 1,
                 "maxLength": 80
               },
+              "nextLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "conditionsLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "draftAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "submit": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "name",
+                  "label"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "title",
+              "conditions",
+              "roomTemplate",
+              "rooms",
+              "roomLabel",
+              "addRoomLabel",
+              "removeRoomLabel",
+              "submit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "KeoEditorNext": {
+      "description": "The same daylight-factor (KEO, SP 367.1325800) input editor as `KeoEditor` — identical props, identical data contract, the same single submit with the whole {conditions, rooms} document — rendered on the catalog primitive set (cards, buttons, chips, one type scale, tokenised colours) with interaction taken from a headless component library. Rooms are collapsible sections instead of tabs, so a second room is visible as a summarised row rather than hidden behind a switch; each room holds its own collapsible sections (purpose, geometry, opening, shading), dropdowns and number fields step with the keyboard, and the project city is a reference lookup that can be corrected for the calculation only. Set `conditionsLabel` to put the conditions into a titled collapsible group, and `nextLabel` to turn the footer button into a two-mode walkthrough (\"Next\" until every section has been visited, then submit); omit them and the conditions stand as a plain first block and the footer has the submit button alone. Prefer it when the surface should be navigable without a mouse or when the document has more than one room; emit the same props as for `KeoEditor`.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-editor-next.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/KeoEditorNext",
+        "definitions": {
+          "KeoEditorNext": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "meta": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "value": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "select",
+                        "lookup"
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "minItems": 1
+                    },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "project",
+                            "question",
+                            "suggested",
+                            "calculated",
+                            "assumption"
+                          ]
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "label",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "roomTemplate": {
+                "type": "object",
+                "properties": {
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "advanced": {
+                          "type": "boolean"
+                        },
+                        "fields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text",
+                                  "number",
+                                  "select",
+                                  "boolean"
+                                ]
+                              },
+                              "required": {
+                                "type": "boolean"
+                              },
+                              "options": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1
+                              },
+                              "referenceId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "minChars": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 10
+                              },
+                              "suggestMode": {
+                                "type": "string",
+                                "enum": [
+                                  "action",
+                                  "fetch"
+                                ]
+                              },
+                              "placeholder": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "defaultValue": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "value": {
+                                        "type": "string"
+                                      },
+                                      "label": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "value",
+                                      "label"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                ]
+                              },
+                              "hint": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              },
+                              "shortLabel": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 40
+                              },
+                              "optionNotes": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              },
+                              "revealBy": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80
+                                  },
+                                  "values": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 120
+                                    },
+                                    "minItems": 1
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "values"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "valueWarnings": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              },
+                              "min": {
+                                "type": "number"
+                              },
+                              "max": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "label",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 1
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "title",
+                        "fields"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "sections"
+                ],
+                "additionalProperties": false
+              },
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "sources": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "project",
+                              "question",
+                              "suggested",
+                              "calculated",
+                              "assumption"
+                            ]
+                          },
+                          "note": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "source"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "values"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "roomLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "addRoomLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "removeRoomLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "maxRooms": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 24
+              },
+              "computedNotes": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "purposeField": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "apartmentField": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "byPurpose": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "plane": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "point": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "byApartment": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "plane"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "label",
+                  "purposeField",
+                  "byPurpose"
+                ],
+                "additionalProperties": false
+              },
+              "validationRules": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "ratio-max",
+                        "sum-max"
+                      ]
+                    },
+                    "over": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "minItems": 1
+                    },
+                    "under": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "minItems": 1
+                    },
+                    "limit": {
+                      "type": "number"
+                    },
+                    "limitField": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "targets": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "minItems": 1
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "over",
+                    "message",
+                    "targets"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 8
+              },
+              "sourcesLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "nextLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "conditionsLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "draftAction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
               "submit": {
                 "type": "object",
                 "properties": {
@@ -9240,7 +9826,7 @@
       }
     },
     "KeoReport": {
-      "description": "A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a \"what to change\" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed \"assumed by the system — check it\" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent.",
+      "description": "A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a \"what to change\" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed \"assumed by the system — check it\" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent. The optional `drawings` model is NOT rendered by this renderer — for the Danilyuk section/plan sheets emit `KeoReportNext`.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-report.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/KeoReport",
@@ -9513,6 +10099,211 @@
                 ],
                 "additionalProperties": false
               },
+              "drawings": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "object",
+                    "properties": {
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomHeight": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "sillHeight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 200
+                      },
+                      "windowTop": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "alphaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "betaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "opposing": {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "distance",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "skyVisible": {
+                        "type": "boolean"
+                      },
+                      "n1": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomDepth",
+                      "roomHeight",
+                      "wallThickness",
+                      "sillHeight",
+                      "windowTop",
+                      "point",
+                      "alphaDeg",
+                      "skyVisible"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "plan": {
+                    "type": "object",
+                    "properties": {
+                      "roomWidth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "window": {
+                        "type": "object",
+                        "properties": {
+                          "width": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "offset": {
+                            "type": "number",
+                            "minimum": -200,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "width",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "thetaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "fanRayAnglesDeg": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 89.9
+                        },
+                        "minItems": 1,
+                        "maxItems": 49
+                      },
+                      "psi1Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "psi2Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "n2": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomWidth",
+                      "roomDepth",
+                      "wallThickness",
+                      "window",
+                      "point",
+                      "thetaDeg",
+                      "fanRayAnglesDeg",
+                      "psi1Deg",
+                      "psi2Deg"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "section",
+                  "plan"
+                ],
+                "additionalProperties": false
+              },
               "protocol": {
                 "type": "object",
                 "properties": {
@@ -9535,6 +10326,535 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 120000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "content"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "verdict",
+              "inputs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "KeoReportNext": {
+      "description": "The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent) and the protocol download is a menu. Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`. It also renders the optional `drawings` model — the Danilyuk section and plan of the room as numbers (room sizes, opening, calculation point, angles, sector edges, n1/n2 and the graph II fan azimuths) — as a collapsed \"Чертежи\" fold; send numbers in metres and degrees, never raw SVG.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-report-next.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/KeoReportNext",
+        "definitions": {
+          "KeoReportNext": {
+            "type": "object",
+            "properties": {
+              "verdict": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail"
+                    ]
+                  },
+                  "badge": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  }
+                },
+                "required": [
+                  "status",
+                  "badge",
+                  "headline"
+                ],
+                "additionalProperties": false
+              },
+              "recommendations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "tone": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "neutral",
+                        "fail"
+                      ]
+                    },
+                    "action": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "payload": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "detail",
+                    "tone"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    },
+                    "norm": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail"
+                      ]
+                    },
+                    "action": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "payload": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "value",
+                    "norm",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "assumptions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "minItems": 1
+              },
+              "inputs": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "payload": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string",
+                          "maxLength": 200
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "groups": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "tone": {
+                          "type": "string",
+                          "enum": [
+                            "normal",
+                            "warning"
+                          ]
+                        },
+                        "chips": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 1
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        }
+                      },
+                      "required": [
+                        "label",
+                        "tone",
+                        "chips"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "groups"
+                ],
+                "additionalProperties": false
+              },
+              "drawings": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "object",
+                    "properties": {
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomHeight": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "sillHeight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 200
+                      },
+                      "windowTop": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "alphaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "betaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "opposing": {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "distance",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "skyVisible": {
+                        "type": "boolean"
+                      },
+                      "n1": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomDepth",
+                      "roomHeight",
+                      "wallThickness",
+                      "sillHeight",
+                      "windowTop",
+                      "point",
+                      "alphaDeg",
+                      "skyVisible"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "plan": {
+                    "type": "object",
+                    "properties": {
+                      "roomWidth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "window": {
+                        "type": "object",
+                        "properties": {
+                          "width": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "offset": {
+                            "type": "number",
+                            "minimum": -200,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "width",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "thetaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "fanRayAnglesDeg": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 89.9
+                        },
+                        "minItems": 1,
+                        "maxItems": 49
+                      },
+                      "psi1Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "psi2Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "n2": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomWidth",
+                      "roomDepth",
+                      "wallThickness",
+                      "window",
+                      "point",
+                      "thetaDeg",
+                      "fanRayAnglesDeg",
+                      "psi1Deg",
+                      "psi2Deg"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "section",
+                  "plan"
+                ],
+                "additionalProperties": false
+              },
+              "protocol": {
+                "type": "object",
+                "properties": {
+                  "meta": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "content": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60000
+                  },
+                  "downloadFileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "downloadContent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
                   }
                 },
                 "required": [
@@ -9589,13 +10909,58 @@
                     },
                     "value": {
                       "type": "string",
-                      "minLength": 1,
                       "maxLength": 200
                     },
                     "note": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 200
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "select",
+                        "lookup"
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "minItems": 1
+                    },
+                    "referenceId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "project",
+                            "question",
+                            "suggested",
+                            "calculated",
+                            "assumption"
+                          ]
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "required": [
+                        "source"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [

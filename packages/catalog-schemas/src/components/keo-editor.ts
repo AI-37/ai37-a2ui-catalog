@@ -109,6 +109,19 @@ export const keoEditorPropsSchema = z
     validationRules: z.array(keoValidationRuleSchema).max(8).optional(),
     // Подпись счётчика источников в футере («Источники значений»).
     sourcesLabel: z.string().min(1).max(80).optional(),
+    // Подпись первого режима кнопки подвала («Далее»). Пока по документу есть
+    // незаполненные или непросмотренные секции, кнопка ведёт по ним, а не
+    // отправляет. Без подписи режима прохода нет вовсе: кнопка одна — та, что
+    // отправляет (прецедент `pendingLabel` у `LiftEditor`).
+    nextLabel: z.string().min(1).max(80).optional(),
+    // Заголовок группы условий («Условия»). Без него группа стоит первым
+    // блоком без раскрывашки и заголовка: русских слов компонент не сочиняет.
+    conditionsLabel: z.string().min(1).max(120).optional(),
+    // Имя action'а автосохранения черновика. Необязательный: без него компонент
+    // ведёт себя как раньше — наружу уходит только submit. Ключ тот же и с той
+    // же оговоркой, что у `ConstructionsEditor` и `LiftEditor`: агент, который
+    // черновик хранить не умеет, просто не присылает его.
+    draftAction: z.string().min(1).max(120).optional(),
     submit: calcSubmitSchema,
   })
   .strict()
@@ -168,5 +181,19 @@ export const keoEditorDefinition: CatalogComponentDefinition<typeof keoEditorPro
   slug: 'keo-editor',
   description:
     'A single-message editor that collects the input data of a daylight-factor (KEO, SP 367.1325800) calculation: read-only project conditions on top, then one tab per room ("Room 1…N", add and remove locally) with sections for purpose, geometry, the window opening, opposing-building shading (revealed by a trigger field) and a collapsed group of defaulted coefficients. Every value carries a provenance caption (from the project / from your question / suggested / calculated / assumption) and the footer counts them; the calculation plane and reference-point captions are computed on the client from ready-made strings, and parameterised rules highlight suspicious geometry with a non-blocking "check this" mark. No normative tables live in the component — they come in props — and the whole document ({conditions, rooms}) goes back to the agent in a single submit action.',
+  schema: keoEditorPropsSchema,
+};
+
+/**
+ * Тот же экран на примитивах каталога. Схема props общая со старым рендерером
+ * намеренно (Решение 2 change'а `keo-editor-next`): одно наполнение обязано
+ * рендериться обоими, иначе сравнивать «было / стало» нечем, а агенту не
+ * приходится знать, какой рендерер стоит у потребителя.
+ */
+export const keoEditorNextDefinition: CatalogComponentDefinition<typeof keoEditorPropsSchema> = {
+  name: 'KeoEditorNext',
+  slug: 'keo-editor-next',
+  description:
+    'The same daylight-factor (KEO, SP 367.1325800) input editor as `KeoEditor` — identical props, identical data contract, the same single submit with the whole {conditions, rooms} document — rendered on the catalog primitive set (cards, buttons, chips, one type scale, tokenised colours) with interaction taken from a headless component library. Rooms are collapsible sections instead of tabs, so a second room is visible as a summarised row rather than hidden behind a switch; each room holds its own collapsible sections (purpose, geometry, opening, shading), dropdowns and number fields step with the keyboard, and the project city is a reference lookup that can be corrected for the calculation only. Set `conditionsLabel` to put the conditions into a titled collapsible group, and `nextLabel` to turn the footer button into a two-mode walkthrough ("Next" until every section has been visited, then submit); omit them and the conditions stand as a plain first block and the footer has the submit button alone. Prefer it when the surface should be navigable without a mouse or when the document has more than one room; emit the same props as for `KeoEditor`.',
   schema: keoEditorPropsSchema,
 };

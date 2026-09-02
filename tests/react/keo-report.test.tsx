@@ -79,7 +79,10 @@ describe('KeoReport', () => {
 
     const warningGroup = container.querySelector('.a2ui-kr__group--warning')!;
     expect(warningGroup.textContent).toContain('Принято системой — проверьте');
-    expect(warningGroup.textContent).toContain('ρ_ф фасада');
+    // Карточка «Исходные данные» общая у KeoReport и KeoReportNext, поэтому
+    // подстрочные индексы приходят и сюда: '_' на экране больше нет.
+    expect(warningGroup.textContent).toContain('ρф фасада');
+    expect(warningGroup.textContent).not.toContain('_');
     expect(warningGroup.textContent).toContain('пол Г-0,0');
   });
 

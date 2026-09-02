@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {type CatalogComponentDefinition} from '../types';
+import {keoDrawingsSchema} from './keo-drawings';
 
 /**
  * Действие карточки отчёта: диспатчится агенту как
@@ -88,6 +89,14 @@ export const keoReportProtocolSchema = z
     downloadFileName: z.string().min(1).max(120).optional(),
     /** Полный протокол (состав таблиц А.1/Б.1/Б.2 ГОСТ Р 21.514) формирует агент. */
     downloadContent: z.string().min(1).max(120000).optional(),
+    /**
+     * Относительный URL ручки агента (`/api/agent-resource?resource=…`) для
+     * «Скачать»: при наличии рендерер показывает меню форматов (`.md` —
+     * прямая ссылка, `.docx` — конверт-сервис chat-backend). Blob-поля выше
+     * остаются fallback'ом для старых наполнений без URL. Дословно как у
+     * `thermalReportProtocolSchema` — третий отчёт получает ту же ручку.
+     */
+    downloadUrl: z.string().min(1).max(2000).optional(),
   })
   .strict();
 
@@ -104,6 +113,11 @@ export const keoReportPropsSchema = z
     rooms: z.array(keoReportRoomSchema).min(1).optional(),
     assumptions: z.array(z.string().min(1).max(300)).min(1).optional(),
     inputs: keoReportInputsSchema,
+    /**
+     * Модель чертежей Данилюка (разрез и план) числами. Нет поля — карточка
+     * рендерится как прежде, секции «Чертежи» просто нет.
+     */
+    drawings: keoDrawingsSchema.optional(),
     protocol: keoReportProtocolSchema.optional(),
   })
   .strict();
@@ -122,6 +136,14 @@ export const keoReportDefinition: CatalogComponentDefinition<typeof keoReportPro
   name: 'KeoReport',
   slug: 'keo-report',
   description:
-    'A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a "what to change" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed "assumed by the system — check it" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent.',
+    'A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a "what to change" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed "assumed by the system — check it" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent. The optional `drawings` model is NOT rendered by this renderer — for the Danilyuk section/plan sheets emit `KeoReportNext`.',
+  schema: keoReportPropsSchema,
+};
+
+export const keoReportNextDefinition: CatalogComponentDefinition<typeof keoReportPropsSchema> = {
+  name: 'KeoReportNext',
+  slug: 'keo-report-next',
+  description:
+    'The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent) and the protocol download is a menu. Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`. It also renders the optional `drawings` model — the Danilyuk section and plan of the room as numbers (room sizes, opening, calculation point, angles, sector edges, n1/n2 and the graph II fan azimuths) — as a collapsed "Чертежи" fold; send numbers in metres and degrees, never raw SVG.',
   schema: keoReportPropsSchema,
 };

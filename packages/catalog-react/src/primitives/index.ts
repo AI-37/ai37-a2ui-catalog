@@ -49,6 +49,7 @@ export * from './form.types';
 export * from './field';
 export * from './input';
 export * from './static-value';
+export * from './static.types';
 export * from './select';
 export * from './select.types';
 export * from './select-options';
@@ -58,6 +59,8 @@ export * from './combo';
 export * from './combo.types';
 
 export * from './popup-css';
+export * from './use-popup-scheme';
+export * from './use-popup-scheme.types';
 export * from './lookup';
 export * from './lookup.types';
 export * from './lookup-highlight';

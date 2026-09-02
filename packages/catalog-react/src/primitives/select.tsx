@@ -2,6 +2,7 @@ import React from 'react';
 import {Select as BaseSelect} from '@base-ui/react/select';
 import {CaretIcon} from './icons';
 import {selectOptions} from './select-options';
+import {usePopupScheme} from './use-popup-scheme';
 import type {SelectProps} from './select.types';
 
 /**
@@ -16,6 +17,7 @@ import type {SelectProps} from './select.types';
  * выбранного значения, а не само значение (`steny` → «Стены»).
  */
 export function Select({items, value, onValueChange, placeholder, disabled, name}: SelectProps) {
+  const {anchorRef, popupRef} = usePopupScheme<HTMLButtonElement>();
   const options = selectOptions(items);
 
   return (
@@ -26,7 +28,7 @@ export function Select({items, value, onValueChange, placeholder, disabled, name
       disabled={disabled}
       name={name}
     >
-      <BaseSelect.Trigger className="a2ui-control a2ui-select a2ui-t--body">
+      <BaseSelect.Trigger ref={anchorRef} className="a2ui-control a2ui-select a2ui-t--body">
         <BaseSelect.Value className="a2ui-select__value" placeholder={placeholder} />
         <BaseSelect.Icon className="a2ui-select__icon">
           <CaretIcon />
@@ -35,7 +37,7 @@ export function Select({items, value, onValueChange, placeholder, disabled, name
 
       <BaseSelect.Portal>
         <BaseSelect.Positioner sideOffset={4} alignItemWithTrigger={false}>
-          <BaseSelect.Popup className="a2ui-popup a2ui-popup--wide">
+          <BaseSelect.Popup ref={popupRef} className="a2ui-popup a2ui-popup--wide">
             <BaseSelect.List>
               {options.map(option => (
                 <BaseSelect.Item

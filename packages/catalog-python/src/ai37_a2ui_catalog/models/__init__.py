@@ -61,6 +61,15 @@ from .keo_editor import (
     KeoValidationRule,
     KeoValidationRuleKind,
 )
+from .keo_drawings import (
+    KeoDrawingOpposing,
+    KeoDrawingPlanPoint,
+    KeoDrawingPoint,
+    KeoDrawings,
+    KeoDrawingWindow,
+    KeoPlanDrawing,
+    KeoSectionDrawing,
+)
 from .keo_report import (
     KeoReportAction,
     KeoReportInputChip,
@@ -107,7 +116,13 @@ COMPONENT_MODELS = {
     # (change lift-editor-next).
     "LiftEditorNext": LiftEditorProps,
     "KeoEditor": KeoEditorProps,
+    # То же и у КЕО: имя новое, схема props общая со старым рендерером
+    # (change keo-editor-next).
+    "KeoEditorNext": KeoEditorProps,
     "KeoReport": KeoReportProps,
+    # Новый рендерер того же отчёта на примитивах каталога: схема props общая
+    # со старым, поэтому и модель одна (change keo-report-next).
+    "KeoReportNext": KeoReportProps,
     "InsolationEditor": InsolationEditorProps,
     "InsolationReport": InsolationReportProps,
 }
@@ -167,6 +182,12 @@ __all__ = [
     "KeoEditorRoom",
     "KeoEditorRoomTemplate",
     "KeoEditorSection",
+    "KeoDrawingOpposing",
+    "KeoDrawingPlanPoint",
+    "KeoDrawingPoint",
+    "KeoDrawingWindow",
+    "KeoDrawings",
+    "KeoPlanDrawing",
     "KeoReportAction",
     "KeoReportInputChip",
     "KeoReportInputGroup",
@@ -176,6 +197,7 @@ __all__ = [
     "KeoReportRecommendation",
     "KeoReportRoom",
     "KeoReportVerdict",
+    "KeoSectionDrawing",
     "KeoValidationRule",
     "KeoValidationRuleKind",
     "LatexFormulaProps",

@@ -15,6 +15,7 @@ export * from './components/lift-editor-recommend';
 export * from './components/thermal-report';
 export * from './components/calc-editor-common';
 export * from './components/keo-editor';
+export * from './components/keo-drawings';
 export * from './components/keo-report';
 export * from './components/insolation-editor';
 export * from './components/insolation-report';
