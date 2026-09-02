@@ -1,6 +1,6 @@
 {
   "name": "ai37-a2ui-catalog-monorepo",
-  "version": "0.34.4",
+  "version": "0.34.5",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.29.3",
