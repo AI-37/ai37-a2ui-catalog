@@ -12,7 +12,7 @@ export const KEO_REPORT_STYLE_PREFIX = 'a2ui-keo-report';
  * (группа `kr` + общие статусные).
  *
  * Метрики — канон CE/TR: 14px титулы, 12.5px вторичный текст, 10.5px
- * uppercase-подписи с letter-spacing 0.21px, кнопки 13px с радиусом 9px,
+ * uppercase-подписи с letter-spacing 0.21px, кнопки 13px с радиусом 8px,
  * карточка 14px. Своё, не переиспользованное из TR: карточки рекомендаций с
  * тоном.
  */
