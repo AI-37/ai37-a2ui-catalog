@@ -1010,6 +1010,36 @@ describe('KeoEditorNext: черновик REST-каналом (спайк keo-dr
     expect(section('Условия').textContent).not.toContain('устаревшая');
   });
 
+  it('поздний GET посева старого снапшота не перезатирает новый снапшот', async () => {
+    // Ревью 0.34.3: смена снапшота абортила только POST — GET посева,
+    // запущенный при монтировании, доезжал позже и сеял устаревший черновик.
+    let resolveSeed!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) => {
+      if (init?.method === 'POST') return Promise.resolve(jsonResponse({notes: {}}));
+      return new Promise<Response>((resolve, reject) => {
+        resolveSeed = resolve;
+        init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+      });
+    });
+    const {container, processor} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    // Новое сообщение агента приходит, пока GET посева в полёте.
+    await updateProps(processor, {...draftProps(), rooms: [{values: {depth: 9}}]});
+
+    await act(async () => {
+      resolveSeed(
+        jsonResponse({
+          draft: {conditions: {region: 'Тюмень'}, rooms: [{name: 'Помещение 1', values: {depth: 1.1}}]},
+        }),
+      );
+    });
+    await tick(0);
+
+    // Значения нового снапшота на месте, устаревший черновик не посеян.
+    expect(fieldIn(root, 'depth').value).toBe('9');
+  });
+
   it('после перезагрузки форма сеется сохранённым черновиком из GET', async () => {
     fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
       init?.method === 'POST'

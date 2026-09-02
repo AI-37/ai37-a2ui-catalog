@@ -28,6 +28,10 @@ export function useKeoDraftPost(
   const [noteOverrides, setNoteOverrides] = React.useState<Readonly<Record<string, string>>>({});
   const [draftSeed, setDraftSeed] = React.useState<KeoDocument | undefined>(undefined);
   const abortRef = React.useRef<AbortController | null>(null);
+  // GET посева держит СВОЙ контроллер: его отменяют и unmount, и смена
+  // снапшота, а контроллер POST'а живёт своим циклом «новый ввод отменяет
+  // предыдущий».
+  const seedAbortRef = React.useRef<AbortController | null>(null);
   // Пользователь уже отправлял черновик из ЭТОГО состояния экрана — поздний
   // ответ GET'а посева не должен затирать живой ввод.
   const activeRef = React.useRef(false);
@@ -42,12 +46,17 @@ export function useKeoDraftPost(
     if (draftUrl === undefined) return undefined;
 
     const controller = new AbortController();
+    seedAbortRef.current = controller;
     void (async () => {
       try {
         const response = await fetch(draftUrl, {signal: controller.signal});
         if (!response.ok) return;
 
         const body: unknown = await response.json();
+        // Ответ мог доехать ДО abort'а (смена снапшота), а примениться —
+        // после: устаревший посев поверх нового сообщения агента запрещён.
+        if (controller.signal.aborted) return;
+
         const draft = (body as {draft?: unknown} | null)?.draft;
         if (
           !activeRef.current &&
@@ -59,7 +68,8 @@ export function useKeoDraftPost(
           setDraftSeed(draft as KeoDocument);
         }
       } catch {
-        // Отменённый (unmount) или упавший GET — тихо: посев не критичен.
+        // Отменённый (unmount/смена снапшота) или упавший GET — тихо: посев
+        // не критичен.
       }
     })();
 
@@ -77,9 +87,11 @@ export function useKeoDraftPost(
     setBaseKey(resetKey);
     setNoteOverrides({});
     setDraftSeed(undefined);
-    // In-flight POST старого снапшота отменяется тут же: его поздний ответ
-    // принёс бы notes от прежнего документа и перетёр свежие подписи нового.
+    // In-flight запросы старого снапшота отменяются тут же: поздний POST
+    // принёс бы notes прежнего документа, поздний GET посева — прежний
+    // черновик, и оба перетёрли бы свежие props нового сообщения.
     abortRef.current?.abort();
+    seedAbortRef.current?.abort();
   }
 
   if (draftUrl === undefined) {

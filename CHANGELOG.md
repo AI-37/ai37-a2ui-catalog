@@ -4,6 +4,17 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.34.4] - 2026-09-02
+
+### Fixed
+
+- **Поздний GET посева старого снапшота не перезатирает новый** (по ревью
+  0.34.3). Смена снапшота абортила только in-flight POST; GET посева,
+  запущенный при монтировании, доезжал позже и сеял устаревший черновик поверх
+  свежих props. У GET'а теперь свой контроллер, отменяемый сменой снапшота (и
+  unmount'ом), плюс сверка `signal.aborted` перед посевом. Регрессионный тест
+  красный без фикса.
+
 ## [0.34.3] - 2026-09-02
 
 ### Fixed
