@@ -86,7 +86,7 @@ class KeoEditorProps(StrictModel):
     # URL приёма черновика REST-каналом (спайк keo-draft-rest-channel): задан —
     # черновик уезжает POST'ом вне диалогового run'а, draftAction — путь отката.
     # Строго относительный путь (один ведущий /): значение уходит в fetch.
-    draftUrl: str = Field(default=None, min_length=1, max_length=500, pattern=r"^\/(?:$|[^\/])")
+    draftUrl: str = Field(default=None, min_length=1, max_length=500, pattern=r"^\/(?:$|[^\/\\])")
     submit: CalcSubmit
 
     @model_validator(mode="after")

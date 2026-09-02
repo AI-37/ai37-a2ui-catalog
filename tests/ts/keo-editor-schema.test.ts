@@ -136,6 +136,13 @@ describe('keo-editor schema', () => {
     expect(keoEditorPropsSchema.safeParse(props).success).toBe(false);
   });
 
+  it('rejects a backslash draftUrl (/\\host — URL-парсер трактует \\ как /)', () => {
+    const fixture = readFixture('valid', 'keo-editor-draft.json');
+    const props = {...fixture.props, draftUrl: '/\\evil.example/api/agent-resource'};
+
+    expect(keoEditorPropsSchema.safeParse(props).success).toBe(false);
+  });
+
   it('rejects a source kind outside the calc dictionary', () => {
     const fixture = readFixture('valid', 'keo-editor.json');
     const rooms = [

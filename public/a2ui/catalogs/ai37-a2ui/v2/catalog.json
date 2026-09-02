@@ -9266,7 +9266,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 500,
-                "pattern": "^\\/(?:$|[^\\/])"
+                "pattern": "^\\/(?:$|[^\\/\\\\])"
               },
               "submit": {
                 "type": "object",
@@ -9798,7 +9798,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 500,
-                "pattern": "^\\/(?:$|[^\\/])"
+                "pattern": "^\\/(?:$|[^\\/\\\\])"
               },
               "submit": {
                 "type": "object",

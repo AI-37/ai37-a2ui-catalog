@@ -133,11 +133,13 @@ export const keoEditorPropsSchema = z
     // протокол-относительный (`//host`) URL увёл бы черновик на чужой origin.
     // Паттерн без lookahead: Rust-движок pydantic-core (Python-зеркало) его
     // не поддерживает, а строка паттерна обязана совпадать в обоих зеркалах.
+    // Бэкслеш запрещён наравне со слэшем: URL-парсер special-схем трактует
+    // `\` как `/`, и `/\evil.com` резолвился бы в `//evil.com` — чужой origin.
     draftUrl: z
       .string()
       .min(1)
       .max(500)
-      .regex(/^\/(?:$|[^\/])/)
+      .regex(/^\/(?:$|[^\/\\])/)
       .optional(),
     submit: calcSubmitSchema,
   })

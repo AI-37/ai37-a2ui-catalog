@@ -77,6 +77,9 @@ export function useKeoDraftPost(
     setBaseKey(resetKey);
     setNoteOverrides({});
     setDraftSeed(undefined);
+    // In-flight POST старого снапшота отменяется тут же: его поздний ответ
+    // принёс бы notes от прежнего документа и перетёр свежие подписи нового.
+    abortRef.current?.abort();
   }
 
   if (draftUrl === undefined) {
@@ -100,6 +103,10 @@ export function useKeoDraftPost(
         if (!response.ok) return;
 
         const body: unknown = await response.json();
+        // Ответ мог доехать ДО abort'а, а примениться — после: сверяемся с
+        // сигналом ещё раз, чтобы устаревшие notes не пережили смену снапшота.
+        if (controller.signal.aborted) return;
+
         const notes = (body as {notes?: unknown} | null)?.notes;
         if (typeof notes !== 'object' || notes === null) return;
 

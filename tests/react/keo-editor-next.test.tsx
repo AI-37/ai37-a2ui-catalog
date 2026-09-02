@@ -970,6 +970,46 @@ describe('KeoEditorNext: черновик REST-каналом (спайк keo-dr
     expect(fieldIn(root, 'depth').value).toBe('6');
   });
 
+  it('поздний ответ POST старого снапшота не перетирает подписи нового', async () => {
+    // Ревью 0.34.2: смена снапшота сбрасывала оверрайды, но in-flight POST не
+    // отменялся и его then-цепочка возвращала старые notes поверх новых props.
+    let resolvePost!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) => {
+      if (init?.method !== 'POST') return Promise.resolve(jsonResponse({draft: null}));
+      return new Promise<Response>((resolve, reject) => {
+        resolvePost = resolve;
+        init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+      });
+    });
+    const {container, processor} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS); // POST в полёте
+
+    // Новый снапшот агента с другим документом и свежей подписью.
+    await updateProps(processor, {
+      ...draftProps(),
+      rooms: [{values: {depth: 9}}],
+      conditions: [
+        {
+          ...(draftProps().conditions as Array<Record<string, unknown>>)[0],
+          note: 'свежая подпись нового снапшота',
+        },
+      ],
+    });
+
+    await act(async () => {
+      resolvePost(jsonResponse({notes: {region: 'устаревшая подпись старого черновика'}}));
+    });
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('свежая подпись');
+    expect(section('Условия').textContent).not.toContain('устаревшая');
+  });
+
   it('после перезагрузки форма сеется сохранённым черновиком из GET', async () => {
     fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
       init?.method === 'POST'

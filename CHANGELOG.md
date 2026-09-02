@@ -4,6 +4,19 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.34.3] - 2026-09-02
+
+### Fixed
+
+- **`draftUrl`: бэкслеш запрещён наравне со слэшем** (по ревью 0.34.2). URL-парсер
+  special-схем трактует `\` как `/`, и `/\evil.com` резолвился в `//evil.com` —
+  обход same-origin-ограничения. Паттерн теперь отклоняет и `\` после ведущего
+  `/`; Python-зеркало синхронно.
+- **Поздний ответ POST старого снапшота не перетирает подписи нового.** Смена
+  снапшота агента сбрасывала оверрайды, но in-flight POST не отменялся и его
+  then-цепочка возвращала устаревшие `notes`. Теперь запрос абортится при смене
+  снапшота, плюс страховочная сверка `signal.aborted` перед применением ответа.
+
 ## [0.34.2] - 2026-09-01
 
 ### Changed
