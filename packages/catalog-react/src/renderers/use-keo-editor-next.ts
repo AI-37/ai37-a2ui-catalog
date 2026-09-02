@@ -105,7 +105,17 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
   // черновик в полёте, и состояние уже не равно снапшоту. Поэтому своё эхо
   // узнаётся по ПОСЛЕДНЕМУ ОТПРАВЛЕННОМУ черновику, а не по текущему состоянию:
   // совпало — это ack, пересев которого стёр бы свежие нажатия под руками.
-  const propsKey = JSON.stringify([props.rooms, props.roomTemplate, props.conditions]);
+  // `note` условий В КЛЮЧ НЕ ВХОДИТ: подпись рендерится из props напрямую, а
+  // пересев существует ради значений и раскрытия. В REST-канале черновика
+  // (`draftUrl`) ответ меняет ровно `note` при СТАРЫХ значениях в props — ключ
+  // с подписью считал это новым сообщением, ack по документу не срабатывал
+  // (значения props ≠ отправленному черновику), и пересев схлопывал секции и
+  // откатывал ввод под руками на каждую паузу ввода.
+  const propsKey = JSON.stringify([
+    props.rooms,
+    props.roomTemplate,
+    props.conditions.map(({note: _note, ...rest}) => rest),
+  ]);
   const [baseKey, setBaseKey] = React.useState(propsKey);
   if (propsKey !== baseKey) {
     const next = seed(props);

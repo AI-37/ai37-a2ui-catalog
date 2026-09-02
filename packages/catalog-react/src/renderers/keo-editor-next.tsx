@@ -3,6 +3,8 @@ import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {keoEditorNextDefinition} from '@ai37/a2ui-catalog-schemas';
 import {KeoNextScreen} from './keo-next-screen';
 import {useA2uiBaseStyles} from './shared';
+import {applyKeoDraftSeed} from './apply-keo-draft-seed';
+import {useKeoDraftPost} from './use-keo-draft-post';
 
 /**
  * Тот же экран сбора исходных данных КЕО, что `KeoEditor`, собранный из
@@ -29,17 +31,35 @@ export const KeoEditorNext = createComponentImplementation(
 
     const draftAction = props.draftAction;
 
+    // СПАЙК keo-draft-rest-channel: при заданном `draftUrl` черновик уезжает
+    // POST'ом вне диалогового run'а (индикатор выполнения не мелькает), а
+    // пересчитанные подписи условий применяются из ответа локально.
+    // `draftAction` — путь отката: без URL канал прежний, диалоговый.
+    const {postDraft, noteOverrides, draftSeed} = useKeoDraftPost(
+      props.draftUrl,
+      JSON.stringify([props.conditions, props.rooms]),
+    );
+    // Посев добранного GET'ом черновика (перезагрузка страницы) — поверх него
+    // локальные оверрайды подписей условий из ответов на POST.
+    const seeded = applyKeoDraftSeed(props, draftSeed);
+    const conditions = seeded.conditions.map(condition => {
+      const note = noteOverrides[condition.name];
+      return note === undefined ? condition : {...condition, note};
+    });
+
     return (
       <KeoNextScreen
-        props={props}
+        props={{...seeded, conditions}}
         sink={{
-          // Без `draftAction` автосейва нет: получателя не существует, и
-          // черновик не собирается вовсе.
-          onDraft: draftAction
-            ? document => {
-                void context.dispatchAction({event: {name: draftAction, context: document}});
-              }
-            : undefined,
+          // Без `draftUrl` и `draftAction` автосейва нет: получателя не
+          // существует, и черновик не собирается вовсе.
+          onDraft:
+            postDraft ??
+            (draftAction
+              ? document => {
+                  void context.dispatchAction({event: {name: draftAction, context: document}});
+                }
+              : undefined),
           onSubmit: document => {
             void context.dispatchAction({event: {name: props.submit.name, context: document}});
           },
