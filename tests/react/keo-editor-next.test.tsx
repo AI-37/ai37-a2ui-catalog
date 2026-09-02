@@ -808,3 +808,255 @@ describe('KeoEditorNext: предел помещений', () => {
     expect(back.disabled).toBe(false);
   });
 });
+
+describe('KeoEditorNext: черновик REST-каналом (спайк keo-draft-rest-channel)', () => {
+  const DRAFT_URL = '/api/agent-resource?resource=keo-draft&taskId=t-1';
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  async function tick(ms: number) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ms);
+    });
+  }
+
+  const jsonResponse = (body: unknown) =>
+    ({ok: true, json: async () => body}) as unknown as Response;
+
+  it('пауза ввода шлёт POST на draftUrl, диалоговый action не уходит', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({notes: {}}));
+    const {actions, container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.change(fieldIn(container as HTMLElement, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    // Черновик уехал REST'ом: run AG-UI не поднимался, действий в тред нет.
+    // (Помимо POST на монтировании уходит GET посева — отфильтровываем.)
+    expect(actions).toHaveLength(0);
+    const posts = fetchMock.mock.calls.filter(
+      call => (call[1] as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(posts).toHaveLength(1);
+    const [url, init] = posts[0]! as [string, RequestInit];
+    expect(url).toBe(DRAFT_URL);
+    expect(init.method).toBe('POST');
+    const body = JSON.parse(init.body as string) as {rooms: Array<{values: Record<string, unknown>}>};
+    expect(body.rooms[0]!.values.depth).toBe(5);
+  });
+
+  it('notes ответа применяются к подписи условия локально, без эха формы', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({notes: {region: 'группа светового климата 4 — из ответа'}}),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.change(fieldIn(container as HTMLElement, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    // Микрозадачи ответа fetch: setState живёт в then-цепочке.
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('из ответа');
+  });
+
+  it('submit уходит прежним диалоговым action — REST-канал только про черновик', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({notes: {}}));
+    const props = draftProps();
+    delete (props as Record<string, unknown>).nextLabel;
+    const {actions} = renderEditor({...props, draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+    });
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe('keo_calculate');
+  });
+
+  it('сбой канала тих: подпись прежняя, следующая пауза шлёт снова', async () => {
+    fetchMock.mockRejectedValue(new Error('network down'));
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('группа светового климата 1');
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    const posts = fetchMock.mock.calls.filter(
+      call => (call[1] as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(posts).toHaveLength(2);
+  });
+
+  it('ответ с ИЗМЕНЁННОЙ подписью не схлопывает секции и не откатывает ввод', async () => {
+    // Прод-репро 2026-09-01: «ввожу значение — через мгновение всё
+    // схлопывается». Ответ на POST меняет note при старых значениях в props;
+    // ключ пересева с подписью считал это новым сообщением.
+    fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? jsonResponse({notes: {region: 'группа светового климата 3 — пересчитано'}})
+        : jsonResponse({draft: null}),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.click(section('Помещение 1'));
+    });
+    const wasOpen = section('Помещение 1').getAttribute('aria-expanded');
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    await tick(0); // микрозадачи ответа POST: оверрайд подписи применяется здесь
+
+    expect(section('Условия').textContent).toContain('пересчитано');
+    // Ввод и раскрытие пережили ответ: пересева не было.
+    expect(fieldIn(root, 'depth').value).toBe('5');
+    expect(section('Помещение 1').getAttribute('aria-expanded')).toBe(wasOpen);
+  });
+
+  it('поздний ответ GET посева не затирает живой ввод', async () => {
+    // Защитная ветвь activeRef: пользователь начал печатать (и POST уже ушёл),
+    // пока GET посева ещё в полёте — его поздний ответ игнорируется.
+    let resolveSeed!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? Promise.resolve(jsonResponse({notes: {}}))
+        : new Promise<Response>(resolve => {
+            resolveSeed = resolve;
+          }),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS); // POST ушёл — activeRef взведён
+
+    await act(async () => {
+      resolveSeed(
+        jsonResponse({
+          draft: {conditions: {region: 'Тюмень'}, rooms: [{name: 'Помещение 1', values: {depth: 9.9}}]},
+        }),
+      );
+    });
+    await tick(0);
+
+    expect(fieldIn(root, 'depth').value).toBe('6');
+  });
+
+  it('поздний ответ POST старого снапшота не перетирает подписи нового', async () => {
+    // Ревью 0.34.2: смена снапшота сбрасывала оверрайды, но in-flight POST не
+    // отменялся и его then-цепочка возвращала старые notes поверх новых props.
+    let resolvePost!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) => {
+      if (init?.method !== 'POST') return Promise.resolve(jsonResponse({draft: null}));
+      return new Promise<Response>((resolve, reject) => {
+        resolvePost = resolve;
+        init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+      });
+    });
+    const {container, processor} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS); // POST в полёте
+
+    // Новый снапшот агента с другим документом и свежей подписью.
+    await updateProps(processor, {
+      ...draftProps(),
+      rooms: [{values: {depth: 9}}],
+      conditions: [
+        {
+          ...(draftProps().conditions as Array<Record<string, unknown>>)[0],
+          note: 'свежая подпись нового снапшота',
+        },
+      ],
+    });
+
+    await act(async () => {
+      resolvePost(jsonResponse({notes: {region: 'устаревшая подпись старого черновика'}}));
+    });
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('свежая подпись');
+    expect(section('Условия').textContent).not.toContain('устаревшая');
+  });
+
+  it('поздний GET посева старого снапшота не перезатирает новый снапшот', async () => {
+    // Ревью 0.34.3: смена снапшота абортила только POST — GET посева,
+    // запущенный при монтировании, доезжал позже и сеял устаревший черновик.
+    let resolveSeed!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) => {
+      if (init?.method === 'POST') return Promise.resolve(jsonResponse({notes: {}}));
+      return new Promise<Response>((resolve, reject) => {
+        resolveSeed = resolve;
+        init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+      });
+    });
+    const {container, processor} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    // Новое сообщение агента приходит, пока GET посева в полёте.
+    await updateProps(processor, {...draftProps(), rooms: [{values: {depth: 9}}]});
+
+    await act(async () => {
+      resolveSeed(
+        jsonResponse({
+          draft: {conditions: {region: 'Тюмень'}, rooms: [{name: 'Помещение 1', values: {depth: 1.1}}]},
+        }),
+      );
+    });
+    await tick(0);
+
+    // Значения нового снапшота на месте, устаревший черновик не посеян.
+    expect(fieldIn(root, 'depth').value).toBe('9');
+  });
+
+  it('после перезагрузки форма сеется сохранённым черновиком из GET', async () => {
+    fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? jsonResponse({notes: {}})
+        : jsonResponse({
+            draft: {
+              conditions: {region: 'Тюмень'},
+              rooms: [{name: 'Помещение 1', values: {depth: 7.5}}],
+            },
+          }),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    // Микрозадачи ответа GET: посев живёт в then-цепочке эффекта монтирования.
+    await tick(0);
+
+    expect(fieldIn(container as HTMLElement, 'depth').value).toBe('7.5');
+    expect((screen.getByPlaceholderText('Город') as HTMLInputElement).value).toBe('Тюмень');
+  });
+});
