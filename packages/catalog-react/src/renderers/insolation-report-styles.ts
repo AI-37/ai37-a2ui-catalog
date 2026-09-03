@@ -141,12 +141,12 @@ export const INSOLATION_REPORT_CSS = `
 .a2ui-ir__status--fail { color: ${tokens.danger}; }
 .a2ui-ir__status--info { color: ${tokens.irTextMuted}; }
 
-/* Кнопки — канон CE: 13px, радиус 9px, без жирности. */
+/* Кнопки — канон CE: 13px, радиус 8px, без жирности. */
 .a2ui-ir .a2ui-ir-btn {
   appearance: none;
   margin: 0;
   padding: 8px 14px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid ${tokens.irBorder};
   background: transparent;
   color: ${tokens.irText};

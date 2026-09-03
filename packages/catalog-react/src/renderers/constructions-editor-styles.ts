@@ -167,7 +167,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
 
 .a2ui-ce .a2ui-ce-btn {
   padding: 8px 14px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid ${tokens.ceBorder};
   background: transparent;
   color: ${tokens.ceText};
@@ -281,7 +281,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   min-height: 37px;
   box-sizing: border-box;
   padding: 10px 12px;
-  border-radius: 9px;
+  border-radius: 8px;
   /* Рамка считается от цвета текста, а не от токена границы: у тёмной темы
      хоста граница почти совпадает с фоном, и поля переставали читаться как
      поля — на виду оставались только акцентные. Токен остаётся запасным
@@ -572,7 +572,7 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid ${tokens.ceBorder};
   background: ${tokens.ceSurface};
   color: ${tokens.ceText};
