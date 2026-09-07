@@ -83,7 +83,11 @@ export const keoReportInputsSchema = z
 export const keoReportProtocolSchema = z
   .object({
     meta: z.string().min(1).max(200).optional(),
-    /** Краткий вывод расчёта — в UI не показывается, только скачивается. */
+    /**
+     * Содержимое блока «Протокол расчёта» — markdown, свёрнут по умолчанию
+     * (разделы, списки, GFM-таблицы и формулы в долларах; сырой HTML не
+     * рендерится). Краткий вывод или полный протокол — решает агент.
+     */
     content: z.string().min(1).max(60000),
     /** Без имени файла кнопки «Скачать» нет. */
     downloadFileName: z.string().min(1).max(120).optional(),
@@ -144,6 +148,6 @@ export const keoReportNextDefinition: CatalogComponentDefinition<typeof keoRepor
   name: 'KeoReportNext',
   slug: 'keo-report-next',
   description:
-    'The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent) and the protocol download is a menu. Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`. It also renders the optional `drawings` model — the Danilyuk section and plan of the room as numbers (room sizes, opening, calculation point, angles, sector edges, n1/n2 and the graph II fan azimuths) — as a collapsed "Чертежи" fold; send numbers in metres and degrees, never raw SVG.',
+    'The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent), the protocol download is a menu and the protocol row expands into `protocol.content` rendered as markdown (GFM tables and `$…$` KaTeX formulas, collapsed by default, no raw HTML). Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`. It also renders the optional `drawings` model — the Danilyuk section and plan of the room as numbers (room sizes, opening, calculation point, angles, sector edges, n1/n2 and the graph II fan azimuths) — as a collapsed "Чертежи" fold; send numbers in metres and degrees, never raw SVG.',
   schema: keoReportPropsSchema,
 };

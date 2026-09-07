@@ -69,8 +69,9 @@ export * from './lookup-option-slot';
 export * from './find-option-by-label';
 
 // Части отчёта: строка списка, serif-заголовок вердикта, таблица с итогом,
-// заметка на утопленном фоне и карточка протокола. Общие у ThermalReportNext
-// и LiftReportNext — второго набора «почти таких же» не заводится.
+// заметка на утопленном фоне, карточка протокола и markdown его содержимого.
+// Общие у ThermalReportNext и LiftReportNext — второго набора «почти таких же»
+// не заводится.
 export * from './report-row';
 export * from './report-row-css';
 export * from './report-row-detail';
@@ -85,6 +86,9 @@ export * from './report-protocol-card';
 export * from './report-protocol-card.types';
 export * from './report-protocol-css';
 export * from './report-protocol-meta';
+export * from './report-markdown';
+export * from './report-markdown-table';
+export * from './report-markdown-css';
 
 export * from './menu';
 export * from './menu-entry';

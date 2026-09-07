@@ -97,7 +97,11 @@ export const thermalReportInputsSchema = z
 export const thermalReportProtocolSchema = z
   .object({
     meta: z.string().min(1).max(200).optional(),
-    /** Краткий текстовый вывод расчёта — показывается под катом (plain text). */
+    /**
+     * Содержимое блока «Протокол расчёта» — markdown, свёрнут по умолчанию
+     * (разделы, списки, GFM-таблицы и формулы в долларах; сырой HTML не
+     * рендерится). Краткий вывод или полный протокол — решает агент.
+     */
     content: z.string().min(1).max(60000),
     /**
      * Имя файла для кнопки «Скачать»: при наличии рендерер отдаёт файл
@@ -168,6 +172,6 @@ export const thermalReportNextDefinition: CatalogComponentDefinition<
   name: 'ThermalReportNext',
   slug: 'thermal-report-next',
   description:
-    'The same thermal-calculation result card as `ThermalReport` — identical props, identical data contract — rendered on the catalog primitive set (report row, two-part data chip, status pill, serif verdict headline, layer table with a total row, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: the protocol is a single non-expanding row (`protocol.content` is never printed, it only feeds the downloaded file), status words for `pass | fail | info` are fixed by the renderer so both reports say the same thing, and the accept-the-suggestion button is `outline`. Prefer it when the surface should read as one system with `LiftReportNext`; emit the same props as for `ThermalReport`.',
+    'The same thermal-calculation result card as `ThermalReport` — identical props, identical data contract — rendered on the catalog primitive set (report row, two-part data chip, status pill, serif verdict headline, layer table with a total row, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: the protocol row expands into `protocol.content` rendered as markdown (GFM tables and `$…$` KaTeX formulas, collapsed by default, no raw HTML), status words for `pass | fail | info` are fixed by the renderer so both reports say the same thing, and the accept-the-suggestion button is `outline`. Prefer it when the surface should read as one system with `LiftReportNext`; emit the same props as for `ThermalReport`.',
   schema: thermalReportPropsSchema,
 };

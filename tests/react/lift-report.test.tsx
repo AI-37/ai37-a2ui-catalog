@@ -97,8 +97,11 @@ describe('LiftReport', () => {
     const protocol = container.querySelector('.a2ui-lr__protocol') as HTMLDetailsElement;
     expect(protocol.tagName).toBe('DETAILS');
     expect(protocol.open).toBe(false);
+    // Старый рендерер печатает `content` дословно в <pre>: с тех пор как поле
+    // стало markdown, он показывает исходник разметки. Так и задумано —
+    // разбирает её только `LiftReportNext`, старый живёт для прежних клиентов.
     expect(protocol.querySelector('.a2ui-lr__protocol-body')!.textContent).toContain(
-      'Интервал = T/n',
+      'Интервал движения',
     );
 
     // «Скачать ▾» — dropdown форматов: .md — прямая ссылка (download-заголовки ставит

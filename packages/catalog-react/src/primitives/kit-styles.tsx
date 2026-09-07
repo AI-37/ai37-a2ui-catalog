@@ -7,6 +7,7 @@ import {KIT_CHIP_CSS} from './chip-css';
 import {KIT_DATA_CHIP_CSS} from './data-chip-css';
 import {KIT_FORM_CSS} from './form-css';
 import {KIT_POPUP_CSS} from './popup-css';
+import {KIT_REPORT_MARKDOWN_CSS} from './report-markdown-css';
 import {KIT_REPORT_NOTE_CSS} from './report-note-css';
 import {KIT_REPORT_PROTOCOL_CSS} from './report-protocol-css';
 import {KIT_REPORT_ROW_CSS} from './report-row-css';
@@ -33,6 +34,9 @@ const LAYERS: Array<[string, string]> = [
   ['a2ui-kit-report-table', KIT_REPORT_TABLE_CSS],
   ['a2ui-kit-report-note', KIT_REPORT_NOTE_CSS],
   ['a2ui-kit-report-protocol', KIT_REPORT_PROTOCOL_CSS],
+  // Последним: markdown отчёта опирается на таблицу и типографику набора и
+  // уточняет их у себя внутри.
+  ['a2ui-kit-report-markdown', KIT_REPORT_MARKDOWN_CSS],
 ];
 
 /**

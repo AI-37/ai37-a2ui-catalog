@@ -195,16 +195,24 @@ describe('KeoReportNext', () => {
     expect(actions[0]!.context).toMatchObject({roomId: 'r2'});
   });
 
-  it('протокол — строка без раскрытия и без текста вывода', () => {
+  it('протокол свёрнут по умолчанию и раскрывается по клику', () => {
     const props = readProps('keo-report-fail.json');
     const {container} = renderReport('KeoReportNext', props);
 
-    expect(screen.getByText('Протокол расчёта')).toBeTruthy();
-    expect(container.querySelector('details')).toBeNull();
-    expect(container.querySelector('pre')).toBeNull();
+    const trigger = screen.getByRole('button', {name: /Протокол расчёта/});
+    const panel = document.getElementById(trigger.getAttribute('aria-controls')!)!;
 
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(panel.hasAttribute('hidden')).toBe(true);
+
+    fireEvent.click(trigger);
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(panel.hasAttribute('hidden')).toBe(false);
+    // Содержимое — разметкой, а не `<pre>`: рендерер протокола общий у трёх
+    // отчётов, и КЕО получает раскрытие вместе с ними.
     const content = (props.protocol as {content: string}).content;
-    expect(container.textContent).not.toContain(content.slice(0, 40));
+    expect(container.querySelector('.a2ui-md')!.textContent).toContain(content.slice(0, 20));
   });
 
   it('протокол текстом в props — один формат; без имени файла «Скачать» нет', async () => {

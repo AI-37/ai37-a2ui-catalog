@@ -79,16 +79,47 @@ describe('LiftReportNext', () => {
     expect(actions[1]!.context).toEqual({});
   });
 
-  it('протокол не раскрывается: ни details, ни pre, ни текста вывода', () => {
-    const props = readProps('lift-report.json');
-    const {container} = renderReport('LiftReportNext', props);
+  it('протокол свёрнут по умолчанию и раскрывается по клику', () => {
+    renderReport('LiftReportNext', readProps('lift-report.json'));
 
-    expect(screen.getByText('Протокол расчёта')).toBeTruthy();
-    expect(container.querySelector('details')).toBeNull();
-    expect(container.querySelector('pre')).toBeNull();
+    const trigger = screen.getByRole('button', {name: /Протокол расчёта/});
+    const panel = document.getElementById(trigger.getAttribute('aria-controls')!)!;
 
-    const content = (props.protocol as {content: string}).content;
-    expect(container.textContent).not.toContain(content.slice(0, 40));
+    // Свёрнут: вердикт, ради которого карточку и открывают, обязан оставаться
+    // первым экраном. Панель при этом в DOM (keepMounted) — иначе
+    // aria-controls указывал бы в пустоту.
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(panel.hasAttribute('hidden')).toBe(true);
+
+    fireEvent.click(trigger);
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(panel.hasAttribute('hidden')).toBe(false);
+  });
+
+  it('протокол рендерится разметкой: разделы, таблица и формулы KaTeX', () => {
+    const {container} = renderReport('LiftReportNext', readProps('lift-report.json'));
+
+    const md = container.querySelector('.a2ui-md')!;
+    // Заголовки разделов — разметкой, а не строкой с решётками.
+    expect(md.querySelector('h2')!.textContent).toContain('Исходные данные');
+    // Таблица — в контейнере со скроллом и на стилях набора: карточка стоит в
+    // узкой колонке чата, вбок должна ехать таблица, а не лента.
+    expect(md.querySelector('.a2ui-table-scroll > table.a2ui-table')).toBeTruthy();
+    // Формулы разобраны KaTeX, а не оставлены долларами.
+    expect(md.querySelectorAll('.katex').length).toBeGreaterThan(0);
+    expect(md.textContent).not.toContain('$$');
+  });
+
+  it('клик по «Скачать» протокол не раскрывает', () => {
+    const {container} = renderReport('LiftReportNext', readProps('lift-report.json'));
+
+    const trigger = screen.getByRole('button', {name: /Протокол расчёта/});
+    // Меню форматов стоит СНАРУЖИ триггера — внутри выбор формата заодно
+    // переключал бы раскрытие.
+    fireEvent.click(container.querySelector('.a2ui-protocol__action button')!);
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('протокол ручкой агента — два формата', async () => {

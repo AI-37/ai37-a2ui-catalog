@@ -79,7 +79,15 @@ export const liftReportInputsSchema = z
 export const liftReportProtocolSchema = z
   .object({
     meta: z.string().min(1).max(200).optional(),
-    /** Краткий вывод расчёта («Итог») — раскрывается под катом (plain text). */
+    /**
+     * Содержимое блока «Протокол расчёта» — markdown, свёрнут по умолчанию.
+     * Разбирается как разметка: разделы, списки, таблицы (GFM) и формулы в
+     * долларах (`$…$`, `$$…$$`); сырой HTML не рендерится.
+     *
+     * Что сюда класть — решает агент: полный протокол расчёта (пошаговые
+     * формулы, ради которых блок и раскрывают, чтобы проверить расчёт до
+     * экспорта) либо краткий «Итог». Лимит — потолок сообщения, а не норма.
+     */
     content: z.string().min(1).max(60000),
     /**
      * Относительный URL ручки агента (`/api/agent-resource?resource=…`) для
@@ -127,6 +135,6 @@ export const liftReportNextDefinition: CatalogComponentDefinition<typeof liftRep
   name: 'LiftReportNext',
   slug: 'lift-report-next',
   description:
-    'The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single non-expanding row without `<details>`/`<pre>` (`protocol.content` is never printed on screen), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.',
+    'The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol row expands into `protocol.content` rendered as markdown (GFM tables and `$…$` KaTeX formulas, collapsed by default, no raw HTML) so a full step-by-step calculation can be checked in the chat before export, suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.',
   schema: liftReportPropsSchema,
 };
