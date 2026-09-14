@@ -324,3 +324,100 @@ describe('ConstructionsEditorNext', () => {
     expect(actions).toHaveLength(1);
   });
 });
+
+/**
+ * Случай со стенда теплотеха 2026-09-14: перекрытие над подвалом со всеми
+ * заполненными слоями, но без выбранной разновидности показывало зелёное
+ * «готова», а «Рассчитать» возвращало в чат «выберите подтип перекрытия»
+ * (change constructions-missing-subtype-invalid). Слои здесь заполнены
+ * намеренно: иначе карточка была бы невалидна по старой причине и тест не
+ * отличил бы новую.
+ */
+describe('ConstructionsEditorNext: незаполненная разновидность', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})})),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const FLOOR_NAME = 'Пол 1 этажа, перекрытие над подвалом';
+
+  /**
+   * Та же фикстура: слои перекрытия дозаполнены (λ утеплителя — из справочника
+   * demo), разновидность снимается или остаётся по аргументу.
+   */
+  function floorConstructions({subtype}: {subtype?: string}) {
+    const messages = patchedMessages();
+    const update = messages.find(message => 'updateComponents' in message) as any;
+    const constructions = update.updateComponents.components[0].constructions as any[];
+    return constructions.map(entry => {
+      if (entry.id !== 'c-floor-1') return entry;
+      const layers = entry.layers.map((layer: any) =>
+        layer.thicknessMm === null
+          ? {...layer, thicknessMm: 100, materialKey: 'm-eps', lambdaA: 0.031, lambdaB: 0.034}
+          : layer,
+      );
+      const {subtype: _dropped, ...rest} = entry;
+      return {...rest, ...(subtype ? {subtype} : {}), name: FLOOR_NAME, layers};
+    });
+  }
+
+  function floorCard() {
+    return screen
+      .getByRole('button', {name: new RegExp(`^${FLOOR_NAME}`)})
+      .closest('.a2ui-card');
+  }
+
+  it('свёрнутая карточка помечена рамкой и чипом «проверить»', () => {
+    renderSurface({constructions: floorConstructions({})});
+
+    const card = floorCard();
+    expect(card).not.toBeNull();
+    expect(card!.className).toContain('a2ui-card--invalid');
+    // Причина названа общим «проверить»: счёт «N слоёв без λ» соврал бы —
+    // слои заполнены полностью.
+    expect(card!.textContent).toContain('проверить');
+    expect(card!.textContent).not.toContain('без λ');
+  });
+
+  it('та же карточка с выбранной разновидностью — «готова» и без пометки рамки', () => {
+    renderSurface({constructions: floorConstructions({subtype: 'podval_vent'})});
+
+    const card = floorCard();
+    expect(card!.className).not.toContain('a2ui-card--invalid');
+    expect(card!.textContent).toContain('готова');
+  });
+
+  it('раскрытая карточка называет, что разновидность не выбрана', () => {
+    renderSurface({constructions: floorConstructions({})});
+    hideConditions();
+    openCard(new RegExp(`^${FLOOR_NAME}`));
+
+    expect(screen.getByText(/разновидность не выбрана/)).toBeInTheDocument();
+  });
+
+  it('выбранная разновидность печатается в шапке, как прежде', () => {
+    renderSurface({constructions: floorConstructions({subtype: 'podval_vent'})});
+    hideConditions();
+    openCard(new RegExp(`^${FLOOR_NAME}`));
+
+    expect(screen.queryByText(/разновидность не выбрана/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Цокольное перекрытие \(подполье вентилируемое\)/)).toBeInTheDocument();
+  });
+
+  it('тип без разновидностей: ни текста, ни разделителя перед ним', () => {
+    renderSurface();
+    hideConditions();
+    openCard(/^Наружная стена/);
+
+    expect(screen.queryByText(/разновидность не выбрана/)).not.toBeInTheDocument();
+    expect(screen.getByText('Наружные стены')).toBeInTheDocument();
+  });
+});
