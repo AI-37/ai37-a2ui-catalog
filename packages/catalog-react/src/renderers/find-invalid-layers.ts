@@ -3,6 +3,7 @@ import type {
   ConstructionLayer,
   ConstructionTypeConfig,
 } from '@ai37/a2ui-catalog-schemas';
+import {isSubtypeRequired} from './is-subtype-required';
 
 /** Производная невалидность конструкции; считается на каждый рендер, как live-Rпр. */
 export type ConstructionInvalidity = {
@@ -10,12 +11,15 @@ export type ConstructionInvalidity = {
   layerIndexes: number[];
   /** Тип без слоёв, а паспортное Rпр не введено. */
   missingPassport: boolean;
+  /** Тип, которому разновидность обязательна, а она не выбрана. */
+  missingSubtype: boolean;
   /** Есть хоть одна причина подсветить карточку. */
   invalid: boolean;
   /**
    * Число проблемных слоёв, когда ВСЕ проблемы карточки — отсутствие λ
    * (материал и толщина на месте): чип может назвать счёт «N слоёв без λ».
-   * Смешанные проблемы или паспорт — null, текст чипа общий «проверить».
+   * Смешанные проблемы, паспорт или разновидность — null, текст чипа общий
+   * «проверить».
    */
   missingLambdaCount: number | null;
 };
@@ -30,13 +34,18 @@ export function findInvalidLayers(
   entry: ConstructionEntry,
   config: ConstructionTypeConfig | undefined,
 ): ConstructionInvalidity {
+  // Без разновидности расчёт невозможен: αн разнится втрое, и агент возвращает
+  // «выберите подтип перекрытия» вместо отчёта.
+  const missingSubtype = isSubtypeRequired(config) && entry.subtype === undefined;
+
   // Нет конфига типа — судим по слоям: это дефолтный путь и для hasLayers.
   if (config && !config.hasLayers) {
     const missingPassport = entry.rprPassport === undefined;
     return {
       layerIndexes: [],
       missingPassport,
-      invalid: missingPassport,
+      missingSubtype,
+      invalid: missingPassport || missingSubtype,
       missingLambdaCount: null,
     };
   }
@@ -48,11 +57,15 @@ export function findInvalidLayers(
     layerIndexes.push(index);
     if (!isMissingLambdaOnly(layer)) lambdaOnly = false;
   });
+  // Счёт «N слоёв без λ» назвал бы не ту причину: при незаполненной
+  // разновидности слои могут быть заполнены полностью.
+  const lambdaCountable = layerIndexes.length > 0 && lambdaOnly && !missingSubtype;
   return {
     layerIndexes,
     missingPassport: false,
-    invalid: layerIndexes.length > 0,
-    missingLambdaCount: layerIndexes.length > 0 && lambdaOnly ? layerIndexes.length : null,
+    missingSubtype,
+    invalid: layerIndexes.length > 0 || missingSubtype,
+    missingLambdaCount: lambdaCountable ? layerIndexes.length : null,
   };
 }
 

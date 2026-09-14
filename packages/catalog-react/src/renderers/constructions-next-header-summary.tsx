@@ -1,6 +1,7 @@
 import React from 'react';
 import {Button} from '../primitives';
 import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
+import {isSubtypeRequired} from './is-subtype-required';
 import type {ConstructionsNextHeaderRowProps} from './constructions-next.types';
 
 /**
@@ -23,6 +24,9 @@ export function ConstructionsNextHeaderSummary({
         <span className="a2ui-t--sub">
           {config?.label ?? entry.type}
           {subtypeLabel ? ` · ${subtypeLabel}` : ''}
+          <ConstructionsNextHeaderSubtypeMissing
+            missing={entry.subtype === undefined && isSubtypeRequired(config)}
+          />
         </span>
         <ConstructionsNextHeaderName name={name} />
       </span>
@@ -31,6 +35,20 @@ export function ConstructionsNextHeaderSummary({
       </Button>
     </div>
   );
+}
+
+/**
+ * Место разновидности не остаётся пустым: подсветка карточки говорит, где
+ * смотреть, а текст — что заполнить. Тот же приём, что «толщина не задана» в
+ * строке слоя. Разделитель внутри span, чтобы «·» не повис без текста у типов
+ * без разновидностей.
+ */
+function ConstructionsNextHeaderSubtypeMissing({missing}: {missing: boolean}) {
+  if (!missing) {
+    return null;
+  }
+
+  return <span className="a2ui-t--warning">{' ·\u00A0разновидность не выбрана'}</span>;
 }
 
 /** Название есть не у всех конструкций: пустая строка сдвигала бы тип вверх. */
