@@ -12,7 +12,7 @@ export const KEO_REPORT_STYLE_PREFIX = 'a2ui-keo-report';
  * (группа `kr` + общие статусные).
  *
  * Метрики — канон CE/TR: 14px титулы, 12.5px вторичный текст, 10.5px
- * uppercase-подписи с letter-spacing 0.21px, кнопки 13px с радиусом 9px,
+ * uppercase-подписи с letter-spacing 0.21px, кнопки 13px с радиусом 8px,
  * карточка 14px. Своё, не переиспользованное из TR: карточки рекомендаций с
  * тоном.
  */
@@ -130,12 +130,12 @@ export const KEO_REPORT_CSS = `
 .a2ui-kr__status--pass { color: ${tokens.success}; }
 .a2ui-kr__status--fail { color: ${tokens.danger}; }
 
-/* Кнопки — канон CE: 13px, радиус 9px, без жирности. */
+/* Кнопки — канон CE: 13px, радиус 8px, без жирности. */
 .a2ui-kr .a2ui-kr-btn {
   appearance: none;
   margin: 0;
   padding: 8px 14px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid ${tokens.krBorder};
   background: transparent;
   color: ${tokens.krText};

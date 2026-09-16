@@ -13,7 +13,7 @@ export const LIFT_REPORT_STYLE_PREFIX = 'a2ui-lift-report';
  *
  * Метрики — канон отчёта (thermal-report-styles.ts): кегли в px (14 титулы /
  * 12.5 вторичный текст / 10.5 uppercase-подписи с letter-spacing 0.21px),
- * weight 500 у титулов, кнопки 13px с радиусом 9px без жирности, карточка
+ * weight 500 у титулов, кнопки 13px с радиусом 8px без жирности, карточка
  * 14px, строки 10px, serif-заголовок вердикта. Своё против teplo — акцентная
  * рамка рекомендуемого варианта «Что изменить» и раскрываемый протокол
  * (`<details>`).
@@ -117,13 +117,13 @@ export const LIFT_REPORT_CSS = `
 .a2ui-lr__status--fail { color: ${tokens.danger}; }
 .a2ui-lr__status--neutral { color: ${tokens.lrTextMuted}; }
 
-/* Кнопки — канон отчёта: 13px, радиус 9px, без жирности; тёмная — border
+/* Кнопки — канон отчёта: 13px, радиус 8px, без жирности; тёмная — border
    transparent + заливка текстовым цветом. */
 .a2ui-lr .a2ui-lr-btn {
   appearance: none;
   margin: 0;
   padding: 8px 14px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid ${tokens.lrBorder};
   background: transparent;
   color: ${tokens.lrText};
