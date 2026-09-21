@@ -1,16 +1,18 @@
 import React from 'react';
 import type {ConstructionType} from '@ai37/a2ui-catalog-schemas';
 import {Button, Field, Form, Input, Select} from '../primitives';
+import {ConstructionsNextRField} from './constructions-next-r-field';
 import {ConstructionsNextSubtypeField} from './constructions-next-subtype-field';
-import {SUBTYPED_TYPE} from './subtyped-construction-type';
+import {nextHeaderDraftForType} from './next-header-draft-for-type';
 import type {ConstructionHeaderFields} from './constructions-editor.types';
 import type {ConstructionsNextHeaderRowProps} from './constructions-next.types';
 import {headerFieldsEqual} from './header-fields-equal';
 
 /**
- * Форма шапки: тип, разновидность и название. Правки живут в локальной копии и
- * уходят наверх только по «Сохранить» — до него заголовок карточки, live-Rпр и
- * состояние редактора прежние. «Сохранить» без изменений равносилен «Отмене».
+ * Форма шапки: тип, разновидность, название и коэффициент однородности r.
+ * Правки живут в локальной копии и уходят наверх только по «Сохранить» — до
+ * него заголовок карточки, live-Rпр и состояние редактора прежние.
+ * «Сохранить» без изменений равносилен «Отмене».
  */
 export function ConstructionsNextHeaderForm({
   entry,
@@ -22,7 +24,9 @@ export function ConstructionsNextHeaderForm({
     type: entry.type,
     subtype: entry.subtype,
     name: entry.name,
+    r: entry.r,
   });
+  const hasLayers = typeConfigs.find(config => config.type === draft.type)?.hasLayers ?? false;
 
   const handleSave = () => {
     if (headerFieldsEqual(draft, entry)) {
@@ -41,13 +45,7 @@ export function ConstructionsNextHeaderForm({
             value={draft.type}
             onValueChange={next => {
               const nextType = (next ?? draft.type) as ConstructionType;
-              setDraft({
-                ...draft,
-                type: nextType,
-                // Разновидность живёт только у своего типа: сменили тип —
-                // чужая разновидность уходит вместе с ним.
-                subtype: nextType === SUBTYPED_TYPE ? draft.subtype : undefined,
-              });
+              setDraft(nextHeaderDraftForType(draft, nextType, typeConfigs));
             }}
           />
         </Field>
@@ -62,6 +60,11 @@ export function ConstructionsNextHeaderForm({
             onChange={event => setDraft({...draft, name: event.target.value})}
           />
         </Field>
+        <ConstructionsNextRField
+          show={hasLayers}
+          value={draft.r}
+          onChange={r => setDraft({...draft, r})}
+        />
       </Form>
 
       <div style={actionsStyle}>

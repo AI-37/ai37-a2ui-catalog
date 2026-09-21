@@ -43,6 +43,9 @@ class ConstructionEntry(StrictModel):
     name: str = Field(default=None, max_length=200)
     layers: list[ConstructionLayer] = Field(max_length=50)
     rprPassport: float = Field(default=None, gt=0)
+    # Коэффициент теплотехнической однородности r (Г.4): Rпр = r·Rусл; только
+    # у типов со слоями, диапазон (0; 1]. Не задан → агент берёт r = 1 (доп).
+    r: float = Field(default=None, gt=0, le=1)
     status: ConstructionStatus = None
 
 

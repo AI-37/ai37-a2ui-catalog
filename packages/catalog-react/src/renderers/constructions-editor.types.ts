@@ -87,8 +87,12 @@ export type ConstructionsEditorCardProps = {
   onRemove: () => void;
 };
 
-/** Поля шапки карточки — то, чем владеет её форма. */
-export type ConstructionHeaderFields = Pick<ConstructionEntry, 'type' | 'subtype' | 'name'>;
+/**
+ * Поля шапки карточки — то, чем владеет её форма. `r` правит только форма
+ * семейства `*Next`; прежняя форма ключа не шлёт, и spread коммита оставляет
+ * `entry.r` нетронутым.
+ */
+export type ConstructionHeaderFields = Pick<ConstructionEntry, 'type' | 'subtype' | 'name' | 'r'>;
 
 export type ConstructionsEditorCardHeaderProps = {
   entry: ConstructionEntry;

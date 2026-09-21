@@ -7,5 +7,10 @@ import type {ConstructionHeaderFields} from './constructions-editor.types';
  * и то же, стереть уже пустое поле не значит «изменил».
  */
 export function headerFieldsEqual(a: ConstructionHeaderFields, b: ConstructionHeaderFields) {
-  return a.type === b.type && a.subtype === b.subtype && (a.name ?? '') === (b.name ?? '');
+  return (
+    a.type === b.type &&
+    a.subtype === b.subtype &&
+    (a.name ?? '') === (b.name ?? '') &&
+    a.r === b.r
+  );
 }
