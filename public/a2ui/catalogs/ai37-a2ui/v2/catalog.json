@@ -5301,6 +5301,12 @@
                       "minimum": 0,
                       "maximum": 1
                     },
+                    "tvRoom": {
+                      "type": "number"
+                    },
+                    "totRoom": {
+                      "type": "number"
+                    },
                     "status": {
                       "type": "string",
                       "enum": [
@@ -5893,6 +5899,12 @@
                       "exclusiveMinimum": true,
                       "minimum": 0,
                       "maximum": 1
+                    },
+                    "tvRoom": {
+                      "type": "number"
+                    },
+                    "totRoom": {
+                      "type": "number"
                     },
                     "status": {
                       "type": "string",

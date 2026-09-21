@@ -2,6 +2,7 @@ import React from 'react';
 import type {ConstructionType} from '@ai37/a2ui-catalog-schemas';
 import {Button, Field, Form, Input, Select} from '../primitives';
 import {ConstructionsNextRField} from './constructions-next-r-field';
+import {ConstructionsNextRoomTempField} from './constructions-next-room-temp-field';
 import {ConstructionsNextSubtypeField} from './constructions-next-subtype-field';
 import {nextHeaderDraftForType} from './next-header-draft-for-type';
 import type {ConstructionHeaderFields} from './constructions-editor.types';
@@ -9,14 +10,16 @@ import type {ConstructionsNextHeaderRowProps} from './constructions-next.types';
 import {headerFieldsEqual} from './header-fields-equal';
 
 /**
- * Форма шапки: тип, разновидность, название и коэффициент однородности r.
- * Правки живут в локальной копии и уходят наверх только по «Сохранить» — до
- * него заголовок карточки, live-Rпр и состояние редактора прежние.
- * «Сохранить» без изменений равносилен «Отмене».
+ * Форма шапки: тип, разновидность, название, коэффициент однородности r и
+ * температуры помещения (tв*, tот*) — поправка nt по (5.3). Правки живут в
+ * локальной копии и уходят наверх только по «Сохранить» — до него заголовок
+ * карточки, чипы и состояние редактора прежние. «Сохранить» без изменений
+ * равносилен «Отмене».
  */
 export function ConstructionsNextHeaderForm({
   entry,
   typeConfigs,
+  climate,
   onCommit,
   onCancel,
 }: ConstructionsNextHeaderRowProps) {
@@ -25,6 +28,8 @@ export function ConstructionsNextHeaderForm({
     subtype: entry.subtype,
     name: entry.name,
     r: entry.r,
+    tvRoom: entry.tvRoom,
+    totRoom: entry.totRoom,
   });
   const hasLayers = typeConfigs.find(config => config.type === draft.type)?.hasLayers ?? false;
 
@@ -64,6 +69,27 @@ export function ConstructionsNextHeaderForm({
           show={hasLayers}
           value={draft.r}
           onChange={r => setDraft({...draft, r})}
+        />
+        <ConstructionsNextRoomTempField
+          label={
+            <>
+              t<sub className="a2ui-field__index">в</sub>* — температура помещения, °C
+            </>
+          }
+          value={draft.tvRoom}
+          fallback={climate.tv}
+          onChange={tvRoom => setDraft({...draft, tvRoom})}
+        />
+        <ConstructionsNextRoomTempField
+          label={
+            <>
+              t<sub className="a2ui-field__index">от</sub>* — температура с холодной стороны,
+              °C
+            </>
+          }
+          value={draft.totRoom}
+          fallback={climate.tot}
+          onChange={totRoom => setDraft({...draft, totRoom})}
         />
       </Form>
 

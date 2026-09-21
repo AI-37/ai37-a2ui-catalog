@@ -502,3 +502,114 @@ describe('ConstructionsEditorNext: коэффициент однородност
     expect(draft.constructions[0]).not.toHaveProperty('r');
   });
 });
+
+describe('ConstructionsEditorNext: температура помещения и поправка nt', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})})),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const TV_LABEL = /температура помещения/;
+  const TOT_LABEL = /температура с холодной стороны/;
+
+  it('плейсхолдеры температур — значения здания: пустое поле значит «как у здания»', () => {
+    renderSurface();
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    expect(screen.getByLabelText(TV_LABEL)).toHaveAttribute('placeholder', '20');
+    expect(screen.getByLabelText(TOT_LABEL)).toHaveAttribute('placeholder', '-2.2');
+    expect(screen.getByLabelText(TV_LABEL)).toHaveValue('');
+  });
+
+  it('tв* лестничной клетки: чип nt, норма по нему, шапка и черновик', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    fireEvent.change(screen.getByLabelText(TV_LABEL), {target: {value: '16'}});
+    // До «Сохранить» ничего не меняется — как у типа, названия и r.
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    expect(actions).toHaveLength(0);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    // nt = (16 − (−2,2))/(20 − (−2,2)) = 0,82; норма 3,19 · 0,82 = 2,62.
+    expect(screen.getByText('nt 0.82')).toBeInTheDocument();
+    expect(screen.getByText('Rпр 4.09 ≥ 2.62')).toBeInTheDocument();
+    expect(screen.getByText(/t.*в \+16 °C/)).toBeInTheDocument();
+    const draft = actions[0]!.context as {constructions: Array<{tvRoom?: number}>};
+    expect(draft.constructions[0]!.tvRoom).toBe(16);
+  });
+
+  it('tот* перекрытия над подвалом опускает норму, а не Rпр', async () => {
+    renderSurface();
+    openCard(/^Пол по грунту/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    fireEvent.change(screen.getByLabelText(TOT_LABEL), {target: {value: '8'}});
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    // nt = (20 − 8)/(20 − (−2,2)) = 0,54; норма 4,20 · 0,54 = 2,27.
+    expect(screen.getByText('nt 0.54')).toBeInTheDocument();
+    expect(screen.getByText('Rпр 0.21 < 2.27')).toBeInTheDocument();
+  });
+
+  it('без заданной температуры чипа nt нет', () => {
+    renderSurface();
+    expect(screen.queryByText(/^nt /)).not.toBeInTheDocument();
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+  });
+
+  it('у изделия поля температур есть: nt правит норму любого типа таблицы 3', () => {
+    renderSurface();
+    openCard(/^Окно двухкамерное/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    expect(screen.getByLabelText(TV_LABEL)).toBeInTheDocument();
+    expect(screen.getByLabelText(TOT_LABEL)).toBeInTheDocument();
+    // r у изделия по-прежнему нет — множитель Rпр, а не нормы.
+    expect(screen.queryByLabelText('r (однородность)')).not.toBeInTheDocument();
+  });
+
+  it('очищенное поле снимает ключ, чип nt уходит', async () => {
+    const {surface} = renderSurface({
+      draftAction: 'constructions:draft',
+      constructions: [
+        {
+          id: 'c-wall-1',
+          type: 'steny',
+          name: 'Наружная стена',
+          layers: [{material: 'Кирпич', thicknessMm: 380, lambdaB: 0.81}],
+          tvRoom: 16,
+        },
+      ],
+    });
+    const actions = subscribeActions(surface);
+    expect(screen.getByText('nt 0.82')).toBeInTheDocument();
+
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+    fireEvent.change(screen.getByLabelText(TV_LABEL), {target: {value: ''}});
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    expect(screen.queryByText(/^nt /)).not.toBeInTheDocument();
+    const draft = actions[0]!.context as {constructions: Array<Record<string, unknown>>};
+    expect(draft.constructions[0]).not.toHaveProperty('tvRoom');
+  });
+});

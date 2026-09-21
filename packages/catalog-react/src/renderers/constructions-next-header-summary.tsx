@@ -28,6 +28,8 @@ export function ConstructionsNextHeaderSummary({
             missing={entry.subtype === undefined && isSubtypeRequired(config)}
           />
           <ConstructionsNextHeaderR r={entry.r} />
+          <ConstructionsNextHeaderTemp label="t в" value={entry.tvRoom} />
+          <ConstructionsNextHeaderTemp label="t от" value={entry.totRoom} />
         </span>
         <ConstructionsNextHeaderName name={name} />
       </span>
@@ -64,6 +66,25 @@ function ConstructionsNextHeaderR({r}: {r: number | undefined}) {
   }
 
   return <span>{` ·\u00A0r = ${r.toFixed(2)}`}</span>;
+}
+
+/**
+ * Температура помещения печатается в строке типа тем же «·», что r: заданная
+ * tв* или tот* меняет норму через nt, и не увидеть её в свёрнутой форме
+ * нельзя. Не задана — строки нет, конструкция считается по общим данным.
+ */
+function ConstructionsNextHeaderTemp({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | undefined;
+}) {
+  if (value === undefined) {
+    return null;
+  }
+
+  return <span>{` ·\u00A0${label} ${value > 0 ? '+' : ''}${value} °C`}</span>;
 }
 
 /** Название есть не у всех конструкций: пустая строка сдвигала бы тип вверх. */
