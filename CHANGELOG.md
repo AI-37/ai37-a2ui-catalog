@@ -4,6 +4,24 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.36.0] - 2026-09-21
+
+### Added
+
+- **Ревизия документа в payload `LiftEditor`** (план
+  `fix-lift-stale-form-draft-overwrites-text`). Новый опциональный проп
+  `docRev` (целое ≥ 0) оба рендерера — `LiftEditor` и `LiftEditorNext` —
+  возвращают без изменений в `context` submit'а и черновика. Компонент его не
+  читает и не показывает: это эхо, по которому агент отличает действие живой
+  формы от действия устаревшего экземпляра, оставшегося в истории чата, и не
+  даёт второму затереть документ. Без пропа ключа в payload нет — прежний
+  контракт `{method, building, lifts}` цел, путь отката сохранён.
+
+  Дедуп черновика теперь считается по значениям, а не по всему payload:
+  сменившаяся `docRev` при тех же полях больше не повод слать черновик
+  заново. Сборка payload вынесена в общий `build-lift-editor-payload` —
+  оба рендерера обязаны слать одно и то же.
+
 ## [0.35.0] - 2026-09-21
 
 ### Added

@@ -3,6 +3,7 @@ import type {LiftEditorProps} from '@ai37/a2ui-catalog-schemas';
 import {applyDependentRules} from './apply-dependent-rules';
 import {applyRecommendVariant} from './apply-recommend-variant';
 import {buildingTouchedKey} from './building-touched-key';
+import {buildLiftEditorPayload} from './build-lift-editor-payload';
 import {createLiftEditorDrafts} from './create-lift-editor-drafts';
 import {createLiftEditorSources} from './create-lift-editor-sources';
 import {findMissingBySection} from './find-missing-by-section';
@@ -115,12 +116,13 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
   const dispatchDraft = (nextMethod: string, next: LiftEditorDraft) => {
     if (!sink.onDraft) return;
 
-    const payload = {method: nextMethod, building: next.building, lifts: next.lifts};
-    const serialized = JSON.stringify(payload);
+    // Дедуп — по значениям: сменившаяся `docRev` при тех же полях не повод
+    // слать черновик заново, эти значения агент уже принял.
+    const serialized = JSON.stringify([nextMethod, next.building, next.lifts]);
     if (serialized === lastDraft.current) return;
 
     lastDraft.current = serialized;
-    sink.onDraft(payload);
+    sink.onDraft(buildLiftEditorPayload(nextMethod, next, props.docRev));
   };
 
   // Структурное действие несёт полное состояние — отложенный черновик после
@@ -334,7 +336,7 @@ export function useLiftEditorNext(props: LiftEditorProps, sink: LiftNextSink): L
       if (!pending) {
         if (props.pendingLabel === undefined && missing.size > 0) return;
         cancelPendingDraft();
-        sink.onSubmit({method: config.method, building: draft.building, lifts: draft.lifts});
+        sink.onSubmit(buildLiftEditorPayload(config.method, draft, props.docRev));
         return;
       }
 

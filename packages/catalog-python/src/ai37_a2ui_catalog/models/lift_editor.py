@@ -152,6 +152,10 @@ class LiftEditorProps(StrictModel):
     liftSources: list[dict[str, LiftEditorFieldSource]] = None
     # Блок подбора. Без пропа компонент ведёт себя как раньше — путь отката.
     recommend: LiftEditorRecommend = None
+    # Ревизия документа агента: возвращается в payload без изменений. По ней
+    # агент отличает действие живой формы от устаревшего экземпляра в истории
+    # чата. Без пропа эха нет.
+    docRev: int = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def validate_document(self) -> "LiftEditorProps":

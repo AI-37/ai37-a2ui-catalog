@@ -2,6 +2,7 @@ import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {liftEditorDefinition} from '@ai37/a2ui-catalog-schemas';
 import {applyDependentRules} from './apply-dependent-rules';
+import {buildLiftEditorPayload} from './build-lift-editor-payload';
 import {buildLiftSectionSummary} from './build-lift-section-summary';
 import {buildingTouchedKey} from './building-touched-key';
 import {createLiftEditorDrafts} from './create-lift-editor-drafts';
@@ -125,12 +126,10 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
   const updateDraft = (next: LiftEditorDraft) =>
     setDrafts(prev => ({...prev, [config.method]: next}));
 
-  // Документ активной ветки — общий payload submit'а и черновика.
-  const buildDocument = (nextMethod: string, next: LiftEditorDraft) => ({
-    method: nextMethod,
-    building: next.building,
-    lifts: next.lifts,
-  });
+  // Документ активной ветки — общий payload submit'а и черновика; ревизия
+  // документа уезжает обратно нетронутой (`build-lift-editor-payload`).
+  const buildDocument = (nextMethod: string, next: LiftEditorDraft) =>
+    buildLiftEditorPayload(nextMethod, next, props.docRev);
 
   const draftStateRef = React.useRef({method: config.method, draft});
   draftStateRef.current = {method: config.method, draft};
@@ -139,7 +138,9 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
     if (!props.draftAction) return;
 
     const payload = buildDocument(nextMethod, next);
-    const serialized = JSON.stringify(payload);
+    // Дедуп — по значениям: сменившаяся `docRev` при тех же полях не повод
+    // слать черновик заново.
+    const serialized = JSON.stringify([nextMethod, next.building, next.lifts]);
     if (serialized === lastDraft.current) return;
 
     lastDraft.current = serialized;

@@ -790,6 +790,10 @@
             "emptyLabel"
           ],
           "additionalProperties": false
+        },
+        "docRev": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "required": [

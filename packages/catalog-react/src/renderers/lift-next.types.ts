@@ -17,6 +17,8 @@ export interface LiftNextDocument {
   method: string;
   building: LiftFieldValues;
   lifts: LiftFieldValues[];
+  /** Эхо `props.docRev`: ревизия документа, из которого собран этот экран. */
+  docRev?: number;
 }
 
 /**

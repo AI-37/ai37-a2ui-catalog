@@ -124,6 +124,22 @@ def test_constructions_editor_round_trip() -> None:
     assert dumped == fixture["props"]
 
 
+def test_lift_editor_doc_rev_is_optional_and_non_negative() -> None:
+    """Ревизия документа: опциональна, принимает 0 и целое, отвергает отрицательное."""
+    fixture = load_fixture("valid", "lift-editor-per-lift.json")
+    props = fixture["props"]
+
+    # Путь отката: фикстуры пропа не несут — прежний контракт проходит.
+    assert "docRev" not in props
+    validate_component_payload("LiftEditor", props)
+
+    validate_component_payload("LiftEditor", {**props, "docRev": 0})
+    validate_component_payload("LiftEditor", {**props, "docRev": 7})
+
+    with pytest.raises((ValidationError, ValueError)):
+        validate_component_payload("LiftEditor", {**props, "docRev": -1})
+
+
 def test_constructions_editor_general_accepts_empty_block() -> None:
     fixture = load_fixture("valid", "constructions-editor.json")
     empty_general = {key: None for key in fixture["props"]["general"]}

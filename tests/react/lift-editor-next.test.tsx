@@ -471,3 +471,82 @@ describe('LiftEditorNext: предел лифтов', () => {
     expect(back.disabled).toBe(false);
   });
 });
+
+/**
+ * Ревизия документа (change `lift-editor-doc-rev`). Компонент её не толкует —
+ * только возвращает: по ней агент отличает действие живой формы от действия
+ * устаревшего экземпляра, оставшегося в истории чата.
+ */
+describe('LiftEditorNext: ревизия документа', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({shouldAdvanceTime: true});
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('черновик несёт docRev формы без изменений', async () => {
+    const {actions} = renderEditor({
+      ...perLiftProps(),
+      draftAction: DRAFT_ACTION,
+      docRev: 7,
+    });
+
+    await flush(() => {
+      fireEvent.change(fieldIn('Здание', 'A'), {target: {value: '341'}});
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(LIFT_DRAFT_DEBOUNCE_MS);
+    });
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.context.docRev).toBe(7);
+  });
+
+  it('submit несёт ту же docRev', async () => {
+    const {actions} = renderEditor({...groupProps(), docRev: 3});
+
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Далее'}));
+    });
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+    });
+
+    const submits = actions.filter(action => action.name === 'calc');
+    expect(submits).toHaveLength(1);
+    expect(submits[0]!.context.docRev).toBe(3);
+  });
+
+  it('docRev = 0 уезжает, а не теряется как пустое значение', async () => {
+    const {actions} = renderEditor({
+      ...perLiftProps(),
+      draftAction: DRAFT_ACTION,
+      docRev: 0,
+    });
+
+    await flush(() => {
+      fireEvent.change(fieldIn('Здание', 'A'), {target: {value: '341'}});
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(LIFT_DRAFT_DEBOUNCE_MS);
+    });
+
+    expect(actions[0]!.context.docRev).toBe(0);
+  });
+
+  it('без пропа ключа в payload нет — путь отката для старого агента', async () => {
+    const {actions} = renderEditor({...perLiftProps(), draftAction: DRAFT_ACTION});
+
+    await flush(() => {
+      fireEvent.change(fieldIn('Здание', 'A'), {target: {value: '341'}});
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(LIFT_DRAFT_DEBOUNCE_MS);
+    });
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.context).not.toHaveProperty('docRev');
+  });
+});

@@ -128,6 +128,21 @@ describe('lift-editor schema', () => {
     expect(liftEditorPropsSchema.safeParse({...props, draftAction: ''}).success).toBe(false);
   });
 
+  it('docRev опционален; принимает 0 и целое, режет дробное и отрицательное', () => {
+    const {props} = readFixture('valid', 'lift-editor-per-lift.json');
+
+    // Обратная совместимость: валидные фикстуры пропа не несут.
+    expect(props).not.toHaveProperty('docRev');
+    expect(liftEditorPropsSchema.safeParse(props).success).toBe(true);
+
+    // 0 — документ, который агент ещё ни разу не пересобирал.
+    expect(liftEditorPropsSchema.safeParse({...props, docRev: 0}).success).toBe(true);
+    expect(liftEditorPropsSchema.safeParse({...props, docRev: 7}).success).toBe(true);
+    expect(liftEditorPropsSchema.safeParse({...props, docRev: 1.5}).success).toBe(false);
+    expect(liftEditorPropsSchema.safeParse({...props, docRev: -1}).success).toBe(false);
+    expect(liftEditorPropsSchema.safeParse({...props, docRev: '3'}).success).toBe(false);
+  });
+
   it('шапка, pendingLabel и подписи сводки опциональны и валидируются', () => {
     const {props} = readFixture('valid', 'lift-editor-per-lift.json');
     const [first, ...rest] = props.methodConfigs;
