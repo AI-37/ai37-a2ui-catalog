@@ -16,9 +16,11 @@ export function NumberField({
   onValueChange,
   step,
   min,
+  max,
   compact,
   disabled,
   name,
+  placeholder,
   'aria-label': ariaLabel,
 }: NumberFieldProps) {
   return (
@@ -27,6 +29,7 @@ export function NumberField({
       onValueChange={onValueChange}
       step={step}
       min={min}
+      max={max}
       disabled={disabled}
       name={name}
       locale="ru-RU"
@@ -34,6 +37,7 @@ export function NumberField({
       <BaseNumberField.Input
         className={`a2ui-control a2ui-t--body${compact ? ' a2ui-control--compact' : ''}`}
         aria-label={ariaLabel}
+        placeholder={placeholder}
       />
     </BaseNumberField.Root>
   );

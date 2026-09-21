@@ -5295,6 +5295,12 @@
                       "exclusiveMinimum": true,
                       "minimum": 0
                     },
+                    "r": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0,
+                      "maximum": 1
+                    },
                     "status": {
                       "type": "string",
                       "enum": [
@@ -5881,6 +5887,12 @@
                       "type": "number",
                       "exclusiveMinimum": true,
                       "minimum": 0
+                    },
+                    "r": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0,
+                      "maximum": 1
                     },
                     "status": {
                       "type": "string",

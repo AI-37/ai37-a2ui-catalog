@@ -29,6 +29,7 @@ describe('catalog-schemas', () => {
     const form = readFixture('valid', 'form-card.json');
     const constructions = readFixture('valid', 'constructions-editor.json');
     const conditions = readFixture('valid', 'constructions-editor-conditions.json');
+    const withR = readFixture('valid', 'constructions-editor-r.json');
 
     expect(simpleTablePropsSchema.safeParse(simple.props).success).toBe(true);
     expect(flexTablePropsSchema.safeParse(flex.props).success).toBe(true);
@@ -37,6 +38,7 @@ describe('catalog-schemas', () => {
     expect(formCardPropsSchema.safeParse(form.props).success).toBe(true);
     expect(constructionsEditorPropsSchema.safeParse(constructions.props).success).toBe(true);
     expect(constructionsEditorPropsSchema.safeParse(conditions.props).success).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse(withR.props).success).toBe(true);
   });
 
   it('rejects invalid fixtures', () => {
@@ -58,6 +60,7 @@ describe('catalog-schemas', () => {
       'invalid',
       'constructions-editor-unknown-type.json',
     );
+    const invalidConstructionsR = readFixture('invalid', 'constructions-editor-r-above-one.json');
 
     expect(simpleTablePropsSchema.safeParse(invalidSimple.props).success).toBe(false);
     expect(flexTablePropsSchema.safeParse(invalidFlex.props).success).toBe(false);
@@ -71,6 +74,9 @@ describe('catalog-schemas', () => {
     expect(
       constructionsEditorPropsSchema.safeParse(invalidConstructionsThickness.props).success,
     ).toBe(false);
+    expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsR.props).success).toBe(
+      false,
+    );
     expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsType.props).success).toBe(
       false,
     );

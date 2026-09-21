@@ -421,3 +421,84 @@ describe('ConstructionsEditorNext: незаполненная разновидн
     expect(screen.getByText('Наружные стены')).toBeInTheDocument();
   });
 });
+
+describe('ConstructionsEditorNext: коэффициент однородности r', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})})),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const wallWithR = {
+    id: 'c-wall-1',
+    type: 'steny',
+    name: 'Наружная стена',
+    layers: [{material: 'Кирпич', thicknessMm: 380, lambdaB: 0.81}],
+    r: 0.9,
+  };
+
+  it('поле r в форме шапки: до «Сохранить» ничего не меняется, после — чип, шапка и черновик', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    // Пустое поле подсказывает, что примет система, но значением не становится.
+    expect(screen.getByLabelText('r (однородность)')).toHaveAttribute('placeholder', '1');
+    fireEvent.change(screen.getByLabelText('r (однородность)'), {target: {value: '0.75'}});
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    expect(actions).toHaveLength(0);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    // 4.09 · 0.75 = 3.06 — стена перестаёт проходить.
+    expect(screen.getByText('Rпр 3.06 < 3.19')).toBeInTheDocument();
+    expect(screen.getByText(/проходит 1 из 3/)).toBeInTheDocument();
+    expect(screen.getByText(/r = 0\.75/)).toBeInTheDocument();
+    expect(actions).toHaveLength(1);
+    const draft = actions[0]!.context as {constructions: Array<{r?: number}>};
+    expect(draft.constructions[0]!.r).toBe(0.75);
+  });
+
+  it('у изделия (окно) поля r нет', () => {
+    renderSurface();
+    openCard(/^Окно двухкамерное/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    expect(screen.getByLabelText('Название')).toBeInTheDocument();
+    expect(screen.queryByLabelText('r (однородность)')).not.toBeInTheDocument();
+  });
+
+  it('присланный r печатается в шапке и учтён в чипе; очищенное поле снимает ключ', async () => {
+    const {surface} = renderSurface({
+      draftAction: 'constructions:draft',
+      constructions: [wallWithR],
+    });
+    const actions = subscribeActions(surface);
+
+    // (1/8.7 + 0.38/0.81 + 1/23) · 0.9 = 0.56
+    expect(screen.getByText('Rпр 0.56 < 3.19')).toBeInTheDocument();
+    openCard(/^Наружная стена/);
+    expect(screen.getByText(/r = 0\.90/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+    fireEvent.change(screen.getByLabelText('r (однородность)'), {target: {value: ''}});
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    expect(screen.getByText('Rпр 0.63 < 3.19')).toBeInTheDocument();
+    expect(screen.queryByText(/r = /)).not.toBeInTheDocument();
+    const draft = actions[0]!.context as {constructions: Array<Record<string, unknown>>};
+    expect(draft.constructions[0]).not.toHaveProperty('r');
+  });
+});

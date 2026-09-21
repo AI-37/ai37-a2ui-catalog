@@ -27,6 +27,7 @@ export function ConstructionsNextHeaderSummary({
           <ConstructionsNextHeaderSubtypeMissing
             missing={entry.subtype === undefined && isSubtypeRequired(config)}
           />
+          <ConstructionsNextHeaderR r={entry.r} />
         </span>
         <ConstructionsNextHeaderName name={name} />
       </span>
@@ -49,6 +50,20 @@ function ConstructionsNextHeaderSubtypeMissing({missing}: {missing: boolean}) {
   }
 
   return <span className="a2ui-t--warning">{' ·\u00A0разновидность не выбрана'}</span>;
+}
+
+/**
+ * Коэффициент однородности печатается в строке типа тем же «·», что и
+ * разновидность: без него строки нет — агент считает с r = 1 и скажет об этом
+ * в отчёте сам. Разделитель приклеен неразрывным пробелом (Решение 7 change
+ * `constructions-missing-subtype-invalid`).
+ */
+function ConstructionsNextHeaderR({r}: {r: number | undefined}) {
+  if (r === undefined) {
+    return null;
+  }
+
+  return <span>{` ·\u00A0r = ${r.toFixed(2)}`}</span>;
 }
 
 /** Название есть не у всех конструкций: пустая строка сдвигала бы тип вверх. */

@@ -54,6 +54,10 @@ export const constructionEntrySchema = z
     layers: z.array(constructionLayerSchema).max(50),
     // Типы без слоёв (окна/фонари/двери): паспортное Rпр вместо таблицы.
     rprPassport: z.number().positive().optional(),
+    // Коэффициент теплотехнической однородности r (Г.4 СП 50): Rпр = r·Rусл.
+    // Только у типов со слоями; не задан → агент считает с r = 1 (доп).
+    // Диапазон (0; 1]: r > 1 «улучшал» бы конструкцию относительно глади.
+    r: z.number().gt(0).max(1).optional(),
     status: constructionStatusSchema.optional(),
   })
   .strict();
