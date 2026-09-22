@@ -11,13 +11,14 @@ import type {ConstructionsNextBodyProps} from './constructions-next.types';
  * нет — переключается только оно, шапка и подложка общие.
  */
 export function ConstructionsNextBody(props: ConstructionsNextBodyProps) {
-  const {entry, typeConfigs, editingTarget, onEditingChange, onChange} = props;
+  const {entry, typeConfigs, climate, editingTarget, onEditingChange, onChange} = props;
 
   return (
     <CardBody>
       <ConstructionsNextHeaderRow
         entry={entry}
         typeConfigs={typeConfigs}
+        climate={climate}
         editing={editingTarget === 'header'}
         onOpen={() => onEditingChange('header')}
         onCommit={fields => {

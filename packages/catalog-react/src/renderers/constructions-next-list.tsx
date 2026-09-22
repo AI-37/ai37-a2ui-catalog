@@ -16,6 +16,7 @@ export function ConstructionsNextList({
   entries,
   typeConfigs,
   condition,
+  climate,
   materialsReferenceId,
   minChars,
   showRnorm,
@@ -49,6 +50,7 @@ export function ConstructionsNextList({
             entry={entry}
             typeConfigs={typeConfigs}
             condition={condition}
+            climate={climate}
             materialsReferenceId={materialsReferenceId}
             minChars={minChars}
             showRnorm={showRnorm}

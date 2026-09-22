@@ -8,6 +8,8 @@ import {
 import {Card, KIT_SCOPE, KitStyles} from '../primitives';
 import {climateKey} from './climate-key';
 import {computeLiveRpr} from './compute-live-rpr';
+import {computeNt} from './compute-nt';
+import {effectiveRnorm} from './effective-rnorm';
 import {CONDITIONS_DRAFT_DEBOUNCE_MS} from './conditions-draft-debounce-ms';
 import {ConstructionsNextConditionsSlot} from './constructions-next-conditions-slot';
 import {ConstructionsNextCounter} from './constructions-next-counter';
@@ -151,6 +153,9 @@ export const ConstructionsEditorNext = createComponentImplementation(
     const typeConfigs = props.typeConfigs;
     // `condition` из блока условий; нет значения — λБ, как на сервере.
     const condition = general.condition ?? undefined;
+    // База поправки nt (5.3): знаменатель (tв − tот) и плейсхолдеры температур
+    // конструкции. Значения живые — правка условий меняет и nt.
+    const climate = {tv: general.tv, tot: general.tot};
 
     const invalidityOf = (entry: ConstructionEntry) =>
       findInvalidLayers(
@@ -195,7 +200,9 @@ export const ConstructionsEditorNext = createComponentImplementation(
     const passing = comparable.filter(entry => {
       const config = typeConfigs.find(candidate => candidate.type === entry.type);
       const rpr = computeLiveRpr(entry, config, condition);
-      return rpr !== null && config?.rnorm !== undefined && rpr >= config.rnorm;
+      // Сравнение — с нормой ЭТОЙ конструкции: базовое Rтр типа × nt (5.3).
+      const rnorm = effectiveRnorm(config?.rnorm, computeNt(entry, climate));
+      return rpr !== null && rnorm !== undefined && rpr >= rnorm;
     });
 
     const handleOpenChange = (id: string | null) => {
@@ -308,6 +315,7 @@ export const ConstructionsEditorNext = createComponentImplementation(
               entries={constructions}
               typeConfigs={typeConfigs}
               condition={condition}
+              climate={climate}
               materialsReferenceId={props.materialsReferenceId}
               minChars={props.minChars}
               showRnorm={!climateDirty}

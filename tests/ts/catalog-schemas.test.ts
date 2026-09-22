@@ -30,6 +30,7 @@ describe('catalog-schemas', () => {
     const constructions = readFixture('valid', 'constructions-editor.json');
     const conditions = readFixture('valid', 'constructions-editor-conditions.json');
     const withR = readFixture('valid', 'constructions-editor-r.json');
+    const withNt = readFixture('valid', 'constructions-editor-nt.json');
 
     expect(simpleTablePropsSchema.safeParse(simple.props).success).toBe(true);
     expect(flexTablePropsSchema.safeParse(flex.props).success).toBe(true);
@@ -39,6 +40,7 @@ describe('catalog-schemas', () => {
     expect(constructionsEditorPropsSchema.safeParse(constructions.props).success).toBe(true);
     expect(constructionsEditorPropsSchema.safeParse(conditions.props).success).toBe(true);
     expect(constructionsEditorPropsSchema.safeParse(withR.props).success).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse(withNt.props).success).toBe(true);
   });
 
   it('rejects invalid fixtures', () => {
@@ -61,6 +63,11 @@ describe('catalog-schemas', () => {
       'constructions-editor-unknown-type.json',
     );
     const invalidConstructionsR = readFixture('invalid', 'constructions-editor-r-above-one.json');
+    // Незаданная температура выражается ОТСУТСТВИЕМ ключа, не null.
+    const invalidConstructionsTv = readFixture(
+      'invalid',
+      'constructions-editor-tv-room-null.json',
+    );
 
     expect(simpleTablePropsSchema.safeParse(invalidSimple.props).success).toBe(false);
     expect(flexTablePropsSchema.safeParse(invalidFlex.props).success).toBe(false);
@@ -75,6 +82,9 @@ describe('catalog-schemas', () => {
       constructionsEditorPropsSchema.safeParse(invalidConstructionsThickness.props).success,
     ).toBe(false);
     expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsR.props).success).toBe(
+      false,
+    );
+    expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsTv.props).success).toBe(
       false,
     );
     expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsType.props).success).toBe(

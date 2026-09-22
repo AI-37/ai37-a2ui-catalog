@@ -1,0 +1,50 @@
+{
+  "component": "ConstructionsEditor",
+  "props": {
+    "constructions": [
+      {
+        "id": "c-wall-stair",
+        "type": "steny",
+        "name": "Стена лестничной клетки",
+        "layers": [
+          {"material": "Кладка из глиняного обыкновенного кирпича", "thicknessMm": 380, "lambdaB": 0.81}
+        ],
+        "tvRoom": 16
+      },
+      {
+        "id": "c-floor-basement",
+        "type": "cherdachnye_podval_grunt",
+        "subtype": "podval_nevent",
+        "name": "Перекрытие над неотапливаемым подвалом",
+        "layers": [
+          {"material": "Железобетон", "thicknessMm": 220, "lambdaB": 2.04}
+        ],
+        "totRoom": 8
+      }
+    ],
+    "typeConfigs": [
+      {"type": "steny", "label": "Наружные стены", "hasLayers": true, "rnorm": 3.19, "alphaV": 8.7, "alphaN": 23},
+      {
+        "type": "cherdachnye_podval_grunt",
+        "label": "Чердачные и цокольные перекрытия, полы",
+        "hasLayers": true,
+        "rnorm": 4.2,
+        "alphaV": 8.7,
+        "alphaN": {"cherdak": 12, "podval_vent": 17, "podval_nevent": 6}
+      }
+    ],
+    "general": {
+      "buildingType": "Жилое многоквартирное",
+      "city": {"value": "moskva", "label": "Москва"},
+      "tot": -2.2,
+      "zot": 205,
+      "tn": -25,
+      "tv": 20,
+      "condition": "Б"
+    },
+    "materialsReferenceId": "sp50-materials",
+    "addLabel": "Добавить конструкцию",
+    "submitLabel": "Рассчитать",
+    "submitAction": "constructions:apply"
+  }
+}

@@ -11,6 +11,8 @@ export function headerFieldsEqual(a: ConstructionHeaderFields, b: ConstructionHe
     a.type === b.type &&
     a.subtype === b.subtype &&
     (a.name ?? '') === (b.name ?? '') &&
-    a.r === b.r
+    a.r === b.r &&
+    a.tvRoom === b.tvRoom &&
+    a.totRoom === b.totRoom
   );
 }

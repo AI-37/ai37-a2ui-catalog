@@ -92,7 +92,10 @@ export type ConstructionsEditorCardProps = {
  * семейства `*Next`; прежняя форма ключа не шлёт, и spread коммита оставляет
  * `entry.r` нетронутым.
  */
-export type ConstructionHeaderFields = Pick<ConstructionEntry, 'type' | 'subtype' | 'name' | 'r'>;
+export type ConstructionHeaderFields = Pick<
+  ConstructionEntry,
+  'type' | 'subtype' | 'name' | 'r' | 'tvRoom' | 'totRoom'
+>;
 
 export type ConstructionsEditorCardHeaderProps = {
   entry: ConstructionEntry;

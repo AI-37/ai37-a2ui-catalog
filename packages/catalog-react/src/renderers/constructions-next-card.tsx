@@ -10,7 +10,10 @@ import {
 } from '../primitives';
 import {applyRprPreview} from './apply-rpr-preview';
 import {computeLiveRpr} from './compute-live-rpr';
+import {computeNt} from './compute-nt';
+import {effectiveRnorm} from './effective-rnorm';
 import {ConstructionsNextBody} from './constructions-next-body';
+import {ConstructionsNextNtChip} from './constructions-next-nt-chip';
 import {ConstructionsNextRprChip} from './constructions-next-rpr-chip';
 import {ConstructionsNextStatus} from './constructions-next-status';
 import type {ConstructionsNextCardProps, ConstructionsNextPreview} from './constructions-next.types';
@@ -38,6 +41,7 @@ export function ConstructionsNextCard({
   entry,
   typeConfigs,
   condition,
+  climate,
   materialsReferenceId,
   minChars,
   showRnorm,
@@ -60,6 +64,9 @@ export function ConstructionsNextCard({
   }
 
   const rpr = computeLiveRpr(applyRprPreview(entry, editingTarget, preview), config, condition);
+  // Норма конструкции — базовое Rтр типа с поправкой nt (5.3) её помещения.
+  const nt = computeNt(entry, climate);
+  const rnorm = effectiveRnorm(config?.rnorm, nt);
   const invalidity = findInvalidLayers(entry, config);
   const title = entry.name?.trim() ? entry.name : (config?.label ?? entry.type);
 
@@ -87,7 +94,12 @@ export function ConstructionsNextCard({
             status={statusDismissed ? undefined : entry.status}
           />
         }
-        badge={<ConstructionsNextRprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />}
+        badge={
+          <span style={badgesStyle}>
+            <ConstructionsNextNtChip nt={nt} />
+            <ConstructionsNextRprChip rpr={rpr} rnorm={showRnorm ? rnorm : undefined} />
+          </span>
+        }
         action={
           <Menu
             icon={<MoreIcon />}
@@ -102,6 +114,7 @@ export function ConstructionsNextCard({
           typeConfigs={typeConfigs}
           config={config}
           condition={condition}
+          climate={climate}
           materialsReferenceId={materialsReferenceId}
           minChars={minChars}
           editingTarget={editingTarget}
@@ -113,3 +126,6 @@ export function ConstructionsNextCard({
     </Accordion.Item>
   );
 }
+
+/** Два чипа в одном слоте шапки: поправка нормы и вердикт по ней. */
+const badgesStyle: React.CSSProperties = {display: 'inline-flex', gap: 6, alignItems: 'center'};
