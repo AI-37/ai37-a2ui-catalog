@@ -19,6 +19,7 @@ export function LiftEditorScreen({
   building,
   advancedLabel,
   sources,
+  notes,
   onChange,
 }: LiftEditorScreenProps) {
   const missing = new Set(findMissingRequired(fields, values));
@@ -32,6 +33,7 @@ export function LiftEditorScreen({
       options={resolveLiftFieldOptions(field, building, values)}
       missing={missing.has(field.name)}
       source={sources[field.name]}
+      note={notes?.[field.name]}
       onChange={value => onChange(field.name, value)}
     />
   );

@@ -6944,11 +6944,37 @@
                                       "number"
                                     ]
                                   }
+                                },
+                                "note": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 80
+                                    },
+                                    "text": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "tone": {
+                                      "type": "string",
+                                      "enum": [
+                                        "muted",
+                                        "warning"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "field",
+                                    "text"
+                                  ],
+                                  "additionalProperties": false
                                 }
                               },
                               "required": [
-                                "when",
-                                "set"
+                                "when"
                               ],
                               "additionalProperties": false
                             },
@@ -7760,11 +7786,37 @@
                                       "number"
                                     ]
                                   }
+                                },
+                                "note": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 80
+                                    },
+                                    "text": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "tone": {
+                                      "type": "string",
+                                      "enum": [
+                                        "muted",
+                                        "warning"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "field",
+                                    "text"
+                                  ],
+                                  "additionalProperties": false
                                 }
                               },
                               "required": [
-                                "when",
-                                "set"
+                                "when"
                               ],
                               "additionalProperties": false
                             },

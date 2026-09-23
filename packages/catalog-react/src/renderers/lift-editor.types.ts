@@ -1,6 +1,7 @@
 import type React from 'react';
 import type {
   LiftEditorField,
+  LiftEditorFieldNote,
   LiftEditorFieldSource,
   LiftEditorMethodConfig,
   LiftEditorSectionSources,
@@ -8,6 +9,9 @@ import type {
 
 /** Значения одного экрана (здания или лифта): имя поля → введённое значение. */
 export type LiftFieldValues = Record<string, unknown>;
+
+/** Подписи под полями лифта от правил с `note`: имя поля → подпись. */
+export type LiftFieldNotes = Readonly<Record<string, LiftEditorFieldNote>>;
 
 /** Рабочая копия документа одной методики. */
 export interface LiftEditorDraft {
@@ -50,6 +54,8 @@ export interface LiftEditorFieldProps {
   missing: boolean;
   /** Источник значения; `undefined` — поле правлено или источника нет. */
   source?: LiftEditorFieldSource | undefined;
+  /** Подпись от правила; сильнее источника и `hint`. */
+  note?: LiftEditorFieldNote | undefined;
   onChange: (value: string | boolean) => void;
 }
 
@@ -73,6 +79,8 @@ export interface LiftEditorScreenProps {
   advancedLabel: string;
   /** Источники значений экрана, уже без тронутых полей. */
   sources: LiftEditorSectionSources;
+  /** Подписи правил (только секции лифта). */
+  notes?: LiftFieldNotes;
   onChange: (name: string, value: string | boolean) => void;
 }
 

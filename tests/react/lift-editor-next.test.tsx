@@ -326,6 +326,41 @@ describe('LiftEditorNext: подписи источников', () => {
   });
 });
 
+describe('LiftEditorNext: подписи правил', () => {
+  const NOTE = /Ниже минимума СП 54 прил\. В для 18 эт\./;
+
+  it('подпись правила зависит от этажности здания и Vн лифта', async () => {
+    renderEditor(readProps('lift-editor-note-rule.json'));
+
+    // N = 17 — строк правила нет, под Vн второго лифта пометка источника.
+    expect(within(sectionPanel('Лифт 2')).queryByText(NOTE)).toBeNull();
+    expect(within(sectionPanel('Лифт 2')).getByText(/^из (вашего )?вопроса$/)).toBeTruthy();
+
+    await flush(() => {
+      fireEvent.change(fieldIn('Здание', 'N'), {target: {value: '18'}});
+    });
+
+    // 18 этажей: Vн 1 — предупреждение ВМЕСТО источника, Vн 1,6 — без подписи.
+    const warning = within(sectionPanel('Лифт 2')).getByText(NOTE);
+    expect(warning.className).toContain('a2ui-t--warning');
+    expect(within(sectionPanel('Лифт 2')).queryByText(/^из (вашего )?вопроса$/)).toBeNull();
+    expect(within(sectionPanel('Лифт 1')).queryByText(NOTE)).toBeNull();
+  });
+
+  it('подпись уходит, когда Vн подняли до минимума', async () => {
+    renderEditor(readProps('lift-editor-note-rule.json'));
+
+    await flush(() => {
+      fireEvent.change(fieldIn('Здание', 'N'), {target: {value: '18'}});
+    });
+    await flush(() => {
+      fireEvent.change(fieldIn('Лифт 2', 'Vn'), {target: {value: '1.6'}});
+    });
+
+    expect(within(sectionPanel('Лифт 2')).queryByText(NOTE)).toBeNull();
+  });
+});
+
 /**
  * Тот же проход, что у `KeoEditorNext`, и то же требование: цель шага
  * получает каретку (change next-walkthrough-focus). Панели живут

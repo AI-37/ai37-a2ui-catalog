@@ -30,6 +30,7 @@ def load_fixture(group: str, name: str):
         ("constructions-editor-nt.json", "ConstructionsEditor"),
         ("lift-editor-per-lift.json", "LiftEditor"),
         ("lift-editor-group.json", "LiftEditor"),
+        ("lift-editor-note-rule.json", "LiftEditorNext"),
         ("lift-editor-recommend.json", "LiftEditorNext"),
         ("keo-editor.json", "KeoEditor"),
         # Новый рендерер на той же схеме props (change keo-editor-next):
@@ -81,6 +82,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("lift-editor-when-length-mismatch.json", "LiftEditor"),
         ("lift-editor-empty-draft-action.json", "LiftEditor"),
         ("lift-editor-unknown-source.json", "LiftEditor"),
+        ("lift-editor-rule-row-empty.json", "LiftEditor"),
         ("lift-editor-recommend-empty-resource.json", "LiftEditorNext"),
         ("lift-editor-recommend-empty-params.json", "LiftEditorNext"),
         ("keo-editor-unknown-reveal.json", "KeoEditor"),

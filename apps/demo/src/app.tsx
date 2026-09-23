@@ -23,6 +23,7 @@ import constructionsConditionsMessages from '../../../fixtures/messages/construc
 import liftEditorMessages from '../../../fixtures/messages/lift-editor-surface.json';
 import liftEditorGroupFixture from '../../../fixtures/valid/lift-editor-group.json';
 import liftEditorPerLiftFixture from '../../../fixtures/valid/lift-editor-per-lift.json';
+import liftEditorNoteRuleFixture from '../../../fixtures/valid/lift-editor-note-rule.json';
 import thermalReportSingleFixture from '../../../fixtures/valid/thermal-report-single.json';
 import thermalReportMultiFixture from '../../../fixtures/valid/thermal-report-multi.json';
 import keoEditorFixture from '../../../fixtures/valid/keo-editor.json';
@@ -150,6 +151,16 @@ const examples = [
         draftAction: DEMO_LIFT_DRAFT_ACTION,
       }),
     ),
+  },
+  {
+    key: 'lift-note-rule-preview',
+    title: 'Lift Editor Next — подпись правила (СП 54)',
+    description:
+      'Правило зависимостей с подписью вместо подстановки: источники N (Здание) и Vн (лифт), строки — проекция таблицы СП 54 прил. В (18–25 этажей, Vн 0,63 и 1). Сейчас N = 17 — подписи нет, под Vн второго лифта стоит «из вопроса». Поставьте N = 18: под Vн второго лифта появится предупреждение ВМЕСТО источника, у первого (1,6) — нет. Поднимите Vн второго до 1.6 — предупреждение уйдёт.',
+    messages: createSurfaceMessages('LiftEditorNext', {
+      ...(liftEditorNoteRuleFixture.props as Record<string, unknown>),
+      draftAction: DEMO_LIFT_DRAFT_ACTION,
+    }),
   },
   {
     key: 'lift-next-group-preview',
