@@ -62,10 +62,19 @@ class LiftEditorDependentRuleSource(StrictModel):
     scope: LiftEditorFieldScope = None
 
 
+class LiftEditorFieldNote(StrictModel):
+    """Подпись под полем лифта от совпавшей строки правила (заменяет источник и hint)."""
+
+    field: str = Field(min_length=1, max_length=80)
+    text: str = Field(min_length=1, max_length=160)
+    tone: Literal["muted", "warning"] = None
+
+
 class LiftEditorDependentRuleRow(StrictModel):
-    # Порядок значений = порядок `sources` правила.
+    # Порядок значений = порядок `sources` правила. Хотя бы одно из set/note.
     when: list[str | float] = Field(min_length=1)
-    set: dict[str, str | float]
+    set: dict[str, str | float] = None
+    note: LiftEditorFieldNote = None
 
 
 class LiftEditorDependentRule(StrictModel):
@@ -164,6 +173,8 @@ class LiftEditorProps(StrictModel):
         for config in self.methodConfigs:
             for rule in config.dependentRules or []:
                 for row in rule.rows:
+                    if row.set is None and row.note is None:
+                        raise ValueError('A rule row must declare "set", "note" or both.')
                     if len(row.when) != len(rule.sources):
                         raise ValueError(
                             f'Row "when" has {len(row.when)} value(s) but the rule '

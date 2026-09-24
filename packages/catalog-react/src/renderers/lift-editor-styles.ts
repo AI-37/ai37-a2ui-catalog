@@ -260,6 +260,15 @@ export const LIFT_EDITOR_CSS = `
   color: ${tokens.leAccent};
 }
 
+/* Подпись правила (note): нормативное предупреждение и пояснение. */
+.a2ui-le-caption--warning {
+  color: ${tokens.warning};
+}
+
+.a2ui-le-caption--muted {
+  color: ${tokens.leTextMuted};
+}
+
 .a2ui-le-dot {
   flex: none;
   width: 6px;

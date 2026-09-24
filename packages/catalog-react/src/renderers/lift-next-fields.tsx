@@ -19,6 +19,7 @@ export function LiftNextFields({
   building,
   advancedLabel,
   sources,
+  notes,
   onChange,
 }: LiftNextFieldsProps) {
   const {main, advanced} = splitAdvancedFields(fields, values);
@@ -32,6 +33,7 @@ export function LiftNextFields({
       // Прил. Е, и подсказки обязаны меняться вместе с ним.
       options={resolveLiftFieldOptions(field, building, values)}
       sources={sources}
+      note={notes?.[field.name]}
       onChange={onChange}
     />
   );

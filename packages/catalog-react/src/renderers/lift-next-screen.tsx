@@ -2,6 +2,7 @@ import React from 'react';
 import {Accordion} from '@base-ui/react/accordion';
 import type {LiftEditorProps} from '@ai37/a2ui-catalog-schemas';
 import {Button, Card, CardHeader, KIT_SCOPE, KitStyles, SectionItem} from '../primitives';
+import {collectRuleNotes} from './collect-rule-notes';
 import {buildLiftSectionSummary} from './build-lift-section-summary';
 import {LiftNextAddButton} from './lift-next-add-button';
 import {LiftNextBadge} from './lift-next-badge';
@@ -141,6 +142,7 @@ export function LiftNextScreen({props, sink}: {props: LiftEditorProps; sink: Lif
                     building={draft.building}
                     advancedLabel={props.advancedLabel}
                     sources={control.sourcesFor(key)}
+                    notes={collectRuleNotes(config.dependentRules ?? [], draft.building, lift)}
                     onChange={(name, value) => control.changeValue(key, name, value)}
                   />
                 </SectionItem>

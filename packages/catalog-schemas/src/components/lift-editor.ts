@@ -58,10 +58,27 @@ export const liftEditorFieldSchema = formFieldBaseSchema
   .strict();
 
 /**
+ * Подпись под полем лифта от совпавшей строки правила (change
+ * `lift-editor-note-rules`): нормативное предупреждение, зависящее от значений
+ * других полей (скорость ниже минимума СП 54 для этажности). Строка под полем
+ * одна, поэтому подпись заменяет и пометку источника «из вашего вопроса», и
+ * статичный `hint`. Нет совпадения — подписи нет.
+ */
+export const liftEditorFieldNoteSchema = z
+  .object({
+    field: z.string().min(1).max(80),
+    text: z.string().min(1).max(160),
+    // `warning` — нормативное предупреждение, `muted` — пояснение. Default `warning`.
+    tone: z.enum(['muted', 'warning']).optional(),
+  })
+  .strict();
+
+/**
  * Декларативное зависимое значение: при изменении любого источника ищется
- * строка, чей `when` совпал со значениями `sources` по порядку, и её `set`
- * перезаписывает поля лифта. Нормативных таблиц ГОСТ в компоненте нет —
- * приходят готовые строки (Решение 7 design.md).
+ * строка, чей `when` совпал со значениями `sources` по порядку; её `set`
+ * перезаписывает поля лифта, `note` ставит подпись под полем. Хотя бы одно из
+ * двух обязательно (проверка — в `superRefine` пропсов). Нормативных таблиц
+ * ГОСТ в компоненте нет — приходят готовые строки (Решение 7 design.md).
  */
 export const liftEditorDependentRuleSchema = z
   .object({
@@ -82,7 +99,8 @@ export const liftEditorDependentRuleSchema = z
           .object({
             // Порядок значений = порядок `sources`.
             when: z.array(z.union([z.string(), z.number()])).min(1),
-            set: z.record(z.string(), z.union([z.string(), z.number()])),
+            set: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+            note: liftEditorFieldNoteSchema.optional(),
           })
           .strict(),
       )
@@ -174,6 +192,14 @@ export const liftEditorPropsSchema = z
     for (const [configIndex, config] of value.methodConfigs.entries()) {
       for (const [ruleIndex, rule] of (config.dependentRules ?? []).entries()) {
         for (const [rowIndex, row] of rule.rows.entries()) {
+          if (row.set === undefined && row.note === undefined) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'A rule row must declare "set", "note" or both.',
+              path: ['methodConfigs', configIndex, 'dependentRules', ruleIndex, 'rows', rowIndex],
+            });
+          }
+
           if (row.when.length !== rule.sources.length) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -198,6 +224,7 @@ export type LiftsMode = z.infer<typeof liftsModeSchema>;
 export type LiftEditorFieldSource = z.infer<typeof liftEditorFieldSourceSchema>;
 export type LiftEditorSectionSources = z.infer<typeof liftEditorSectionSourcesSchema>;
 export type LiftEditorFieldScope = z.infer<typeof liftEditorFieldScopeSchema>;
+export type LiftEditorFieldNote = z.infer<typeof liftEditorFieldNoteSchema>;
 export type LiftEditorField = z.infer<typeof liftEditorFieldSchema>;
 export type LiftEditorDependentRule = z.infer<typeof liftEditorDependentRuleSchema>;
 export type LiftEditorMethodConfig = z.infer<typeof liftEditorMethodConfigSchema>;

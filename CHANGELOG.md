@@ -4,6 +4,21 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.37.0] - 2026-09-23
+
+### Added
+
+- **Подпись под полем от правила зависимостей** (change `lift-editor-note-rules`;
+  план `fix-lift-min-speed-sp54-warning`, срез B). Строка
+  `dependentRules[].rows[]` получила опциональный `note: {field, text, tone?}`,
+  а `set` стал опциональным; строка без обоих отвергается схемой. Совпадение
+  считается как у `set`, по текущим значениям, в том числе кросс-секционно
+  (N из «Здания» + Vн лифта). Подпись правила заменяет под полем и пометку
+  источника «из вопроса», и `hint` — в `LiftEditor` и `LiftEditorNext`.
+  Изменение аддитивное, `CATALOG_VERSION` остаётся `v2`; Python-зеркало
+  обновлено. Первый потребитель — предупреждение «скорость ниже минимума
+  СП 54 прил. В» в агенте лифтов.
+
 ## [0.36.0] - 2026-09-21
 
 ### Added

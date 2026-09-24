@@ -2,6 +2,7 @@ import React from 'react';
 import {createComponentImplementation} from '@a2ui/react/v0_9';
 import {liftEditorDefinition} from '@ai37/a2ui-catalog-schemas';
 import {applyDependentRules} from './apply-dependent-rules';
+import {collectRuleNotes} from './collect-rule-notes';
 import {buildLiftSectionSummary} from './build-lift-section-summary';
 import {buildingTouchedKey} from './building-touched-key';
 import {createLiftEditorDrafts} from './create-lift-editor-drafts';
@@ -430,6 +431,7 @@ export const LiftEditor = createComponentImplementation(liftEditorDefinition, ({
               building={draft.building}
               advancedLabel={props.advancedLabel}
               sources={liftSources}
+              notes={collectRuleNotes(config.dependentRules ?? [], draft.building, lift)}
               onChange={(name, value) => handleLiftChange(index, name, value)}
             />
           </LiftEditorSection>
