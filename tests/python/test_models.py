@@ -28,6 +28,8 @@ def load_fixture(group: str, name: str):
         ("constructions-editor-conditions.json", "ConstructionsEditor"),
         ("constructions-editor-r.json", "ConstructionsEditor"),
         ("constructions-editor-nt.json", "ConstructionsEditor"),
+        # Тонкий слой и вентфасад без толщины (change constructions-layer-kind-thin).
+        ("constructions-editor-thin.json", "ConstructionsEditor"),
         ("lift-editor-per-lift.json", "LiftEditor"),
         ("lift-editor-group.json", "LiftEditor"),
         ("lift-editor-note-rule.json", "LiftEditorNext"),
@@ -77,6 +79,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("constructions-editor-unknown-general-key.json", "ConstructionsEditor"),
         ("constructions-editor-r-above-one.json", "ConstructionsEditor"),
         ("constructions-editor-tv-room-null.json", "ConstructionsEditor"),
+        ("constructions-editor-unknown-layer-kind.json", "ConstructionsEditor"),
         ("lift-editor-unknown-method.json", "LiftEditor"),
         ("lift-editor-empty-lift-fields.json", "LiftEditor"),
         ("lift-editor-when-length-mismatch.json", "LiftEditor"),

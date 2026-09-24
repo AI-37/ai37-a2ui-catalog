@@ -5260,7 +5260,8 @@
                             "enum": [
                               "material",
                               "vent-gap",
-                              "closed-gap"
+                              "closed-gap",
+                              "thin"
                             ]
                           },
                           "materialKey": {
@@ -5859,7 +5860,8 @@
                             "enum": [
                               "material",
                               "vent-gap",
-                              "closed-gap"
+                              "closed-gap",
+                              "thin"
                             ]
                           },
                           "materialKey": {

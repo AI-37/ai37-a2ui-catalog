@@ -1,10 +1,13 @@
 import {z} from 'zod';
 import {type CatalogComponentDefinition} from '../types';
 
-// Вид строки слоя: материал (участвует в Σ δ/λ) или воздушный зазор —
+// Вид строки слоя: материал (участвует в Σ δ/λ), воздушный зазор —
 // вентилируемый/невентилируемый (в live-Rпр слагаемое опускается, канонический
-// Rs считает сервер).
-export const constructionLayerKindSchema = z.enum(['material', 'vent-gap', 'closed-gap']);
+// Rs считает сервер) — либо тонкий нетепловой слой `thin` (плёнка, клей, сетка,
+// краска: Rs = 0, толщина и λ не нужны; change `constructions-layer-kind-thin`).
+// Толщина обязательна у материала и замкнутого зазора; у вентилируемого зазора
+// и тонкого слоя `thicknessMm: null` — полная строка, а не черновик.
+export const constructionLayerKindSchema = z.enum(['material', 'vent-gap', 'closed-gap', 'thin']);
 
 export const constructionLayerSchema = z
   .object({

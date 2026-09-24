@@ -613,3 +613,165 @@ describe('ConstructionsEditorNext: температура помещения и 
     expect(draft.constructions[0]).not.toHaveProperty('tvRoom');
   });
 });
+
+/**
+ * Вид слоя `thin` и толщина у `vent-gap`/`thin` (change
+ * constructions-layer-kind-thin): строка без толщины — полная, вид виден в
+ * сводке, селектор вида в форме, спец-запись справочника ставит вид сразу.
+ */
+describe('ConstructionsEditorNext: вид слоя thin и толщина зазоров', () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+
+  const respondWith = (options: unknown[]) => {
+    fetchMock.mockImplementation(() => Promise.resolve({ok: true, json: async () => ({options})}));
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fetchMock = vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})}));
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const thinFixture = JSON.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), 'fixtures', 'valid', 'constructions-editor-thin.json'),
+      'utf8',
+    ),
+  ).props as {constructions: unknown[]; typeConfigs: unknown[]};
+
+  const renderThin = () =>
+    renderSurface({
+      constructions: thinFixture.constructions,
+      typeConfigs: thinFixture.typeConfigs,
+      draftAction: 'constructions:draft',
+    });
+
+  /** Кнопка-раскрывашка карточки по началу заголовка. */
+  const cardButton = (name: RegExp) => screen.getByRole('button', {name});
+
+  it('облицовка вентфасада без толщины: вид под названием, «без толщины» без предупреждения, карточка готова', () => {
+    renderThin();
+    hideConditions();
+
+    const card = cardButton(/^Наружная стена тип 1/).closest('.a2ui-card');
+    expect(card!.className).not.toContain('a2ui-card--invalid');
+    expect(card!.textContent).toContain('готова');
+
+    openCard(/^Наружная стена тип 1/);
+    const row = screen.getByRole('button', {name: /^Навесной вентилируемый фасад/});
+    expect(row.textContent).toContain('вентилируемый зазор');
+    expect(row.textContent).toContain('без толщины');
+    expect(row.textContent).toContain('Rs — в итоговом расчёте');
+    expect(row.querySelector('.a2ui-t--warning')).toBeNull();
+    expect(screen.queryByText('толщина не задана')).toBeNull();
+  });
+
+  it('тонкие слои без толщины: «тонкий слой», «не учитывается», карточка не подсвечена', () => {
+    renderThin();
+    hideConditions();
+
+    const card = cardButton(/^Стена тамбура/).closest('.a2ui-card');
+    expect(card!.className).not.toContain('a2ui-card--invalid');
+
+    openCard(/^Стена тамбура/);
+    const adhesive = screen.getAllByRole('button', {name: /^Адгезивный слой/})[0]!;
+    expect(adhesive.textContent).toContain('тонкий слой');
+    expect(adhesive.textContent).toContain('без толщины');
+    expect(adhesive.textContent).toContain('не учитывается');
+    expect(adhesive.querySelector('.a2ui-t--warning')).toBeNull();
+
+    // Тонкий слой с толщиной печатает её как обычно.
+    const paint = screen.getByRole('button', {name: /^Акриловая краска/});
+    expect(paint.textContent).toContain('2 мм');
+    expect(paint.textContent).toContain('тонкий слой');
+  });
+
+  it('материал без толщины по-прежнему предупреждает: замкнутому зазору и материалу толщина нужна', () => {
+    renderSurface({
+      constructions: [
+        {
+          id: 'w',
+          type: 'steny',
+          name: 'Стена с пустыми строками',
+          layers: [
+            {material: 'Кирпич', thicknessMm: null, lambdaManual: 0.7},
+            {material: 'Замкнутый зазор', thicknessMm: null, kind: 'closed-gap'},
+          ],
+        },
+      ],
+    });
+    hideConditions();
+    openCard(/^Стена с пустыми строками/);
+
+    expect(screen.getAllByText('толщина не задана')).toHaveLength(2);
+    expect(screen.queryByText('без толщины')).toBeNull();
+  });
+
+  it('селектор «Вид слоя»: «Тонкий слой» снимает λ, толщина не нужна, «Применить» уезжает с kind', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    hideConditions();
+    openCard(/^Наружная стена/);
+
+    // Фибролит: свой материал с ручной λ 0,09 и толщиной 30.
+    fireEvent.click(screen.getByRole('button', {name: /Фибролит/}));
+    const kindSelect = screen.getByRole('combobox', {name: 'Вид слоя'});
+    expect(kindSelect.textContent).toContain('Материал');
+
+    // Base UI Select: клик открывает список, пункт выбирается фокусом + Enter
+    // (клик по пункту в jsdom не срабатывает — нужна pointer-последовательность).
+    await act(async () => {
+      fireEvent.click(kindSelect);
+    });
+    await act(async () => {
+      const option = screen.getByRole('option', {name: 'Тонкий слой'});
+      option.focus();
+      fireEvent.keyDown(option, {key: 'Enter'});
+    });
+
+    expect(screen.getByText('не учитывается')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('не нужна')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+    });
+
+    expect(actions).toHaveLength(1);
+    const draft = actions[0]!.context as {
+      constructions: Array<{layers: Array<{kind?: string; lambdaManual?: number; thicknessMm: number | null}>}>;
+    };
+    const layer = draft.constructions[0]!.layers[3]!;
+    expect(layer.kind).toBe('thin');
+    expect(layer.lambdaManual).toBeUndefined();
+    expect(layer.thicknessMm).toBe(30);
+    expect(screen.getByRole('button', {name: /Фибролит.*тонкий слой/})).toBeInTheDocument();
+  });
+
+  it('спец-запись справочника ставит вид сразу: строка не подсвечена как материал без λ', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    hideConditions();
+    openCard(/^Наружная стена/);
+    respondWith([{value: 'thin', label: 'Тонкий слой (плёнка, клей, сетка)'}]);
+
+    fireEvent.click(screen.getByRole('button', {name: /Фибролит/}));
+    await typeAndFlush(materialInput(), 'тонк');
+    fireEvent.keyDown(materialInput(), {key: 'ArrowDown'});
+    fireEvent.keyDown(materialInput(), {key: 'Enter'});
+
+    expect(screen.getByRole('combobox', {name: 'Вид слоя'}).textContent).toContain('Тонкий слой');
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+    });
+    const draft = actions[0]!.context as {
+      constructions: Array<{layers: Array<{kind?: string; materialKey?: string}>}>;
+    };
+    expect(draft.constructions[0]!.layers[3]).toMatchObject({kind: 'thin', materialKey: 'thin'});
+  });
+});
