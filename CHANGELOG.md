@@ -2,7 +2,25 @@
 
 All notable changes to this repository should be recorded in this file.
 
-The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
+The format follows Keep a Changelog with version headings in the form `## [0.38.0] - 2026-09-24
+
+### Added
+
+- **Вид слоя `thin` и толщина у зазоров** (change `constructions-layer-kind-thin`;
+  план `AI-37/docs#405`, парный change агента `verify-thin-layers`).
+  `ConstructionLayer.kind` принимает `thin` — тонкий нетепловой слой (плёнка,
+  клей, сетка, краска): λ не бывает, Rs = 0 считает сервер. В форме слоя
+  `ConstructionsEditorNext` появился селектор «Вид слоя» (материал /
+  вентилируемый зазор / замкнутый зазор / тонкий слой); смена вида на
+  не-материал снимает λ и ключ справочника. Спец-запись справочника, чьё
+  `value` равно виду, ставит `kind` сразу при выборе, а не после ответа
+  агента. У `vent-gap` и `thin` толщина не нужна: поле без нижней границы с
+  плейсхолдером «не нужна», в сводке — приглушённое «без толщины» вместо
+  предупреждения; вид печатается под названием слоя. `closed-gap` толщину
+  требует по-прежнему. Python-зеркало, фикстуры `constructions-editor-thin`
+  (valid) и `constructions-editor-unknown-layer-kind` (invalid).
+
+## [x.y.z] - YYYY-MM-DD`.
 
 ## [0.37.0] - 2026-09-23
 

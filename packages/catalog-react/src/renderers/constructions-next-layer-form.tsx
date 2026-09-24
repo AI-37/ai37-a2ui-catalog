@@ -1,9 +1,12 @@
 import React from 'react';
 import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import {Button, Field, Form, Lookup, NumberField} from '../primitives';
+import {ConstructionsNextKindField} from './constructions-next-kind-field';
 import {ConstructionsNextLambdaField} from './constructions-next-lambda-field';
 import {ConstructionsNextLayerRemove} from './constructions-next-layer-remove';
 import type {ConstructionsNextLayerProps} from './constructions-next.types';
+import {layerKindFromOption} from './layer-kind-from-option';
+import {layerNeedsThickness} from './layer-needs-thickness';
 import {layersEqual} from './layers-equal';
 import {readOptionLambda} from './read-option-lambda';
 
@@ -15,6 +18,11 @@ import {readOptionLambda} from './read-option-lambda';
  *
  * Каждое изменение копии уходит в `onDraftChange`: карточка считает по нему
  * превью Rпр для чипа. Это не коммит и state редактора не меняет.
+ *
+ * Вид слоя — селектором (`ConstructionsNextKindField`); спец-запись
+ * справочника (зазор, тонкий слой) ставит тот же вид сразу при выборе
+ * (`layerKindFromOption`). У вентилируемого зазора и тонкого слоя толщина не
+ * нужна — поле остаётся, но с плейсхолдером «не нужна» и без нижней границы.
  */
 export function ConstructionsNextLayerForm({
   layer,
@@ -46,9 +54,8 @@ export function ConstructionsNextLayerForm({
 
   return (
     <div style={formStyle}>
-      {/* Одна сетка на три поля: в широком контейнере материал, толщина и λ
-          встают строкой, в узком материал забирает строку себе, а числа идут
-          парой под ним. */}
+      {/* Одна сетка: в широком контейнере материал забирает строку, вид,
+          толщина и λ встают второй строкой; в узком всё идёт столбцом. */}
       <Form columns={3}>
         <Field wide label="Материал">
           <Lookup
@@ -72,24 +79,29 @@ export function ConstructionsNextLayerForm({
               const lambdaA = readOptionLambda(option, 'lambdaA');
               const lambdaB = readOptionLambda(option, 'lambdaB');
               const hasLambda = lambdaA !== undefined || lambdaB !== undefined;
+              // Спец-запись справочника (зазор, тонкий слой) — это выбор вида,
+              // строка прил. М возвращает строку к материалу.
+              const kind = layerKindFromOption(option);
 
               // λ из опции вытесняет ручную: resolveLayerLambda предпочитает
               // lambdaManual, оставить её — значит молча игнорировать справочник.
               updateDraft({
                 ...draft,
                 material: option.label,
+                kind,
                 materialKey: option.value,
                 lambdaA,
                 lambdaB,
-                lambdaManual: hasLambda ? undefined : draft.lambdaManual,
+                lambdaManual: hasLambda || kind !== undefined ? undefined : draft.lambdaManual,
               });
             }}
           />
         </Field>
+        <ConstructionsNextKindField layer={draft} onChange={updateDraft} />
         <Field label="Толщина, мм">
           <NumberField
             value={draft.thicknessMm}
-            min={1}
+            {...(layerNeedsThickness(draft) ? {min: 1} : {placeholder: 'не нужна'})}
             compact
             onValueChange={value => updateDraft({...draft, thicknessMm: value})}
           />
