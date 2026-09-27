@@ -2,7 +2,9 @@
 
 All notable changes to this repository should be recorded in this file.
 
-The format follows Keep a Changelog with version headings in the form `## [0.38.0] - 2026-09-27
+The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
+
+## [0.38.0] - 2026-09-27
 
 ### Added
 
@@ -19,8 +21,6 @@ The format follows Keep a Changelog with version headings in the form `## [0.38.
   предупреждения; вид печатается под названием слоя. `closed-gap` толщину
   требует по-прежнему. Python-зеркало, фикстуры `constructions-editor-thin`
   (valid) и `constructions-editor-unknown-layer-kind` (invalid).
-
-## [x.y.z] - YYYY-MM-DD`.
 
 ## [0.37.0] - 2026-09-23
 
