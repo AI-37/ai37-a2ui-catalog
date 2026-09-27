@@ -27,5 +27,8 @@
 - [x] 4.2 `pnpm run export:public && pnpm run verify:public`, `public/` закоммичен
 - [x] 4.3 `pnpm run version:bump 0.38.0` + раздел в `CHANGELOG.md`
 - [ ] 4.4 Python-тесты (`uv run … pytest`) — в этой среде нет pyenv 3.13
-- [ ] 4.5 Тары: `spai-ui`, `spai-teplo-calc`, `spai-chat-backend`; гейт на стенде
-- [ ] 4.6 Публикация 0.38.0, потребители на версию из реестра
+- [x] 4.5 Тары: `spai-ui`, `spai-teplo-calc`, `spai-chat-backend`; гейт на стенде —
+      принято владельцем 2026-09-27
+- [x] 4.6 Публикация 0.38.0 (schemas → react, 2026-09-27); потребители на
+      версию из реестра: spai-ui#141, spai-chat-backend#142,
+      spai-thermal-calc-agent#81 (3642ef5); тарболлы сняты, `file:` нет
