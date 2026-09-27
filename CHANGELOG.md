@@ -2,7 +2,7 @@
 
 All notable changes to this repository should be recorded in this file.
 
-The format follows Keep a Changelog with version headings in the form `## [0.38.0] - 2026-09-24
+The format follows Keep a Changelog with version headings in the form `## [0.38.0] - 2026-09-27
 
 ### Added
 

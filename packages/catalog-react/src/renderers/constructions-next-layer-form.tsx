@@ -22,7 +22,8 @@ import {readOptionLambda} from './read-option-lambda';
  * Вид слоя — селектором (`ConstructionsNextKindField`); спец-запись
  * справочника (зазор, тонкий слой) ставит тот же вид сразу при выборе
  * (`layerKindFromOption`). У вентилируемого зазора и тонкого слоя толщина не
- * нужна — поле остаётся, но с плейсхолдером «не нужна» и без нижней границы.
+ * нужна — поле остаётся с плейсхолдером «не нужна»; нижняя граница 1 мм
+ * сохраняется: схема принимает только положительную толщину либо `null`.
  */
 export function ConstructionsNextLayerForm({
   layer,
@@ -101,7 +102,8 @@ export function ConstructionsNextLayerForm({
         <Field label="Толщина, мм">
           <NumberField
             value={draft.thicknessMm}
-            {...(layerNeedsThickness(draft) ? {min: 1} : {placeholder: 'не нужна'})}
+            min={1}
+            {...(layerNeedsThickness(draft) ? {} : {placeholder: 'не нужна'})}
             compact
             onValueChange={value => updateDraft({...draft, thicknessMm: value})}
           />
