@@ -10,7 +10,7 @@
       `layer-kind-from-option.ts`
 - [x] 2.2 `ConstructionsNextKindField` — селектор вида в форме слоя
 - [x] 2.3 Выбор спец-записи справочника ставит `kind`
-- [x] 2.4 Толщина: без нижней границы и с плейсхолдером у `vent-gap`/`thin`;
+- [x] 2.4 Толщина: плейсхолдер «не нужна» у `vent-gap`/`thin` (`min=1` сохранён);
       сводка — «без толщины» приглушённо
 - [x] 2.5 Сводка печатает вид под названием; λ у `thin` — «не учитывается»
 
@@ -26,7 +26,7 @@
 - [x] 4.1 `pnpm run typecheck`, `pnpm run test:ts`
 - [x] 4.2 `pnpm run export:public && pnpm run verify:public`, `public/` закоммичен
 - [x] 4.3 `pnpm run version:bump 0.38.0` + раздел в `CHANGELOG.md`
-- [ ] 4.4 Python-тесты (`uv run … pytest`) — в этой среде нет pyenv 3.13
+- [x] 4.4 Python-тесты: `uv run --python 3.13 … pytest` — 61 passed (2026-09-28)
 - [x] 4.5 Тары: `spai-ui`, `spai-teplo-calc`, `spai-chat-backend`; гейт на стенде —
       принято владельцем 2026-09-27
 - [x] 4.6 Публикация 0.38.0 (schemas → react, 2026-09-27); потребители на

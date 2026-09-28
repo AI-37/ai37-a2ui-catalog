@@ -752,6 +752,40 @@ describe('ConstructionsEditorNext: вид слоя thin и толщина заз
     expect(screen.getByRole('button', {name: /Фибролит.*тонкий слой/})).toBeInTheDocument();
   });
 
+  it('селектор «Тонкий слой» снимает materialKey, λА и λБ у слоя из справочника (design, решение 2)', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    hideConditions();
+    openCard(/^Наружная стена/);
+
+    // Кирпич: слой из справочника — materialKey, λБ 0,81 из фикстуры.
+    fireEvent.click(screen.getByRole('button', {name: /^Кладка из глиняного/}));
+    const kindSelect = screen.getByRole('combobox', {name: 'Вид слоя'});
+    await act(async () => {
+      fireEvent.click(kindSelect);
+    });
+    await act(async () => {
+      const option = screen.getByRole('option', {name: 'Тонкий слой'});
+      option.focus();
+      fireEvent.keyDown(option, {key: 'Enter'});
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+    });
+
+    const draft = actions[0]!.context as {
+      constructions: Array<{layers: Array<Record<string, unknown>>}>;
+    };
+    const layer = draft.constructions[0]!.layers[0]!;
+    expect(layer).toMatchObject({material: 'Кладка из глиняного обыкновенного кирпича', kind: 'thin'});
+    // Снятые поля уезжают как undefined (так же делает свободный ввод
+    // материала) — в JSON action'а их нет.
+    expect(layer.materialKey).toBeUndefined();
+    expect(layer.lambdaA).toBeUndefined();
+    expect(layer.lambdaB).toBeUndefined();
+    expect(layer.lambdaManual).toBeUndefined();
+  });
+
   it('спец-запись справочника ставит вид сразу: строка не подсвечена как материал без λ', async () => {
     const {surface} = renderSurface({draftAction: 'constructions:draft'});
     const actions = subscribeActions(surface);
