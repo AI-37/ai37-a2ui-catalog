@@ -55,6 +55,8 @@ def load_fixture(group: str, name: str):
         ("insolation-editor.json", "InsolationEditor"),
         ("insolation-report-pass.json", "InsolationReport"),
         ("insolation-report-fail.json", "InsolationReport"),
+        ("artifact-card.json", "ArtifactCard"),
+        ("artifact-card-minimal.json", "ArtifactCard"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
@@ -95,6 +97,9 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("keo-editor-empty-draft-action.json", "KeoEditorNext"),
         ("insolation-editor-unknown-source.json", "InsolationEditor"),
         ("insolation-report-overlapping-segments.json", "InsolationReport"),
+        ("artifact-card-href-in-props.json", "ArtifactCard"),
+        ("artifact-card-bad-id.json", "ArtifactCard"),
+        ("artifact-card-bad-file-id.json", "ArtifactCard"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:

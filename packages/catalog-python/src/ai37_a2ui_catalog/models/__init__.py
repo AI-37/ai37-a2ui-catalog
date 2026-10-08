@@ -1,3 +1,4 @@
+from .artifact_card import ArtifactCardFile, ArtifactCardFormat, ArtifactCardProps
 from .calc_editor_common import (
     CalcCondition,
     CalcEditorField,
@@ -126,10 +127,14 @@ COMPONENT_MODELS = {
     "KeoReportNext": KeoReportProps,
     "InsolationEditor": InsolationEditorProps,
     "InsolationReport": InsolationReportProps,
+    "ArtifactCard": ArtifactCardProps,
 }
 
 __all__ = [
     "COMPONENT_MODELS",
+    "ArtifactCardFile",
+    "ArtifactCardFormat",
+    "ArtifactCardProps",
     "CalcCondition",
     "CalcEditorField",
     "CalcEditorFieldType",

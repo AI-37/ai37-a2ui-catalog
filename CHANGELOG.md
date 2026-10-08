@@ -4,6 +4,29 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.39.0] - 2026-10-08
+
+### Added
+
+- **`ArtifactCard` — карточка артефакта агента** (план `files-and-artifacts-layer` §3.3,
+  фаза 3). Артефакт — результат хода, сохранённый в выходной полке chat-backend
+  (`/api/artifacts`): протокол расчёта, документ, пакет. Карточка — одна строка на примитивах
+  набора (`ReportProtocolCard`): имя, мета (`meta`, иначе `summary`, иначе `kind`) и справа
+  меню «Скачать» — Word и Markdown из markdown артефакта (`formats`, по умолчанию оба) и
+  бинарные файлы (`files`).
+  - Ссылки рендерер собирает сам из `artifactId` и `files[].id`. Схема пропускает только uuid,
+    а href в props нет вовсе, поэтому агент не может подсунуть ссылку наружу. База ссылок
+    по умолчанию — `/api/artifacts`, хост может задать свою, но только путь от корня
+    (`safeArtifactsBaseUrl`).
+  - «Сохранить в проект» — вызов хоста, а не A2UI-действие агенту: агенту в этом ходе делать
+    нечего, прикрепление идёт в chat-backend. Хост передаёт `onSaveToProject` через
+    `ArtifactCardHostProvider`. Без провайдера кнопки нет, и так же в widget-канале, где
+    проектов нет. При `scope: "project"` карточка сразу показывает «В проекте».
+  - Текстовый fallback — обязанность агента. Описание компонента требует сопровождать
+    карточку markdown-ссылкой на `/api/artifacts/<id>`.
+  - Изменение аддитивное, `CATALOG_VERSION` остаётся `v2`. Python-зеркало
+    `ArtifactCardProps`, фикстуры valid/invalid и `public/` обновлены.
+
 ## [0.38.0] - 2026-09-27
 
 ### Added

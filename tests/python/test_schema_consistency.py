@@ -21,6 +21,7 @@ COMPONENT_NAMES = (
     "KeoReport",
     "InsolationEditor",
     "InsolationReport",
+    "ArtifactCard",
 )
 
 
