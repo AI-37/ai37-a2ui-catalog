@@ -1,5 +1,6 @@
 from .constants import CATALOG_ID, CATALOG_VERSION
 from .models import (
+    ArtifactCardProps,
     ChoiceCardProps,
     ConstructionsEditorProps,
     FlexTableProps,
@@ -13,6 +14,7 @@ from .validation import get_component_schema, validate_component_payload, valida
 __all__ = [
     "CATALOG_ID",
     "CATALOG_VERSION",
+    "ArtifactCardProps",
     "ChoiceCardProps",
     "ConstructionsEditorProps",
     "FlexTableProps",

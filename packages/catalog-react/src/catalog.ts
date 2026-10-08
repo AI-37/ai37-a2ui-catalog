@@ -30,6 +30,7 @@ import {InsolationEditor} from './renderers/insolation-editor';
 import {InsolationReport} from './renderers/insolation-report';
 import {LiftReport} from './renderers/lift-report';
 import {LiftReportNext} from './renderers/lift-report-next';
+import {ArtifactCard} from './renderers/artifact-card';
 
 const customComponents: ReactComponentImplementation[] = [
   SimpleTable,
@@ -62,6 +63,8 @@ const customComponents: ReactComponentImplementation[] = [
   LiftReport,
   // Рядом со старым — тот же набор примитивов, что у ThermalReportNext.
   LiftReportNext,
+  // Карточка артефакта агента: ссылки на выгрузки и «Сохранить в проект» через хост.
+  ArtifactCard,
 ];
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(

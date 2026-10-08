@@ -25,6 +25,7 @@ import {keoReportDefinition, keoReportNextDefinition} from './components/keo-rep
 import {insolationEditorDefinition} from './components/insolation-editor';
 import {insolationReportDefinition} from './components/insolation-report';
 import {liftReportDefinition, liftReportNextDefinition} from './components/lift-report';
+import {artifactCardDefinition} from './components/artifact-card';
 import {getBaseComponentEntries} from './base-components';
 import type {CatalogComponentDefinition, JsonSchema} from './types';
 
@@ -48,6 +49,7 @@ export const componentDefinitions = [
   insolationReportDefinition,
   liftReportDefinition,
   liftReportNextDefinition,
+  artifactCardDefinition,
 ] as const satisfies ReadonlyArray<CatalogComponentDefinition<any>>;
 
 export const componentDefinitionMap = new Map(
