@@ -6,9 +6,11 @@ from pydantic import Field
 
 from .shared import StrictModel
 
-# Вид строки слоя: материал или воздушный зазор (вент./невент.); зазоры в
-# live-Rпр клиента пропускаются, их Rs считает сервер.
-ConstructionLayerKind = Literal["material", "vent-gap", "closed-gap"]
+# Вид строки слоя: материал, воздушный зазор (вент./невент.) либо тонкий
+# нетепловой слой `thin` (плёнка, клей, сетка, краска — Rs = 0, толщина и λ не
+# нужны). Зазоры и тонкие слои в live-Rпр клиента пропускаются, их Rs считает
+# сервер (change constructions-layer-kind-thin).
+ConstructionLayerKind = Literal["material", "vent-gap", "closed-gap", "thin"]
 
 ConstructionType = Literal[
     "steny", "pokrytiya", "cherdachnye_podval_grunt", "okna", "fonari", "dver"

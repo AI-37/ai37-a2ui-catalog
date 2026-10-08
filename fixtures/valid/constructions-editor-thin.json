@@ -1,0 +1,89 @@
+{
+  "component": "ConstructionsEditor",
+  "props": {
+    "constructions": [
+      {
+        "id": "wall-vent-facade",
+        "type": "steny",
+        "name": "Наружная стена тип 1 — газобетон, вентфасад",
+        "layers": [
+          {
+            "material": "Ячеистые бетоны автоклавного твердения",
+            "thicknessMm": 200,
+            "materialKey": "m191",
+            "lambdaA": 0.176,
+            "lambdaB": 0.188
+          },
+          {
+            "material": "Минераловатные изделия из каменного волокна",
+            "thicknessMm": 150,
+            "materialKey": "m25",
+            "lambdaA": 0.04,
+            "lambdaB": 0.044
+          },
+          {
+            "material": "Навесной вентилируемый фасад с облицовкой фибробетон",
+            "thicknessMm": null,
+            "kind": "vent-gap"
+          }
+        ]
+      },
+      {
+        "id": "wall-tambur",
+        "type": "steny",
+        "name": "Стена тамбура — мокрый фасад",
+        "layers": [
+          {
+            "material": "Железобетон",
+            "thicknessMm": 220,
+            "materialKey": "m216",
+            "lambdaA": 1.92,
+            "lambdaB": 2.04
+          },
+          {
+            "material": "Минераловатные изделия из каменного волокна",
+            "thicknessMm": 80,
+            "lambdaManual": 0.044
+          },
+          {
+            "material": "Адгезивный слой",
+            "thicknessMm": null,
+            "kind": "thin"
+          },
+          {
+            "material": "Щелочестойкая штукатурная сетка 5х5 мм",
+            "thicknessMm": null,
+            "kind": "thin"
+          },
+          {
+            "material": "Декоративное покрытие «короед»",
+            "thicknessMm": 10,
+            "lambdaManual": 0.86
+          },
+          {
+            "material": "Акриловая краска",
+            "thicknessMm": 2,
+            "kind": "thin"
+          }
+        ]
+      }
+    ],
+    "typeConfigs": [
+      {
+        "type": "steny",
+        "label": "Наружные стены",
+        "hasLayers": true,
+        "rnorm": 3.4,
+        "alphaV": 8.7,
+        "alphaN": 12
+      }
+    ],
+    "cityReferenceId": "cities",
+    "materialsReferenceId": "sp50-materials",
+    "minChars": 2,
+    "addLabel": "Добавить конструкцию",
+    "submitLabel": "Рассчитать",
+    "nextLabel": "Далее",
+    "submitAction": "constructions:apply"
+  }
+}

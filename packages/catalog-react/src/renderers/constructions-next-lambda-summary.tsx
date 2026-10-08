@@ -4,9 +4,10 @@ import type {OperatingCondition} from './constructions-editor.types';
 import {resolveLayerLambda} from './resolve-layer-lambda';
 
 /**
- * λ в строке-сводке слоя, четырьмя ветками: зазор (Rs считает сервер), ручная
- * λ, λ из справочника с пометкой «авто» и пустая λ предупреждающим цветом.
- * Каждая ветка — свой `return`, а не тернарник в разметке строки.
+ * λ в строке-сводке слоя, пятью ветками: тонкий слой (Rs = 0), зазор (Rs
+ * считает сервер), ручная λ, λ из справочника с пометкой «авто» и пустая λ
+ * предупреждающим цветом. Каждая ветка — свой `return`, а не тернарник в
+ * разметке строки.
  */
 export function ConstructionsNextLambdaSummary({
   layer,
@@ -15,6 +16,10 @@ export function ConstructionsNextLambdaSummary({
   layer: ConstructionLayer;
   condition: OperatingCondition;
 }) {
+  if (layer.kind === 'thin') {
+    return <span className="a2ui-t--muted">не учитывается</span>;
+  }
+
   if (layer.kind !== undefined && layer.kind !== 'material') {
     return <span className="a2ui-t--muted">Rs — в итоговом расчёте</span>;
   }
