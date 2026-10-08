@@ -95,6 +95,9 @@ export const keoReportProtocolSchema = z
      * прямая ссылка, `.docx` — конверт-сервис chat-backend). Blob-поля выше
      * остаются fallback'ом для старых наполнений без URL. Дословно как у
      * `thermalReportProtocolSchema` — третий отчёт получает ту же ручку.
+     * Либо ссылка на протокол в выходной полке chat-backend
+     * (`/api/artifacts/<id>/content?format=md`): тогда `.docx` — тот же путь с
+     * `format=docx` (`reportDocxUrl`).
      */
     downloadUrl: z.string().min(1).max(2000).optional(),
   })

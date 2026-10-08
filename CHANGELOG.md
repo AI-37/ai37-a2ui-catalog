@@ -4,6 +4,23 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.39.1] - 2026-10-09
+
+### Changed
+
+- **«Скачать» у отчётов расчётов понимает ссылку на артефакт** (план
+  `files-and-artifacts-layer` §3.4, фаза 4). Calc-агенты теперь публикуют протокол в выходную
+  полку chat-backend и кладут в `protocol.downloadUrl` ссылку
+  `/api/artifacts/<id>/content?format=md`. Меню «Скачать» у `LiftReport`, `ThermalReport`
+  (dropdown `<details>`) и у `LiftReportNext`, `ThermalReportNext`, `KeoReportNext` (меню
+  примитивов) выводит из неё пункт Word: тот же путь с `format=docx`, DOCX рендерит chat-backend.
+  - Раньше пункт `.docx` появлялся только для `/api/agent-resource?…`. Эта форма работает как
+    прежде: конверт-сервис `/api/agent-resource/convert?format=docx&…`.
+  - Обе формы распознаёт одна функция `reportDocxUrl`. Любой другой URL, в том числе окно
+    markdown артефакта или его бинарный файл, даёт один пункт `.md`, как и раньше.
+  - Схемы не менялись, `CATALOG_VERSION` остаётся `v2`. До выхода этой версии в UI ссылка на
+    артефакт тоже работает, но в меню будет только `.md`.
+
 ## [0.39.0] - 2026-10-08
 
 ### Added

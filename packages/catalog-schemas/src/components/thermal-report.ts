@@ -116,6 +116,9 @@ export const thermalReportProtocolSchema = z
      * «Скачать»: при наличии рендерер показывает dropdown форматов (`.md` —
      * прямая ссылка, `.docx` — конверт-сервис chat-backend); Blob-поля выше
      * остаются fallback'ом для старых payload'ов без URL.
+     * Либо ссылка на протокол в выходной полке chat-backend
+     * (`/api/artifacts/<id>/content?format=md`): тогда `.docx` — тот же путь с
+     * `format=docx` (`reportDocxUrl`).
      */
     downloadUrl: z.string().min(1).max(2000).optional(),
   })
