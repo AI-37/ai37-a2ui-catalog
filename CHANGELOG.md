@@ -27,6 +27,25 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
   - Изменение аддитивное, `CATALOG_VERSION` остаётся `v2`. Python-зеркало
     `ArtifactCardProps`, фикстуры valid/invalid и `public/` обновлены.
 
+## [0.38.0] - 2026-09-27
+
+### Added
+
+- **Вид слоя `thin` и толщина у зазоров** (change `constructions-layer-kind-thin`;
+  план `AI-37/docs#405`, парный change агента `verify-thin-layers`).
+  `ConstructionLayer.kind` принимает `thin` — тонкий нетепловой слой (плёнка,
+  клей, сетка, краска): λ не бывает, Rs = 0 считает сервер. В форме слоя
+  `ConstructionsEditorNext` появился селектор «Вид слоя» (материал /
+  вентилируемый зазор / замкнутый зазор / тонкий слой); смена вида на
+  не-материал снимает λ и ключ справочника. Спец-запись справочника, чьё
+  `value` равно виду, ставит `kind` сразу при выборе, а не после ответа
+  агента. У `vent-gap` и `thin` толщина не нужна: поле с плейсхолдером «не нужна»
+  (нижняя граница 1 мм сохранена — схема принимает только положительное
+  значение либо `null`), в сводке — приглушённое «без толщины» вместо
+  предупреждения; вид печатается под названием слоя. `closed-gap` толщину
+  требует по-прежнему. Python-зеркало, фикстуры `constructions-editor-thin`
+  (valid) и `constructions-editor-unknown-layer-kind` (invalid).
+
 ## [0.37.0] - 2026-09-23
 
 ### Added

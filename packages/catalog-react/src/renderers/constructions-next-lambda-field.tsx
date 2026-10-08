@@ -5,9 +5,10 @@ import type {OperatingCondition} from './constructions-editor.types';
 import {resolveLayerLambda} from './resolve-layer-lambda';
 
 /**
- * Поле λ в форме слоя тремя ветками: у зазора λ не бывает (Rs считает сервер),
- * у материала из справочника она приходит с опцией и показана значением с
- * пометкой «авто», у своего материала — вводится вручную.
+ * Поле λ в форме слоя четырьмя ветками: у тонкого слоя λ не бывает (Rs = 0),
+ * у зазора тоже (Rs считает сервер), у материала из справочника она приходит
+ * с опцией и показана значением с пометкой «авто», у своего материала —
+ * вводится вручную.
  */
 export function ConstructionsNextLambdaField({
   layer,
@@ -18,6 +19,10 @@ export function ConstructionsNextLambdaField({
   condition: OperatingCondition;
   onChange: (lambdaManual: number | undefined) => void;
 }) {
+  if (layer.kind === 'thin') {
+    return <Static>не учитывается</Static>;
+  }
+
   if (layer.kind !== undefined && layer.kind !== 'material') {
     return <Static>Rs — в итоговом расчёте</Static>;
   }
