@@ -19,7 +19,7 @@ export function MenuEntry({item}: {item: MenuItem}) {
   }
 
   return (
-    <BaseMenu.Item className={className} onClick={item.onSelect}>
+    <BaseMenu.Item className={className} disabled={item.disabled} onClick={item.onSelect}>
       {item.label}
     </BaseMenu.Item>
   );

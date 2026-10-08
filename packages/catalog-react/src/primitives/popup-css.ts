@@ -55,6 +55,12 @@ ${declareTokens(POPUP_TOKEN_NAMES)}
 
 .a2ui-popup__item--danger { color: var(--a2ui-text-color-danger); }
 
+/* data-disabled ставит библиотека: пункт виден («В проекте»), но не выбирается. */
+.a2ui-popup__item[data-disabled] {
+  cursor: default;
+  color: var(--a2ui-text-color-muted);
+}
+
 .a2ui-popup__item[data-selected] {
   color: var(--a2ui-text-color-accent);
   font-weight: var(--a2ui-text-weight-strong);

@@ -8,6 +8,8 @@ export interface MenuItem {
   label: string;
   href?: string;
   onSelect?: () => void;
+  /** Пункт виден, но не выбирается (например, «В проекте» после сохранения). */
+  disabled?: boolean;
   /** Тон пункта: `danger` — необратимое действие. */
   tone?: 'neutral' | 'danger';
 }

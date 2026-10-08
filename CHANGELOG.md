@@ -6,6 +6,23 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
 
 ## [0.39.1] - 2026-10-09
 
+### Added
+
+- **«Сохранить в проект» в меню «Скачать» отчётов расчётов** (план `files-and-artifacts-layer`
+  §3.4, фаза 4, решение владельца от 09.10). Если `protocol.downloadUrl` ведёт на артефакт
+  (`/api/artifacts/<uuid>/…`), а хост дал `onSaveToProject`, последним пунктом меню идёт
+  «Сохранить в проект». Пункт есть и в меню примитивов (`LiftReportNext`, `ThermalReportNext`,
+  `KeoReportNext`), и в dropdown `<details>` (`LiftReport`, `ThermalReport`).
+  - Механизм тот же, что у `ArtifactCard`: `ArtifactCardHostProvider` → `onSaveToProject`.
+    Второго контекста нет, хост оборачивает поверхность одним провайдером.
+  - id берётся из пути URL и только в форме uuid (`reportArtifactId`); query и фрагмент не
+    смотрятся. Ресурс агента, чужая форма, нет провайдера, widget-канал без обработчика — пункта
+    нет.
+  - Пока идёт запрос — «Сохраняю…», после успеха — неактивное «В проекте», после отказа —
+    «Не удалось сохранить, ещё раз». Агенту действие не уходит.
+  - Состояние сохранения у карточки и у меню одно (`useSaveToProject`). У `MenuItem` появился
+    `disabled`.
+
 ### Changed
 
 - **«Скачать» у отчётов расчётов понимает ссылку на артефакт** (план
