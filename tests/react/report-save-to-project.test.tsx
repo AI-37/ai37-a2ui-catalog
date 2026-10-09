@@ -271,3 +271,29 @@ describe('dropdown <details> (LiftReport, ThermalReport): пункт «Сохр�
     expect(retry.disabled).toBe(false);
   });
 });
+
+describe('меню не закрывается по клику «Сохранить в проект»', () => {
+  it('статус виден сразу, без повторного открытия меню', async () => {
+    let resolve: () => void = () => undefined;
+    const onSaveToProject = vi.fn(
+      () =>
+        new Promise<void>(r => {
+          resolve = r;
+        }),
+    );
+    renderReport('LiftReportNext', withDownloadUrl('lift-report.json', ARTIFACT_MD), {
+      onSaveToProject,
+    });
+
+    await openNextMenu();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('menuitem', {name: 'Сохранить в проект'}));
+    });
+    // Меню не открывали заново — пункт уже показывает ход сохранения.
+    expect(screen.getByRole('menuitem', {name: 'Сохраняю…'})).toBeTruthy();
+    await act(async () => {
+      resolve();
+    });
+    expect(screen.getByRole('menuitem', {name: 'В проекте'})).toBeTruthy();
+  });
+});
