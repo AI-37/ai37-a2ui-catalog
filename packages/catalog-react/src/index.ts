@@ -45,3 +45,5 @@ export * from './renderers/artifact-card';
 export * from './renderers/artifact-card-host';
 export * from './renderers/artifact-card-links';
 export * from './renderers/artifact-card-screen';
+// Режим «только чтение» для прошлых поверхностей ленты: ввод глушится, скачивание и ссылки — нет.
+export * from './renderers/surface-read-only';
