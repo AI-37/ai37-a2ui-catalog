@@ -31,34 +31,54 @@ import {InsolationReport} from './renderers/insolation-report';
 import {LiftReport} from './renderers/lift-report';
 import {LiftReportNext} from './renderers/lift-report-next';
 import {ArtifactCard} from './renderers/artifact-card';
+import {withReadOnlyGate} from './renderers/surface-read-only';
+
+/**
+ * Компоненты ввода: на прошлой поверхности (`SurfaceReadOnlyProvider`) их поддерево
+ * глушится целиком. Отчёты, таблицы и карточка артефакта сюда не входят — у них
+ * скачивание, ссылки и раскрытие остаются рабочими, а кнопки действий агенту
+ * прячутся сами (`useSurfaceReadOnly`).
+ */
+const BASIC_INPUT_COMPONENTS = new Set([
+  'Button',
+  'TextField',
+  'CheckBox',
+  'ChoicePicker',
+  'Slider',
+  'DateTimeInput',
+]);
+
+const basicComponents = [...basicCatalog.components.values()].map(component =>
+  BASIC_INPUT_COMPONENTS.has(component.name) ? withReadOnlyGate(component) : component,
+);
 
 const customComponents: ReactComponentImplementation[] = [
   SimpleTable,
   FlexTable,
   LatexFormula,
-  ChoiceCard,
-  FormCard,
-  ConstructionsEditor,
+  withReadOnlyGate(ChoiceCard),
+  withReadOnlyGate(FormCard),
+  withReadOnlyGate(ConstructionsEditor),
   // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока
   // сравнение «было / стало» не закончено (change constructions-editor-next).
-  ConstructionsEditorNext,
-  LiftEditor,
+  withReadOnlyGate(ConstructionsEditorNext),
+  withReadOnlyGate(LiftEditor),
   // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока
   // сравнение «было / стало» не закончено (change lift-editor-next).
-  LiftEditorNext,
+  withReadOnlyGate(LiftEditorNext),
   ThermalReport,
   // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока
   // сравнение «было / стало» не закончено (change reports-next).
   ThermalReportNext,
-  KeoEditor,
+  withReadOnlyGate(KeoEditor),
   // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока
   // сравнение «было / стало» не закончено (change keo-editor-next).
-  KeoEditorNext,
+  withReadOnlyGate(KeoEditorNext),
   KeoReport,
   // Рядом со старым — тот же набор примитивов, что у ThermalReportNext и
   // LiftReportNext (change keo-report-next).
   KeoReportNext,
-  InsolationEditor,
+  withReadOnlyGate(InsolationEditor),
   InsolationReport,
   LiftReport,
   // Рядом со старым — тот же набор примитивов, что у ThermalReportNext.
@@ -69,7 +89,7 @@ const customComponents: ReactComponentImplementation[] = [
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(
   CATALOG_ID,
-  [...basicCatalog.components.values(), ...customComponents],
+  [...basicComponents, ...customComponents],
   [...basicCatalog.functions.values()],
   basicCatalog.themeSchema,
 );

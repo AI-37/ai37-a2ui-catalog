@@ -2,6 +2,7 @@ import React from 'react';
 import type {KeoReportAction} from '@ai37/a2ui-catalog-schemas';
 import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import type {KeoReportOnAction} from './keo-report.types';
+import {useSurfaceReadOnly} from './surface-read-only';
 
 const VARIANT_CLASS = {
   solid: 'a2ui-kr-btn a2ui-kr-btn--solid',
@@ -20,6 +21,11 @@ export function KeoReportActionButton({
   variant: keyof typeof VARIANT_CLASS;
   onAction: KeoReportOnAction;
 }) {
+  // На прошлой поверхности кнопки нет: действие ушло бы агенту и сменило диалог.
+  if (useSurfaceReadOnly()) {
+    return null;
+  }
+
   return (
     <button
       type="button"
