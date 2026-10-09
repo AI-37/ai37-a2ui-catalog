@@ -19,7 +19,12 @@ export function MenuEntry({item}: {item: MenuItem}) {
   }
 
   return (
-    <BaseMenu.Item className={className} disabled={item.disabled} onClick={item.onSelect}>
+    <BaseMenu.Item
+      className={className}
+      disabled={item.disabled}
+      closeOnClick={!item.keepOpen}
+      onClick={item.onSelect}
+    >
       {item.label}
     </BaseMenu.Item>
   );

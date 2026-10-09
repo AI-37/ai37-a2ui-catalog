@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 
 export type SaveToProjectState = 'idle' | 'saving' | 'saved' | 'failed';
 
@@ -14,6 +14,10 @@ export interface SaveToProject {
  * отчётов. Сохранение — вызов хоста (`ArtifactCardHost.onSaveToProject`), агенту
  * ничего не уходит. Пока идёт запрос, повторный вызов ничего не делает; после
  * отказа можно попробовать ещё раз.
+ *
+ * Состояние привязано к `artifactId`: тот же компонент на месте получает новый протокол
+ * (пересчёт), и «В проекте» от прошлого артефакта сбрасывается в `initial`. Ответ хоста
+ * по прошлому артефакту, пришедший после смены, состояние нового не трогает.
  */
 export function useSaveToProject(
   artifactId: string | undefined,
@@ -21,16 +25,25 @@ export function useSaveToProject(
   initial: SaveToProjectState = 'idle',
 ): SaveToProject {
   const [state, setState] = useState<SaveToProjectState>(initial);
+  const [trackedId, setTrackedId] = useState(artifactId);
+  // Сброс при смене артефакта — во время рендера (паттерн React «хранить прошлое значение
+  // пропса»), чтобы новый протокол ни одного кадра не показался «В проекте».
+  if (trackedId !== artifactId) {
+    setTrackedId(artifactId);
+    setState(initial);
+  }
+  const currentId = useRef(artifactId);
+  currentId.current = artifactId;
   const canSave = artifactId !== undefined && onSaveToProject !== undefined;
 
   const save = () => {
     if (artifactId === undefined || onSaveToProject === undefined) return;
     if (state === 'saving' || state === 'saved') return;
     setState('saving');
-    onSaveToProject(artifactId).then(
-      () => setState('saved'),
-      () => setState('failed'),
-    );
+    const settle = (next: SaveToProjectState) => () => {
+      if (currentId.current === artifactId) setState(next);
+    };
+    onSaveToProject(artifactId).then(settle('saved'), settle('failed'));
   };
 
   return {state, canSave, save};

@@ -46,6 +46,8 @@ function saveItems(save: SaveToProject): MenuItem[] {
       label: saveToProjectLabel(save.state),
       onSelect: save.save,
       disabled: save.state === 'saving' || save.state === 'saved',
+      // Статус сохранения виден в самом пункте, поэтому меню остаётся открытым.
+      keepOpen: true,
     },
   ];
 }
