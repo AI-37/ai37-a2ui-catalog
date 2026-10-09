@@ -85,6 +85,9 @@ export const liftReportProtocolSchema = z
      * Относительный URL ручки агента (`/api/agent-resource?resource=…`) для
      * «Скачать»: рендерер отдаёт обычный `<a href>`, download-заголовки ставит
      * сервер агента. Нет URL — нет ссылки, протокол только раскрывается.
+     * Либо ссылка на протокол в выходной полке chat-backend
+     * (`/api/artifacts/<id>/content?format=md`): тогда `.docx` — тот же путь с
+     * `format=docx` (`reportDocxUrl`).
      */
     downloadUrl: z.string().min(1).max(2000).optional(),
   })

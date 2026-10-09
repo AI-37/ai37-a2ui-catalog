@@ -1,10 +1,9 @@
-import React, {useState} from 'react';
+import React from 'react';
 import type {ArtifactCardProps} from '@ai37/a2ui-catalog-schemas';
 import {Button, KIT_SCOPE, KitStyles, Menu, ReportProtocolCard} from '../primitives';
 import {artifactDownloadItems, artifactMeta, safeArtifactsBaseUrl} from './artifact-card-links';
 import type {ArtifactCardHost} from './artifact-card-host';
-
-type SaveState = 'idle' | 'saving' | 'saved' | 'failed';
+import {useSaveToProject, type SaveToProjectState} from './use-save-to-project';
 
 /**
  * Карточка артефакта на примитивах: одна строка протокола — имя, мета и
@@ -14,17 +13,11 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'failed';
  */
 export function ArtifactCardScreen({props, host}: {props: ArtifactCardProps; host: ArtifactCardHost}) {
   const items = artifactDownloadItems(props, safeArtifactsBaseUrl(host.baseUrl));
-  const [save, setSave] = useState<SaveState>(props.scope === 'project' ? 'saved' : 'idle');
-
-  const onSave = host.onSaveToProject;
-  const handleSave = () => {
-    if (onSave === undefined) return;
-    setSave('saving');
-    onSave(props.artifactId).then(
-      () => setSave('saved'),
-      () => setSave('failed'),
-    );
-  };
+  const save = useSaveToProject(
+    props.artifactId,
+    host.onSaveToProject,
+    props.scope === 'project' ? 'saved' : 'idle',
+  );
 
   return (
     <div className={KIT_SCOPE}>
@@ -34,7 +27,7 @@ export function ArtifactCardScreen({props, host}: {props: ArtifactCardProps; hos
         meta={artifactMeta(props)}
         action={
           <span style={actionsStyle}>
-            <SaveControl state={save} canSave={onSave !== undefined} onSave={handleSave} />
+            <SaveControl state={save.state} canSave={save.canSave} onSave={save.save} />
             {items.length > 0 ? <Menu label="Скачать" side="top" items={items} /> : null}
           </span>
         }
@@ -48,7 +41,7 @@ function SaveControl({
   canSave,
   onSave,
 }: {
-  state: SaveState;
+  state: SaveToProjectState;
   canSave: boolean;
   onSave: () => void;
 }) {
