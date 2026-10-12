@@ -12501,6 +12501,154 @@
         },
         "$schema": "https://json-schema.org/draft/2019-09/schema#"
       }
+    },
+    "VerificationReport": {
+      "description": "A counterparty-verification result card: a verdict header (status pill, company as the headline, one-line summary) and a list of checks, each with a status and a one-line basis. A check that carries `details` (label/value pairs) or `sources` (registry links) expands to show them; a check without them is a plain row. Use it to present a supplier/contractor check (registry status, OKVED, financials, unfair-supplier registry, website) instead of a markdown checklist; for a single targeted check send one row. Values arrive as ready strings — the renderer does not format numbers.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/verification-report.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/VerificationReport",
+        "definitions": {
+          "VerificationReport": {
+            "type": "object",
+            "properties": {
+              "verdict": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail",
+                      "warning"
+                    ]
+                  },
+                  "badge": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  }
+                },
+                "required": [
+                  "status",
+                  "badge",
+                  "headline"
+                ],
+                "additionalProperties": false
+              },
+              "checks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail",
+                        "warning",
+                        "error",
+                        "skipped"
+                      ]
+                    },
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 400
+                    },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "value": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 600
+                          }
+                        },
+                        "required": [
+                          "label",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 16
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "url": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 2000
+                          }
+                        },
+                        "required": [
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 8
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "verdict",
+              "checks"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
     }
   }
 }

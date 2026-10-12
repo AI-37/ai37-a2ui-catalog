@@ -33,6 +33,8 @@ import insolationEditorFixture from '../../../fixtures/valid/insolation-editor.j
 import insolationReportPassFixture from '../../../fixtures/valid/insolation-report-pass.json';
 import insolationReportFailFixture from '../../../fixtures/valid/insolation-report-fail.json';
 import liftReportFixture from '../../../fixtures/valid/lift-report.json';
+import verificationReportReviewFixture from '../../../fixtures/valid/verification-report-review.json';
+import verificationReportPassFixture from '../../../fixtures/valid/verification-report-pass.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
@@ -288,6 +290,26 @@ const examples = [
     messages: createSurfaceMessages(
       'LiftReportNext',
       liftReportFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'verification-report-review-preview',
+    title: 'Verification Report — проверка контрагента',
+    description:
+      'Вердикт проверки контрагента (Минстрой) на примитивах отчётов: пилюля вердикта, компания заголовком и список проверок. Строка с деталями раскрывается в ключевые значения и источник, строка без деталей — обычная строка без шеврона. Раскрыть можно несколько строк сразу.',
+    messages: createSurfaceMessages(
+      'VerificationReport',
+      verificationReportReviewFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'verification-report-single-preview',
+    title: 'Verification Report — точечная проверка',
+    description:
+      'Тот же компонент с одной строкой: вердикт карточки — статус этой проверки, у источников одна ссылка и одна подпись.',
+    messages: createSurfaceMessages(
+      'VerificationReport',
+      verificationReportPassFixture.props as Record<string, unknown>,
     ),
   },
 ] as const;

@@ -102,6 +102,14 @@ from .lift_editor import (
 )
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
+from .verification_report import (
+    VerificationReportCheck,
+    VerificationReportCheckStatus,
+    VerificationReportDetail,
+    VerificationReportProps,
+    VerificationReportSource,
+    VerificationReportVerdict,
+)
 
 COMPONENT_MODELS = {
     "SimpleTable": SimpleTableProps,
@@ -128,6 +136,7 @@ COMPONENT_MODELS = {
     "InsolationEditor": InsolationEditorProps,
     "InsolationReport": InsolationReportProps,
     "ArtifactCard": ArtifactCardProps,
+    "VerificationReport": VerificationReportProps,
 }
 
 __all__ = [
@@ -228,4 +237,10 @@ __all__ = [
     "SimpleTableRow",
     "StrictModel",
     "TextAlign",
+    "VerificationReportCheck",
+    "VerificationReportCheckStatus",
+    "VerificationReportDetail",
+    "VerificationReportProps",
+    "VerificationReportSource",
+    "VerificationReportVerdict",
 ]

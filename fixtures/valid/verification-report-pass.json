@@ -1,0 +1,27 @@
+{
+  "component": "VerificationReport",
+  "props": {
+    "verdict": {
+      "status": "pass",
+      "badge": "Проверка пройдена",
+      "headline": "Финансовая отчётность",
+      "summary": "ООО «Единая строительная компания» · ИНН 7203350660"
+    },
+    "checks": [
+      {
+        "id": "revenue",
+        "label": "Финансовая отчётность",
+        "status": "pass",
+        "summary": "Выручка за 2025 год — 48,2 млн ₽ при пороге 10 млн ₽",
+        "details": [
+          {"label": "Год анализа", "value": "2025"},
+          {"label": "Выручка", "value": "48,2 млн ₽"}
+        ],
+        "sources": [
+          {"label": "ГИР БО (ФНС)", "url": "https://bo.nalog.ru/"},
+          {"label": "Контур.Фокус"}
+        ]
+      }
+    ]
+  }
+}
