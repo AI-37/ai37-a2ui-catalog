@@ -57,6 +57,11 @@ def load_fixture(group: str, name: str):
         ("insolation-report-fail.json", "InsolationReport"),
         ("artifact-card.json", "ArtifactCard"),
         ("artifact-card-minimal.json", "ArtifactCard"),
+        # Проверка контрагента (change verification-report): спорный случай,
+        # точечная проверка с одной строкой и вердикт без проверок.
+        ("verification-report-review.json", "VerificationReport"),
+        ("verification-report-pass.json", "VerificationReport"),
+        ("verification-report-fail.json", "VerificationReport"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
@@ -100,6 +105,8 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("artifact-card-href-in-props.json", "ArtifactCard"),
         ("artifact-card-bad-id.json", "ArtifactCard"),
         ("artifact-card-bad-file-id.json", "ArtifactCard"),
+        ("verification-report-unknown-status.json", "VerificationReport"),
+        ("verification-report-empty-details.json", "VerificationReport"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:

@@ -8,6 +8,7 @@ from .models import (
     LatexFormulaProps,
     LiftEditorProps,
     SimpleTableProps,
+    VerificationReportProps,
 )
 from .validation import get_component_schema, validate_component_payload, validate_component_payload_json
 
@@ -22,6 +23,7 @@ __all__ = [
     "LatexFormulaProps",
     "LiftEditorProps",
     "SimpleTableProps",
+    "VerificationReportProps",
     "get_component_schema",
     "validate_component_payload",
     "validate_component_payload_json",

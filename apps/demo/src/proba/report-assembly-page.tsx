@@ -16,7 +16,7 @@ export function ReportAssemblyPage() {
       route="/proba/report-assembly"
       eyebrow="AI37 A2UI CATALOG"
       title="Отчёты"
-      lead="ThermalReport в двух режимах и LiftReport из готовых примитивов: у трёх экранов одна шапка, одна строка списка и один протокол."
+      lead="ThermalReport в двух режимах, LiftReport и VerificationReport из готовых примитивов: одна шапка, одна строка списка и один протокол на все отчёты."
     >
       {REPORT_BLOCKS.map(block => (
         <section key={block.id} style={blockStyle}>

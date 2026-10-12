@@ -21,4 +21,5 @@ export * from './components/insolation-editor';
 export * from './components/insolation-report';
 export * from './components/lift-report';
 export * from './components/artifact-card';
+export * from './components/verification-report';
 export * from './catalog';

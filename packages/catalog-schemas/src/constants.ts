@@ -52,6 +52,7 @@ export const CATALOG_COMPONENT_NAMES = [
   'LiftReport',
   'LiftReportNext',
   'ArtifactCard',
+  'VerificationReport',
 ] as const;
 
 export type CatalogComponentName = (typeof CATALOG_COMPONENT_NAMES)[number];

@@ -1,0 +1,7 @@
+{
+  "component": "VerificationReport",
+  "props": {
+    "verdict": {"status": "pass", "badge": "Проверка пройдена", "headline": "ООО «Ромашка»"},
+    "checks": [{"id": "egrul", "label": "Статус в ЕГРЮЛ", "status": "passed"}]
+  }
+}

@@ -31,6 +31,7 @@ import {InsolationReport} from './renderers/insolation-report';
 import {LiftReport} from './renderers/lift-report';
 import {LiftReportNext} from './renderers/lift-report-next';
 import {ArtifactCard} from './renderers/artifact-card';
+import {VerificationReport} from './renderers/verification-report';
 import {withReadOnlyGate} from './renderers/surface-read-only';
 
 /**
@@ -85,6 +86,9 @@ const customComponents: ReactComponentImplementation[] = [
   LiftReportNext,
   // Карточка артефакта агента: ссылки на выгрузки и «Сохранить в проект» через хост.
   ArtifactCard,
+  // Проверка контрагента (Минстрой): отчёт без действий, раскрытие строк
+  // остаётся рабочим на прошлой поверхности (change verification-report).
+  VerificationReport,
 ];
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(

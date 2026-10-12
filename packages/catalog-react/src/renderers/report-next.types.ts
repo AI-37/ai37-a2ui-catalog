@@ -13,7 +13,14 @@ import type {
  * одни и те же компоненты, и разойтись им нечем. У протокола лифтов полей
  * меньше (нет Blob-полей), но все лишние необязательны — значение подходит.
  */
-export type ReportNextVerdict = ThermalReportVerdict;
+export type ReportNextVerdict = Omit<ThermalReportVerdict, 'status'> & {
+  /**
+   * Шире расчётных отчётов: у проверки контрагента есть «требует
+   * дополнительной проверки» (`VerificationReport`). Схемы теплотеха и лифтов
+   * по-прежнему шлют только `pass | fail` — расширен тип секции, не их контракт.
+   */
+  status: ThermalReportVerdict['status'] | 'warning';
+};
 export type ReportNextInputs = ThermalReportInputs;
 export type ReportNextProtocol = ThermalReportProtocol;
 export type ReportNextAction = ThermalReportAction;

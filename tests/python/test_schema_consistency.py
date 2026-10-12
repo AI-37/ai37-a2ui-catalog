@@ -22,6 +22,7 @@ COMPONENT_NAMES = (
     "InsolationEditor",
     "InsolationReport",
     "ArtifactCard",
+    "VerificationReport",
 )
 
 

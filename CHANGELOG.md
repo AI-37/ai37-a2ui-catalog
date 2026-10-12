@@ -4,6 +4,25 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.40.0] - 2026-10-12
+
+### Added
+
+- **`VerificationReport` — вердикт проверки контрагента** (change `verification-report`, план
+  AI-37/docs#470). Шапка — пилюля вердикта (`pass | fail | warning`), компания заголовком и
+  подстрока. Ниже идёт список проверок с одним из пяти статусов шага агента. Основание проверки
+  (`summary`) видно сразу, в том числе у пройденной. Строка с `details` или `sources` раскрывается
+  в пары «подпись — значение» и строку источников. Строка без них раскрывашкой не становится.
+  Можно раскрыть несколько строк сразу. Ссылкой становится только `http(s)`-источник.
+  Компонент собран на примитивах `*ReportNext`, новых примитивов нет. Название и основание
+  стоят друг под другом, чтобы длинные названия проверок не вылезали за карточку в узком контейнере. Добавлено Python-зеркало
+  `VerificationReportProps`, потому что эмитент — Python-агент Минстроя.
+
+### Changed
+
+- Тип секции `ReportNextVerdict` расширен до `pass | fail | warning`. Схемы `ThermalReport`,
+  `LiftReport` и `KeoReport` не менялись.
+
 ## [0.39.3] - 2026-10-09
 
 ### Fixed
