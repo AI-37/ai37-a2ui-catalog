@@ -28,8 +28,18 @@
      строки разного размера, а главная была accent;
    - выбор файла — обычная `Button`: пунктир в наборе только у «+ Добавить …»;
    - выбранный файл — `DataChip` («Файл · имя · размер»), снять — icon-only `Button size="sm"`.
-   Скриншоты: `preview/idle-760.png`, `preview/ready-760.png`.
+   Скриншоты: `preview/{idle,ready}-{720,360}-{light,dark}.png` — две ширины контейнера, обе темы.
+
+10. **Структура — один компонент на файл, ветки ранним `return null`** (сверка со скиллом
+   `a2ui-component`, 4.4): слот файла разнесён на `*-file-picker`, `*-file-uploading`, `*-file-chip`,
+   строки — `*-note` и `*-error`, все интерфейсы — в `attachment-choice-card.types.ts`.
+
+## Тема
+
+Тёмная тема работает механизмом набора: хост ставит `data-a2ui-theme="dark"` (или `color-scheme`) на
+предке, токены `light-dark()` читают его. Проверено в headless Chrome, скриншоты `*-dark.png`.
+Своих цветов у компонента нет.
 
 ## Открытые вопросы
 
-- Тёмная тема — как у всего набора `a2ui-kit`, ждёт change `next-dark-theme`.
+- Нет.

@@ -8,7 +8,9 @@
 - [x] Превью в `apps/demo` с имитацией ручки загрузки (`demo-attachment-host.ts`)
 - [x] `export:public`, `verify:public`, `version:bump 0.41.0`, `CHANGELOG.md`
 - [x] Тары в spai-ui (`install:consumer`)
-- [x] Вёрстка приведена к канону `*Next` после замечания владельца, скриншоты в `preview/`
+- [x] Вёрстка приведена к канону `*Next` после замечания владельца
+- [x] Структура по 4.4: один компонент на файл, типы в `*.types.ts`
+- [x] Скриншоты в `preview/`: 720 и 360 px, светлая и тёмная, idle и ready
 - [ ] Гейт глазами на стенде — владелец
 - [ ] Публикация 0.41.0 — после «принято»
 - [ ] `openspec archive attachment-choice-card -y` после влития PR
