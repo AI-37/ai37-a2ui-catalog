@@ -17,8 +17,8 @@ A2UI action-ход: `context_refs` треда уезжают, агент под�
 - Обе кнопки шлют одно действие `action`: skip — `{value}`, attach — `{value, fileId, fileName}`.
 - Python-зеркало `AttachmentChoiceCardProps` — эмитент Python-агент Минстроя.
 
-Инвентаризация: закрыто набором — `Card`, `Button` (outline / filled accent / outline dashed / link
-icon-only), `Chip`, `CloseIcon`, ступени `a2ui-t--*`; из библиотеки — ничего (нативный
+Инвентаризация: закрыто набором — `Card` + `Card flat` + `CardHeader`, `Button` (outline lg / filled lg /
+outline / icon-only sm), `DataChip`, `CloseIcon`, ступени `a2ui-t--*`; из библиотеки — ничего (нативный
 `<input type="file">` скрыт, кнопка набора открывает его); новое — хук `useAttachmentUpload`, потому что
 загрузки файла в каталоге не было ни у одного из 21 компонента.
 

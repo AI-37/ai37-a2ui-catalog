@@ -1,6 +1,6 @@
 import React from 'react';
 import type {AttachmentChoiceAttach} from '@ai37/a2ui-catalog-schemas';
-import {Button, Chip, CloseIcon} from '../primitives';
+import {Button, CloseIcon, DataChip} from '../primitives';
 import type {AttachmentUpload} from './attachment-choice-card.types';
 
 interface FileSlotProps {
@@ -35,7 +35,8 @@ function FilePicker({attach, upload, disabled, onPick}: FileSlotProps) {
 
   return (
     <>
-      <Button variant="outline" dashed disabled={disabled} onClick={() => inputRef.current?.click()}>
+      {/* Обычная кнопка, не пунктир: пунктир в наборе — только «+ Добавить …». */}
+      <Button disabled={disabled} onClick={() => inputRef.current?.click()}>
         {attach.pickLabel}
       </Button>
       <input
@@ -65,11 +66,8 @@ function FileChip({upload, disabled, onClear}: FileSlotProps) {
 
   return (
     <span style={chipRowStyle}>
-      <Chip>
-        {upload.fileName} · {formatKb(upload.bytes)}
-      </Chip>
+      <DataChip label="Файл" value={`${upload.fileName} · ${formatKb(upload.bytes)}`} />
       <Button
-        variant="link"
         size="sm"
         icon={<CloseIcon />}
         aria-label={`Убрать ${upload.fileName}`}
