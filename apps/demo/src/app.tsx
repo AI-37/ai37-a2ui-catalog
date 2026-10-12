@@ -35,7 +35,11 @@ import insolationReportFailFixture from '../../../fixtures/valid/insolation-repo
 import liftReportFixture from '../../../fixtures/valid/lift-report.json';
 import verificationReportReviewFixture from '../../../fixtures/valid/verification-report-review.json';
 import verificationReportPassFixture from '../../../fixtures/valid/verification-report-pass.json';
+import attachmentChoiceCardFixture from '../../../fixtures/valid/attachment-choice-card-signature.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
+import {attachDemoAttachmentHost} from './demo-attachment-host';
+
+attachDemoAttachmentHost();
 import {attachDemoActionLogger} from './attach-demo-action-logger';
 import {attachDemoDraftLogger} from './attach-demo-draft-logger';
 import {createLiftEditorMessages} from './create-lift-editor-messages';
@@ -310,6 +314,16 @@ const examples = [
     messages: createSurfaceMessages(
       'VerificationReport',
       verificationReportPassFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'attachment-choice-card-preview',
+    title: 'Attachment Choice Card — подпись сотрудника',
+    description:
+      'Две кнопки вместо radio и «Продолжить»: «без подписи» шлёт действие сразу, «с подписью» неактивна, пока PNG не выбран и не загружен на полку треда. Загрузка в demo имитирована: файл с «fail» в имени отвечает ошибкой. Действия — в консоли.',
+    messages: createSurfaceMessages(
+      'AttachmentChoiceCard',
+      attachmentChoiceCardFixture.props as Record<string, unknown>,
     ),
   },
 ] as const;

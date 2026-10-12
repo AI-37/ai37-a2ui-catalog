@@ -1,0 +1,10 @@
+{
+  "component": "AttachmentChoiceCard",
+  "props": {
+    "title": "Приложить расчёт?",
+    "contextId": "thread-1",
+    "skip": {"label": "Без файла", "value": "skip"},
+    "attach": {"label": "С файлом", "value": "attach", "pickLabel": "Выбрать файл…", "accept": ".pdf,.docx"},
+    "action": "submit"
+  }
+}

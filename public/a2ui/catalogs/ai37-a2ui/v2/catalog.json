@@ -5044,6 +5044,106 @@
         "$schema": "https://json-schema.org/draft/2019-09/schema#"
       }
     },
+    "AttachmentChoiceCard": {
+      "description": "A two-way human-in-the-loop card where one option needs a file. One button continues without a file; the other stays disabled until the user picks a file inside the card, which is uploaded to the chat shelf immediately. Use it when the agent asks \"continue as is, or with this file?\" (e.g. a signature scan). Both buttons dispatch the same action: skip sends { value }, attach sends { value, fileId, fileName }.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/attachment-choice-card.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/AttachmentChoiceCard",
+        "definitions": {
+          "AttachmentChoiceCard": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "contextId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "skip": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "label",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "attach": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "pickLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "accept": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "hint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240
+                  }
+                },
+                "required": [
+                  "label",
+                  "value",
+                  "pickLabel",
+                  "accept"
+                ],
+                "additionalProperties": false
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "title",
+              "contextId",
+              "skip",
+              "attach",
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
     "FormCard": {
       "description": "An interactive form card with typed fields for human-in-the-loop prompts. Use it when the agent must collect structured parameters (text, number, select, boolean, or lookup with reference-backed autocomplete) from the user and return them via a submit action.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/form-card.schema.json",

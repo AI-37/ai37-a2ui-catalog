@@ -10,6 +10,7 @@ import {flexTableDefinition} from './components/flex-table';
 import {latexFormulaDefinition} from './components/latex-formula';
 import {simpleTableDefinition} from './components/simple-table';
 import {choiceCardDefinition} from './components/choice-card';
+import {attachmentChoiceCardDefinition} from './components/attachment-choice-card';
 import {formCardDefinition} from './components/form-card';
 import {
   constructionsEditorDefinition,
@@ -35,6 +36,7 @@ export const componentDefinitions = [
   flexTableDefinition,
   latexFormulaDefinition,
   choiceCardDefinition,
+  attachmentChoiceCardDefinition,
   formCardDefinition,
   constructionsEditorDefinition,
   constructionsEditorNextDefinition,

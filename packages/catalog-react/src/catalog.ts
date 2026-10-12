@@ -15,6 +15,7 @@ import {SimpleTable} from './renderers/simple-table';
 import {FlexTable} from './renderers/flex-table';
 import {LatexFormula} from './renderers/latex-formula';
 import {ChoiceCard} from './renderers/choice-card';
+import {AttachmentChoiceCard} from './renderers/attachment-choice-card';
 import {FormCard} from './renderers/form-card';
 import {ConstructionsEditor} from './renderers/constructions-editor';
 import {ConstructionsEditorNext} from './renderers/constructions-editor-next';
@@ -58,6 +59,8 @@ const customComponents: ReactComponentImplementation[] = [
   FlexTable,
   LatexFormula,
   withReadOnlyGate(ChoiceCard),
+  // Выбор «без файла / с файлом», файл грузится из карточки (план AI-37/docs#497).
+  withReadOnlyGate(AttachmentChoiceCard),
   withReadOnlyGate(FormCard),
   withReadOnlyGate(ConstructionsEditor),
   // Рядом со старым, а не вместо: одно наполнение рендерится обоими, пока

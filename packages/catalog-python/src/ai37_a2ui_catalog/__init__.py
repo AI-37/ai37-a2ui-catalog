@@ -1,6 +1,7 @@
 from .constants import CATALOG_ID, CATALOG_VERSION
 from .models import (
     ArtifactCardProps,
+    AttachmentChoiceCardProps,
     ChoiceCardProps,
     ConstructionsEditorProps,
     FlexTableProps,
@@ -16,6 +17,7 @@ __all__ = [
     "CATALOG_ID",
     "CATALOG_VERSION",
     "ArtifactCardProps",
+    "AttachmentChoiceCardProps",
     "ChoiceCardProps",
     "ConstructionsEditorProps",
     "FlexTableProps",
