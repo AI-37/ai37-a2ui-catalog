@@ -62,6 +62,8 @@ def load_fixture(group: str, name: str):
         ("verification-report-review.json", "VerificationReport"),
         ("verification-report-pass.json", "VerificationReport"),
         ("verification-report-fail.json", "VerificationReport"),
+        ("attachment-choice-card-signature.json", "AttachmentChoiceCard"),
+        ("attachment-choice-card-minimal.json", "AttachmentChoiceCard"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
@@ -107,6 +109,9 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("artifact-card-bad-file-id.json", "ArtifactCard"),
         ("verification-report-unknown-status.json", "VerificationReport"),
         ("verification-report-empty-details.json", "VerificationReport"),
+        ("attachment-choice-card-no-context.json", "AttachmentChoiceCard"),
+        ("attachment-choice-card-attach-no-accept.json", "AttachmentChoiceCard"),
+        ("attachment-choice-card-extra-key.json", "AttachmentChoiceCard"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:

@@ -4,6 +4,17 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.41.0] - 2026-10-12
+
+### Added
+
+- **`AttachmentChoiceCard` — «продолжить без файла / с файлом»** (change `attachment-choice-card`, план
+  AI-37/docs#497). Две кнопки вместо radio и «Продолжить». Кнопка «с файлом» неактивна, пока файл не
+  выбран в самой карточке и не загружен на полку треда. Загрузка идёт сразу при выборе через ту же ручку,
+  что у «+» композера (`CHAT_ATTACHMENTS_ROUTE`), поэтому чип над полем ввода больше не остаётся. Обе
+  кнопки шлют одно действие: без файла — `{value}`, с файлом — `{value, fileId, fileName}`. Есть
+  Python-зеркало `AttachmentChoiceCardProps`, потому что эмитент — Python-агент Минстроя.
+
 ## [0.40.0] - 2026-10-12
 
 ### Added

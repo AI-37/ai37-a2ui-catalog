@@ -1,0 +1,9 @@
+{
+  "component": "AttachmentChoiceCard",
+  "props": {
+    "title": "Подпись сотрудника",
+    "skip": {"label": "Без подписи", "value": "nosign"},
+    "attach": {"label": "С подписью", "value": "withsign", "pickLabel": "Выбрать PNG…", "accept": "image/png"},
+    "action": "submit"
+  }
+}

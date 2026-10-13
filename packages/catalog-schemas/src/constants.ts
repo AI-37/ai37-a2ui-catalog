@@ -36,6 +36,7 @@ export const CATALOG_COMPONENT_NAMES = [
   'FlexTable',
   'LatexFormula',
   'ChoiceCard',
+  'AttachmentChoiceCard',
   'FormCard',
   'ConstructionsEditor',
   'ConstructionsEditorNext',

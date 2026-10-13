@@ -8,6 +8,7 @@ from .calc_editor_common import (
     CalcRevealBy,
     CalcSubmit,
 )
+from .attachment_choice_card import AttachmentChoiceAttach, AttachmentChoiceCardProps, AttachmentChoiceSkip
 from .choice_card import ChoiceCardProps, ChoiceCardSubmit, ChoiceOption
 from .constructions_editor import (
     CherdachnyeSubtype,
@@ -116,6 +117,7 @@ COMPONENT_MODELS = {
     "FlexTable": FlexTableProps,
     "LatexFormula": LatexFormulaProps,
     "ChoiceCard": ChoiceCardProps,
+    "AttachmentChoiceCard": AttachmentChoiceCardProps,
     "FormCard": FormCardProps,
     "ConstructionsEditor": ConstructionsEditorProps,
     # Новый рендерер того же экрана на новых примитивах: схема props общая со
@@ -153,6 +155,9 @@ __all__ = [
     "CalcSubmit",
     "CellPrimitive",
     "CherdachnyeSubtype",
+    "AttachmentChoiceAttach",
+    "AttachmentChoiceCardProps",
+    "AttachmentChoiceSkip",
     "ChoiceCardProps",
     "ChoiceCardSubmit",
     "ChoiceOption",
