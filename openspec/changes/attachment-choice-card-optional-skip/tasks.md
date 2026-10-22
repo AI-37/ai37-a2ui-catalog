@@ -9,6 +9,6 @@
 - [x] Гейт макета — SSR-превью состояний, «принято» владельца 2026-10-22
 - [x] Скриншоты в `preview/`: 720 и 360 px, светлая и тёмная, idle и ready
 - [x] Тары в spai-ui и spai-thermal-calc-agent (`install:consumer`)
-- [ ] Гейт на стенде — владелец
-- [ ] Публикация 0.42.0 — после «принято»
+- [x] Гейт на стенде — владелец (принято 2026-10-22)
+- [x] Публикация 0.42.0 — schemas → react, 2026-10-22
 - [ ] `openspec archive attachment-choice-card-optional-skip -y` после влития PR
