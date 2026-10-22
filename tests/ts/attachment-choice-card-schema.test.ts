@@ -14,8 +14,12 @@ function readFixture(group: 'valid' | 'invalid', fileName: string) {
 }
 
 describe('attachment-choice-card schema', () => {
-  it('принимает карточку подписи и минимальную карточку', () => {
-    for (const name of ['attachment-choice-card-signature.json', 'attachment-choice-card-minimal.json']) {
+  it('принимает карточку подписи, минимальную и без skip', () => {
+    for (const name of [
+      'attachment-choice-card-signature.json',
+      'attachment-choice-card-minimal.json',
+      'attachment-choice-card-attach-only.json',
+    ]) {
       expect(attachmentChoiceCardPropsSchema.safeParse(readFixture('valid', name).props).success).toBe(
         true,
       );
@@ -37,5 +41,12 @@ describe('attachment-choice-card schema', () => {
   it('зарегистрирована в каталоге, ручка загрузки — та же, что у композера', () => {
     expect(CATALOG_COMPONENT_NAMES).toContain('AttachmentChoiceCard');
     expect(CHAT_ATTACHMENTS_ROUTE).toBe('/api/chat-attachments');
+  });
+
+  it('skip необязателен, но если есть — с label', () => {
+    const props = readFixture('valid', 'attachment-choice-card-attach-only.json').props;
+    expect(
+      attachmentChoiceCardPropsSchema.safeParse({...props, skip: {value: 'skip'}}).success,
+    ).toBe(false);
   });
 });

@@ -30,6 +30,6 @@ class AttachmentChoiceCardProps(StrictModel):
     title: str = Field(min_length=1, max_length=120)
     description: str = Field(default=None, min_length=1, max_length=400)
     contextId: str = Field(min_length=1, max_length=200)
-    skip: AttachmentChoiceSkip
+    skip: AttachmentChoiceSkip = Field(default=None)
     attach: AttachmentChoiceAttach
     action: str = Field(min_length=1, max_length=120)

@@ -35,7 +35,8 @@ export const attachmentChoiceCardPropsSchema = z
     description: z.string().min(1).max(400).optional(),
     /** Тред, на полку которого грузится файл (contextId хода). */
     contextId: z.string().min(1).max(200),
-    skip: attachmentChoiceSkipSchema,
+    /** Кнопка «без файла». Нет — карточка только запрашивает файл, кнопка одна. */
+    skip: attachmentChoiceSkipSchema.optional(),
     attach: attachmentChoiceAttachSchema,
     /** Имя действия; обе кнопки шлют его, различаясь `value`. */
     action: z.string().min(1).max(120),
@@ -52,6 +53,6 @@ export const attachmentChoiceCardDefinition: CatalogComponentDefinition<
   name: 'AttachmentChoiceCard',
   slug: 'attachment-choice-card',
   description:
-    'A two-way human-in-the-loop card where one option needs a file. One button continues without a file; the other stays disabled until the user picks a file inside the card, which is uploaded to the chat shelf immediately. Use it when the agent asks "continue as is, or with this file?" (e.g. a signature scan). Both buttons dispatch the same action: skip sends { value }, attach sends { value, fileId, fileName }.',
+    'A two-way human-in-the-loop card where one option needs a file. One button continues without a file; the other stays disabled until the user picks a file inside the card, which is uploaded to the chat shelf immediately. Use it when the agent asks "continue as is, or with this file?" (e.g. a signature scan). Both buttons dispatch the same action: skip sends { value }, attach sends { value, fileId, fileName }. Omit skip when there is no meaningful path without the file (e.g. "verify this calculation"): the card then only asks for one file and confirms it with a single button.',
   schema: attachmentChoiceCardPropsSchema,
 };
