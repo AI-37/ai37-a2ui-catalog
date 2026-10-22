@@ -4,6 +4,16 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.42.0] - 2026-10-22
+
+### Changed
+
+- **`AttachmentChoiceCard` — `skip` необязателен** (change `attachment-choice-card-optional-skip`, план
+  AI-37/docs#522). Без `skip` карточка только запрашивает файл: кнопка «без файла» не рендерится, остаётся одна
+  главная, неактивная до загрузки. Payload attach и disabled-логика не менялись; прежние эмитенты (Минстрой) всегда
+  шлют `skip` — их рендер тот же. Python-зеркало: `skip` по умолчанию `None`. Фикстура
+  `attachment-choice-card-attach-only.json`, превью «только загрузка» в demo.
+
 ## [0.41.0] - 2026-10-12
 
 ### Added

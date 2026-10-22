@@ -5045,7 +5045,7 @@
       }
     },
     "AttachmentChoiceCard": {
-      "description": "A two-way human-in-the-loop card where one option needs a file. One button continues without a file; the other stays disabled until the user picks a file inside the card, which is uploaded to the chat shelf immediately. Use it when the agent asks \"continue as is, or with this file?\" (e.g. a signature scan). Both buttons dispatch the same action: skip sends { value }, attach sends { value, fileId, fileName }.",
+      "description": "A two-way human-in-the-loop card where one option needs a file. One button continues without a file; the other stays disabled until the user picks a file inside the card, which is uploaded to the chat shelf immediately. Use it when the agent asks \"continue as is, or with this file?\" (e.g. a signature scan). Both buttons dispatch the same action: skip sends { value }, attach sends { value, fileId, fileName }. Omit skip when there is no meaningful path without the file (e.g. \"verify this calculation\"): the card then only asks for one file and confirms it with a single button.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/attachment-choice-card.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/AttachmentChoiceCard",
@@ -5134,7 +5134,6 @@
             "required": [
               "title",
               "contextId",
-              "skip",
               "attach",
               "action"
             ],

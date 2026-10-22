@@ -64,6 +64,7 @@ def load_fixture(group: str, name: str):
         ("verification-report-fail.json", "VerificationReport"),
         ("attachment-choice-card-signature.json", "AttachmentChoiceCard"),
         ("attachment-choice-card-minimal.json", "AttachmentChoiceCard"),
+        ("attachment-choice-card-attach-only.json", "AttachmentChoiceCard"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
