@@ -1,0 +1,10 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_1",
+    "title": "Изменения",
+    "state": "open",
+    "items": [{"id": "c1", "kind": "changed", "label": "вытяжка ростеров", "before": "1", "after": "2"}],
+    "confirm": {"label": "Подтвердить"}
+  }
+}
