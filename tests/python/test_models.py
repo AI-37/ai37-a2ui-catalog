@@ -64,6 +64,10 @@ def load_fixture(group: str, name: str):
         ("verification-report-fail.json", "VerificationReport"),
         ("attachment-choice-card-signature.json", "AttachmentChoiceCard"),
         ("attachment-choice-card-minimal.json", "AttachmentChoiceCard"),
+        # Подтверждение пачки предложений агента данных (план AI-37/docs#545).
+        ("proposal-card-voice.json", "ProposalCard"),
+        ("proposal-card-params.json", "ProposalCard"),
+        ("proposal-card-superseded.json", "ProposalCard"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
@@ -112,6 +116,10 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("attachment-choice-card-no-context.json", "AttachmentChoiceCard"),
         ("attachment-choice-card-attach-no-accept.json", "AttachmentChoiceCard"),
         ("attachment-choice-card-extra-key.json", "AttachmentChoiceCard"),
+        ("proposal-card-unknown-state.json", "ProposalCard"),
+        ("proposal-card-empty-items.json", "ProposalCard"),
+        ("proposal-card-unknown-item-kind.json", "ProposalCard"),
+        ("proposal-card-confirm-without-action.json", "ProposalCard"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:
@@ -200,3 +208,22 @@ def test_constructions_editor_without_back_button() -> None:
     )
 
     assert model.backAction == "navigate"
+
+
+def test_proposal_card_builds_from_python() -> None:
+    """Агент на Python собирает карточку моделями и отдаёт её JSON без None-полей."""
+    from ai37_a2ui_catalog.models import ProposalCardProps, ProposalConfirm, ProposalItem
+
+    card = ProposalCardProps(
+        proposalId="pb_1",
+        title="Изменения из сообщения",
+        state="open",
+        items=[ProposalItem(id="c1", kind="changed", label="вытяжка ростеров", before="1", after="2")],
+        confirm=ProposalConfirm(label="Подтвердить", action="proposal.accept"),
+    )
+    dumped = card.model_dump(exclude_none=True)
+
+    assert dumped["items"] == [
+        {"id": "c1", "kind": "changed", "label": "вытяжка ростеров", "before": "1", "after": "2"}
+    ]
+    assert validate_component_payload("ProposalCard", dumped) == card

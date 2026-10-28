@@ -101,6 +101,17 @@ from .lift_editor import (
     LiftEditorRecommendParam,
     LiftsMode,
 )
+from .proposal_card import (
+    ProposalCardProps,
+    ProposalCardState,
+    ProposalCardView,
+    ProposalConfirm,
+    ProposalDecideLink,
+    ProposalItem,
+    ProposalItemKind,
+    ProposalItemStatus,
+    ProposalSource,
+)
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
 from .verification_report import (
@@ -139,6 +150,7 @@ COMPONENT_MODELS = {
     "InsolationReport": InsolationReportProps,
     "ArtifactCard": ArtifactCardProps,
     "VerificationReport": VerificationReportProps,
+    "ProposalCard": ProposalCardProps,
 }
 
 __all__ = [
@@ -237,6 +249,15 @@ __all__ = [
     "LiftEditorRecommendParam",
     "LiftsMode",
     "LookupSuggestMode",
+    "ProposalCardProps",
+    "ProposalCardState",
+    "ProposalCardView",
+    "ProposalConfirm",
+    "ProposalDecideLink",
+    "ProposalItem",
+    "ProposalItemKind",
+    "ProposalItemStatus",
+    "ProposalSource",
     "SimpleTableColumn",
     "SimpleTableProps",
     "SimpleTableRow",

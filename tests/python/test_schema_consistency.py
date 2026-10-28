@@ -24,6 +24,7 @@ COMPONENT_NAMES = (
     "InsolationReport",
     "ArtifactCard",
     "VerificationReport",
+    "ProposalCard",
 )
 
 

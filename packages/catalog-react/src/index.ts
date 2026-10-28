@@ -50,5 +50,9 @@ export * from './renderers/artifact-card-links';
 export * from './renderers/artifact-card-screen';
 export * from './renderers/verification-report';
 export * from './renderers/verification-report-screen';
+export * from './renderers/proposal-card';
+export * from './renderers/proposal-card-screen';
+export * from './renderers/proposal-card.types';
+export * from './renderers/resolve-proposal-card-footer';
 // Режим «только чтение» для прошлых поверхностей ленты: ввод глушится, скачивание и ссылки — нет.
 export * from './renderers/surface-read-only';

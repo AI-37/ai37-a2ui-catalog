@@ -8,6 +8,7 @@ from .models import (
     FormCardProps,
     LatexFormulaProps,
     LiftEditorProps,
+    ProposalCardProps,
     SimpleTableProps,
     VerificationReportProps,
 )
@@ -24,6 +25,7 @@ __all__ = [
     "FormCardProps",
     "LatexFormulaProps",
     "LiftEditorProps",
+    "ProposalCardProps",
     "SimpleTableProps",
     "VerificationReportProps",
     "get_component_schema",

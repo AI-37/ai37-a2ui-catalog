@@ -1,0 +1,9 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_1",
+    "title": "Изменения",
+    "state": "open",
+    "items": []
+  }
+}

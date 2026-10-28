@@ -12749,6 +12749,179 @@
         },
         "$schema": "https://json-schema.org/draft/2019-09/schema#"
       }
+    },
+    "ProposalCard": {
+      "description": "A human-in-the-loop confirmation card for a batch of proposed changes (a data agent never writes on its own: it proposes, a person confirms). Shows a title, the batch state (open, accepted, rejected, superseded), the items either as a list grouped by kind (added / changed / removed) or as a table \"What · Was · Becomes · Effective from\", an optional quote of the source message, an optional note, and a confirm button that dispatches `action` with context { proposalId, decision: \"accept\" }. Item statuses: pending, accepted, rejected, stale. When the agent task is gone (no `confirm`, or the host shows the surface read-only) the card shows `decideLink` instead of the button; with `canDecide: false` it shows neither. Values arrive as ready strings — the renderer does not format them.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/proposal-card.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/ProposalCard",
+        "definitions": {
+          "ProposalCard": {
+            "type": "object",
+            "properties": {
+              "proposalId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "accepted",
+                  "rejected",
+                  "superseded"
+                ]
+              },
+              "view": {
+                "type": "string",
+                "enum": [
+                  "list",
+                  "table"
+                ]
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "added",
+                        "changed",
+                        "removed"
+                      ]
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "before": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "after": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "effectiveFrom": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "accepted",
+                        "rejected",
+                        "stale"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "label"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 50
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "quote": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "quote"
+                ],
+                "additionalProperties": false
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "confirm": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "label",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "canDecide": {
+                "type": "boolean"
+              },
+              "decideLink": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "href": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "label",
+                  "href"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "proposalId",
+              "title",
+              "state",
+              "items"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
     }
   }
 }

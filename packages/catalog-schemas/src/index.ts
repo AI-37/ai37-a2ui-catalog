@@ -23,4 +23,5 @@ export * from './components/insolation-report';
 export * from './components/lift-report';
 export * from './components/artifact-card';
 export * from './components/verification-report';
+export * from './components/proposal-card';
 export * from './catalog';

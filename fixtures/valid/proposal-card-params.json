@@ -1,0 +1,23 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_19d0e4",
+    "title": "Параметры объекта из файла «Тарифы 2026.xlsx»",
+    "state": "open",
+    "view": "table",
+    "items": [
+      {
+        "id": "p1",
+        "kind": "changed",
+        "label": "Тариф электроэнергии, ₽/кВт·ч",
+        "before": "7,12",
+        "after": "7,48",
+        "effectiveFrom": "01.11.2026"
+      },
+      {"id": "p2", "kind": "added", "label": "Ночной тариф, ₽/кВт·ч", "after": "3,90", "effectiveFrom": "01.11.2026"},
+      {"id": "p3", "kind": "removed", "label": "Тариф выходного дня", "before": "6,80", "status": "stale"}
+    ],
+    "source": {"label": "Тарифы 2026.xlsx · лист «Электроэнергия»", "quote": "С 01.11.2026 одноставочный тариф 7,48 ₽/кВт·ч, ночная зона 3,90 ₽/кВт·ч."},
+    "decideLink": {"label": "Решить в «Требуют решения»", "href": "/cabinet/decisions?proposal=pb_19d0e4"}
+  }
+}
