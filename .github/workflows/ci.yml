@@ -25,7 +25,11 @@ on:
           - ubuntu-latest
           - ai37-self-hosted
 jobs:
-  test:
+  # Одна джоба: раннер подбирает прогон один раз, и PR разблокируется сразу после последнего шага.
+  # Отдельный агрегатор вставал на единственном self-hosted раннере в очередь за чужими джобами и
+  # держал PR красным уже после зелёных проверок. Имя ci-green — единое для всех репозиториев AI-37
+  # и обязательная проверка ruleset (docs/plans/doc-bot-pr-review.md).
+  ci-green:
     runs-on: ${{ inputs.runner == 'ai37-self-hosted' && fromJSON('["self-hosted", "ai37-local-1"]') || inputs.runner == 'ubuntu-latest' && 'ubuntu-latest' || vars.CI_RUNNER && fromJSON(vars.CI_RUNNER) || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -83,16 +87,3 @@ jobs:
       # Падает, если забыли `pnpm run export:public` + commit после правки компонентов/бампа версии.
       - name: Verify ./public is up to date with source
         run: pnpm run verify:public
-
-  # Aggregate "green" check with a UNIFORM name across all AI-37 repos, so one org/branch ruleset can
-  # require a single context (`ci-green`) regardless of each repo's job names, and the doc-bot review
-  # trigger keys off it. Fails if any real CI job above failed or was cancelled.
-  ci-green:
-    if: always()
-    needs: [test]
-    runs-on: ${{ inputs.runner == 'ai37-self-hosted' && fromJSON('["self-hosted", "ai37-local-1"]') || inputs.runner == 'ubuntu-latest' && 'ubuntu-latest' || vars.CI_RUNNER && fromJSON(vars.CI_RUNNER) || 'ubuntu-latest' }}
-    steps:
-      - name: gate
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-        run: |
-          echo "one or more required CI jobs did not succeed"; exit 1
