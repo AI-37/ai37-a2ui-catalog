@@ -123,10 +123,21 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # poetry ставим ДО setup-python: `cache: poetry` вычисляет ключ кэша через сам poetry,
-      # поэтому он обязан быть в PATH заранее (иначе setup-python падает "Unable to locate poetry").
+      # Poetry — официальным установщиком (install.python-poetry.org), версия = та, что сгенерировала
+      # poetry.lock. POETRY_HOME в runner.temp: каталог чистится после каждой джобы, поэтому на
+      # self-hosted раннере ничего не копится в ~/.local и не ломается, когда из toolcache удаляют
+      # Python, на котором был поставлен инструмент (так сломался прежний `pipx install poetry`).
+      # До setup-python (cache: poetry вычисляет ключ кэша через сам poetry, он обязан быть в PATH
+      # заранее) — на системном python3; окружение пакета poetry всё равно создаёт на Python 3.13
+      # из setup-python (virtualenvs.use-poetry-python=false).
       - name: Install Poetry
-        run: pipx install poetry==2.3.2
+        shell: bash  # bash -eo pipefail: упавший curl не превратится в «успешный» пустой скрипт
+        env:
+          POETRY_HOME: ${{ runner.temp }}/poetry
+          POETRY_VERSION: 2.3.2
+        run: |
+          curl -fsSL https://install.python-poetry.org | python3 -
+          echo "$POETRY_HOME/bin" >> "$GITHUB_PATH"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -136,8 +147,10 @@ jobs:
           # cache-dependency-path — это with:, резолвится от корня репо (не от working-directory)
           cache-dependency-path: packages/catalog-python/poetry.lock
 
+      # twine — pip-ом в Python из setup-python, а не через pipx: pipx self-hosted раннера живёт на
+      # Python хоста и ломается вместе с ним (как прежний `pipx install poetry`).
       - name: Install Twine
-        run: pipx install twine
+        run: python -m pip install twine
 
       - name: Install dependencies
         run: poetry install --no-interaction
