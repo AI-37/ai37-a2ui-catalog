@@ -4,6 +4,26 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.44.0] - 2026-11-02
+
+### Added
+
+- **`ProposalCard`: источник у пункта** (change `proposal-item-source`, план AI-37/docs#569, срез D).
+  У `ProposalItem` появилось необязательное поле `source`: документ и страница, откуда агент взял пункт
+  (`Счёт за сентябрь.pdf, стр. 2`), цитата и ссылка. Форма та же, что у источника всей пачки
+  (`ProposalSource`), второй схемы нет. Источник пункта стоит приглушённой строкой под текстом в списке и
+  под «Что» в таблице, цитата идёт в кавычках. Подпись становится ссылкой (в новой вкладке), только если
+  `href` — путь от корня хоста или http(s). Служебная ссылка агента (`project-attachment:…`) остаётся
+  текстом. Пункт без `source` рисуется как раньше. Python-зеркало: `ProposalItem.source: ProposalSource`.
+
+### Changed
+
+- **`ProposalSource`**: `quote` стал необязательным, добавлен `href`. Нужна подпись или цитата: пустой
+  источник и источник с одной ссылкой схема отклоняет (Zod `refine`, в Python `model_validator`). Всё,
+  что было валидно в 0.43.0, валидно и сейчас. У источника пачки без цитаты нет блока цитаты, подпись с
+  `href` стала ссылкой. Внутренний `isProposalDecideHref` переименован в `isProposalHref`: тем же
+  правилом теперь проверяется и ссылка источника.
+
 ## [0.43.0] - 2026-10-28
 
 ### Added

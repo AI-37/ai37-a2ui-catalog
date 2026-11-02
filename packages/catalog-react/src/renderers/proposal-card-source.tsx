@@ -1,5 +1,6 @@
 import React from 'react';
 import type {ProposalSource} from '@ai37/a2ui-catalog-schemas';
+import {ProposalCardSourceLabel} from './proposal-card-source-label';
 
 /**
  * Цитата источника на утопленном фоне: человек сверяет, что агент понял
@@ -12,11 +13,15 @@ export function ProposalCardSource({source}: {source: ProposalSource | undefined
 
   return (
     <figure style={figureStyle}>
-      <blockquote className="a2ui-t--sub" style={quoteStyle}>
-        {source.quote}
-      </blockquote>
+      {source.quote !== undefined ? (
+        <blockquote className="a2ui-t--sub" style={quoteStyle}>
+          {source.quote}
+        </blockquote>
+      ) : null}
       {source.label !== undefined ? (
-        <figcaption className="a2ui-t--sub a2ui-t--muted">{source.label}</figcaption>
+        <figcaption className="a2ui-t--sub a2ui-t--muted">
+          <ProposalCardSourceLabel label={source.label} href={source.href} />
+        </figcaption>
       ) : null}
     </figure>
   );

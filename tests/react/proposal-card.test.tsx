@@ -6,7 +6,7 @@ import {describe, expect, it} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
 import {ai37Catalog, resolveProposalCardFooter, SurfaceReadOnlyProvider} from '@ai37/a2ui-catalog-react';
-import type {ProposalCardProps} from '@ai37/a2ui-catalog-schemas';
+import type {ProposalCardProps, ProposalItem} from '@ai37/a2ui-catalog-schemas';
 
 const CATALOG_ID =
   'https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json';
@@ -43,6 +43,7 @@ function renderCard(props: ProposalCardProps, readOnly?: boolean) {
 
 const voice = () => readProps('proposal-card-voice.json');
 const params = () => readProps('proposal-card-params.json');
+const documents = () => readProps('proposal-card-documents.json');
 const confirmButton = () => screen.queryByRole('button', {name: 'Подтвердить'});
 const decideLink = () => screen.queryByRole('link', {name: 'Решить в «Требуют решения»'});
 
@@ -125,6 +126,68 @@ describe('ProposalCard', () => {
     expect(screen.getAllByText('принято')).toHaveLength(3);
     expect(screen.getByText('отклонено')).toBeTruthy();
     expect(confirmButton()).toBeNull();
+  });
+});
+
+describe('ProposalCard — источник пункта', () => {
+  const withSource = (source: ProposalItem['source']): ProposalCardProps => {
+    const props = voice();
+    return {...props, items: props.items.map((item, index) => (index === 2 ? {...item, source} : item))};
+  };
+
+  it('таблица: под «Что» подпись документа, цитата в кавычках, ссылка только с href', () => {
+    renderCard(documents());
+    const rows = within(screen.getByRole('table')).getAllByRole('row').slice(1);
+    const what = rows.map(row => within(row).getAllByRole('cell')[0]!);
+
+    const link = within(what[0]!).getByRole('link', {name: 'Акт техприсоединения.pdf, стр. 2'});
+    expect(link.getAttribute('href')).toBe('/projects/prj_demo/documents');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(within(what[0]!).getByText('«Максимальная мощность энергопринимающих устройств — 450 кВт.»')).toBeTruthy();
+
+    expect(within(what[1]!).queryByRole('link')).toBeNull();
+    expect(what[1]!.textContent).toBe(
+      'Тариф электроэнергии, ₽/кВт·чСчёт за сентябрь.pdf, стр. 2«Цена за 1 кВт·ч — 7,48 руб. без НДС.»',
+    );
+    expect(what[2]!.textContent).toBe(
+      'Площадь производственного цеха, м²Техпаспорт здания.xlsx, лист «Экспликация», D14',
+    );
+    expect(within(what[2]!).queryByText(/^«/)).toBeNull();
+  });
+
+  it('список: источник под текстом пункта приглушённой строкой, у остальных пунктов его нет', () => {
+    renderCard(withSource({label: 'Паспорт вытяжки.pdf, стр. 3', quote: 'Две вытяжки над ростерами'}));
+    const items = within(screen.getByRole('list')).getAllByRole('listitem');
+
+    expect(items[2]!.textContent).toBe(
+      'измененовытяжка ростеров: 1 → 2Паспорт вытяжки.pdf, стр. 3«Две вытяжки над ростерами»',
+    );
+    expect(within(items[2]!).getByText('Паспорт вытяжки.pdf, стр. 3').closest('.a2ui-t--muted')).toBeTruthy();
+    expect(items[0]!.textContent).toBe('новоеузел: камера охлаждения зерна (система, круглый год)');
+  });
+
+  it('только цитата — без подписи и ссылки', () => {
+    renderCard(withSource({quote: 'Две вытяжки', href: '/projects/p/documents'}));
+    const items = within(screen.getByRole('list')).getAllByRole('listitem');
+    expect(items[2]!.textContent).toBe('измененовытяжка ростеров: 1 → 2«Две вытяжки»');
+    expect(within(items[2]!).queryByRole('link')).toBeNull();
+  });
+
+  it.each(['project-attachment:ser_1#p2', 'javascript:alert(1)', '//evil.example/x', 'documents/ser_1'])(
+    'служебный или небезопасный href %s — подпись текстом, не ссылкой',
+    href => {
+      renderCard(withSource({label: 'Счёт.pdf, стр. 2', href}));
+      expect(screen.getByText('Счёт.pdf, стр. 2').closest('a')).toBeNull();
+    },
+  );
+
+  it('источник пачки: подпись ссылкой при href, без цитаты — без blockquote', () => {
+    const {container} = renderCard({...voice(), source: {label: 'Документация проекта', href: 'https://docs.example/p'}});
+    const link = screen.getByRole('link', {name: 'Документация проекта'});
+    expect(link.closest('figcaption')).toBeTruthy();
+    expect(link.getAttribute('href')).toBe('https://docs.example/p');
+    expect(container.querySelector('blockquote')).toBeNull();
   });
 });
 
