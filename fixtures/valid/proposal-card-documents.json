@@ -1,0 +1,42 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_4e81b0",
+    "title": "Параметры объекта из документации проекта",
+    "state": "open",
+    "view": "table",
+    "items": [
+      {
+        "id": "d1",
+        "kind": "changed",
+        "label": "Разрешённая мощность, кВт",
+        "before": "380",
+        "after": "450",
+        "effectiveFrom": "01.09.2026",
+        "source": {
+          "label": "Акт техприсоединения.pdf, стр. 2",
+          "quote": "Максимальная мощность энергопринимающих устройств — 450 кВт.",
+          "href": "/projects/prj_demo/documents"
+        }
+      },
+      {
+        "id": "d2",
+        "kind": "added",
+        "label": "Тариф электроэнергии, ₽/кВт·ч",
+        "after": "7,48",
+        "effectiveFrom": "01.09.2026",
+        "source": {"label": "Счёт за сентябрь.pdf, стр. 2", "quote": "Цена за 1 кВт·ч — 7,48 руб. без НДС."}
+      },
+      {
+        "id": "d3",
+        "kind": "added",
+        "label": "Площадь производственного цеха, м²",
+        "after": "1 240",
+        "source": {"label": "Техпаспорт здания.xlsx, лист «Экспликация», D14"}
+      }
+    ],
+    "note": "После подтверждения значения появятся в «Параметрах объекта» вместе с источником.",
+    "confirm": {"label": "Подтвердить", "action": "proposal.accept"},
+    "decideLink": {"label": "Решить в «Требуют решения»", "href": "/cabinet/decisions?proposal=pb_4e81b0"}
+  }
+}

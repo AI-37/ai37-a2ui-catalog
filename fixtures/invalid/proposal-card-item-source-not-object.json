@@ -1,0 +1,11 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_bad_source",
+    "title": "Параметры объекта из документации проекта",
+    "state": "open",
+    "items": [
+      {"id": "d1", "kind": "added", "label": "Тариф электроэнергии, ₽/кВт·ч", "after": "7,48", "source": "Счёт за сентябрь.pdf, стр. 2"}
+    ]
+  }
+}

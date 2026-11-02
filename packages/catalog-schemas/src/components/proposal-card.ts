@@ -18,6 +18,25 @@ export const proposalItemStatusSchema = z.enum(['pending', 'accepted', 'rejected
 export const proposalItemKindSchema = z.enum(['added', 'changed', 'removed']);
 
 /**
+ * Откуда предложение. Одна форма на два места: у карточки — сообщение, из
+ * которого собрана пачка (`Голосовое сообщение · 0:21` и цитата), у пункта —
+ * документ и страница (`Счёт за сентябрь.pdf, стр. 2`), цитата и ссылка.
+ * Нужна подпись или цитата. Ссылкой рендерер делает подпись, только если
+ * `href` — путь от корня хоста или http(s); служебную ссылку агента
+ * (`project-attachment:…`) в `href` не кладут.
+ */
+export const proposalSourceSchema = z
+  .object({
+    label: z.string().min(1).max(120).optional(),
+    quote: z.string().min(1).max(1000).optional(),
+    href: z.string().min(1).max(2000).optional(),
+  })
+  .strict()
+  .refine(source => source.label !== undefined || source.quote !== undefined, {
+    message: 'source needs a label or a quote',
+  });
+
+/**
  * Пункт пачки: «Что · Было · Станет · С какой даты». Значения — готовые
  * строки от агента, рендерер их не форматирует. У нового пункта обычно нет
  * `before`, у удалённого — `after`; схема этого не требует, рендерер
@@ -34,14 +53,8 @@ export const proposalItemSchema = z
     effectiveFrom: z.string().min(1).max(40).optional(),
     /** Без поля пункт ждёт решения (`pending`). */
     status: proposalItemStatusSchema.optional(),
-  })
-  .strict();
-
-/** Откуда предложение: подпись (`Голосовое сообщение · 0:21`) и цитата. */
-export const proposalSourceSchema = z
-  .object({
-    label: z.string().min(1).max(120).optional(),
-    quote: z.string().min(1).max(1000),
+    /** Откуда взят пункт: документ и страница. Без поля пункт идёт от источника всей пачки. */
+    source: proposalSourceSchema.optional(),
   })
   .strict();
 
@@ -101,6 +114,6 @@ export const proposalCardDefinition: CatalogComponentDefinition<typeof proposalC
   name: 'ProposalCard',
   slug: 'proposal-card',
   description:
-    'A human-in-the-loop confirmation card for a batch of proposed changes (a data agent never writes on its own: it proposes, a person confirms). Shows a title, the batch state (open, accepted, rejected, superseded), the items either as a list grouped by kind (added / changed / removed) or as a table "What · Was · Becomes · Effective from", an optional quote of the source message, an optional note, and a confirm button that dispatches `action` with context { proposalId, decision: "accept" }. Item statuses: pending, accepted, rejected, stale. When the agent task is gone (no `confirm`, or the host shows the surface read-only) the card shows `decideLink` instead of the button; with `canDecide: false` it shows neither. Values arrive as ready strings — the renderer does not format them.',
+    'A human-in-the-loop confirmation card for a batch of proposed changes (a data agent never writes on its own: it proposes, a person confirms). Shows a title, the batch state (open, accepted, rejected, superseded), the items either as a list grouped by kind (added / changed / removed) or as a table "What · Was · Becomes · Effective from", an optional source of the batch (label, quote, optional link), an optional per-item source (the document and page an item was taken from, with a quote and an optional link), an optional note, and a confirm button that dispatches `action` with context { proposalId, decision: "accept" }. Item statuses: pending, accepted, rejected, stale. When the agent task is gone (no `confirm`, or the host shows the surface read-only) the card shows `decideLink` instead of the button; with `canDecide: false` it shows neither. Values arrive as ready strings — the renderer does not format them.',
   schema: proposalCardPropsSchema,
 };

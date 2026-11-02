@@ -1,5 +1,5 @@
 import type {ProposalCardProps} from '@ai37/a2ui-catalog-schemas';
-import {isProposalDecideHref} from './is-proposal-decide-href';
+import {isProposalHref} from './is-proposal-href';
 import type {ProposalCardFooterKind} from './proposal-card.types';
 
 /**
@@ -19,7 +19,7 @@ export function resolveProposalCardFooter(
   if (props.confirm !== undefined && !readOnly) {
     return 'confirm';
   }
-  if (props.decideLink !== undefined && isProposalDecideHref(props.decideLink.href)) {
+  if (props.decideLink !== undefined && isProposalHref(props.decideLink.href)) {
     return 'link';
   }
   return 'none';

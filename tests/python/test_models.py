@@ -68,6 +68,8 @@ def load_fixture(group: str, name: str):
         ("proposal-card-voice.json", "ProposalCard"),
         ("proposal-card-params.json", "ProposalCard"),
         ("proposal-card-superseded.json", "ProposalCard"),
+        # Источник у пункта: документ и страница (план AI-37/docs#569, срез D).
+        ("proposal-card-documents.json", "ProposalCard"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
@@ -120,6 +122,8 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("proposal-card-empty-items.json", "ProposalCard"),
         ("proposal-card-unknown-item-kind.json", "ProposalCard"),
         ("proposal-card-confirm-without-action.json", "ProposalCard"),
+        ("proposal-card-item-source-without-text.json", "ProposalCard"),
+        ("proposal-card-item-source-not-object.json", "ProposalCard"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:
@@ -227,3 +231,47 @@ def test_proposal_card_builds_from_python() -> None:
         {"id": "c1", "kind": "changed", "label": "вытяжка ростеров", "before": "1", "after": "2"}
     ]
     assert validate_component_payload("ProposalCard", dumped) == card
+
+
+def test_proposal_item_source_builds_from_python() -> None:
+    """Пункт несёт свой источник; JSON без None-полей проходит валидацию каталога."""
+    from ai37_a2ui_catalog.models import ProposalCardProps, ProposalItem, ProposalSource
+
+    card = ProposalCardProps(
+        proposalId="pb_2",
+        title="Параметры из документов",
+        state="open",
+        items=[
+            ProposalItem(
+                id="d1",
+                kind="added",
+                label="Тариф, ₽/кВт·ч",
+                after="7,48",
+                source=ProposalSource(label="Счёт за сентябрь.pdf, стр. 2", quote="7,48 руб. без НДС"),
+            ),
+            ProposalItem(id="d2", kind="added", label="Площадь, м²", after="1 240"),
+        ],
+    )
+    dumped = card.model_dump(exclude_none=True)
+
+    assert dumped["items"][0]["source"] == {"label": "Счёт за сентябрь.pdf, стр. 2", "quote": "7,48 руб. без НДС"}
+    assert "source" not in dumped["items"][1]
+    assert validate_component_payload("ProposalCard", dumped) == card
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        {},
+        {"href": "/projects/p/documents"},
+        {"label": ""},
+        {"label": "Счёт.pdf", "page": 2},
+        {"label": 2},
+        "Счёт.pdf",
+    ],
+)
+def test_proposal_item_source_rejects_bad_shapes(source: object) -> None:
+    from ai37_a2ui_catalog.models import ProposalItem
+
+    with pytest.raises(ValidationError):
+        ProposalItem.model_validate({"id": "d1", "kind": "added", "label": "Тариф", "source": source})

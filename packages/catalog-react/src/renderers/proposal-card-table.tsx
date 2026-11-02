@@ -1,11 +1,13 @@
 import React from 'react';
 import type {ProposalItem} from '@ai37/a2ui-catalog-schemas';
+import {ProposalCardItemSource} from './proposal-card-item-source';
 import {ProposalCardItemStatus} from './proposal-card-item-status';
 
 /**
  * Пункты таблицей «Что · Было · Станет · С какой даты» на классах таблицы
  * набора (`a2ui-table`): скролл в своём контейнере, первая колонка тянется.
  * Колонка даты есть, только если дату прислали хотя бы у одного пункта.
+ * Источник пункта — под «Что»: эта колонка переносится, остальные нет.
  */
 export function ProposalCardTable({items}: {items: ProposalItem[]}) {
   const withDate = items.some(item => item.effectiveFrom !== undefined);
@@ -25,9 +27,12 @@ export function ProposalCardTable({items}: {items: ProposalItem[]}) {
           {items.map(item => (
             <tr key={item.id} data-kind={item.kind}>
               <td>
-                <span style={whatStyle}>
-                  <span>{item.label}</span>
-                  <ProposalCardItemStatus status={item.status} />
+                <span style={whatCellStyle}>
+                  <span style={whatStyle}>
+                    <span>{item.label}</span>
+                    <ProposalCardItemStatus status={item.status} />
+                  </span>
+                  <ProposalCardItemSource source={item.source} />
                 </span>
               </td>
               <td>{item.before ?? '—'}</td>
@@ -41,6 +46,7 @@ export function ProposalCardTable({items}: {items: ProposalItem[]}) {
   );
 }
 
+const whatCellStyle: React.CSSProperties = {display: 'grid', gap: 2};
 const whatStyle: React.CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',

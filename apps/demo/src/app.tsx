@@ -39,6 +39,7 @@ import attachmentChoiceCardFixture from '../../../fixtures/valid/attachment-choi
 import proposalCardVoiceFixture from '../../../fixtures/valid/proposal-card-voice.json';
 import proposalCardParamsFixture from '../../../fixtures/valid/proposal-card-params.json';
 import proposalCardSupersededFixture from '../../../fixtures/valid/proposal-card-superseded.json';
+import proposalCardDocumentsFixture from '../../../fixtures/valid/proposal-card-documents.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoAttachmentHost} from './demo-attachment-host';
 
@@ -357,6 +358,16 @@ const examples = [
     messages: createSurfaceMessages(
       'ProposalCard',
       proposalCardSupersededFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'proposal-card-documents-preview',
+    title: 'Proposal Card — параметры из документации, источник у пункта',
+    description:
+      'У каждого пункта свой источник под «Что»: документ и страница, цитата в кавычках. Подпись — ссылка, только если агент прислал открываемый href (путь от корня или http(s)).',
+    messages: createSurfaceMessages(
+      'ProposalCard',
+      proposalCardDocumentsFixture.props as Record<string, unknown>,
     ),
   },
 ] as const;
