@@ -1,0 +1,21 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_9c1e40",
+    "title": "Изменения из голосовых сообщений",
+    "state": "rejected",
+    "view": "table",
+    "items": [
+      {"id": "s1", "kind": "changed", "label": "уставка приточки, °C", "before": "18", "after": "20", "effectiveFrom": "05.11.2026", "status": "rejected"},
+      {"id": "s2", "kind": "changed", "label": "график работы цеха", "before": "8:00–20:00", "after": "7:00–21:00", "status": "rejected"}
+    ],
+    "source": {
+      "label": "Голосовые сообщения · 2",
+      "quote": "Уставку приточки теперь держим двадцать, а цех с понедельника работает с семи до девяти.",
+      "links": [
+        {"label": "Голосовое сообщение 1", "href": "https://docs.polimetrika.example/documents/ser_4b7d21"},
+        {"label": "Голосовое сообщение 2 — запись удалена"}
+      ]
+    }
+  }
+}

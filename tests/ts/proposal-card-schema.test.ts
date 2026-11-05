@@ -20,6 +20,7 @@ describe('proposal-card schema', () => {
       'proposal-card-params.json',
       'proposal-card-superseded.json',
       'proposal-card-documents.json',
+      'proposal-card-voice-links.json',
     ]) {
       const result = proposalCardPropsSchema.safeParse(readFixture('valid', name).props);
       expect(result.success, name).toBe(true);
@@ -34,6 +35,7 @@ describe('proposal-card schema', () => {
       'proposal-card-confirm-without-action.json',
       'proposal-card-item-source-without-text.json',
       'proposal-card-item-source-not-object.json',
+      'proposal-card-source-link-without-label.json',
     ]) {
       const result = proposalCardPropsSchema.safeParse(readFixture('invalid', name).props);
       expect(result.success, name).toBe(false);
@@ -94,6 +96,59 @@ describe('proposal-card schema', () => {
     });
   });
 
+  describe('ссылки источника', () => {
+    const withLinks = (links: unknown) => {
+      const props = readFixture('valid', 'proposal-card-voice.json').props as {source: Record<string, unknown>};
+      return proposalCardPropsSchema.safeParse({...props, source: {...props.source, links}});
+    };
+
+    it.each([
+      ['ссылку с href', [{label: 'Голосовое сообщение 1', href: '/documents/ser_1'}]],
+      ['подпись без href', [{label: 'Голосовое сообщение 1'}]],
+      [
+        'ссылку и подпись вперемешку',
+        [{label: 'Запись 1', href: 'https://ds.example/documents/ser_1'}, {label: 'Запись 2'}],
+      ],
+      ['пустой список', []],
+      ['двадцать ссылок', Array.from({length: 20}, (_, index) => ({label: `Запись ${index + 1}`}))],
+    ])('принимает %s', (_name, links) => {
+      expect(withLinks(links).success).toBe(true);
+    });
+
+    it('без поля источник валиден, как в 0.44.0', () => {
+      const props = readFixture('valid', 'proposal-card-voice.json').props as {source: Record<string, unknown>};
+      expect('links' in props.source).toBe(false);
+      expect(proposalCardPropsSchema.safeParse(props).success).toBe(true);
+    });
+
+    it.each([
+      ['ссылку без подписи', [{href: '/documents/ser_1'}]],
+      ['пустую подпись', [{label: ''}]],
+      ['пустой href', [{label: 'Запись 1', href: ''}]],
+      ['подпись длиннее 120', [{label: 'а'.repeat(121)}]],
+      ['лишний ключ у ссылки', [{label: 'Запись 1', seriesId: 'ser_1'}]],
+      ['строку вместо объекта', ['Запись 1']],
+      ['объект вместо списка', {label: 'Запись 1'}],
+      ['больше двадцати ссылок', Array.from({length: 21}, (_, index) => ({label: `Запись ${index + 1}`}))],
+    ])('отклоняет %s', (_name, links) => {
+      expect(withLinks(links).success).toBe(false);
+    });
+
+    it('одни ссылки без подписи и цитаты источник не делают', () => {
+      const props = readFixture('valid', 'proposal-card-voice.json').props;
+      const source = {links: [{label: 'Голосовое сообщение 1'}]};
+      expect(proposalCardPropsSchema.safeParse({...props, source}).success).toBe(false);
+    });
+
+    it('у источника пункта ссылки той же формы', () => {
+      type Props = {items: Array<Record<string, unknown>>};
+      const props = readFixture('valid', 'proposal-card-superseded.json').props as Props;
+      const source = {label: 'Акт.pdf, стр. 2', links: [{label: 'Приложение 1', href: '/documents/ser_2'}]};
+      const items = [{...props.items[0], source}];
+      expect(proposalCardPropsSchema.safeParse({...props, items}).success).toBe(true);
+    });
+  });
+
   it('зарегистрирована в каталоге с JSON-схемой props', () => {
     expect(CATALOG_COMPONENT_NAMES).toContain('ProposalCard');
     const entry = createCatalogArtifact().components.ProposalCard as {
@@ -106,7 +161,7 @@ describe('proposal-card schema', () => {
     );
   });
 
-  it('JSON-схема пункта знает необязательный source {label, quote, href}', () => {
+  it('JSON-схема пункта знает необязательный source {label, quote, href, links}', () => {
     const entry = createCatalogArtifact().components.ProposalCard as {
       propsSchema: {
         definitions: {
@@ -120,7 +175,11 @@ describe('proposal-card schema', () => {
     };
     const item = entry.propsSchema.definitions.ProposalCard.properties.items.items;
     expect(item.required).not.toContain('source');
-    expect(Object.keys(item.properties.source!.properties ?? {})).toEqual(['label', 'quote', 'href']);
+    expect(Object.keys(item.properties.source!.properties ?? {})).toEqual(['label', 'quote', 'href', 'links']);
     expect(item.properties.source!.required ?? []).toEqual([]);
+    type LinksSchema = {items: {required: string[]; properties: object}};
+    const links = (item.properties.source!.properties as Record<string, LinksSchema>).links!;
+    expect(links.items.required).toEqual(['label']);
+    expect(Object.keys(links.items.properties)).toEqual(['label', 'href']);
   });
 });

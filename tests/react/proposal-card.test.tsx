@@ -191,6 +191,66 @@ describe('ProposalCard — источник пункта', () => {
   });
 });
 
+describe('ProposalCard — ссылки источника', () => {
+  const voiceLinks = () => readProps('proposal-card-voice-links.json');
+  const caption = (container: HTMLElement) => container.querySelector('figcaption')!;
+
+  it('после подписи: запись с href — ссылка в новой вкладке, без href — подпись', () => {
+    const {container} = renderCard(voiceLinks());
+    const figcaption = caption(container);
+
+    expect(figcaption.textContent).toBe(
+      'Голосовые сообщения · 2Голосовое сообщение 1Голосовое сообщение 2 — запись удалена',
+    );
+    const link = within(figcaption).getByRole('link', {name: 'Голосовое сообщение 1'});
+    expect(link.getAttribute('href')).toBe('https://docs.polimetrika.example/documents/ser_4b7d21');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(within(figcaption).getAllByRole('link')).toHaveLength(1);
+    expect(within(figcaption).getByText('Голосовое сообщение 2 — запись удалена').tagName).toBe('SPAN');
+    expect(container.querySelector('blockquote')!.textContent).toBe(
+      'Уставку приточки теперь держим двадцать, а цех с понедельника работает с семи до девяти.',
+    );
+  });
+
+  it('разметка источника со ссылками', () => {
+    const {container} = renderCard(voiceLinks());
+    expect(container.querySelector('figure')!.outerHTML).toMatchSnapshot();
+  });
+
+  it('служебный href у записи — подпись, не ссылка', () => {
+    const props = voiceLinks();
+    const source = {...props.source!, links: [{label: 'Голосовое сообщение 1', href: 'project-attachment:ser_1'}]};
+    const {container} = renderCard({...props, source});
+    expect(within(caption(container)).queryByRole('link')).toBeNull();
+    expect(caption(container).textContent).toBe('Голосовые сообщения · 2Голосовое сообщение 1');
+  });
+
+  it('пустой список и отсутствие поля рисуют то же, что 0.44.0', () => {
+    const empty = renderCard({...voice(), source: {...voice().source!, links: []}});
+    const emptyHtml = empty.container.querySelector('figure')!.outerHTML;
+    empty.unmount();
+    const absent = renderCard(voice());
+    expect(absent.container.querySelector('figure')!.outerHTML).toBe(emptyHtml);
+  });
+
+  it('источник с цитатой и ссылками, без подписи — ссылки в подписи под цитатой', () => {
+    const source = {quote: 'Две вытяжки', links: [{label: 'Голосовое сообщение 1'}]};
+    const {container} = renderCard({...voice(), source});
+    expect(caption(container).textContent).toBe('Голосовое сообщение 1');
+  });
+
+  it('у источника пункта ссылки идут после цитаты', () => {
+    const props = voice();
+    const links = [{label: 'Приложение 1', href: '/documents/ser_2'}];
+    const source = {label: 'Акт.pdf, стр. 2', quote: '450 кВт', links};
+    renderCard({...props, items: props.items.map((item, index) => (index === 2 ? {...item, source} : item))});
+    const item = within(screen.getByRole('list')).getAllByRole('listitem')[2]!;
+    expect(item.textContent).toBe('измененовытяжка ростеров: 1 → 2Акт.pdf, стр. 2«450 кВт»Приложение 1');
+    expect(within(item).getByRole('link', {name: 'Приложение 1'}).getAttribute('href')).toBe('/documents/ser_2');
+  });
+});
+
 describe('resolveProposalCardFooter', () => {
   const base: ProposalCardProps = {
     proposalId: 'pb_1',

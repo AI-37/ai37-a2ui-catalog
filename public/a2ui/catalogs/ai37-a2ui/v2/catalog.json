@@ -12751,7 +12751,7 @@
       }
     },
     "ProposalCard": {
-      "description": "A human-in-the-loop confirmation card for a batch of proposed changes (a data agent never writes on its own: it proposes, a person confirms). Shows a title, the batch state (open, accepted, rejected, superseded), the items either as a list grouped by kind (added / changed / removed) or as a table \"What · Was · Becomes · Effective from\", an optional source of the batch (label, quote, optional link), an optional per-item source (the document and page an item was taken from, with a quote and an optional link), an optional note, and a confirm button that dispatches `action` with context { proposalId, decision: \"accept\" }. Item statuses: pending, accepted, rejected, stale. When the agent task is gone (no `confirm`, or the host shows the surface read-only) the card shows `decideLink` instead of the button; with `canDecide: false` it shows neither. Values arrive as ready strings — the renderer does not format them.",
+      "description": "A human-in-the-loop confirmation card for a batch of proposed changes (a data agent never writes on its own: it proposes, a person confirms). Shows a title, the batch state (open, accepted, rejected, superseded), the items either as a list grouped by kind (added / changed / removed) or as a table \"What · Was · Becomes · Effective from\", an optional source of the batch (label, quote, optional link, and optional extra `links` such as the voice recordings the batch came from — a link without href renders as plain text), an optional per-item source of the same shape (the document and page an item was taken from, with a quote and an optional link), an optional note, and a confirm button that dispatches `action` with context { proposalId, decision: \"accept\" }. Item statuses: pending, accepted, rejected, stale. When the agent task is gone (no `confirm`, or the host shows the surface read-only) the card shows `decideLink` instead of the button; with `canDecide: false` it shows neither. Values arrive as ready strings — the renderer does not format them.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/proposal-card.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/ProposalCard",
@@ -12849,6 +12849,29 @@
                           "type": "string",
                           "minLength": 1,
                           "maxLength": 2000
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "href": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 2000
+                              }
+                            },
+                            "required": [
+                              "label"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 20
                         }
                       },
                       "additionalProperties": false
@@ -12881,6 +12904,29 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 2000
+                  },
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "href": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        }
+                      },
+                      "required": [
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 20
                   }
                 },
                 "additionalProperties": false

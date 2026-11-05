@@ -70,6 +70,7 @@ def load_fixture(group: str, name: str):
         ("proposal-card-superseded.json", "ProposalCard"),
         # Источник у пункта: документ и страница (план AI-37/docs#569, срез D).
         ("proposal-card-documents.json", "ProposalCard"),
+        ("proposal-card-voice-links.json", "ProposalCard"),
     ],
 )
 def test_valid_fixtures(file_name: str, component: str) -> None:
@@ -124,6 +125,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("proposal-card-confirm-without-action.json", "ProposalCard"),
         ("proposal-card-item-source-without-text.json", "ProposalCard"),
         ("proposal-card-item-source-not-object.json", "ProposalCard"),
+        ("proposal-card-source-link-without-label.json", "ProposalCard"),
     ],
 )
 def test_invalid_fixtures(file_name: str, component: str) -> None:
@@ -275,3 +277,65 @@ def test_proposal_item_source_rejects_bad_shapes(source: object) -> None:
 
     with pytest.raises(ValidationError):
         ProposalItem.model_validate({"id": "d1", "kind": "added", "label": "Тариф", "source": source})
+
+
+def test_proposal_source_links_build_from_python() -> None:
+    """Источник пачки с записями: ссылка с адресом и подпись без него, JSON без None-полей."""
+    from ai37_a2ui_catalog.models import ProposalCardProps, ProposalItem, ProposalSource, ProposalSourceLink
+
+    card = ProposalCardProps(
+        proposalId="pb_3",
+        title="Изменения из голосовых сообщений",
+        state="open",
+        items=[ProposalItem(id="s1", kind="changed", label="уставка приточки, °C", before="18", after="20")],
+        source=ProposalSource(
+            label="Голосовые сообщения · 2",
+            links=[
+                ProposalSourceLink(label="Голосовое сообщение 1", href="/documents/ser_1"),
+                ProposalSourceLink(label="Голосовое сообщение 2"),
+            ],
+        ),
+    )
+    dumped = card.model_dump(exclude_none=True)
+
+    assert dumped["source"]["links"] == [
+        {"label": "Голосовое сообщение 1", "href": "/documents/ser_1"},
+        {"label": "Голосовое сообщение 2"},
+    ]
+    assert validate_component_payload("ProposalCard", dumped) == card
+
+
+@pytest.mark.parametrize("links", [[], [{"label": "Запись 1"}], [{"label": f"Запись {n}"} for n in range(20)]])
+def test_proposal_source_links_accepts(links: list[dict[str, str]]) -> None:
+    from ai37_a2ui_catalog.models import ProposalSource
+
+    assert ProposalSource.model_validate({"label": "Голосовые сообщения", "links": links}).links is not None
+    assert ProposalSource.model_validate({"label": "Голосовые сообщения"}).links is None
+
+
+@pytest.mark.parametrize(
+    "links",
+    [
+        [{"href": "/documents/ser_1"}],
+        [{"label": ""}],
+        [{"label": "Запись 1", "href": ""}],
+        [{"label": "Запись 1", "seriesId": "ser_1"}],
+        ["Запись 1"],
+        {"label": "Запись 1"},
+        None,
+        [{"label": f"Запись {n}"} for n in range(21)],
+    ],
+)
+def test_proposal_source_links_rejects_bad_shapes(links: object) -> None:
+    from ai37_a2ui_catalog.models import ProposalSource
+
+    with pytest.raises(ValidationError):
+        ProposalSource.model_validate({"label": "Голосовые сообщения", "links": links})
+
+
+def test_proposal_source_links_alone_are_not_a_source() -> None:
+    """Подпись или цитата нужна по-прежнему: одних ссылок мало."""
+    from ai37_a2ui_catalog.models import ProposalSource
+
+    with pytest.raises(ValidationError):
+        ProposalSource.model_validate({"links": [{"label": "Голосовое сообщение 1"}]})

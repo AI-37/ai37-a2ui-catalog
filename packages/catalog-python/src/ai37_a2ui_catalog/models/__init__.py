@@ -111,6 +111,7 @@ from .proposal_card import (
     ProposalItemKind,
     ProposalItemStatus,
     ProposalSource,
+    ProposalSourceLink,
 )
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
@@ -258,6 +259,7 @@ __all__ = [
     "ProposalItemKind",
     "ProposalItemStatus",
     "ProposalSource",
+    "ProposalSourceLink",
     "SimpleTableColumn",
     "SimpleTableProps",
     "SimpleTableRow",
