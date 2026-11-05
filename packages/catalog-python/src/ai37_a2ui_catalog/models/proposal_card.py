@@ -12,16 +12,29 @@ ProposalItemKind = Literal["added", "changed", "removed"]
 ProposalCardView = Literal["list", "table"]
 
 
+class ProposalSourceLink(StrictModel):
+    """Одна из ссылок источника, например запись голосового сообщения в документах проекта.
+
+    Без `href` рендерер рисует подпись текстом: зритель без права открыть запись видит её имя, но не
+    переходит. Правило адреса то же, что у `ProposalSource.href`.
+    """
+
+    label: str = Field(min_length=1, max_length=120)
+    href: str = Field(default=None, min_length=1, max_length=2000)
+
+
 class ProposalSource(StrictModel):
     """Откуда предложение (у карточки) или пункт (документ и страница): подпись, цитата, ссылка.
 
     Нужна подпись или цитата. `href` — только открываемый адрес (путь от корня хоста или http(s)),
-    служебную ссылку агента (`project-attachment:…`) сюда не кладут.
+    служебную ссылку агента (`project-attachment:…`) сюда не кладут. Если записей несколько, они идут
+    в `links` после подписи; пустой список равен отсутствию поля.
     """
 
     label: str = Field(default=None, min_length=1, max_length=120)
     quote: str = Field(default=None, min_length=1, max_length=1000)
     href: str = Field(default=None, min_length=1, max_length=2000)
+    links: list[ProposalSourceLink] = Field(default=None, max_length=20)
 
     @model_validator(mode="after")
     def validate_label_or_quote(self) -> "ProposalSource":

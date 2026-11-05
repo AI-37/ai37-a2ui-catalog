@@ -40,6 +40,7 @@ import proposalCardVoiceFixture from '../../../fixtures/valid/proposal-card-voic
 import proposalCardParamsFixture from '../../../fixtures/valid/proposal-card-params.json';
 import proposalCardSupersededFixture from '../../../fixtures/valid/proposal-card-superseded.json';
 import proposalCardDocumentsFixture from '../../../fixtures/valid/proposal-card-documents.json';
+import proposalCardVoiceLinksFixture from '../../../fixtures/valid/proposal-card-voice-links.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoAttachmentHost} from './demo-attachment-host';
 
@@ -368,6 +369,16 @@ const examples = [
     messages: createSurfaceMessages(
       'ProposalCard',
       proposalCardDocumentsFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'proposal-card-voice-links-preview',
+    title: 'Proposal Card — отклонённая пачка, ссылки на записи',
+    description:
+      'Источник из двух голосовых: после подписи ссылки на записи в документах проекта. Запись без href (нет прав или она удалена) — подпись без перехода.',
+    messages: createSurfaceMessages(
+      'ProposalCard',
+      proposalCardVoiceLinksFixture.props as Record<string, unknown>,
     ),
   },
 ] as const;
