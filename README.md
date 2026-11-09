@@ -10,8 +10,8 @@
 - TypeScript 5.9, Node ≥ 22, pnpm ≥ 10 (`packageManager: pnpm@10.29.3`), workspace `packages/*` + `apps/*`.
 - Zod 3 + `zod-to-json-schema` (схемы), React 19 + `@a2ui/react`/`@a2ui/web_core` 0.10.1 (зафиксированы через `pnpm.overrides`), `@base-ui/react`, KaTeX (рендереры).
 - tsup, tsx, Vite 7, Vitest 4 (jsdom, Testing Library).
-- Python ≥ 3.13, Pydantic 2, Poetry, pytest (`packages/catalog-python`).
-- Единая синхронная версия пакетов и каталога — 0.45.0.
+- Python ≥ 3.13 (ограничение `>=3.13,<4.0`), Pydantic 2, Poetry, pytest (`packages/catalog-python`).
+- Единая синхронная версия пакетов и каталога — 0.46.0.
 
 ## Схема работы
 - `packages/catalog-schemas` задаёт схемы компонентов и регистрирует их в `catalog.ts`. Константы `CATALOG_ID`, `A2UI_BASE_CATALOG_ID` и `CATALOG_COMPONENT_NAMES` экспортируются отдельно через `./constants`.
@@ -21,6 +21,7 @@
 - `packages/catalog-python` даёт Pydantic-модели (ручное зеркало Zod-схем) и `validate_component_payload` / `validate_component_payload_json` / `get_component_schema`.
 - `ProposalSource.links` — необязательный список до 20 объектов `{label, href?}` (записи, из которых собрана пачка, напр. голосовые сообщения). Работает у обеих форм источника: у источника пачки и у источника пункта. Рендерер (`proposal-card-source-links.tsx`) ставит их после подписи/цитаты: с `href` (путь от корня хоста или http(s)) — ссылкой в новой вкладке, без `href` — подписью. Одиночный `href` сохранён; пустой список рисуется как отсутствие поля; одних `links` без подписи или цитаты по-прежнему мало. Python-зеркало: `ProposalSourceLink`, `ProposalSource.links`.
 - Схемы источника — `.strict()`: рендерер 0.44.0 отклоняет источник с `links`, поэтому в хостах каталог бампают раньше, чем эмитент-агент начнёт слать поле.
+- `ProposalCardScreen` (экран карточки пачки отдельно от рендерера, чтобы ставить его в demo и в хостах без a2ui-хоста) принимает проп `flat?: boolean` (по умолчанию `false`): при `flat` внешняя карточка рисуется как `Card flat` — без рамки, содержимое прежнее. Это проп хоста, а не поле A2UI-схемы: агент его не присылает, рендерер `ProposalCard` его не ставит; Zod-схемы, Python-зеркало и `public/` не менялись. Раскладка самого экрана — канон `*Next` (утопленная шапка с пилюлей состояния, пункты, цитата источника, заметка, подвал); подвал считает `resolveProposalCardFooter` (`confirm` | `link` | `none`).
 - Fetch-подсказки lookup-полей (`suggestMode: 'fetch'`) и рекомендации редактора лифтов ходят same-origin `GET /api/agent-resource?resource=&query=` (`AGENT_RESOURCE_ROUTE` / `LOOKUP_SUGGEST_ROUTE`, ответ `LookupSuggestResponse`). BFF потребителя проксирует запрос в оркестратор.
 
 ```mermaid
@@ -39,18 +40,18 @@ flowchart LR
 
 ## Структура каталогов
 - `packages/catalog-schemas/` — `@ai37/a2ui-catalog-schemas`: Zod-схемы (`src/components/`), каталог, константы, генерация артефактов.
-- `packages/catalog-react/` — `@ai37/a2ui-catalog-react`: рендереры (`src/renderers/`), примитивы набора (`src/primitives/`).
+- `packages/catalog-react/` — `@ai37/a2ui-catalog-react`: рендереры (`src/renderers/`, в т.ч. `proposal-card-screen.tsx`, `proposal-card.types.ts`), примитивы набора (`src/primitives/`).
 - `packages/catalog-python/` — Python-пакет `ai37-a2ui-catalog` (`ai37_a2ui_catalog`: `models/`, `validation.py`, `constants.py`).
 - `apps/demo/` — `@ai37/a2ui-demo`, Vite-стенд для ручной проверки сообщений (в т.ч. страницы `proba/` системы примитивов, мок-справочники).
-- `fixtures/` — `valid/`, `invalid/`, `messages/` (поверхности A2UI) для тестов и демо; напр. `proposal-card-voice-links.json` (источник со ссылками) и `proposal-card-source-link-without-label.json` (ссылка без подписи).
-- `tests/` — `ts/`, `react/` (Vitest, включая снапшоты разметки), `python/` (pytest).
+- `fixtures/` — `valid/`, `invalid/`, `messages/` (поверхности A2UI) для тестов и демо; напр. `proposal-card-voice-links.json` (источник со ссылками), `proposal-card-source-link-without-label.json` (ссылка без подписи), `proposal-card-voice.json` / `proposal-card-params.json` / `proposal-card-documents.json`.
+- `tests/` — `ts/`, `react/` (Vitest, включая снапшоты разметки и тесты `ProposalCardScreen`), `python/` (pytest).
 - `public/` — сгенерированные артефакты каталога для GitHub Pages (`a2ui/catalogs/ai37-a2ui/v1`, `v2`).
 - `scripts/` — `bump-version.mjs`, `verify-public.ts`, `install-to-consumer.mjs` (установка локальной сборки в потребителя тарболлами), `check-pr-release-metadata.mjs`.
 - `docs/` — `theming.md`, `initial-plan.md`; `openspec/changes/` — спецификации изменений компонентов (напр. `proposal-source-links/`).
 
 ## Публичные интерфейсы
 - Статический каталог на GitHub Pages: `https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json` (`CATALOG_ID`) и `.../v2/components/*.schema.json`; `v1` хранится рядом. В `proposal-card.schema.json` у источника (пачки и пункта) поля `label`/`quote`/`href`/`links` (`links` — до 20 объектов, обязателен только `label`).
-- npm: `@ai37/a2ui-catalog-schemas` (экспорты `.`, `./constants`), `@ai37/a2ui-catalog-react` (`.`, `./primitives`; peer `react`/`react-dom` ^19).
+- npm: `@ai37/a2ui-catalog-schemas` (экспорты `.`, `./constants`), `@ai37/a2ui-catalog-react` (`.`, `./primitives`; peer `react`/`react-dom` ^19). Из react-пакета наружу также идут `ProposalCardScreen` (props `props`, `readOnly`, `sent`, `sink`, `flat?`), `resolveProposalCardFooter`, `SurfaceReadOnlyProvider`, `useSurfaceReadOnly`, `withReadOnlyGate`.
 - PyPI: `ai37-a2ui-catalog`.
 - Контракт, который должен реализовать потребитель: same-origin `GET /api/agent-resource?resource=&query=`. Неизвестный resource → 404 `{error: "unknown_resource"}`.
 - HTTP-сервиса, A2A, MCP и AG-UI нет.
@@ -62,16 +63,16 @@ flowchart LR
 - В рантайме рендереров: BFF хоста с маршрутом `/api/agent-resource`. Authentik, БД и LLM не используются.
 
 ### От него зависят
-- spai-ui и UI-форки (рендер), widget-ui, polimetrika-ui.
+- spai-ui и UI-форки (рендер), widget-ui, polimetrika-ui (в т.ч. передаёт `flat` в `ProposalCardScreen`, чтобы рисовать пачку в своей рамке — ревью AI-37/polimetrika-ui#45).
 - spai-chat-backend и форки, `@ai37/agent-host` (ai37-agent-sdk) — `@ai37/a2ui-catalog-schemas`.
-- Агенты: spai-elevator-calc-agent, spai-thermal-calc-agent, spai-daylight-factor-calc-agent, spai-consultant-agent, pdai-doc-gen-agent, pdai-site-check, polimetrika-data-agent (эмитент `ProposalCard`; для поля `links` нужен пин `ai37-a2ui-catalog==0.45.0` — модель строгая).
+- Агенты: spai-elevator-calc-agent, spai-thermal-calc-agent, spai-daylight-factor-calc-agent, spai-consultant-agent, pdai-doc-gen-agent, pdai-site-check, polimetrika-data-agent (эмитент `ProposalCard`; для поля `links` нужен пин `ai37-a2ui-catalog==0.45.0` и выше — модель строгая).
 
 ## Конфигурация
 `.env.example` нет.
 - `AI37_NPM_TOKEN` — авторизация в `npm.app.sp-ai.ru`. Через `.npmrc` она нужна уже для `pnpm install`.
 - `AI37_PYPI_TOKEN` — пароль публикации в `pypi.app.sp-ai.ru` (CD).
 - Переменные организации `CI_RUNNER` / `CD_RUNNER` — выбор раннера.
-- Тематизация рендереров — CSS-токены `--a2ui-*` и атрибут `data-a2ui-theme` (см. `docs/theming.md`); ссылки источника используют тот же класс `a2ui-t--accent`, новых цветов нет.
+- Тематизация рендереров — CSS-токены `--a2ui-*` и атрибут `data-a2ui-theme` (см. `docs/theming.md`); ссылки источника используют тот же класс `a2ui-t--accent`, новых цветов нет. Проп `flat` меняет только класс внешней карточки (`a2ui-card--flat`), новых токенов не вводит.
 
 ## Данные и хранилища
 БД, Redis и S3 нет. Хранятся только статические артефакты в `public/a2ui/catalogs/ai37-a2ui/{v1,v2}` и фикстуры в `fixtures/`.
@@ -107,7 +108,7 @@ pnpm run lint          # = typecheck
 - `ecosystem/design/a2ui-negotiation-plan.md` — негоциация MIME → `catalogId` (`CATALOG_ID`, `A2UI_BASE_CATALOG_ID`).
 - `ecosystem/v2/10-agui-protocol.md` — AG-UI/A2UI в чате.
 - `ecosystem/design/frontend-stack.md`, `ecosystem/design/ui-principles-sp-ai.md` — фронтенд-основа.
-- `docs/theming.md` (в репозитории).
+- `docs/theming.md` (в репозитории), `CHANGELOG.md` — история версий (0.46.0: проп хоста `flat` у `ProposalCardScreen`).
 <!-- ai37:card:end -->
 
 <!-- Ниже — только уникальный человеческий контекст (замысел, инварианты, грабли).
