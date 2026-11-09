@@ -13,9 +13,10 @@ import {resolveProposalCardFooter} from './resolve-proposal-card-footer';
  * a2ui-хоста. Раскладка — канон `*Next`, как у `AttachmentChoiceCard`:
  * шапка утопленной полосой с пилюлей состояния, пункты, цитата источника,
  * заметка и подвал. Заменённая пачка приглушена целиком: решать по ней
- * нечего, актуальна новая карточка.
+ * нечего, актуальна новая карточка. `flat` снимает рамку внешней карточки,
+ * когда хост ставит экран в свою рамку.
  */
-export function ProposalCardScreen({props, readOnly, sent, sink}: ProposalCardScreenProps) {
+export function ProposalCardScreen({props, readOnly, sent, sink, flat = false}: ProposalCardScreenProps) {
   const footer = resolveProposalCardFooter(props, readOnly);
   const superseded = props.state === 'superseded';
 
@@ -23,7 +24,7 @@ export function ProposalCardScreen({props, readOnly, sent, sink}: ProposalCardSc
     <div className={KIT_SCOPE}>
       <KitStyles />
 
-      <Card>
+      <Card flat={flat}>
         <div style={bodyStyle}>
           <Card flat>
             <CardHeader

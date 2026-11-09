@@ -4,6 +4,17 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.46.0] - 2026-11-10
+
+### Added
+
+- **`ProposalCardScreen`: проп хоста `flat`** (план AI-37/docs#618, ревью AI-37/polimetrika-ui#45).
+  Полиметрика кладёт карточку пачки в свою рамку («пачка целиком в одной рамке») и снимала рамку
+  каталога правилом форка по внутренним классам `.a2ui-kit > .a2ui-card`. Теперь хост передаёт
+  `flat`, и внешняя карточка рисуется `Card flat`: без рамки, остальное как было. По умолчанию
+  `false`, без пропа рендер прежний. Это проп экрана, а не поле A2UI-схемы: агент его не присылает,
+  рендерер `ProposalCard` его не ставит, схема и Python-зеркало не менялись.
+
 ## [0.45.0] - 2026-11-05
 
 ### Added

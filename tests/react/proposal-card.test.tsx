@@ -5,7 +5,12 @@ import {act, fireEvent, render, screen, within} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
-import {ai37Catalog, resolveProposalCardFooter, SurfaceReadOnlyProvider} from '@ai37/a2ui-catalog-react';
+import {
+  ai37Catalog,
+  ProposalCardScreen,
+  resolveProposalCardFooter,
+  SurfaceReadOnlyProvider,
+} from '@ai37/a2ui-catalog-react';
 import type {ProposalCardProps, ProposalItem} from '@ai37/a2ui-catalog-schemas';
 
 const CATALOG_ID =
@@ -248,6 +253,32 @@ describe('ProposalCard — ссылки источника', () => {
     const item = within(screen.getByRole('list')).getAllByRole('listitem')[2]!;
     expect(item.textContent).toBe('измененовытяжка ростеров: 1 → 2Акт.pdf, стр. 2«450 кВт»Приложение 1');
     expect(within(item).getByRole('link', {name: 'Приложение 1'}).getAttribute('href')).toBe('/documents/ser_2');
+  });
+});
+
+describe('ProposalCardScreen — flat', () => {
+  const sink = {onConfirm: () => {}};
+  const outerCard = (container: HTMLElement) => container.querySelector('.a2ui-kit > .a2ui-card');
+
+  it('без flat у внешней карточки рамка, как раньше', () => {
+    const {container} = render(<ProposalCardScreen props={voice()} readOnly={false} sent={false} sink={sink} />);
+    expect(outerCard(container)?.className).toBe('a2ui-card');
+  });
+
+  it('flat снимает рамку только у внешней карточки', () => {
+    const {container} = render(
+      <ProposalCardScreen props={voice()} readOnly={false} sent={false} sink={sink} flat />,
+    );
+    const outer = outerCard(container);
+    expect(outer?.className).toBe('a2ui-card a2ui-card--flat');
+    // Содержимое то же: шапка, пункты и кнопка на месте.
+    expect(screen.getByText('Изменения из голосового сообщения')).toBeTruthy();
+    expect(screen.getByRole('button', {name: 'Подтвердить'})).toBeTruthy();
+  });
+
+  it('рендерер каталога flat не ставит', () => {
+    const {container} = renderCard(voice());
+    expect(outerCard(container)?.classList.contains('a2ui-card--flat')).toBe(false);
   });
 });
 
