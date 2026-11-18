@@ -8,6 +8,7 @@ import {nextHeaderDraftForType} from './next-header-draft-for-type';
 import type {ConstructionHeaderFields} from './constructions-editor.types';
 import type {ConstructionsNextHeaderRowProps} from './constructions-next.types';
 import {headerFieldsEqual} from './header-fields-equal';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Форма шапки: тип, разновидность, название, коэффициент однородности r и
@@ -23,6 +24,7 @@ export function ConstructionsNextHeaderForm({
   onCommit,
   onCancel,
 }: ConstructionsNextHeaderRowProps) {
+  const m = useA2uiMessages();
   const [draft, setDraft] = React.useState<ConstructionHeaderFields>({
     type: entry.type,
     subtype: entry.subtype,
@@ -44,7 +46,7 @@ export function ConstructionsNextHeaderForm({
   return (
     <div style={formStyle}>
       <Form columns={2}>
-        <Field label="Тип конструкции">
+        <Field label={m.constructions.type}>
           <Select
             items={typeConfigs.map(config => ({value: config.type, label: config.label}))}
             value={draft.type}
@@ -59,7 +61,7 @@ export function ConstructionsNextHeaderForm({
           value={draft.subtype}
           onChange={subtype => setDraft({...draft, subtype})}
         />
-        <Field label="Название">
+        <Field label={m.constructions.name}>
           <Input
             value={draft.name ?? ''}
             onChange={event => setDraft({...draft, name: event.target.value})}
@@ -73,7 +75,7 @@ export function ConstructionsNextHeaderForm({
         <ConstructionsNextRoomTempField
           label={
             <>
-              t<sub className="a2ui-field__index">в</sub>* — температура помещения, °C
+              t<sub className="a2ui-field__index">в</sub>* — {m.constructions.roomTemp}
             </>
           }
           value={draft.tvRoom}
@@ -83,8 +85,7 @@ export function ConstructionsNextHeaderForm({
         <ConstructionsNextRoomTempField
           label={
             <>
-              t<sub className="a2ui-field__index">от</sub>* — температура с холодной стороны,
-              °C
+              t<sub className="a2ui-field__index">от</sub>* — {m.constructions.coldSideTemp}
             </>
           }
           value={draft.totRoom}
@@ -95,10 +96,10 @@ export function ConstructionsNextHeaderForm({
 
       <div style={actionsStyle}>
         <Button variant="filled" size="sm" onClick={handleSave}>
-          Сохранить
+          {m.common.save}
         </Button>
         <Button size="sm" onClick={onCancel}>
-          Отмена
+          {m.common.cancel}
         </Button>
       </div>
     </div>

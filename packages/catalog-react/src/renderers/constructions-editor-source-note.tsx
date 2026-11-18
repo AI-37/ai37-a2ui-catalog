@@ -1,6 +1,7 @@
 import React from 'react';
 import type {ConstructionsEditorSourceNoteProps} from './constructions-editor.types';
 import {fieldSourceLabel} from './field-source-label';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Подпись источника под контролом: обоснование агента (`note`) или, если его
@@ -12,12 +13,13 @@ import {fieldSourceLabel} from './field-source-label';
  * design.md).
  */
 export function ConstructionsEditorSourceNote({source}: ConstructionsEditorSourceNoteProps) {
+  const m = useA2uiMessages();
   const accent = source.source === 'suggested' || source.source === 'question';
 
   return (
     <span className={`a2ui-ce-note${accent ? ' a2ui-ce-note--accent' : ''}`}>
       {source.source === 'default' ? <span className="a2ui-ce-dot" aria-hidden="true" /> : null}
-      {source.note ?? fieldSourceLabel(source.source)}
+      {source.note ?? fieldSourceLabel(source.source, m)}
     </span>
   );
 }

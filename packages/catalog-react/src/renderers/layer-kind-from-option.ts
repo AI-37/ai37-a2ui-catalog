@@ -1,7 +1,7 @@
 import type {ConstructionLayerKind, LookupOption} from '@ai37/a2ui-catalog-schemas';
-import {LAYER_KIND_LABELS} from './layer-kind-labels';
+import {LAYER_KINDS} from './layer-kind-labels';
 
-const SPECIAL_KINDS = (Object.keys(LAYER_KIND_LABELS) as ConstructionLayerKind[]).filter(
+const SPECIAL_KINDS = LAYER_KINDS.filter(
   kind => kind !== 'material',
 );
 

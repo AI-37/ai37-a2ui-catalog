@@ -18,6 +18,7 @@ import {ConstructionsNextRprChip} from './constructions-next-rpr-chip';
 import {ConstructionsNextStatus} from './constructions-next-status';
 import type {ConstructionsNextCardProps, ConstructionsNextPreview} from './constructions-next.types';
 import {findInvalidLayers} from './find-invalid-layers';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Карточка конструкции — элемент аккордеона: карточкой её делает класс
@@ -53,6 +54,7 @@ export function ConstructionsNextCard({
   onRemove,
   entryRef,
 }: ConstructionsNextCardProps) {
+  const m = useA2uiMessages();
   const panelId = `${React.useId()}-construction`;
   const config = typeConfigs.find(candidate => candidate.type === entry.type);
 
@@ -103,8 +105,8 @@ export function ConstructionsNextCard({
         action={
           <Menu
             icon={<MoreIcon />}
-            ariaLabel={`Действия: ${title}`}
-            items={[{label: 'Удалить', tone: 'danger', onSelect: onRemove}]}
+            ariaLabel={formatMessage(m.common.actionsFor, {title})}
+            items={[{label: m.common.remove, tone: 'danger', onSelect: onRemove}]}
           />
         }
       />

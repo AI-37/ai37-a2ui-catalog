@@ -1,8 +1,7 @@
 import React from 'react';
 import {Button, Field, Form, NumberField} from '../primitives';
 import type {ConstructionsNextPassportProps} from './constructions-next.types';
-
-const PASSPORT_LABEL = 'Rпр по паспорту, м²·°C/Вт';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Форма паспортного Rпр — тот же паттерн, что у слоя и шапки: локальная копия,
@@ -15,6 +14,7 @@ export function ConstructionsNextPassportForm({
   onCancel,
   onDraftChange,
 }: ConstructionsNextPassportProps) {
+  const m = useA2uiMessages();
   const [draft, setDraft] = React.useState<number | undefined>(value);
 
   const handleApply = () => {
@@ -28,7 +28,7 @@ export function ConstructionsNextPassportForm({
   return (
     <div style={formStyle}>
       <Form>
-        <Field label={PASSPORT_LABEL}>
+        <Field label={m.constructions.passportField}>
           <NumberField
             value={draft ?? null}
             min={0.01}
@@ -45,10 +45,10 @@ export function ConstructionsNextPassportForm({
 
       <div style={actionsStyle}>
         <Button variant="filled" size="sm" onClick={handleApply}>
-          Применить
+          {m.common.apply}
         </Button>
         <Button size="sm" onClick={onCancel}>
-          Отмена
+          {m.common.cancel}
         </Button>
       </div>
     </div>

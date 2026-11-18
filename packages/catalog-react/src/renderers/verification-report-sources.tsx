@@ -1,5 +1,6 @@
 import React from 'react';
 import type {VerificationReportSource} from '@ai37/a2ui-catalog-schemas';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Строка «Источник: ЕГРЮЛ · ГИР БО». Ссылкой становится только http(s):
@@ -10,13 +11,14 @@ export function VerificationReportSources({
 }: {
   sources: VerificationReportSource[] | undefined;
 }) {
+  const m = useA2uiMessages();
   if (sources === undefined) {
     return null;
   }
 
   return (
     <p className="a2ui-t--sub a2ui-t--muted" style={lineStyle}>
-      <span>{sources.length > 1 ? 'Источники:' : 'Источник:'}</span>
+      <span>{sources.length > 1 ? m.report.sources : m.report.source}</span>
       {sources.map((source, index) => (
         <VerificationReportSourceItem key={`${source.label}-${index}`} source={source} />
       ))}

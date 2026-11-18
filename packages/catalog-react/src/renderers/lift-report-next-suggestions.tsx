@@ -4,6 +4,7 @@ import {ReportRow} from '../primitives';
 import {LiftReportNextSide} from './lift-report-next-side';
 import {ReportNextSection} from './report-next-section';
 import type {ReportNextActionSink} from './report-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Что изменить»: варианты с уже пересчитанным результатом. Рекомендованный
@@ -17,12 +18,13 @@ export function LiftReportNextSuggestions({
   suggestions: LiftReportSuggestions | undefined;
   onAction: ReportNextActionSink;
 }) {
+  const m = useA2uiMessages();
   if (suggestions === undefined) {
     return null;
   }
 
   return (
-    <ReportNextSection label={suggestions.title ?? 'Что изменить'}>
+    <ReportNextSection label={suggestions.title ?? m.report.whatToChange}>
       {suggestions.items.map(item => (
         <ReportRow
           key={item.id}

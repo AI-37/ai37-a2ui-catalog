@@ -4,6 +4,39 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.47.0] - 2026-11-18
+
+### Added
+
+- **`A2uiI18nProvider`: язык подписей каталога** (план AI-37/docs#589, срез 7; контракт локали
+  `ecosystem/v2.4/06-i18n-locale.md`). Всё, что рендерер пишет сам — статусы, кнопки, подписи полей,
+  сводки, «Скачать», «Сохранить в проект», «! проверить», формы по числу, — теперь берётся из словаря.
+  Встроенные словари на шесть языков: `ru, en, es, de, fr, pt`, русский — источник, остальные
+  переведены с него. Хост ставит провайдер над поверхностями и передаёт `locale` — полный тег BCP-47,
+  он не обрезается: `es-MX` берёт словарь `es`, а числа форматирует по `es-MX`. Цепочка фолбэка:
+  точный тег → язык → `en`; язык без словаря (`pl`) и битый тег уходят в `en` целиком. Проп
+  `messages` — переводы хоста, ложатся поверх встроенных по ключам (deep-merge; пустая строка и
+  неизвестный ключ игнорируются). Без провайдера каталог говорит по-русски, как раньше: существующие
+  тесты не правились. Тексты, которые присылает агент, каталог не трогает — их переводит агент.
+  Наружу: `A2uiI18nProvider`, `useA2uiI18n`, `useA2uiMessages`, `createA2uiI18n`,
+  `resolveA2uiLocale`, `A2UI_MESSAGES`, `RU_MESSAGES`, `formatMessage`, `formatPlural`, типы
+  `A2uiMessages`, `A2uiMessagesOverride`.
+- Тест паритета словарей: тот же набор ключей и те же подстановки `{имя}`, что у русского; у форм по
+  числу есть `one` и `other`; обозначения норм (ГСОП, СП 131, Rпр, tв, РТ) не переведены.
+
+### Changed
+
+- **Числа по локали провайдера.** `NumberField` (было `locale="ru-RU"`), чип отклонения ThermalReport
+  (было `toLocaleString('ru-RU')`), ГСОП, числа на чертежах КЕО и границы поля в пометке «вне
+  диапазона» форматируются по `locale` из контекста. Без провайдера вывод прежний, байт в байт.
+- Формы по числу считаются через `Intl.PluralRules` локали; `plural-ru.ts` и ручное правило в
+  `formatMissingLambda` удалены.
+- Вспомогательные функции подписей (`fieldSourceLabel`, `buildConditionsSummary`,
+  `formatCalcSourceCounter`, `calcFieldRangeWarning` и др.) приняли необязательный последний аргумент
+  — словарь или `{locale, messages}`; без него — русский. Внутренние константы с русскими словами
+  (`CHERDACHNYE_SUBTYPE_LABELS`, `LAYER_KIND_LABELS`, `R_FIELD_LABEL`, `REPORT_NEXT_STATUS_TEXT`,
+  `CALC_EDITED_LABEL`) заменены функциями от словаря; из пакета они не экспортировались.
+
 ## [0.46.0] - 2026-11-10
 
 ### Added

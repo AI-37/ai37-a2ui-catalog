@@ -8,6 +8,7 @@ import {formatGsop} from './format-gsop';
 import {LookupCombobox} from './lookup-combobox';
 import {readOptionClimate} from './read-option-climate';
 import {useLookupSuggest} from './use-lookup-suggest';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Климат второго ряда: обозначение с индексом (tот, zот) и расшифровка прямо в
@@ -18,11 +19,11 @@ const CLIMATE_FIELDS: Array<{
   key: 'tot' | 'zot' | 'tn';
   symbol: string;
   index: string;
-  text: string;
+  text: 'climateTot' | 'climateZot' | 'climateTn';
 }> = [
-  {key: 'tot', symbol: 't', index: 'от', text: 'средняя темп. отопительного периода, °C'},
-  {key: 'zot', symbol: 'z', index: 'от', text: 'продолжительность отопит. периода, сут/год'},
-  {key: 'tn', symbol: 't', index: 'н', text: 'темп. наиб. холодной пятидневки (0,92), °C'},
+  {key: 'tot', symbol: 't', index: 'от', text: 'climateTot'},
+  {key: 'zot', symbol: 'z', index: 'от', text: 'climateZot'},
+  {key: 'tn', symbol: 't', index: 'н', text: 'climateTn'},
 ];
 
 /**
@@ -44,6 +45,8 @@ export function ConstructionsEditorGeneral({
   minChars,
   onChange,
 }: ConstructionsEditorGeneralProps) {
+  const {locale, messages} = useA2uiI18n();
+  const m = messages.constructions;
   const {options, loading, queried, handleInputText, closeOptions} = useLookupSuggest({
     referenceId: cityReferenceId ?? '',
     minChars,
@@ -79,10 +82,10 @@ export function ConstructionsEditorGeneral({
     <>
       <div className="a2ui-ce-conditions__grid">
         <label className="a2ui-ce-field">
-          <span className="a2ui-ce-field__label">Регион строительства</span>
+          <span className="a2ui-ce-field__label">{m.region}</span>
           <LookupCombobox
             name="constructions-general-city"
-            placeholder="Город из справочника"
+            placeholder={m.cityPlaceholder}
             inputText={general.city?.label ?? ''}
             selected={selectedCity}
             options={options}
@@ -96,7 +99,7 @@ export function ConstructionsEditorGeneral({
           {sources.city ? <ConstructionsEditorSourceNote source={sources.city} /> : null}
         </label>
         <label className="a2ui-ce-field">
-          <span className="a2ui-ce-field__label">Назначение помещений</span>
+          <span className="a2ui-ce-field__label">{m.buildingType}</span>
           {buildingTypeOptions && buildingTypeOptions.length > 0 ? (
             <ConstructionsEditorSelect
               value={general.buildingType ?? ''}
@@ -128,7 +131,7 @@ export function ConstructionsEditorGeneral({
         </label>
         <label className="a2ui-ce-field">
           <span className="a2ui-ce-field__label">
-            Температура внутреннего воздуха t<sub className="a2ui-ce-field__index">в</sub>
+            {m.indoorTemp} t<sub className="a2ui-ce-field__index">в</sub>
           </span>
           <input
             type="number"
@@ -140,7 +143,7 @@ export function ConstructionsEditorGeneral({
           {sources.tv ? <ConstructionsEditorSourceNote source={sources.tv} /> : null}
         </label>
         <label className="a2ui-ce-field">
-          <span className="a2ui-ce-field__label">Условия эксплуатации</span>
+          <span className="a2ui-ce-field__label">{m.operatingConditions}</span>
           <ConstructionsEditorSelect
             value={general.condition ?? ''}
             onChange={event =>
@@ -168,7 +171,7 @@ export function ConstructionsEditorGeneral({
           <label key={field.key} className="a2ui-ce-field">
             <span className="a2ui-ce-field__label">
               {field.symbol}
-              <sub className="a2ui-ce-field__index">{field.index}</sub> — {field.text}
+              <sub className="a2ui-ce-field__index">{field.index}</sub> — {m[field.text]}
             </span>
             <input
               type="number"
@@ -187,12 +190,10 @@ export function ConstructionsEditorGeneral({
             прислал — «—»; на время «дебаунс + раунд-трип» живёт прежнее
             значение (Решение 2 design constructions-editor-live-draft). */}
         <div className="a2ui-ce-field">
-          <span className="a2ui-ce-field__label">
-            ГСОП — градусо-сутки отопит. периода, °C·сут/год
-          </span>
+          <span className="a2ui-ce-field__label">{m.gsop}</span>
           {/* Не контрол, а значение: править ГСОП нельзя, и коробка поля звала
               бы это делать. */}
-          <span className="a2ui-ce-static">{gsop === null ? '—' : formatGsop(gsop)}</span>
+          <span className="a2ui-ce-static">{gsop === null ? '—' : formatGsop(gsop, locale)}</span>
           {gsop !== null && sources.gsop ? (
             <ConstructionsEditorSourceNote source={sources.gsop} />
           ) : null}

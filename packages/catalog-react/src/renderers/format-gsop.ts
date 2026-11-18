@@ -1,11 +1,10 @@
-/** Неразрывный пробел-разделитель разрядов. */
-const GROUP_SEPARATOR = '\u00a0';
+import {A2UI_DEFAULT_LOCALE, formatInteger} from '../i18n';
 
 /**
- * ГСОП с разрядами через неразрывный пробел: «6 380». Своё форматирование, а не
- * `toLocaleString`, — результат не должен зависеть от локали среды (у SSR и у
- * браузера она разная, и разметка разъезжалась бы при гидратации).
+ * ГСОП с разрядами по локали: «6 380» по-русски, «6,380» по-английски. Локаль
+ * передаётся явно, а не берётся из среды: у SSR и у браузера она разная, и
+ * разметка разъезжалась бы при гидратации.
  */
-export function formatGsop(value: number): string {
-  return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, GROUP_SEPARATOR);
+export function formatGsop(value: number, locale: string = A2UI_DEFAULT_LOCALE): string {
+  return formatInteger(locale, value);
 }

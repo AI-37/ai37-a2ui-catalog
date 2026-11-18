@@ -18,6 +18,7 @@ import {graphRadius50} from './graph-radius50';
 import {sectionBounds} from './section-bounds';
 import {FAR_WALL_THICKNESS, SLAB_THICKNESS} from './sheet-constants';
 import type {KeoSectionDrawing} from '@ai37/a2ui-catalog-schemas';
+import {formatMessage, useA2uiI18n} from '../../i18n';
 
 /**
  * Разрез по помещению с наложенным графиком Данилюка I — лист «под ВОК550»:
@@ -34,6 +35,8 @@ export function SectionDrawing({
   section: KeoSectionDrawing;
   pxPerMeter: number;
 }) {
+  const {locale, messages} = useA2uiI18n();
+  const num = (value: number, digits = 1) => formatNum(value, digits, locale);
   const bounds = sectionBounds(section);
   const {roomDepth, roomHeight, wallThickness, sillHeight, windowTop} = section;
   const lt = section.point.lt;
@@ -45,7 +48,7 @@ export function SectionDrawing({
   const dimBase = SLAB_THICKNESS * pxPerMeter;
 
   return (
-    <DrawingSheet bounds={bounds} pxPerMeter={pxPerMeter} title="Разрез по помещению">
+    <DrawingSheet bounds={bounds} pxPerMeter={pxPerMeter} title={messages.keo.sectionTitle}>
       {/* конструкции: пол, потолок, дальняя стена, оконная стена с проёмом */}
       <CutRect
         x={bounds.xMin + 0.2}
@@ -79,7 +82,7 @@ export function SectionDrawing({
           fromDeg={fromDeg}
           toDeg={section.alphaDeg}
           glassX={glassX}
-          label={section.n1 === undefined ? undefined : formatNum(section.n1)}
+          label={section.n1 === undefined ? undefined : num(section.n1)}
         />
       ) : (
         <SkyBlockedNote poleX={lt} poleY={pointHeight} glassX={glassX} />
@@ -88,7 +91,7 @@ export function SectionDrawing({
         x={lt}
         y={pointHeight}
         angleDeg={section.alphaDeg}
-        label={`α = ${formatNum(section.alphaDeg)}° — верх проёма`}
+        label={`α = ${num(section.alphaDeg)}° — ${messages.keo.openingTop}`}
       />
       {section.betaDeg !== undefined && (
         <SightRay
@@ -97,11 +100,14 @@ export function SectionDrawing({
           angleDeg={section.betaDeg}
           label={
             section.opposing === undefined
-              ? `β = ${formatNum(section.betaDeg)}° — верх застройки`
-              : `β = ${formatNum(section.betaDeg)}° — верх застройки (H = ${formatNum(
-                  section.opposing.height,
-                  0,
-                )} м, l = ${formatNum(section.opposing.distance, 0)} м)`
+              ? `β = ${num(section.betaDeg)}° — ${messages.keo.buildingTop}`
+              : `β = ${num(section.betaDeg)}° — ${messages.keo.buildingTop} (${formatMessage(
+                  messages.keo.opposing,
+                  {
+                    height: num(section.opposing.height, 0),
+                    distance: num(section.opposing.distance, 0),
+                  },
+                )})`
           }
         />
       )}

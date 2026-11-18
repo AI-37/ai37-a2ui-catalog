@@ -4,6 +4,7 @@ import {Card, CardHeader, CardTriggerLabel, buttonClassName} from '../primitives
 import {ConstructionsNextConditionsForm} from './constructions-next-conditions-form';
 import {ConstructionsNextConditionsSummary} from './constructions-next-conditions-summary';
 import type {ConstructionsNextConditionsProps} from './constructions-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Секция «Условия»: подпись и одна карточка в двух состояниях. Раскрытием
@@ -28,11 +29,14 @@ export function ConstructionsNextConditions({
   onOpenChange,
   ...general
 }: ConstructionsNextConditionsProps) {
+  const m = useA2uiMessages();
   const panelId = `${React.useId()}-conditions`;
 
   return (
     <div style={groupStyle}>
-      <span className="a2ui-t--sub a2ui-t--overline a2ui-t--muted">Условия</span>
+      <span className="a2ui-t--sub a2ui-t--overline a2ui-t--muted">
+        {m.constructions.conditions}
+      </span>
 
       <Collapsible.Root open={open} onOpenChange={onOpenChange}>
         <Card flat>
@@ -42,7 +46,7 @@ export function ConstructionsNextConditions({
                 className={buttonClassName({variant: 'link', className: 'a2ui-card__title'})}
                 aria-controls={panelId}
               >
-                <CardTriggerLabel title="Условия расчёта" />
+                <CardTriggerLabel title={m.constructions.conditionsTitle} />
                 <ConstructionsNextConditionsSummary open={open} general={general.general} />
               </Collapsible.Trigger>
             }

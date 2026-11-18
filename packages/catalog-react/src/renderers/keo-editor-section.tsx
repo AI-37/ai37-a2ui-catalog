@@ -1,6 +1,7 @@
 import React from 'react';
 import {CalcChevron} from './calc-chevron';
 import type {KeoEditorSectionProps} from './keo-editor.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Секция помещения. Обычная секция всегда раскрыта — это анкета, а не
@@ -15,13 +16,14 @@ export function KeoEditorSection({
   onToggle,
   children,
 }: KeoEditorSectionProps) {
+  const m = useA2uiMessages();
   if (section.advanced && !open) {
     return (
       <button type="button" className="a2ui-ke-banner" aria-expanded={false} onClick={onToggle}>
         <CalcChevron prefix="ke" open={false} />
         <span className="a2ui-ke-banner__title">{section.title}</span>
         <span className="a2ui-ke-banner__summary">{summary}</span>
-        <span className="a2ui-ke-link">Показать</span>
+        <span className="a2ui-ke-link">{m.common.show}</span>
       </button>
     );
   }
@@ -45,7 +47,7 @@ export function KeoEditorSection({
         <span className="a2ui-ke-section__spacer" />
         {section.advanced ? (
           <button type="button" className="a2ui-ke-link" onClick={onToggle}>
-            Свернуть
+            {m.common.collapse}
           </button>
         ) : null}
       </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import type {ProposalItem} from '@ai37/a2ui-catalog-schemas';
 import {ProposalCardItemSource} from './proposal-card-item-source';
 import {ProposalCardItemStatus} from './proposal-card-item-status';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Пункты таблицей «Что · Было · Станет · С какой даты» на классах таблицы
@@ -10,6 +11,7 @@ import {ProposalCardItemStatus} from './proposal-card-item-status';
  * Источник пункта — под «Что»: эта колонка переносится, остальные нет.
  */
 export function ProposalCardTable({items}: {items: ProposalItem[]}) {
+  const m = useA2uiMessages().proposal;
   const withDate = items.some(item => item.effectiveFrom !== undefined);
 
   return (
@@ -17,10 +19,10 @@ export function ProposalCardTable({items}: {items: ProposalItem[]}) {
       <table className="a2ui-table">
         <thead>
           <tr>
-            <th scope="col">Что</th>
-            <th scope="col">Было</th>
-            <th scope="col">Станет</th>
-            {withDate ? <th scope="col">С какой даты</th> : null}
+            <th scope="col">{m.columnWhat}</th>
+            <th scope="col">{m.columnBefore}</th>
+            <th scope="col">{m.columnAfter}</th>
+            {withDate ? <th scope="col">{m.columnSince}</th> : null}
           </tr>
         </thead>
         <tbody>
@@ -36,7 +38,7 @@ export function ProposalCardTable({items}: {items: ProposalItem[]}) {
                 </span>
               </td>
               <td>{item.before ?? '—'}</td>
-              <td>{item.after ?? (item.kind === 'removed' ? 'удалено' : '—')}</td>
+              <td>{item.after ?? (item.kind === 'removed' ? m.removedValue : '—')}</td>
               {withDate ? <td>{item.effectiveFrom ?? '—'}</td> : null}
             </tr>
           ))}

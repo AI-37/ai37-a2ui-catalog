@@ -3,6 +3,7 @@ import {Accordion} from '@base-ui/react/accordion';
 import type {VerificationReportCheck} from '@ai37/a2ui-catalog-schemas';
 import {ReportNextSection} from './report-next-section';
 import {VerificationReportCheckRow} from './verification-report-check-row';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Проверки». Один `Accordion` на весь список, раскрыть можно несколько строк
@@ -14,13 +15,14 @@ export function VerificationReportChecks({checks}: {checks: VerificationReportCh
   // Экранов на странице может быть несколько (полная и точечная проверка в
   // одном треде): id панелей несут приставку экрана.
   const scope = React.useId();
+  const m = useA2uiMessages();
 
   if (checks.length === 0) {
     return null;
   }
 
   return (
-    <ReportNextSection label="Проверки">
+    <ReportNextSection label={m.report.checks}>
       <Accordion.Root multiple style={listStyle}>
         {checks.map((check, index) => (
           <VerificationReportCheckRow

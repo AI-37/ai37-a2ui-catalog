@@ -2,6 +2,7 @@ import React from 'react';
 import {buildLiftSectionSummary} from './build-lift-section-summary';
 import {LiftEditorChevron} from './lift-editor-chevron';
 import type {LiftEditorAdvancedProps} from './lift-editor.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Блок «Параметры по умолчанию» тем же баннер-паттерном, что секции: в
@@ -11,6 +12,7 @@ import type {LiftEditorAdvancedProps} from './lift-editor.types';
  * <3 полей — без блока) живут там.
  */
 export function LiftEditorAdvanced({label, fields, values, renderField}: LiftEditorAdvancedProps) {
+  const m = useA2uiMessages().common;
   const [open, setOpen] = React.useState(false);
 
   if (fields.length === 0) return null;
@@ -26,7 +28,7 @@ export function LiftEditorAdvanced({label, fields, values, renderField}: LiftEdi
         <LiftEditorChevron open={false} />
         <span className="a2ui-le-banner__title">{label}</span>
         <span className="a2ui-le-banner__summary">{buildLiftSectionSummary(fields, values)}</span>
-        <span className="a2ui-le-link">Показать</span>
+        <span className="a2ui-le-link">{m.show}</span>
       </button>
     );
   }
@@ -44,7 +46,7 @@ export function LiftEditorAdvanced({label, fields, values, renderField}: LiftEdi
           {label}
         </button>
         <button type="button" className="a2ui-le-link" onClick={() => setOpen(false)}>
-          Свернуть
+          {m.collapse}
         </button>
       </div>
       <div className="a2ui-le-grid">

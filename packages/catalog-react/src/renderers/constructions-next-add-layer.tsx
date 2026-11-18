@@ -3,6 +3,7 @@ import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import {Button, PlusIcon} from '../primitives';
 import {ConstructionsNextLayer} from './constructions-next-layer';
 import type {ConstructionsNextBodyProps} from './constructions-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /** Пустой слой формы «+ Слой»: в state редактора не попадает до «Добавить». */
 const EMPTY_LAYER: ConstructionLayer = {material: '', thicknessMm: null};
@@ -21,6 +22,7 @@ export function ConstructionsNextAddLayer({
   onChange,
   onPreviewChange,
 }: ConstructionsNextBodyProps) {
+  const m = useA2uiMessages();
   if (editingTarget !== 'new') {
     return (
       <div style={{justifySelf: 'start'}}>
@@ -31,7 +33,7 @@ export function ConstructionsNextAddLayer({
           icon={<PlusIcon />}
           onClick={() => onEditingChange('new')}
         >
-          Слой
+          {m.constructions.layer}
         </Button>
       </div>
     );

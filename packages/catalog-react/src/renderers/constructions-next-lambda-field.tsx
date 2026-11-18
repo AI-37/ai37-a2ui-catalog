@@ -3,6 +3,7 @@ import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import {NumberField, Static} from '../primitives';
 import type {OperatingCondition} from './constructions-editor.types';
 import {resolveLayerLambda} from './resolve-layer-lambda';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Поле λ в форме слоя четырьмя ветками: у тонкого слоя λ не бывает (Rs = 0),
@@ -19,19 +20,21 @@ export function ConstructionsNextLambdaField({
   condition: OperatingCondition;
   onChange: (lambdaManual: number | undefined) => void;
 }) {
+  const m = useA2uiMessages().constructions;
+
   if (layer.kind === 'thin') {
-    return <Static>не учитывается</Static>;
+    return <Static>{m.lambdaNotCounted}</Static>;
   }
 
   if (layer.kind !== undefined && layer.kind !== 'material') {
-    return <Static>Rs — в итоговом расчёте</Static>;
+    return <Static>{m.gapInFinal}</Static>;
   }
 
   if (typeof layer.lambdaA === 'number' || typeof layer.lambdaB === 'number') {
     return (
       <Static>
         {resolveLayerLambda(layer, condition)}
-        <span className="a2ui-t--sub a2ui-t--muted"> авто</span>
+        <span className="a2ui-t--sub a2ui-t--muted">{` ${m.lambdaAuto}`}</span>
       </Static>
     );
   }

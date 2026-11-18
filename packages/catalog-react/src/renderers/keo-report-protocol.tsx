@@ -1,5 +1,6 @@
 import React from 'react';
 import type {KeoReportProtocol} from '@ai37/a2ui-catalog-schemas';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Протокол расчёта» — одна неразворачиваемая строка: лейбл, meta и «Скачать»
@@ -8,6 +9,7 @@ import type {KeoReportProtocol} from '@ai37/a2ui-catalog-schemas';
  * участвуют (канон после thermal-report-standard-buttons).
  */
 export function KeoReportProtocolCard({protocol}: {protocol: KeoReportProtocol}) {
+  const m = useA2uiMessages();
   const handleDownload = () => {
     const blob = new Blob([protocol.downloadContent ?? protocol.content], {
       type: 'text/markdown;charset=utf-8',
@@ -22,7 +24,7 @@ export function KeoReportProtocolCard({protocol}: {protocol: KeoReportProtocol})
 
   return (
     <div className="a2ui-kr__protocol">
-      <span className="a2ui-kr__protocol-title">Протокол расчёта</span>
+      <span className="a2ui-kr__protocol-title">{m.report.protocol}</span>
       {protocol.meta ? <span className="a2ui-kr__protocol-meta">{protocol.meta}</span> : null}
       {protocol.downloadFileName !== undefined ? (
         <button
@@ -30,7 +32,7 @@ export function KeoReportProtocolCard({protocol}: {protocol: KeoReportProtocol})
           className="a2ui-kr-btn a2ui-kr-btn--link a2ui-kr__protocol-download"
           onClick={handleDownload}
         >
-          Скачать
+          {m.common.download}
         </button>
       ) : null}
     </div>

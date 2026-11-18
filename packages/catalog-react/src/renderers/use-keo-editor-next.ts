@@ -23,6 +23,7 @@ import {MIN_EDITOR_ITEMS} from './min-editor-items';
 import {resolveAddItemState} from './resolve-add-item-state';
 import {keoTargetRoom} from './keo-target-room';
 import type {KeoControl, KeoDocument, KeoRoomDraft, KeoSink} from './keo-next.types';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Состояние экрана КЕО: помещения, раскрытие, просмотр секций и счётчик
@@ -43,6 +44,7 @@ import type {KeoControl, KeoDocument, KeoRoomDraft, KeoSink} from './keo-next.ty
  * черновик про данные.
  */
 export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoControl {
+  const i18n = useA2uiI18n();
   const sections = props.roomTemplate.sections;
   const templateFields = sections.flatMap(section => section.fields);
   // Группа условий — раскрывашка только с заголовком: без него ей нечем
@@ -233,6 +235,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
             })),
         ),
       ]),
+      i18n.messages,
     ),
     pending,
     addRoomState: resolveAddItemState({
@@ -274,7 +277,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
     isEdited: (roomId, field) => touched.has(calcTouchedKey(roomId, field)),
 
     warningsFor: (room: KeoRoomDraft, field: CalcEditorField) => {
-      const range = calcFieldRangeWarning(field, room.values[field.name]);
+      const range = calcFieldRangeWarning(field, room.values[field.name], i18n);
 
       return [...(rulesFor(room).get(field.name) ?? []), ...(range === undefined ? [] : [range])];
     },

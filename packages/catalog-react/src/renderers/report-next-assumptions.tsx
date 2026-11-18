@@ -2,8 +2,8 @@ import React from 'react';
 import {Collapsible} from '@base-ui/react/collapsible';
 import {ReportNote} from '../primitives';
 import {ReportNextFoldTrigger} from './report-next-fold-trigger';
-import {pluralRu} from './plural-ru';
 import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
+import {formatPlural, useA2uiI18n} from '../i18n';
 
 /**
  * Допущения расчёта — фолдом, свёрнутым по умолчанию (change
@@ -16,6 +16,7 @@ import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
  * должно.
  */
 export function ReportNextAssumptions({assumptions}: {assumptions: string[] | undefined}) {
+  const {locale, messages} = useA2uiI18n();
   const [open, setOpen] = React.useState(false);
   const panelId = `${React.useId()}-assumptions`;
 
@@ -28,8 +29,8 @@ export function ReportNextAssumptions({assumptions}: {assumptions: string[] | un
       <div style={open ? openHeadStyle : headStyle}>
         <ReportNextFoldTrigger
           panelId={panelId}
-          label="Допущения"
-          summary={`${assumptions.length} ${pluralRu(assumptions.length, 'допущение', 'допущения', 'допущений')}`}
+          label={messages.report.assumptions}
+          summary={formatPlural(locale, messages.report.assumptionsCount, assumptions.length)}
           open={open}
         />
       </div>

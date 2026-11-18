@@ -12,6 +12,7 @@ import type {
   ConstructionsEditorCardProps,
 } from './constructions-editor.types';
 import {tokens} from './tokens';
+import {useA2uiI18n} from '../i18n';
 
 // Пустой слой формы «+ Слой»: в state редактора не попадает до «Добавить».
 const EMPTY_LAYER: ConstructionLayer = {material: '', thicknessMm: null};
@@ -56,6 +57,8 @@ export function ConstructionsEditorCard({
   onChange,
   onRemove,
 }: ConstructionsEditorCardProps) {
+  const i18n = useA2uiI18n();
+  const m = i18n.messages;
   const config = typeConfigs.find(candidate => candidate.type === entry.type);
 
   // Превью-черновик открытой формы — только для чипа Rпр. Любая смена
@@ -102,12 +105,18 @@ export function ConstructionsEditorCard({
           ok: false,
           text:
             invalidity.missingLambdaCount !== null
-              ? formatMissingLambda(invalidity.missingLambdaCount)
-              : 'проверить',
+              ? formatMissingLambda(invalidity.missingLambdaCount, i18n)
+              : m.constructions.statusCheck,
         }
       : agentStatus
-        ? {ok: false, text: agentStatus === 'confirm' ? 'подтвердите' : 'подтвердите паспорт'}
-        : {ok: true, text: 'готова'};
+        ? {
+            ok: false,
+            text:
+              agentStatus === 'confirm'
+                ? m.constructions.statusConfirm
+                : m.constructions.statusConfirmPassport,
+          }
+        : {ok: true, text: m.constructions.statusReady};
 
   const handleHeaderCommit = (fields: ConstructionHeaderFields) => {
     onEditingChange(null);
@@ -165,7 +174,7 @@ export function ConstructionsEditorCard({
         <RprChip rpr={rpr} rnorm={showRnorm ? config?.rnorm : undefined} />
         <button
           type="button"
-          aria-label="Удалить конструкцию"
+          aria-label={m.constructions.removeConstruction}
           onClick={onRemove}
           className="a2ui-ce-card__remove"
         >
@@ -231,7 +240,7 @@ export function ConstructionsEditorCard({
                   onClick={() => onEditingChange('new')}
                   className="a2ui-ce-btn a2ui-ce-btn--add-layer"
                 >
-                  + Слой
+                  + {m.constructions.layer}
                 </button>
               )}
             </div>

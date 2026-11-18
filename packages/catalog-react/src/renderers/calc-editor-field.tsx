@@ -1,6 +1,7 @@
 import React from 'react';
 import {CalcSourceNote} from './calc-source-note';
 import type {CalcEditorFieldProps} from './calc-editor.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Контрол одного поля расчётного редактора (КЕО, инсоляция) с подписью
@@ -20,6 +21,7 @@ export function CalcEditorField({
   warnings,
   onChange,
 }: CalcEditorFieldProps) {
+  const m = useA2uiMessages();
   const text = value === undefined || value === null ? '' : String(value);
   const warned = warnings.length > 0;
   const controlClass = `a2ui-${prefix}-control${warned ? ` a2ui-${prefix}-control--warned` : ''}`;
@@ -40,7 +42,7 @@ export function CalcEditorField({
           onChange={event => onChange(event.target.value)}
           className={controlClass}
         >
-          <option value="">— выберите —</option>
+          <option value="">{m.common.choose}</option>
           {(field.options ?? []).map(option => (
             <option key={option} value={option}>
               {option}
@@ -81,7 +83,7 @@ export function CalcEditorField({
           className={`a2ui-${prefix}-caption a2ui-${prefix}-caption--warning`}
           data-warning={field.name}
         >
-          ! проверить — {warning}
+          {m.common.checkPrefix} {warning}
         </span>
       ))}
     </label>
