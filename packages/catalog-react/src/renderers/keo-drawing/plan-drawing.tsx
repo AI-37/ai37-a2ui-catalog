@@ -12,6 +12,7 @@ import {graphRadius50} from './graph-radius50';
 import {planBounds} from './plan-bounds';
 import {PLAN_SIDE_WALL} from './sheet-constants';
 import type {KeoPlanDrawing} from '@ai37/a2ui-catalog-schemas';
+import {useA2uiI18n} from '../../i18n';
 
 /**
  * План помещения с наложенным графиком Данилюка II: оконная стена двумя
@@ -23,6 +24,7 @@ import type {KeoPlanDrawing} from '@ai37/a2ui-catalog-schemas';
  * proposal.md).
  */
 export function PlanDrawing({plan, pxPerMeter}: {plan: KeoPlanDrawing; pxPerMeter: number}) {
+  const {locale, messages} = useA2uiI18n();
   const bounds = planBounds(plan);
   const {roomWidth, roomDepth, wallThickness} = plan;
   const lt = plan.point.lt;
@@ -32,14 +34,14 @@ export function PlanDrawing({plan, pxPerMeter}: {plan: KeoPlanDrawing; pxPerMete
   const windowTo = plan.window.offset + plan.window.width / 2;
 
   return (
-    <DrawingSheet bounds={bounds} pxPerMeter={pxPerMeter} title="План помещения">
+    <DrawingSheet bounds={bounds} pxPerMeter={pxPerMeter} title={messages.keo.planTitle}>
       {/* сектор света — под конструкциями, как на листе */}
       <PlanSector
         poleY={lt}
         psi1Deg={plan.psi1Deg}
         psi2Deg={plan.psi2Deg}
         wallThickness={wallThickness}
-        label={plan.n2 === undefined ? undefined : formatNum(plan.n2)}
+        label={plan.n2 === undefined ? undefined : formatNum(plan.n2, 1, locale)}
       />
 
       <GraphIiFan

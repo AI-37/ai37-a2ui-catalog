@@ -6,6 +6,7 @@ import {ReportNextFoldTrigger} from './report-next-fold-trigger';
 import {ReportNextInputGroup} from './report-next-input-group';
 import {buildReportInputsSummary} from './build-report-inputs-summary';
 import type {ReportNextActionSink, ReportNextInputs} from './report-next.types';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Карточка «Исходные данные»: группы пилюль по источнику значения. Одна на все
@@ -27,6 +28,7 @@ export function ReportNextInputsCard({
   inputs: ReportNextInputs;
   onAction: ReportNextActionSink;
 }) {
+  const {locale, messages} = useA2uiI18n();
   const [open, setOpen] = React.useState(false);
   const panelId = `${React.useId()}-inputs`;
 
@@ -37,8 +39,8 @@ export function ReportNextInputsCard({
           title={
             <ReportNextFoldTrigger
               panelId={panelId}
-              label="Исходные данные"
-              summary={buildReportInputsSummary(inputs)}
+              label={messages.report.inputs}
+              summary={buildReportInputsSummary(inputs, {locale, messages})}
               open={open}
             />
           }

@@ -2,6 +2,7 @@ import React from 'react';
 import type {ThermalReportInputs} from '@ai37/a2ui-catalog-schemas';
 import {ThermalReportActionButton} from './thermal-report-action-button';
 import type {ThermalReportOnAction} from './thermal-report.types';
+import {useA2uiMessages} from '../i18n';
 
 /** Карточка «Исходные данные»: группы чипов по источнику значения.
  * `tone: 'warning'` («принято системой — проверьте») — пунктирные чипы,
@@ -13,10 +14,11 @@ export function ThermalReportInputsCard({
   inputs: ThermalReportInputs;
   onAction: ThermalReportOnAction;
 }) {
+  const m = useA2uiMessages();
   return (
     <div className="a2ui-tr__card">
       <div className="a2ui-tr__inputs-head">
-        <span className="a2ui-tr__inputs-title">Исходные данные</span>
+        <span className="a2ui-tr__inputs-title">{m.report.inputs}</span>
         {inputs.action ? (
           <ThermalReportActionButton action={inputs.action} variant="link" onAction={onAction} />
         ) : null}

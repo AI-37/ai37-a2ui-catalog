@@ -1,6 +1,7 @@
 import React from 'react';
 import type {ThermalReportProtocol} from '@ai37/a2ui-catalog-schemas';
 import {DownloadFormatMenu} from './download-format-menu';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Протокол расчёта» — одна неразворачиваемая строка: лейбл, meta и «Скачать».
@@ -10,6 +11,7 @@ import {DownloadFormatMenu} from './download-format-menu';
  * совместимость со старыми payload'ами; агент и транспорт не участвуют).
  */
 export function ThermalReportProtocolCard({protocol}: {protocol: ThermalReportProtocol}) {
+  const m = useA2uiMessages();
   const handleDownload = () => {
     const blob = new Blob([protocol.downloadContent ?? protocol.content], {
       type: 'text/markdown;charset=utf-8',
@@ -24,7 +26,7 @@ export function ThermalReportProtocolCard({protocol}: {protocol: ThermalReportPr
 
   return (
     <div className="a2ui-tr__protocol">
-      <span className="a2ui-tr__protocol-title">Протокол расчёта</span>
+      <span className="a2ui-tr__protocol-title">{m.report.protocol}</span>
       {protocol.meta ? <span className="a2ui-tr__protocol-meta">{protocol.meta}</span> : null}
       {protocol.downloadUrl !== undefined ? (
         <span className="a2ui-tr__protocol-download">
@@ -39,7 +41,7 @@ export function ThermalReportProtocolCard({protocol}: {protocol: ThermalReportPr
           className="a2ui-tr-btn a2ui-tr-btn--link a2ui-tr__protocol-download"
           onClick={handleDownload}
         >
-          Скачать
+          {m.common.download}
         </button>
       ) : null}
     </div>

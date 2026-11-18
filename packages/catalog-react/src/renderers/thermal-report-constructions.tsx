@@ -6,6 +6,7 @@ import type {
 import {formatDeviationPct} from './format-deviation-pct';
 import {ThermalReportActionButton} from './thermal-report-action-button';
 import type {ThermalReportOnAction} from './thermal-report.types';
+import {useA2uiI18n} from '../i18n';
 
 /** Блок «КОНСТРУКЦИИ» (режим списка): отклонение чипом по знаку
  * `deviationPct`, «Подобрать» у непроходящих, строка исключённых в конце. */
@@ -18,9 +19,10 @@ export function ThermalReportConstructionsSection({
   excluded: ThermalReportExcluded | undefined;
   onAction: ThermalReportOnAction;
 }) {
+  const {locale, messages} = useA2uiI18n();
   return (
     <section className="a2ui-tr__section">
-      <p className="a2ui-tr__list-label">Конструкции</p>
+      <p className="a2ui-tr__list-label">{messages.report.constructions}</p>
       <div className="a2ui-tr__rows">
         {constructions.map(construction => (
           <div key={construction.id} className="a2ui-tr__row">
@@ -36,7 +38,7 @@ export function ThermalReportConstructionsSection({
                   }`}
                 >
                   <span className="a2ui-tr__dot" aria-hidden="true" />
-                  {formatDeviationPct(construction.deviationPct)}
+                  {formatDeviationPct(construction.deviationPct, locale)}
                 </span>
               ) : null}
               {construction.action ? (

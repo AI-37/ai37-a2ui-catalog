@@ -2,6 +2,7 @@ import React from 'react';
 import type {KeoReportRoom} from '@ai37/a2ui-catalog-schemas';
 import {KeoReportActionButton} from './keo-report-action-button';
 import type {KeoReportOnAction} from './keo-report.types';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Секция «Помещения» (мультипомещенный расчёт): расчётное значение против
@@ -15,15 +16,18 @@ export function KeoReportRoomsSection({
   rooms: KeoReportRoom[];
   onAction: KeoReportOnAction;
 }) {
+  const m = useA2uiMessages();
   return (
     <section className="a2ui-kr__section">
-      <p className="a2ui-kr__list-label">Помещения</p>
+      <p className="a2ui-kr__list-label">{m.report.rooms}</p>
       <div className="a2ui-kr__rows">
         {rooms.map(room => (
           <div key={room.id} className="a2ui-kr__row">
             <div className="a2ui-kr__row-main">
               <span className="a2ui-kr__row-title">{room.name}</span>
-              <span className="a2ui-kr__row-detail">норма {room.norm}</span>
+              <span className="a2ui-kr__row-detail">
+                {formatMessage(m.report.roomNorm, {norm: room.norm})}
+              </span>
             </div>
             <span className="a2ui-kr__row-side">
               <span className={`a2ui-kr__status a2ui-kr__status--${room.status}`}>

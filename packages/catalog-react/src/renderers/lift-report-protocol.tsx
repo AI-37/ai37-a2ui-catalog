@@ -2,6 +2,7 @@ import React from 'react';
 import type {LiftReportProtocol} from '@ai37/a2ui-catalog-schemas';
 import {DownloadFormatMenu} from './download-format-menu';
 import {LiftReportChevron} from './lift-report-chevron';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Протокол расчёта» — нативный `<details>`: строка-сводка (лейбл, `meta`,
@@ -16,10 +17,11 @@ import {LiftReportChevron} from './lift-report-chevron';
  * а не `<summary>`. Нет URL — нет меню.
  */
 export function LiftReportProtocolCard({protocol}: {protocol: LiftReportProtocol}) {
+  const m = useA2uiMessages();
   return (
     <details className="a2ui-lr__protocol">
       <summary className="a2ui-lr__protocol-head">
-        <span className="a2ui-lr__protocol-title">Протокол расчёта</span>
+        <span className="a2ui-lr__protocol-title">{m.report.protocol}</span>
         {protocol.meta ? <span className="a2ui-lr__protocol-meta">{protocol.meta}</span> : null}
         {protocol.downloadUrl !== undefined ? (
           <span className="a2ui-lr__protocol-download">

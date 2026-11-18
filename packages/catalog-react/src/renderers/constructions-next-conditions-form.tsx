@@ -8,6 +8,7 @@ import {ConstructionsNextSourceNote} from './constructions-next-source-note';
 import type {ConstructionsNextGeneralProps} from './constructions-next.types';
 import {formatGsop} from './format-gsop';
 import {readOptionClimate} from './read-option-climate';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Климат второго ряда: обозначение с индексом (tот, zот) и расшифровка прямо в
@@ -18,34 +19,31 @@ const CLIMATE_FIELDS: Array<{
   key: 'tot' | 'zot' | 'tn';
   symbol: string;
   index: string;
-  text: string;
+  text: 'climateTot' | 'climateZot' | 'climateTn';
   step: number;
 }> = [
   {
     key: 'tot',
     symbol: 't',
     index: 'от',
-    text: 'средняя темп. отопительного периода, °C',
+    text: 'climateTot',
     step: 0.1,
   },
   {
     key: 'zot',
     symbol: 'z',
     index: 'от',
-    text: 'продолжительность отопит. периода, сут/год',
+    text: 'climateZot',
     step: 1,
   },
   {
     key: 'tn',
     symbol: 't',
     index: 'н',
-    text: 'темп. наиб. холодной пятидневки (0,92), °C',
+    text: 'climateTn',
     step: 1,
   },
 ];
-
-/** ГСОП считает агент; пока снапшота нет — прочерк, а не пустой контрол. */
-const GSOP_LABEL = 'ГСОП — градусо-сутки отопит. периода, °C·сут/год';
 
 /**
  * Форма условий: два ряда полей внутри карточки секции. Поля, порядок и
@@ -64,6 +62,8 @@ export function ConstructionsNextConditionsForm({
   minChars,
   onChange,
 }: ConstructionsNextGeneralProps) {
+  const {locale, messages} = useA2uiI18n();
+  const m = messages.constructions;
   const setNumber = (key: 'tot' | 'zot' | 'tn' | 'tv', value: number | null) => {
     onChange({...general, [key]: value}, [key]);
   };
@@ -71,7 +71,7 @@ export function ConstructionsNextConditionsForm({
   return (
     <CardBody>
       <Form columns={2}>
-        <Field label="Город строительства">
+        <Field label={m.city}>
           <ConstructionsNextCityField
             referenceId={cityReferenceId}
             minChars={minChars}
@@ -89,7 +89,7 @@ export function ConstructionsNextConditionsForm({
           />
           <ConstructionsNextSourceNote source={sources.city} />
         </Field>
-        <Field label="Назначение помещений">
+        <Field label={m.buildingType}>
           <ConstructionsNextBuildingTypeField
             options={buildingTypeOptions}
             value={general.buildingType}
@@ -100,14 +100,14 @@ export function ConstructionsNextConditionsForm({
         <Field
           label={
             <>
-              Температура внутреннего воздуха t<sub className="a2ui-field__index">в</sub>
+              {m.indoorTemp} t<sub className="a2ui-field__index">в</sub>
             </>
           }
         >
           <NumberField value={general.tv} onValueChange={value => setNumber('tv', value)} />
           <ConstructionsNextSourceNote source={sources.tv} />
         </Field>
-        <Field label="Условия эксплуатации">
+        <Field label={m.operatingConditions}>
           <ConstructionsNextConditionField
             value={general.condition}
             onChange={value => onChange({...general, condition: value}, ['condition'])}
@@ -123,7 +123,7 @@ export function ConstructionsNextConditionsForm({
             label={
               <>
                 {field.symbol}
-                <sub className="a2ui-field__index">{field.index}</sub> — {field.text}
+                <sub className="a2ui-field__index">{field.index}</sub> — {m[field.text]}
               </>
             }
           >
@@ -135,9 +135,12 @@ export function ConstructionsNextConditionsForm({
             <ConstructionsNextSourceNote source={sources[field.key]} />
           </Field>
         ))}
-        <Field label={GSOP_LABEL}>
+        {/* ГСОП считает агент; пока снапшота нет — прочерк, а не пустой контрол. */}
+        <Field label={m.gsop}>
           <Static>
-            {general.gsop === null || general.gsop === undefined ? '—' : formatGsop(general.gsop)}
+            {general.gsop === null || general.gsop === undefined
+              ? '—'
+              : formatGsop(general.gsop, locale)}
           </Static>
           <ConstructionsNextGsopNote general={general} sources={sources} />
         </Field>

@@ -19,6 +19,7 @@ import {resolveKeoComputedNote} from './resolve-keo-computed-note';
 import {seedCalcValues} from './seed-calc-values';
 import {StyleTag} from './style-tag';
 import {useA2uiBaseStyles} from './shared';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Сбор исходных данных расчёта КЕО одним экраном: readonly-условия сверху,
@@ -34,6 +35,7 @@ import {useA2uiBaseStyles} from './shared';
  */
 export const KeoEditor = createComponentImplementation(keoEditorDefinition, ({props, context}) => {
   useA2uiBaseStyles();
+  const i18n = useA2uiI18n();
 
   const [rooms, setRooms] = React.useState(() => createCalcScreens(props.rooms));
   const [activeIndex, setActiveIndex] = React.useState(0);
@@ -119,7 +121,7 @@ export const KeoEditor = createComponentImplementation(keoEditorDefinition, ({pr
   // Предупреждения активного помещения: правила из props плюс диапазоны полей.
   const ruleWarnings = evaluateKeoRules(props.validationRules ?? [], active.values);
   const warningsFor = (field: CalcEditorField): string[] => {
-    const range = calcFieldRangeWarning(field, active.values[field.name]);
+    const range = calcFieldRangeWarning(field, active.values[field.name], i18n);
 
     return [...(ruleWarnings.get(field.name) ?? []), ...(range === undefined ? [] : [range])];
   };
@@ -137,6 +139,7 @@ export const KeoEditor = createComponentImplementation(keoEditorDefinition, ({pr
           })),
       ),
     ),
+    i18n.messages,
   );
 
   const computedNote =

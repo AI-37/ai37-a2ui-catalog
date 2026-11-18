@@ -1,6 +1,7 @@
 import React from 'react';
 import {Menu, MoreIcon} from '../primitives';
 import type {KeoRoomMenuProps} from './keo-next.types';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Действия помещения. Удаление живёт пунктом меню, а не голым «✕»:
@@ -12,6 +13,7 @@ import type {KeoRoomMenuProps} from './keo-next.types';
  * ещё и название: иначе диктор читает подряд несколько одинаковых кнопок.
  */
 export function KeoNextRoomMenu({removable, label, title, onRemove}: KeoRoomMenuProps) {
+  const m = useA2uiMessages();
   if (!removable) {
     return null;
   }
@@ -19,7 +21,7 @@ export function KeoNextRoomMenu({removable, label, title, onRemove}: KeoRoomMenu
   return (
     <Menu
       icon={<MoreIcon />}
-      ariaLabel={`Действия: ${title}`}
+      ariaLabel={formatMessage(m.common.actionsFor, {title})}
       items={[{label, tone: 'danger', onSelect: onRemove}]}
     />
   );

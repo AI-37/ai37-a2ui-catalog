@@ -3,6 +3,7 @@ import type {LookupComboboxProps} from './lookup-combobox.types';
 import {LookupOptionRow} from './lookup-option-row';
 import {inputStyle, lookupStatusStyle} from './shared';
 import {tokens} from './tokens';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Контролируемый комбобокс lookup-поля: текстовый input, скрытый input со
@@ -28,14 +29,15 @@ export function LookupCombobox({
   onClose,
   inputClassName,
 }: LookupComboboxProps) {
+  const m = useA2uiMessages().common;
   // Во время загрузки опции не показываются (возможно, они от прошлого
   // запроса) — попап занят статус-строкой.
   const visibleOptions = loading ? [] : options;
   const isOpen = loading || options.length > 0 || queried;
   const statusText = loading
-    ? 'Ищем…'
+    ? m.searching
     : queried && visibleOptions.length === 0
-      ? 'Ничего не найдено'
+      ? m.nothingFound
       : null;
 
   return (

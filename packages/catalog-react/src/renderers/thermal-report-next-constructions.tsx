@@ -6,6 +6,7 @@ import {ReportNextSection} from './report-next-section';
 import {ThermalReportNextDeviation} from './thermal-report-next-deviation';
 import {ThermalReportNextExcluded} from './thermal-report-next-excluded';
 import type {ReportNextActionSink} from './report-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Конструкции» — режим списка: отклонение чипом и «Подобрать» у непроходящих,
@@ -21,12 +22,13 @@ export function ThermalReportNextConstructions({
   excluded: ThermalReportExcluded | undefined;
   onAction: ReportNextActionSink;
 }) {
+  const m = useA2uiMessages();
   if (constructions === undefined) {
     return null;
   }
 
   return (
-    <ReportNextSection label="Конструкции">
+    <ReportNextSection label={m.report.constructions}>
       {constructions.map(construction => (
         <ReportRow
           key={construction.id}

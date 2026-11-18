@@ -1,4 +1,6 @@
 export * from './catalog';
+// Язык подписей каталога: провайдер, встроенные словари на шесть языков, форматтеры по локали.
+export * from './i18n';
 export * from './renderers/tokens';
 export * from './renderers/simple-table';
 export * from './renderers/flex-table';

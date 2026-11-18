@@ -2,8 +2,9 @@ import React from 'react';
 import type {LiftReportSuggestion} from '@ai37/a2ui-catalog-schemas';
 import {StatusPill} from '../primitives';
 import {ReportNextActionButton} from './report-next-action-button';
-import {REPORT_NEXT_STATUS_TEXT} from './report-next-status-text';
+import {reportNextStatusText} from './report-next-status-text';
 import type {ReportNextActionSink} from './report-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Правый слот варианта «Что изменить»: кнопка принятия либо статус тоном
@@ -22,12 +23,14 @@ export function LiftReportNextSide({
   item: LiftReportSuggestion;
   onAction: ReportNextActionSink;
 }) {
+  const m = useA2uiMessages();
+
   if (item.action !== undefined) {
     return <ReportNextActionButton action={item.action} weight="outline" onAction={onAction} />;
   }
 
   if (item.tone !== 'neutral') {
-    return <StatusPill tone={item.tone}>{REPORT_NEXT_STATUS_TEXT[item.tone]}</StatusPill>;
+    return <StatusPill tone={item.tone}>{reportNextStatusText(item.tone, m)}</StatusPill>;
   }
 
   if (item.statusLabel !== undefined) {

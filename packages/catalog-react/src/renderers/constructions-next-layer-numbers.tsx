@@ -3,6 +3,7 @@ import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import type {OperatingCondition} from './constructions-editor.types';
 import {ConstructionsNextLambdaSummary} from './constructions-next-lambda-summary';
 import {layerNeedsThickness} from './layer-needs-thickness';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Правая колонка строки слоя: толщина и λ. Незаполненная толщина названа
@@ -17,6 +18,7 @@ export function ConstructionsNextLayerNumbers({
   layer: ConstructionLayer;
   condition: OperatingCondition;
 }) {
+  const m = useA2uiMessages().constructions;
   const thicknessMissing = layer.thicknessMm === null || layer.thicknessMm <= 0;
   const thicknessOptional = !layerNeedsThickness(layer);
 
@@ -25,9 +27,9 @@ export function ConstructionsNextLayerNumbers({
       <span className={thicknessMissing && !thicknessOptional ? 'a2ui-t--warning' : undefined}>
         {thicknessMissing
           ? thicknessOptional
-            ? 'без толщины'
-            : 'толщина не задана'
-          : `${layer.thicknessMm} мм`}
+            ? m.noThickness
+            : m.thicknessMissing
+          : formatMessage(m.thicknessValue, {value: String(layer.thicknessMm)})}
       </span>
       <span aria-hidden="true">·</span>
       <ConstructionsNextLambdaSummary layer={layer} condition={condition} />

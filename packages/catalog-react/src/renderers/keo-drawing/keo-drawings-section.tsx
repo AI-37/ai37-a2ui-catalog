@@ -8,6 +8,7 @@ import {planBounds} from './plan-bounds';
 import {resolveSheetScale} from './resolve-sheet-scale';
 import {sectionBounds} from './section-bounds';
 import type {KeoDrawings} from '@ai37/a2ui-catalog-schemas';
+import {useA2uiI18n} from '../../i18n';
 
 /**
  * Секция «Чертежи» карточки отчёта: две проекции фолдом, свёрнутым по
@@ -31,6 +32,7 @@ export function KeoDrawingsSection({
    */
   defaultOpen?: boolean;
 }) {
+  const i18n = useA2uiI18n();
   const [open, setOpen] = React.useState(defaultOpen);
   const panelId = `${React.useId()}-drawings`;
 
@@ -50,23 +52,27 @@ export function KeoDrawingsSection({
             className={buttonClassName({variant: 'link', className: 'a2ui-card__title'})}
             aria-controls={open ? panelId : undefined}
           >
-            <CardTriggerLabel title={<span style={labelStyle}>Чертежи</span>} />
+            <CardTriggerLabel
+              title={<span style={labelStyle}>{i18n.messages.keo.drawings}</span>}
+            />
           </Collapsible.Trigger>
           {open ? null : (
-            <span className="a2ui-t--sub a2ui-t--muted">{buildDrawingsSummary(drawings)}</span>
+            <span className="a2ui-t--sub a2ui-t--muted">
+              {buildDrawingsSummary(drawings, i18n)}
+            </span>
           )}
         </div>
         <Collapsible.Panel id={panelId} className="a2ui-card__panel">
           <CardBody>
             <figure style={figureStyle}>
               <figcaption className="a2ui-t--sub a2ui-t--muted">
-                Разрез по помещению · график Данилюка I
+                {i18n.messages.keo.sectionCaption}
               </figcaption>
               <SectionDrawing section={drawings.section} pxPerMeter={pxPerMeter} />
             </figure>
             <figure style={figureStyle}>
               <figcaption className="a2ui-t--sub a2ui-t--muted">
-                План помещения · график Данилюка II
+                {i18n.messages.keo.planCaption}
               </figcaption>
               <PlanDrawing plan={drawings.plan} pxPerMeter={pxPerMeter} />
             </figure>

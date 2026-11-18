@@ -1,4 +1,5 @@
 import React from 'react';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Счётчик «проходит N из M». Молчит, пока климат тронут: присланный Rнорм
@@ -13,13 +14,14 @@ export function ConstructionsNextCounter({
   passing: number;
   comparable: number;
 }) {
+  const m = useA2uiMessages();
   if (!show) {
     return null;
   }
 
   return (
     <span className="a2ui-t--sub a2ui-t--muted">
-      проходит {passing} из {comparable}
+      {formatMessage(m.constructions.passing, {passing, total: comparable})}
     </span>
   );
 }

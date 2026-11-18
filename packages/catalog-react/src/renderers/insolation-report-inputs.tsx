@@ -2,6 +2,7 @@ import React from 'react';
 import type {InsolationReportInputs} from '@ai37/a2ui-catalog-schemas';
 import {InsolationReportActionButton} from './insolation-report-action-button';
 import type {InsolationReportOnAction} from './insolation-report.types';
+import {useA2uiMessages} from '../i18n';
 
 /** Карточка «Исходные данные»: группы чипов по источнику значения.
  * `tone: 'warning'` («принято системой — проверьте») — пунктирные чипы,
@@ -13,10 +14,11 @@ export function InsolationReportInputsCard({
   inputs: InsolationReportInputs;
   onAction: InsolationReportOnAction;
 }) {
+  const m = useA2uiMessages();
   return (
     <div className="a2ui-ir__card">
       <div className="a2ui-ir__inputs-head">
-        <span className="a2ui-ir__inputs-title">Исходные данные</span>
+        <span className="a2ui-ir__inputs-title">{m.report.inputs}</span>
         {inputs.action ? (
           <InsolationReportActionButton action={inputs.action} variant="link" onAction={onAction} />
         ) : null}

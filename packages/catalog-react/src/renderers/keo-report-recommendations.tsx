@@ -2,6 +2,7 @@ import React from 'react';
 import type {KeoReportRecommendation} from '@ai37/a2ui-catalog-schemas';
 import {KeoReportActionButton} from './keo-report-action-button';
 import type {KeoReportOnAction} from './keo-report.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Секция «Что изменить» — единственная секция, которой нет у ThermalReport:
@@ -17,9 +18,10 @@ export function KeoReportRecommendationsSection({
   recommendations: KeoReportRecommendation[];
   onAction: KeoReportOnAction;
 }) {
+  const m = useA2uiMessages();
   return (
     <section className="a2ui-kr__section">
-      <p className="a2ui-kr__list-label">Что изменить</p>
+      <p className="a2ui-kr__list-label">{m.report.whatToChange}</p>
       <div className="a2ui-kr__rows">
         {recommendations.map((recommendation, index) => (
           <div

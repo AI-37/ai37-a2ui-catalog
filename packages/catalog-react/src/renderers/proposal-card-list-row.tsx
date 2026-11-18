@@ -3,12 +3,13 @@ import type {ProposalItem, ProposalItemKind} from '@ai37/a2ui-catalog-schemas';
 import {formatProposalItemValue} from './format-proposal-item-value';
 import {ProposalCardItemSource} from './proposal-card-item-source';
 import {ProposalCardItemStatus} from './proposal-card-item-status';
+import {useA2uiMessages, type A2uiMessages} from '../i18n';
 
 /** Слово вида правки перед строкой: в макете F02 это «+ узел», «изменение: …». */
-const KIND_TEXT: Record<ProposalItemKind, string> = {
-  added: 'новое',
-  changed: 'изменено',
-  removed: 'удалено',
+const KIND_TEXT: Record<ProposalItemKind, keyof A2uiMessages['proposal']> = {
+  added: 'kindAdded',
+  changed: 'kindChanged',
+  removed: 'kindRemoved',
 };
 
 /**
@@ -16,12 +17,13 @@ const KIND_TEXT: Record<ProposalItemKind, string> = {
  * Источник пункта — под текстом в той же колонке, чтобы не уходил под слово вида.
  */
 export function ProposalCardListRow({item}: {item: ProposalItem}) {
-  const value = formatProposalItemValue(item);
+  const m = useA2uiMessages();
+  const value = formatProposalItemValue(item, m);
 
   return (
     <li style={rowStyle} data-kind={item.kind}>
       <span className="a2ui-t--sub a2ui-t--muted" style={kindStyle}>
-        {KIND_TEXT[item.kind]}
+        {m.proposal[KIND_TEXT[item.kind]]}
       </span>
       <span style={textStyle}>
         <span className="a2ui-t--body">{value === '' ? item.label : `${item.label}: ${value}`}</span>

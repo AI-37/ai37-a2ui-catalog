@@ -1,8 +1,7 @@
 import React from 'react';
 import {CHAT_ATTACHMENTS_ROUTE} from '@ai37/a2ui-catalog-schemas';
 import type {AttachmentUpload, UseAttachmentUpload} from './attachment-choice-card.types';
-
-const UPLOAD_FAILED = 'Не удалось загрузить файл. Выберите его ещё раз.';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Загрузка файла из карточки на полку треда: same-origin multipart POST
@@ -13,6 +12,7 @@ const UPLOAD_FAILED = 'Не удалось загрузить файл. Выбе
  * AbortController, unmount отменяет запрос, сбой — состояние `error`.
  */
 export function useAttachmentUpload(contextId: string): UseAttachmentUpload {
+  const failed = useA2uiMessages().attachment.uploadFailed;
   const [upload, setUpload] = React.useState<AttachmentUpload>({status: 'idle'});
   const abortRef = React.useRef<AbortController | null>(null);
 
@@ -23,7 +23,7 @@ export function useAttachmentUpload(contextId: string): UseAttachmentUpload {
     const controller = new AbortController();
     abortRef.current = controller;
     setUpload({status: 'uploading', fileName: file.name});
-    void send(file, contextId, controller).then(next => {
+    void send(file, contextId, controller, failed).then(next => {
       if (!controller.signal.aborted) setUpload(next);
     });
   };
@@ -40,6 +40,7 @@ async function send(
   file: File,
   contextId: string,
   controller: AbortController,
+  failed: string,
 ): Promise<AttachmentUpload> {
   const form = new FormData();
   form.append('file', file);
@@ -50,14 +51,14 @@ async function send(
       body: form,
       signal: controller.signal,
     });
-    if (!response.ok) return {status: 'error', message: UPLOAD_FAILED};
+    if (!response.ok) return {status: 'error', message: failed};
     const body = (await response.json()) as {fileId?: unknown; bytes?: unknown};
     if (typeof body.fileId !== 'string' || body.fileId === '') {
-      return {status: 'error', message: UPLOAD_FAILED};
+      return {status: 'error', message: failed};
     }
     const bytes = typeof body.bytes === 'number' ? body.bytes : file.size;
     return {status: 'ready', fileId: body.fileId, fileName: file.name, bytes};
   } catch {
-    return {status: 'error', message: UPLOAD_FAILED};
+    return {status: 'error', message: failed};
   }
 }

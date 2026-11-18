@@ -2,6 +2,7 @@ import React from 'react';
 import type {CalcFieldSource, LiftEditorFieldSource} from '@ai37/a2ui-catalog-schemas';
 import {fieldSourceLabel} from './field-source-label';
 import {renderLabelSubscripts} from './render-label-subscripts';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Подпись под контролом: откуда взялось значение. Обоснование агента (`note`)
@@ -21,6 +22,7 @@ import {renderLabelSubscripts} from './render-label-subscripts';
  * (`omitTouchedLiftSources`).
  */
 export function SourceNote({source}: {source: LiftEditorFieldSource | CalcFieldSource}) {
+  const m = useA2uiMessages();
   const accent = source.source === 'suggested' || source.source === 'question';
   const marked = source.source === 'assumption';
 
@@ -35,7 +37,7 @@ export function SourceNote({source}: {source: LiftEditorFieldSource | CalcFieldS
           отдельными флекс-элементами — «ρ  ф  0,5» вместо «ρф 0,5». */}
       <span>
         {source.note === undefined
-          ? fieldSourceLabel(source.source)
+          ? fieldSourceLabel(source.source, m)
           : renderLabelSubscripts(source.note)}
       </span>
     </span>

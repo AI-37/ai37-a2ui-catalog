@@ -1,8 +1,9 @@
 import React from 'react';
 import {Button} from '../primitives';
-import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
+import {cherdachnyeSubtypeLabels} from './cherdachnye-subtype-labels';
 import {isSubtypeRequired} from './is-subtype-required';
 import type {ConstructionsNextHeaderRowProps} from './constructions-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Режим чтения шапки: тип (с разновидностью через «·») и название текстом,
@@ -14,8 +15,9 @@ export function ConstructionsNextHeaderSummary({
   typeConfigs,
   onOpen,
 }: ConstructionsNextHeaderRowProps) {
+  const m = useA2uiMessages();
   const config = typeConfigs.find(candidate => candidate.type === entry.type);
-  const subtypeLabel = entry.subtype ? CHERDACHNYE_SUBTYPE_LABELS[entry.subtype] : undefined;
+  const subtypeLabel = entry.subtype ? cherdachnyeSubtypeLabels(m)[entry.subtype] : undefined;
   const name = entry.name?.trim();
 
   return (
@@ -33,8 +35,8 @@ export function ConstructionsNextHeaderSummary({
         </span>
         <ConstructionsNextHeaderName name={name} />
       </span>
-      <Button size="sm" aria-label="Изменить тип и название" onClick={onOpen}>
-        Изменить
+      <Button size="sm" aria-label={m.constructions.editHeader} onClick={onOpen}>
+        {m.common.edit}
       </Button>
     </div>
   );
@@ -47,11 +49,12 @@ export function ConstructionsNextHeaderSummary({
  * без разновидностей.
  */
 function ConstructionsNextHeaderSubtypeMissing({missing}: {missing: boolean}) {
+  const m = useA2uiMessages();
   if (!missing) {
     return null;
   }
 
-  return <span className="a2ui-t--warning">{' ·\u00A0разновидность не выбрана'}</span>;
+  return <span className="a2ui-t--warning">{` ·\u00A0${m.constructions.subtypeMissing}`}</span>;
 }
 
 /**

@@ -1,4 +1,4 @@
-import {pluralRu} from './plural-ru';
+import {A2UI_DEFAULT_I18N, formatPlural, type A2uiI18n} from '../i18n';
 import type {ReportNextInputs} from './report-next.types';
 
 /**
@@ -10,7 +10,10 @@ import type {ReportNextInputs} from './report-next.types';
  * Собирается из живых props, а не приходит от агента: присланная строка
  * разошлась бы с содержимым при первой же правке наполнения.
  */
-export function buildReportInputsSummary(inputs: ReportNextInputs): string {
+export function buildReportInputsSummary(
+  inputs: ReportNextInputs,
+  {locale, messages}: A2uiI18n = A2UI_DEFAULT_I18N,
+): string {
   let total = 0;
   let assumed = 0;
 
@@ -22,9 +25,9 @@ export function buildReportInputsSummary(inputs: ReportNextInputs): string {
     }
   }
 
-  const values = `${total} ${pluralRu(total, 'значение', 'значения', 'значений')}`;
+  const values = formatPlural(locale, messages.report.inputsCount, total);
 
   return assumed === 0
     ? values
-    : `${values} · ${assumed} ${pluralRu(assumed, 'принято', 'приняты', 'приняты')} системой`;
+    : `${values} · ${formatPlural(locale, messages.report.inputsAssumed, assumed)}`;
 }

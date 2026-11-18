@@ -9,6 +9,7 @@ import {layerKindFromOption} from './layer-kind-from-option';
 import {layerNeedsThickness} from './layer-needs-thickness';
 import {layersEqual} from './layers-equal';
 import {readOptionLambda} from './read-option-lambda';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Форма правки/добавления слоя: локальная копия в state с момента открытия,
@@ -37,6 +38,7 @@ export function ConstructionsNextLayerForm({
   onRemove,
   onDraftChange,
 }: ConstructionsNextLayerProps) {
+  const m = useA2uiMessages();
   const [draft, setDraft] = React.useState<ConstructionLayer>(layer);
 
   const updateDraft = (next: ConstructionLayer) => {
@@ -58,11 +60,11 @@ export function ConstructionsNextLayerForm({
       {/* Одна сетка: в широком контейнере материал забирает строку, вид,
           толщина и λ встают второй строкой; в узком всё идёт столбцом. */}
       <Form columns={3}>
-        <Field wide label="Материал">
+        <Field wide label={m.constructions.material}>
           <Lookup
             name={rowName}
             referenceId={materialsReferenceId}
-            placeholder="Материал из справочника или свой"
+            placeholder={m.constructions.materialPlaceholder}
             text={draft.material}
             minChars={minChars}
             onTextChange={text =>
@@ -99,16 +101,18 @@ export function ConstructionsNextLayerForm({
           />
         </Field>
         <ConstructionsNextKindField layer={draft} onChange={updateDraft} />
-        <Field label="Толщина, мм">
+        <Field label={m.constructions.thickness}>
           <NumberField
             value={draft.thicknessMm}
             min={1}
-            {...(layerNeedsThickness(draft) ? {} : {placeholder: 'не нужна'})}
+            {...(layerNeedsThickness(draft)
+              ? {}
+              : {placeholder: m.constructions.thicknessNotNeeded})}
             compact
             onValueChange={value => updateDraft({...draft, thicknessMm: value})}
           />
         </Field>
-        <Field label="λ, Вт/(м·°C)">
+        <Field label={m.constructions.lambda}>
           <ConstructionsNextLambdaField
             layer={draft}
             condition={condition}
@@ -119,10 +123,10 @@ export function ConstructionsNextLayerForm({
 
       <div style={actionsStyle}>
         <Button variant="filled" size="sm" onClick={handleApply}>
-          {mode === 'new' ? 'Добавить' : 'Применить'}
+          {mode === 'new' ? m.common.add : m.common.apply}
         </Button>
         <Button size="sm" onClick={onCancel}>
-          Отмена
+          {m.common.cancel}
         </Button>
         <ConstructionsNextLayerRemove mode={mode} onRemove={onRemove} />
       </div>

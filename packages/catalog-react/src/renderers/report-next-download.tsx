@@ -6,6 +6,7 @@ import type {ReportNextProtocol} from './report-next.types';
 import {saveToProjectLabel} from './save-to-project-label';
 import {useReportSaveToProject} from './use-report-save-to-project';
 import type {SaveToProject} from './use-save-to-project';
+import {useA2uiMessages, type A2uiMessages} from '../i18n';
 
 /**
  * «Скачать ⌄» в строке протокола. Вид один на оба отчёта: триггер рамкой в
@@ -20,16 +21,17 @@ import type {SaveToProject} from './use-save-to-project';
  */
 export function ReportNextDownload({protocol}: {protocol: ReportNextProtocol}) {
   const save = useReportSaveToProject(protocol.downloadUrl);
+  const m = useA2uiMessages();
 
   if (protocol.downloadUrl !== undefined) {
-    const items = [...reportNextUrlItems(protocol.downloadUrl), ...saveItems(save)];
-    return <Menu label="Скачать" side="top" items={items} />;
+    const items = [...reportNextUrlItems(protocol.downloadUrl), ...saveItems(save, m)];
+    return <Menu label={m.common.download} side="top" items={items} />;
   }
 
   if (protocol.downloadFileName !== undefined) {
     return (
       <Menu
-        label="Скачать"
+        label={m.common.download}
         side="top"
         items={reportNextBlobItems(protocol, protocol.downloadFileName)}
       />
@@ -39,11 +41,11 @@ export function ReportNextDownload({protocol}: {protocol: ReportNextProtocol}) {
   return null;
 }
 
-function saveItems(save: SaveToProject): MenuItem[] {
+function saveItems(save: SaveToProject, messages: A2uiMessages): MenuItem[] {
   if (!save.canSave) return [];
   return [
     {
-      label: saveToProjectLabel(save.state),
+      label: saveToProjectLabel(save.state, messages),
       onSelect: save.save,
       disabled: save.state === 'saving' || save.state === 'saved',
       // Статус сохранения виден в самом пункте, поэтому меню остаётся открытым.

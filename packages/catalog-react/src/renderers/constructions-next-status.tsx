@@ -2,6 +2,7 @@ import React from 'react';
 import type {ConstructionStatus} from '@ai37/a2ui-catalog-schemas';
 import type {ConstructionInvalidity} from './find-invalid-layers';
 import {formatMissingLambda} from './format-missing-lambda';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Ровно одна статусная пометка по приоритету: проблемы данных (однородное «нет
@@ -21,6 +22,9 @@ export function ConstructionsNextStatus({
   invalidity: ConstructionInvalidity;
   status: ConstructionStatus | undefined;
 }) {
+  const i18n = useA2uiI18n();
+  const m = i18n.messages.constructions;
+
   if (!show) {
     return null;
   }
@@ -29,8 +33,8 @@ export function ConstructionsNextStatus({
     return (
       <span className="a2ui-t--sub a2ui-t--warning">
         {invalidity.missingLambdaCount !== null
-          ? formatMissingLambda(invalidity.missingLambdaCount)
-          : 'проверить'}
+          ? formatMissingLambda(invalidity.missingLambdaCount, i18n)
+          : m.statusCheck}
       </span>
     );
   }
@@ -38,10 +42,10 @@ export function ConstructionsNextStatus({
   if (status !== undefined) {
     return (
       <span className="a2ui-t--sub a2ui-t--warning">
-        {status === 'confirm' ? 'подтвердите' : 'подтвердите паспорт'}
+        {status === 'confirm' ? m.statusConfirm : m.statusConfirmPassport}
       </span>
     );
   }
 
-  return <span className="a2ui-t--sub a2ui-t--success">готова</span>;
+  return <span className="a2ui-t--sub a2ui-t--success">{m.statusReady}</span>;
 }
