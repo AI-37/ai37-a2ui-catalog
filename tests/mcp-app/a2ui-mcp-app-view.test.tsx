@@ -2,7 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {act, fireEvent, screen, waitFor} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
-import {App, type McpUiHostContext} from '@modelcontextprotocol/ext-apps';
+import {
+  App,
+  type McpUiDownloadFileRequest,
+  type McpUiDownloadFileResult,
+  type McpUiHostCapabilities,
+  type McpUiHostContext,
+} from '@modelcontextprotocol/ext-apps';
 import {AppBridge} from '@modelcontextprotocol/ext-apps/app-bridge';
 import {InMemoryTransport, type CallToolResult} from '@modelcontextprotocol/client';
 import {
@@ -52,10 +58,20 @@ function draftResult(state: unknown) {
 
 type ToolHandler = (args: A2uiAppActionArgs) => CallToolResult;
 
+type DownloadParams = McpUiDownloadFileRequest['params'];
+
+/** Хост: контекст, возможности и ответ на `ui/download-file` (по умолчанию — согласие). */
+type HostOptions = {
+  hostContext?: McpUiHostContext;
+  capabilities?: McpUiHostCapabilities;
+  onDownload?: (params: DownloadParams) => McpUiDownloadFileResult | Promise<McpUiDownloadFileResult>;
+};
+
 type Host = {
   bridge: AppBridge;
   calls: Array<{tool: string; args: A2uiAppActionArgs}>;
   modelContext: string[];
+  downloads: DownloadParams[];
   view: A2uiAppView;
   container: HTMLElement;
 };
@@ -64,16 +80,21 @@ type Host = {
  * Настоящие `App` (внутри view) и `AppBridge` (как у хоста) на линкованном
  * транспорте в памяти: проверяется протокол ui/*, а не наши заглушки.
  */
-async function startHost(handler: ToolHandler, hostContext: McpUiHostContext = {}): Promise<Host> {
+async function startHost(handler: ToolHandler, options: HostOptions = {}): Promise<Host> {
   const [hostTransport, viewTransport] = InMemoryTransport.createLinkedPair();
   const bridge = new AppBridge(
     null,
     {name: 'test-host', version: '1.0.0'},
-    {serverTools: {}},
-    {hostContext},
+    options.capabilities ?? {serverTools: {}},
+    {hostContext: options.hostContext ?? {}},
   );
   const calls: Host['calls'] = [];
   const modelContext: string[] = [];
+  const downloads: DownloadParams[] = [];
+  bridge.ondownloadfile = async params => {
+    downloads.push(params);
+    return options.onDownload === undefined ? {} : options.onDownload(params);
+  };
   bridge.oncalltool = async params => {
     const args = params.arguments as A2uiAppActionArgs;
     calls.push({tool: params.name, args});
@@ -92,7 +113,7 @@ async function startHost(handler: ToolHandler, hostContext: McpUiHostContext = {
   // Авторазмер ходит через ResizeObserver, которого в jsdom нет; к протоколу поверхности он не относится.
   const app = new App({name: 'test-view', version: '0.0.0'}, {}, {autoResize: false});
   const view = await act(() => startA2uiAppView(app, container, viewTransport));
-  return {bridge, calls, modelContext, view, container};
+  return {bridge, calls, modelContext, downloads, view, container};
 }
 
 async function sendToolResult(host: Host, result: CallToolResult) {
@@ -136,7 +157,7 @@ afterEach(async () => {
 
 describe('view: результат инструмента', () => {
   it('рисует LiftEditorNext из _meta["ai37/a2ui"] и берёт тему хоста', async () => {
-    host = await startHost(unexpected, {theme: 'dark'});
+    host = await startHost(unexpected, {hostContext: {theme: 'dark'}});
 
     await sendToolResult(host, formResult(readProps('lift-editor-per-lift.json')));
 
@@ -145,7 +166,7 @@ describe('view: результат инструмента', () => {
   });
 
   it('смена темы у хоста доезжает до поверхности', async () => {
-    host = await startHost(unexpected, {theme: 'light'});
+    host = await startHost(unexpected, {hostContext: {theme: 'light'}});
     await sendToolResult(host, formResult(readProps('lift-editor-per-lift.json')));
     await screen.findByRole('button', {name: 'Добавить лифт'});
 
@@ -278,5 +299,94 @@ describe('view: ресурсный канал', () => {
     });
     expect(networkCalls).toBe(0);
     expect(host.modelContext).toEqual([]);
+  });
+});
+
+describe('view: скачивание протокола через хост', () => {
+  const DOWNLOAD_HOST: McpUiHostCapabilities = {serverTools: {}, downloadFile: {}};
+
+  function protocolTextResult() {
+    return a2uiAppResult({
+      text: 'Итог: не соответствует, интервал 220 с.',
+      node: {component: 'LiftReportNext', props: readProps('lift-report-protocol-text.json')},
+      surfaceId: 'lift',
+      state: {doc: 'v2'},
+      actionTool: ACTION_TOOL,
+    });
+  }
+
+  async function chooseMarkdown(): Promise<void> {
+    const trigger = await screen.findByRole('button', {name: /^Скачать/});
+    await act(async () => {
+      trigger.focus();
+      fireEvent.keyDown(trigger, {key: 'ArrowDown'});
+    });
+    const items = screen.getAllByRole('menuitem');
+    expect(items.map(item => item.textContent)).toEqual(['Markdown (.md)']);
+    await act(async () => {
+      fireEvent.click(items[0]!);
+    });
+  }
+
+  it('«Скачать → .md» уходит хосту как ui/download-file с text/markdown', async () => {
+    host = await startHost(unexpected, {capabilities: DOWNLOAD_HOST});
+    await sendToolResult(host, protocolTextResult());
+
+    await chooseMarkdown();
+
+    await waitFor(() => expect(host!.downloads).toHaveLength(1));
+    const protocol = readProps('lift-report-protocol-text.json').protocol as {downloadContent: string};
+    expect(host.downloads[0]).toEqual({
+      contents: [
+        {
+          type: 'resource',
+          resource: {
+            uri: `file:///${encodeURIComponent('протокол-лифты-ГОСТ-Р-52941.md')}`,
+            mimeType: 'text/markdown',
+            text: protocol.downloadContent,
+          },
+        },
+      ],
+    });
+    // Хост скачивает сам: ни вызова агента, ни ошибки на экране.
+    expect(host.calls).toEqual([]);
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('хост без capability downloadFile — пункта «Скачать» нет', async () => {
+    host = await startHost(unexpected);
+    await sendToolResult(host, protocolTextResult());
+
+    expect(await screen.findByText('Протокол расчёта')).toBeTruthy();
+    expect(screen.queryByRole('button', {name: /^Скачать/})).toBeNull();
+    expect(host.downloads).toEqual([]);
+  });
+
+  it('отмена в диалоге хоста (isError) — без ошибки на экране', async () => {
+    host = await startHost(unexpected, {capabilities: DOWNLOAD_HOST, onDownload: () => ({isError: true})});
+    await sendToolResult(host, protocolTextResult());
+
+    await chooseMarkdown();
+
+    await waitFor(() => expect(host!.downloads).toHaveLength(1));
+    // Ответ хоста дошёл и обработан — а экран чист.
+    await act(async () => {});
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(host.view.session.getSnapshot().error).toBeUndefined();
+  });
+
+  it('оборванный вызов хоста — видимая ошибка, отчёт на месте', async () => {
+    host = await startHost(unexpected, {
+      capabilities: DOWNLOAD_HOST,
+      onDownload: () => {
+        throw new Error('диалог закрыт');
+      },
+    });
+    await sendToolResult(host, protocolTextResult());
+
+    await chooseMarkdown();
+
+    expect((await screen.findByRole('alert')).textContent).toMatch(/^Не удалось скачать файл: /);
+    expect(screen.getByText('Интервал движения — 220 с')).toBeTruthy();
   });
 });

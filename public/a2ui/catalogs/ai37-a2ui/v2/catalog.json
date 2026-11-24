@@ -12237,6 +12237,16 @@
                     "minLength": 1,
                     "maxLength": 60000
                   },
+                  "downloadFileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "downloadContent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120000
+                  },
                   "downloadUrl": {
                     "type": "string",
                     "minLength": 1,
@@ -12489,6 +12499,16 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 60000
+                  },
+                  "downloadFileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "downloadContent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120000
                   },
                   "downloadUrl": {
                     "type": "string",

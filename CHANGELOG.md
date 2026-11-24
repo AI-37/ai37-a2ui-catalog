@@ -4,6 +4,34 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.49.0] - 2026-11-24
+
+### Added
+
+- **Протокол лифтов текстом в props** (план AI-37/docs `plans/mcp-apps-a2ui-bridge.md`, волна 2 по
+  приёмке владельца). У `liftReportProtocolSchema` (`LiftReport` и `LiftReportNext`) — необязательные
+  `downloadFileName` (1–120) и `downloadContent` (1–120000), ровно как у протокола теплотеха;
+  `.strict()` остался, лишние поля по-прежнему отклоняются. При `downloadFileName` без `downloadUrl`
+  «Скачать» у `LiftReportNext` — меню с одним пунктом `Markdown (.md)`, у старого `LiftReport` — кнопка;
+  в файл уходит `downloadContent ?? content`. Так протокол скачивается там, где полки chat-backend нет
+  (внешний хост MCP App). Артефакты каталога v2 перегенерированы.
+- **Python-зеркало `LiftReportProps`** (`LiftReport`, `LiftReportNext` в `COMPONENT_MODELS`) с теми же
+  полями и проверкой консистентности со схемой.
+- **Точка инъекции загрузчика файлов: `ArtifactCardHost.downloadFile`.** Все Blob-скачивания протоколов
+  (теплотех, КЕО, инсоляция, лифты — старые и `*Next`) идут через неё. Не задана — прежний клиентский
+  Blob и `<a download>`; функция — хост скачивает сам; `null` — хост скачивать не умеет, и пункта
+  «Скачать» у протокола текстом нет. Ссылки на полку (`downloadUrl`) не тронуты. Наружу:
+  `downloadTextFileAsBlob`, типы `FileDownloader`, `TextFile`.
+- **`@ai37/a2ui-mcp-app`: скачивание через хост.** View подставляет загрузчик, который отправляет файл
+  хосту как `ui/download-file` (`App.downloadFile`, `EmbeddedResource` с `uri: file:///<имя>`,
+  `mimeType: text/markdown`, `text`). Хост без capability `downloadFile` — пункта «Скачать» у протокола
+  текстом нет. Отказ или отмена в диалоге хоста (`isError`) — без ошибки на экране; оборванный вызов —
+  «Не удалось скачать файл: …».
+
+### Removed
+
+- Внутренний `download-report-next-blob.ts` — его заменил загрузчик по умолчанию `downloadTextFileAsBlob`.
+
 ## [0.48.0] - 2026-11-24
 
 ### Added

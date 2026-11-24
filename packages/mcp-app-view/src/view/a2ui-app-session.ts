@@ -2,7 +2,7 @@ import type {App, McpUiHostContext} from '@modelcontextprotocol/ext-apps';
 import type {CallToolResult} from '@modelcontextprotocol/client';
 import type {ReactComponentImplementation} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
-import {ai37Catalog} from '@ai37/a2ui-catalog-react';
+import {ai37Catalog, type TextFile} from '@ai37/a2ui-catalog-react';
 import {LOOKUP_SUGGEST_ACTION} from '@ai37/a2ui-catalog-schemas';
 import {
   A2UI_RESOURCE_ACTION_PREFIX,
@@ -22,6 +22,11 @@ export type ViewSnapshot = {
   busy: boolean;
   error: string | undefined;
   theme: ViewTheme;
+  /**
+   * Хост объявил `downloadFile` при подключении. Нет — «Скачать» у протокола
+   * текстом не показывается: Blob из песочницы всё равно не скачается.
+   */
+  canDownload: boolean;
 };
 
 /** Действие поверхности, как его отдаёт `MessageProcessor`. */
@@ -70,6 +75,7 @@ export class A2uiAppSession {
     busy: false,
     error: undefined,
     theme: 'light',
+    canDownload: false,
   };
 
   private readonly listeners = new Set<() => void>();
@@ -105,6 +111,36 @@ export class A2uiAppSession {
     if (context.theme === undefined) return;
     this.update({theme: context.theme === 'dark' ? 'dark' : 'light'});
   }
+
+  /** Возможности хоста после `connect()`: пока что только скачивание файлов. */
+  applyHostCapabilities(): void {
+    this.update({canDownload: this.app.getHostCapabilities()?.downloadFile !== undefined});
+  }
+
+  /**
+   * Загрузчик файлов каталога внутри MCP App: Blob-ссылку песочница режет,
+   * поэтому файл уходит хосту как `ui/download-file`. `isError` — отказ или
+   * отмена в диалоге хоста: это решение пользователя, а не сбой, экран его не
+   * показывает. Ошибкой считается только оборванный вызов.
+   */
+  readonly downloadFile = async (file: TextFile): Promise<void> => {
+    try {
+      await this.app.downloadFile({
+        contents: [
+          {
+            type: 'resource',
+            resource: {
+              uri: `file:///${encodeURIComponent(file.fileName)}`,
+              mimeType: file.mimeType,
+              text: file.text,
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      this.update({error: `Не удалось скачать файл: ${errorText(error)}`});
+    }
+  };
 
   /** Обработчик действий поверхности: отдаётся в `MessageProcessor`. */
   readonly handleAction = async (action: SurfaceAction): Promise<void> => {

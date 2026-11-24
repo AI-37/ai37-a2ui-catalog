@@ -82,9 +82,23 @@ export const liftReportProtocolSchema = z
     /** Краткий вывод расчёта («Итог») — раскрывается под катом (plain text). */
     content: z.string().min(1).max(60000),
     /**
+     * Имя файла протокола, собранного на клиенте (как у теплотеха): при нём и
+     * без `downloadUrl` «Скачать» отдаёт один `.md` из props — Blob'ом или
+     * через хост (MCP App: `ui/download-file`). Так протокол скачивается там,
+     * где полки chat-backend нет.
+     */
+    downloadFileName: z.string().min(1).max(120).optional(),
+    /**
+     * Содержимое скачиваемого файла (полная markdown-простыня). Без него
+     * «Скачать» отдаёт `content`. На экран не выводится.
+     */
+    downloadContent: z.string().min(1).max(120000).optional(),
+    /**
      * Относительный URL ручки агента (`/api/agent-resource?resource=…`) для
      * «Скачать»: рендерер отдаёт обычный `<a href>`, download-заголовки ставит
-     * сервер агента. Нет URL — нет ссылки, протокол только раскрывается.
+     * сервер агента. URL главнее Blob-полей: при нём они не нужны. Нет ни
+     * URL, ни `downloadFileName` — скачивать нечего, протокол только
+     * раскрывается.
      * Либо ссылка на протокол в выходной полке chat-backend
      * (`/api/artifacts/<id>/content?format=md`): тогда `.docx` — тот же путь с
      * `format=docx` (`reportDocxUrl`).

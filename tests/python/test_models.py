@@ -34,6 +34,10 @@ def load_fixture(group: str, name: str):
         ("lift-editor-group.json", "LiftEditor"),
         ("lift-editor-note-rule.json", "LiftEditorNext"),
         ("lift-editor-recommend.json", "LiftEditorNext"),
+        ("lift-report.json", "LiftReport"),
+        # Протокол текстом для внешнего хоста MCP App — аддитивные
+        # `downloadFileName`/`downloadContent` (план mcp-apps-a2ui-bridge, волна 2).
+        ("lift-report-protocol-text.json", "LiftReportNext"),
         ("keo-editor.json", "KeoEditor"),
         # Новый рендерер на той же схеме props (change keo-editor-next):
         # подписи «Далее» и «Условия» обязаны быть и в зеркале.
@@ -104,6 +108,7 @@ def test_valid_fixtures(file_name: str, component: str) -> None:
         ("lift-editor-rule-row-empty.json", "LiftEditor"),
         ("lift-editor-recommend-empty-resource.json", "LiftEditorNext"),
         ("lift-editor-recommend-empty-params.json", "LiftEditorNext"),
+        ("lift-report-protocol-extra-key.json", "LiftReportNext"),
         ("keo-editor-unknown-reveal.json", "KeoEditor"),
         ("keo-editor-empty-next-label.json", "KeoEditorNext"),
         ("keo-editor-empty-conditions-label.json", "KeoEditorNext"),
