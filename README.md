@@ -4,7 +4,7 @@
 # ai37-a2ui-catalog
 
 ## Описание
-Монорепозиторий собственного A2UI-каталога AI-37 («AI37 Custom A2UI Catalog»): канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели для валидации на Python, общие фикстуры и тесты. С 0.48.0 в нём живёт `@ai37/a2ui-mcp-app` — однофайловый HTML-view, который показывает A2UI-поверхность каталога внутри MCP App и отправляет действия поверхности агенту через app-only инструмент. JSON-артефакты каталога публикуются на GitHub Pages, а их URL служит `catalogId`.
+Монорепозиторий собственного A2UI-каталога AI-37 («AI37 Custom A2UI Catalog»): канонические Zod-схемы компонентов, React-рендереры, Pydantic-модели для валидации на Python, общие фикстуры и тесты. С 0.48.0 в нём живёт `@ai37/a2ui-mcp-app` — однофайловый HTML-view, который показывает A2UI-поверхность каталога внутри MCP App и отправляет действия поверхности агенту через app-only инструмент. С 0.49.0 протокол отчётов (теплотех, КЕО, инсоляция, лифты) скачивается через единый загрузчик хоста: внутри MCP App файл уходит хосту как `ui/download-file`. JSON-артефакты каталога публикуются на GitHub Pages, а их URL служит `catalogId`.
 
 ## Стек
 - TypeScript 5.9, Node ≥ 22, pnpm ≥ 10 (`packageManager: pnpm@10.29.3`), workspace `packages/*` + `apps/*`.
@@ -12,22 +12,25 @@
 - MCP Apps: `@modelcontextprotocol/ext-apps` 2.0.4, `@modelcontextprotocol/client` ^2.4.0, `@modelcontextprotocol/core` ^2.4.0 (пакет view).
 - Сборка: tsup, tsx, Vite 7 (`vite-plugin-singlefile` — один HTML без внешних ресурсов), Vitest 4 (jsdom, Testing Library).
 - Python ≥ 3.13 (ограничение `>=3.13,<4.0`), Pydantic 2, Poetry, pytest (`packages/catalog-python`).
-- Единая синхронная версия пакетов и каталога — 0.48.0.
+- Единая синхронная версия пакетов и каталога — 0.49.0.
 
 ## Схема работы
 - `packages/catalog-schemas` задаёт схемы компонентов и регистрирует их в `catalog.ts`. Константы `CATALOG_ID`, `A2UI_BASE_CATALOG_ID`, `CATALOG_COMPONENT_NAMES`, `AGENT_RESOURCE_ROUTE`, `LOOKUP_SUGGEST_ACTION` экспортируются отдельно через `./constants`.
 - `generate-artifacts.ts` (`pnpm run export:public`) генерирует `catalog.json` и JSON Schema компонентов в `public/a2ui/catalogs/ai37-a2ui/<версия>/`. Текущая версия каталога — `CATALOG_VERSION = 'v2'`, `v1` заморожена. Правки схем аддитивные и версию каталога не меняют.
 - `scripts/verify-public.ts` сверяет закоммиченный `public/` с исходником текущей версии и запускается в CI и перед деплоем Pages.
 - `packages/catalog-react` даёт рендереры под тот же набор компонентов и примитивы (`./primitives`) для семейства `*Next`; экспортирует `ai37Catalog` для процессора A2UI.
-- `packages/catalog-python` даёт Pydantic-модели (ручное зеркало Zod-схем), `validate_component_payload` / `validate_component_payload_json` / `get_component_schema`, а также пакет `ai37_a2ui_catalog.mcp_app` — Python-пару протокола «A2UI внутри MCP App».
+- `packages/catalog-python` даёт Pydantic-модели (ручное зеркало Zod-схем; с 0.49.0 — включая `LiftReportProps`), `validate_component_payload` / `validate_component_payload_json` / `get_component_schema`, а также пакет `ai37_a2ui_catalog.mcp_app` — Python-пару протокола «A2UI внутри MCP App».
+- Скачивание протоколов — одна точка, `ArtifactCardHost.downloadFile` (`FileDownloader`): не задана — прежний клиентский `downloadTextFileAsBlob` (Blob + `<a download>`); функция — скачивает хост; `null` — хост не умеет, и пункта «Скачать» у протокола текстом нет. Ссылки на полку (`downloadUrl`) не тронуты. Помощники: `protocolTextFile` (файл = `downloadContent ?? content`, `mimeType: text/markdown`), `useFileDownloader`, `useProtocolDownload`, `reportNextBlobItems`.
+- Протокол лифтов: `liftReportProtocolSchema` (`LiftReport` и `LiftReportNext`) получил необязательные `downloadFileName` (1–120) и `downloadContent` (1–120000), как у теплотеха; `.strict()` сохранён. При `downloadFileName` без `downloadUrl` у `LiftReportNext` — меню с одним пунктом `Markdown (.md)`, у `LiftReport` — кнопка. `downloadUrl` главнее `downloadFileName`: при нём меню форматов `.md`/`.docx` как раньше.
 - `packages/mcp-app-view` (`@ai37/a2ui-mcp-app`) — два слоя:
   - `src/protocol.ts` + `src/result.ts` — протокол версии 1 и помощники результата. Поверхность едет в `_meta["ai37/a2ui"]` результата инструмента, а не в `structuredContent` (текст для модели — в `content`). Поля конверта: `version`, `messages`, `surfaceId`, `state`, `actionTool`. `a2uiSurfaceMessages(node, surfaceId, catalogId)` собирает поток A2UI v0.9 из одного корневого узла (`createSurface` + `updateComponents` с `id: 'root'`); `a2uiAppResult({text, surfaceId, actionTool, state?, node | messages, catalogId?})` отдаёт готовый результат инструмента; `a2uiResourceResult(resource, text?)` — ответ ресурсного канала.
   - `src/view/*` — сам HTML-view: React + `App` из `@modelcontextprotocol/ext-apps`, `MessageProcessor` из `@a2ui/web_core/v0_9` с каталогом `ai37Catalog` и `A2uiSurface`. `startA2uiAppView` вешает обработчики `toolresult` / `hostcontextchanged` до `connect()`, рендерит `A2uiAppSurface` в контейнер и применяет тему хоста (`data-a2ui-theme = light | dark`) и стили (`applyHostStyleVariables`, `applyHostFonts`).
+  - Скачивание через хост: после `connect()` вызывается `session.applyHostCapabilities()` → `canDownload = getHostCapabilities()?.downloadFile !== undefined`. `A2uiAppSurface` оборачивает поверхность в `ArtifactCardHostProvider` с `downloadFile: canDownload ? session.downloadFile : null`. `session.downloadFile` отправляет `app.downloadFile({contents: [{type: 'resource', resource: {uri: 'file:///<encodeURIComponent(имя)>', mimeType, text}}]})`. Отказ/отмена в диалоге хоста (`isError`) — без ошибки на экране; оборванный вызов — `error: "Не удалось скачать файл: …"`.
   - `A2uiAppSession`: хост присылает результат инструмента → поверхность рисуется заново (поток с `createSurface` создаёт новый `MessageProcessor`; поток без него — правка текущей поверхности, напр. `updateDataModel`). Действие поверхности уходит как `callServerTool(actionTool, {name, context, state})`; ответ того же формата перерисовывает поверхность, его текст уходит модели через `updateModelContext`. Действия `*:draft` и `LOOKUP_SUGGEST_ACTION` — «тихие»: без индикатора хода и без сообщения модели, черновик поверхность не пересоздаёт. Поздний ответ на более ранний запрос состояние не затирает (счётчики `issued`/`applied`).
   - Ресурсный канал: рендереры ходят same-origin `GET /api/agent-resource?resource=&query=`; в песочнице хоста такого origin нет, поэтому `installResourceFetch` подменяет `fetch` страницы и отправляет тот же запрос в `actionTool` как `resource:<id>` (остальные параметры — в `context`). Пустой ответ → 404 `{error: "unknown_resource"}`; отмена поддержана через `AbortSignal`.
   - Сборка view: `vite build` (single-file HTML) + `tsup` (ESM-библиотека) + `scripts/emit-entry.mjs`, который пишет `dist/html.js` со строкой `A2UI_MCP_APP_HTML`, склеивает `dist/index.js` и кладёт копию HTML в `packages/catalog-python/src/ai37_a2ui_catalog/mcp_app/a2ui-mcp-app.html` (в git не лежит, входит в колесо через `include` в `pyproject.toml`).
   - Ограничения размера: в view KaTeX заменён показом исходного TeX (`katex-plain.ts`), из zod 4 вырезаны неанглийские локали (плагин `zodEnglishOnly`). Бюджет HTML в тестах — 1 120 000 байт (сейчас ~1,10 МБ).
-- Формат протокола совпадает у TS и Python байт в байт — это проверяет общая фикстура `tests/mcp-app/a2ui-app-result.fixture.json`.
+- Формат протокола `_meta["ai37/a2ui"]` совпадает у TS и Python байт в байт — это проверяет общая фикстура `tests/mcp-app/a2ui-app-result.fixture.json`. Скачивание в этот конверт не входит: оно идёт протоколом MCP Apps `ui/download-file`.
 - `ProposalSource.links` — необязательный список до 20 объектов `{label, href?}` (записи, из которых собрана пачка, напр. голосовые сообщения). Работает у обеих форм источника: у источника пачки и у источника пункта. Рендерер (`proposal-card-source-links.tsx`) ставит их после подписи/цитаты: с `href` (путь от корня хоста или http(s)) — ссылкой в новой вкладке, без `href` — подписью. Одиночный `href` сохранён; пустой список рисуется как отсутствие поля; одних `links` без подписи или цитаты по-прежнему мало. Python-зеркало: `ProposalSourceLink`, `ProposalSource.links`.
 - Схемы источника — `.strict()`: рендерер 0.44.0 отклоняет источник с `links`, поэтому в хостах каталог бампают раньше, чем эмитент-агент начнёт слать поле.
 - `ProposalCardScreen` (экран карточки пачки отдельно от рендерера) принимает проп `flat?: boolean` (по умолчанию `false`): при `flat` внешняя карточка рисуется как `Card flat`. Это проп хоста, а не поле A2UI-схемы; Zod-схемы, Python-зеркало и `public/` не менялись. Подвал считает `resolveProposalCardFooter` (`confirm` | `link` | `none`).
@@ -44,6 +47,8 @@ flowchart LR
     A[агенты] -->|a2uiAppResult / a2ui_app_result| M[_meta["ai37/a2ui"] результата инструмента]
     M --> V
     V -->|callServerTool actionTool: name, context, state| A
+    R -->|ArtifactCardHost.downloadFile| D[загрузчик: Blob по умолчанию]
+    D -->|в MCP App: ui/download-file| H[хост MCP Apps]
     U[UI-хост с catalog-react] -->|GET /api/agent-resource| BFF[BFF → оркестратор → агент]
 ```
 
@@ -51,39 +56,40 @@ flowchart LR
 
 ## Структура каталогов
 - `packages/catalog-schemas/` — `@ai37/a2ui-catalog-schemas`: Zod-схемы (`src/components/`), каталог, константы, генерация артефактов.
-- `packages/catalog-react/` — `@ai37/a2ui-catalog-react`: рендереры (`src/renderers/`, в т.ч. `proposal-card-screen.tsx`, `proposal-card.types.ts`), примитивы набора (`src/primitives/`).
-- `packages/catalog-python/` — Python-пакет `ai37-a2ui-catalog` (`ai37_a2ui_catalog`: `models/`, `validation.py`, `constants.py`, `mcp_app/`).
+- `packages/catalog-react/` — `@ai37/a2ui-catalog-react`: рендереры (`src/renderers/`, в т.ч. `proposal-card-screen.tsx`, `proposal-card.types.ts`, `download-text-file.ts`, `protocol-text-file.ts`, `use-file-downloader.ts`, `use-protocol-download.ts`), примитивы набора (`src/primitives/`).
+- `packages/catalog-python/` — Python-пакет `ai37-a2ui-catalog` (`ai37_a2ui_catalog`: `models/` в т.ч. `lift_report.py`, `validation.py`, `constants.py`, `mcp_app/`).
 - `packages/mcp-app-view/` — `@ai37/a2ui-mcp-app`: протокол и помощники (`src/protocol.ts`, `src/result.ts`, `src/index.ts`), HTML-view (`src/view/`, точка входа `a2ui-mcp-app.html`), конфиги `vite.config.ts` / `tsup.config.ts`, скрипт сборки `scripts/emit-entry.mjs`.
 - `apps/demo/` — `@ai37/a2ui-demo`, Vite-стенд для ручной проверки сообщений (в т.ч. страницы `proba/` системы примитивов, мок-справочники).
-- `fixtures/` — `valid/`, `invalid/`, `messages/` (поверхности A2UI) для тестов и демо; напр. `lift-editor-per-lift.json`, `lift-editor-recommend.json`, `proposal-card-voice-links.json`.
-- `tests/` — `ts/`, `react/`, `mcp-app/` (Vitest: протокол, сессия view, подмена fetch, сборка HTML) и `python/` (pytest, включая `test_mcp_app.py`).
+- `fixtures/` — `valid/`, `invalid/`, `messages/` (поверхности A2UI) для тестов и демо; напр. `lift-editor-per-lift.json`, `lift-editor-recommend.json`, `proposal-card-voice-links.json`, `lift-report-protocol-text.json`.
+- `tests/` — `ts/`, `react/` (в т.ч. `protocol-file-downloader.test.tsx`), `mcp-app/` (Vitest: протокол, сессия view, подмена fetch, скачивание через хост, сборка HTML) и `python/` (pytest, включая `test_mcp_app.py`).
 - `public/` — сгенерированные артефакты каталога для GitHub Pages (`a2ui/catalogs/ai37-a2ui/v1`, `v2`).
 - `scripts/` — `bump-version.mjs` (в т.ч. `packages/mcp-app-view/package.json` и `uv lock`), `verify-public.ts`, `install-to-consumer.mjs`, `check-pr-release-metadata.mjs`.
 - `docs/` — `theming.md`, `initial-plan.md`; `openspec/changes/` — спецификации изменений компонентов.
 
 ## Публичные интерфейсы
-- Статический каталог на GitHub Pages: `https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json` (`CATALOG_ID`) и `.../v2/components/*.schema.json`; `v1` хранится рядом. В `proposal-card.schema.json` у источника (пачки и пункта) поля `label`/`quote`/`href`/`links`.
+- Статический каталог на GitHub Pages: `https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json` (`CATALOG_ID`) и `.../v2/components/*.schema.json`; `v1` хранится рядом. В `lift-report.schema.json` и `lift-report-next.schema.json` у `protocol` поля `content`/`meta`/`downloadFileName`/`downloadContent`/`downloadUrl` (`additionalProperties: false`); в `proposal-card.schema.json` у источника (пачки и пункта) поля `label`/`quote`/`href`/`links`.
 - npm:
   - `@ai37/a2ui-catalog-schemas` (экспорты `.`, `./constants`).
-  - `@ai37/a2ui-catalog-react` (`.`, `./primitives`; peer `react`/`react-dom` ^19), в т.ч. `ProposalCardScreen`, `resolveProposalCardFooter`, `SurfaceReadOnlyProvider`, `useSurfaceReadOnly`, `withReadOnlyGate`.
+  - `@ai37/a2ui-catalog-react` (`.`, `./primitives`; peer `react`/`react-dom` ^19), в т.ч. `ProposalCardScreen`, `resolveProposalCardFooter`, `SurfaceReadOnlyProvider`, `useSurfaceReadOnly`, `withReadOnlyGate`, `ArtifactCardHost` (с `downloadFile?: FileDownloader | null`), `downloadTextFileAsBlob`, типы `FileDownloader` и `TextFile`.
   - `@ai37/a2ui-mcp-app` (`.`, `./a2ui-mcp-app.html`): `A2UI_MCP_APP_HTML` (строка однофайлового HTML), `A2UI_META_KEY = 'ai37/a2ui'`, `A2UI_APP_PROTOCOL_VERSION = 1`, `A2UI_RESOURCE_ACTION_PREFIX = 'resource:'`, типы `A2uiAppPayload`, `A2uiResourcePayload`, `A2uiAppActionArgs`, `A2uiAppMessage`, `A2uiNode`, `A2uiAppResultInput`, `A2uiAppToolResult`, `A2uiResourceToolResult`; функции `a2uiSurfaceMessages`, `a2uiAppResult`, `a2uiResourceResult`, `readA2uiAppPayload`, `readA2uiResource`, `parseResourceActionName`.
-- PyPI: `ai37-a2ui-catalog`; `ai37_a2ui_catalog.mcp_app`: `html()` (тот же HTML из колеса), `a2ui_app_result`, `a2ui_resource_result`, `a2ui_surface_messages`, `parse_resource_action_name`, `A2UI_META_KEY`, `A2UI_APP_PROTOCOL_VERSION`, `A2UI_RESOURCE_ACTION_PREFIX`, `A2UI_MCP_APP_HTML_FILE`.
+- PyPI: `ai37-a2ui-catalog`; `ai37_a2ui_catalog`: типы моделей, включая `LiftReportProps` (и подмодели `LiftReportVerdict`, `LiftReportSuggestions`, `LiftReportSuggestion`, `LiftReportInputs`, `LiftReportInputGroup`, `LiftReportInputChip`, `LiftReportProtocol`, `LiftReportAction`), `get_component_schema`, `validate_component_payload`, `validate_component_payload_json`, `CATALOG_ID`, `CATALOG_VERSION`; `COMPONENT_MODELS` отображает `LiftReport` и `LiftReportNext` в `LiftReportProps`. `ai37_a2ui_catalog.mcp_app`: `html()` (тот же HTML из колеса), `a2ui_app_result`, `a2ui_resource_result`, `a2ui_surface_messages`, `parse_resource_action_name`, `A2UI_META_KEY`, `A2UI_APP_PROTOCOL_VERSION`, `A2UI_RESOURCE_ACTION_PREFIX`, `A2UI_MCP_APP_HTML_FILE`.
 - Протокол «A2UI внутри MCP App» v1: `_meta["ai37/a2ui"]` результата инструмента = `{version: 1, messages, surfaceId, state, actionTool}`; ответ ресурсного канала = `{version: 1, resource}`; аргументы app-only инструмента = `{name, context, state}`. View отбрасывает чужой ключ, другую версию и битую форму.
+- Скачивание файлов внутри MCP App — протокол MCP Apps `ui/download-file`: view объявляет себя потребителем capability хоста `downloadFile` и шлёт `contents: [{type: 'resource', resource: {uri: 'file:///<имя>', mimeType: 'text/markdown', text}}]`. Хост без `downloadFile` — пункта «Скачать» у протокола текстом нет.
 - Контракт, который должен реализовать потребитель-хост: same-origin `GET /api/agent-resource?resource=&query=`. Неизвестный resource → 404 `{error: "unknown_resource"}`.
 - A2A, AG-UI и HTTP-сервисов нет; MCP-сервер не реализуется — есть только view, который хост MCP Apps грузит как ресурс `ui://…` в песочницу (CSP закрыт).
 
 ## Зависимости в экосистеме
 ### Зависит от
 - `@a2ui/react`, `@a2ui/web_core` 0.10.1 (базовый каталог A2UI).
-- `@modelcontextprotocol/ext-apps` 2.0.4, `@modelcontextprotocol/client` ^2.4.0, `@modelcontextprotocol/core` ^2.4.0 — протокол MCP Apps во view.
+- `@modelcontextprotocol/ext-apps` 2.0.4, `@modelcontextprotocol/client` ^2.4.0, `@modelcontextprotocol/core` ^2.4.0 — протокол MCP Apps во view, включая `ui/download-file` (`App.downloadFile`, capability хоста `downloadFile`).
 - Приватные реестры `npm.app.sp-ai.ru` и `pypi.app.sp-ai.ru` (публикация; scope `@ai37` закреплён в `.npmrc`).
-- В рантайме рендереров: BFF хоста с маршрутом `/api/agent-resource`. Во view этот маршрут не нужен — он подменяется вызовом `actionTool`. Authentik, БД и LLM не используются.
+- В рантайме рендереров: BFF хоста с маршрутом `/api/agent-resource`; при скачивании протокола текстом хост может подставить свой `ArtifactCardHost.downloadFile` (в MCP App это `ui/download-file`). Authentik, БД и LLM не используются.
 
 ### От него зависят
 - spai-ui и UI-форки (рендер), widget-ui, polimetrika-ui (в т.ч. передаёт `flat` в `ProposalCardScreen` — ревью AI-37/polimetrika-ui#45).
 - spai-chat-backend и форки, `@ai37/agent-host` (ai37-agent-sdk) — `@ai37/a2ui-catalog-schemas`.
 - Агенты: spai-elevator-calc-agent, spai-thermal-calc-agent, spai-daylight-factor-calc-agent, spai-consultant-agent, pdai-doc-gen-agent, pdai-site-check, polimetrika-data-agent (эмитент `ProposalCard`; для поля `links` нужен пин `ai37-a2ui-catalog==0.45.0` и выше — модель строгая).
-- MCP-хосты и агенты, отдающие поверхность через `_meta["ai37/a2ui"]`: TS — через `a2uiAppResult` из `@ai37/a2ui-mcp-app`, Python — через `ai37_a2ui_catalog.mcp_app.a2ui_app_result` (формат идентичен).
+- MCP-хосты и агенты, отдающие поверхность через `_meta["ai37/a2ui"]`: TS — через `a2uiAppResult` из `@ai37/a2ui-mcp-app`, Python — через `ai37_a2ui_catalog.mcp_app.a2ui_app_result` (формат идентичен). Для скачивания протокола текстом в MCP App хост должен объявить capability `downloadFile`.
 
 ## Конфигурация
 `.env.example` нет.
@@ -91,6 +97,7 @@ flowchart LR
 - `AI37_PYPI_TOKEN` — пароль публикации в `pypi.app.sp-ai.ru` (CD).
 - Переменные организации `CI_RUNNER` / `CD_RUNNER` — выбор раннера.
 - Тематизация: CSS-токены `--a2ui-*` и атрибут `data-a2ui-theme` (см. `docs/theming.md`); view получает тему и стили от хоста MCP Apps (`applyHostStyleVariables`, `applyHostFonts`), а шрифт/цвета подписей берёт из переменных хоста с системными фолбэками.
+- Скачивание: `ArtifactCardHost.downloadFile` — конфигурация хоста, а не env (не задана → Blob; функция → хост; `null` → «Скачать» нет). В MCP App значение берётся из capability хоста `downloadFile`.
 
 ## Данные и хранилища
 БД, Redis и S3 нет. Хранятся только статические артефакты в `public/a2ui/catalogs/ai37-a2ui/{v1,v2}`, фикстуры в `fixtures/` и собранный HTML view: `packages/mcp-app-view/dist/a2ui-mcp-app.html` (в git не хранится) и его копия `packages/catalog-python/src/ai37_a2ui_catalog/mcp_app/a2ui-mcp-app.html` (в `.gitignore`, попадает в sdist/wheel через `include` в `pyproject.toml`).
@@ -115,7 +122,7 @@ pnpm run test:ts       # vitest run tests/ts tests/react tests/mcp-app
 pnpm run test:python   # poetry -C packages/catalog-python run pytest ../../tests/python
 pnpm run lint          # = typecheck
 ```
-Тесты `tests/mcp-app` и Python-тест `test_mcp_app.py` читают собранный HTML, поэтому перед ними нужен `pnpm run build` (в CI так и сделано). В `tests/mcp-app` проверяются: формат результата по общей фикстуре, ветки сессии view (порядок ответов, тихие действия, битый поток, сбой транспорта), подмена `fetch` для ресурсного канала, бюджет размера и однофайловость HTML (~1,10 МБ при лимите 1 120 000 байт).
+Тесты `tests/mcp-app` и Python-тест `test_mcp_app.py` читают собранный HTML, поэтому перед ними нужен `pnpm run build` (в CI так и сделано). В `tests/mcp-app` проверяются: формат результата по общей фикстуре, ветки сессии view (порядок ответов, тихие действия, битый поток, сбой транспорта), подмена `fetch` для ресурсного канала, скачивание через хост (`ui/download-file`: уходит `text/markdown` с именем файла; хост без capability — без «Скачать»; `isError` — без ошибки на экране; оборванный вызов — видимая ошибка), бюджет размера и однофайловость HTML (~1,10 МБ при лимите 1 120 000 байт). В `tests/react/protocol-file-downloader.test.tsx` — точка `ArtifactCardHost.downloadFile` для протоколов теплотеха, КЕО, инсоляции и лифтов (подменённый загрузчик, Blob по умолчанию, `null`, приоритет `downloadUrl`).
 
 ## Деплой
 Не деплоится как сервис.
@@ -128,8 +135,8 @@ pnpm run lint          # = typecheck
 - `ecosystem/design/a2ui-negotiation-plan.md` — негоциация MIME → `catalogId` (`CATALOG_ID`, `A2UI_BASE_CATALOG_ID`).
 - `ecosystem/v2/10-agui-protocol.md` — AG-UI/A2UI в чате.
 - `ecosystem/design/frontend-stack.md`, `ecosystem/design/ui-principles-sp-ai.md` — фронтенд-основа.
-- AI-37/docs `plans/mcp-apps-a2ui-bridge.md` — план «A2UI внутри MCP App» (протокол `_meta["ai37/a2ui"]`, ресурсный канал).
-- `docs/theming.md` (в репозитории), `CHANGELOG.md` — история версий (0.48.0: `@ai37/a2ui-mcp-app` и `ai37_a2ui_catalog.mcp_app`; 0.46.0: проп хоста `flat` у `ProposalCardScreen`).
+- AI-37/docs `plans/mcp-apps-a2ui-bridge.md` — план «A2UI внутри MCP App» (протокол `_meta["ai37/a2ui"]`, ресурсный канал, волна 2 — протокол текстом и скачивание через хост).
+- `docs/theming.md` (в репозитории), `CHANGELOG.md` — история версий (0.49.0: `downloadFileName`/`downloadContent` у `LiftReport`/`LiftReportNext`, Python-зеркало `LiftReportProps`, `ArtifactCardHost.downloadFile` и `ui/download-file` во view; 0.48.0: `@ai37/a2ui-mcp-app` и `ai37_a2ui_catalog.mcp_app`; 0.46.0: проп хоста `flat` у `ProposalCardScreen`).
 <!-- ai37:card:end -->
 
 <!-- Ниже — только уникальный человеческий контекст (замысел, инварианты, грабли).
