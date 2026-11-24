@@ -43,6 +43,7 @@ export async function startA2uiAppView(
   );
 
   await app.connect(transport);
+  session.applyHostCapabilities();
   applyHostContext(session, app.getHostContext());
   return {session, root};
 }

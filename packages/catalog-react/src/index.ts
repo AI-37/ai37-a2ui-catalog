@@ -48,6 +48,7 @@ export * from './renderers/lift-report-next';
 export * from './renderers/lift-report-next-screen';
 export * from './renderers/artifact-card';
 export * from './renderers/artifact-card-host';
+export {downloadTextFileAsBlob, type FileDownloader, type TextFile} from './renderers/download-text-file';
 export * from './renderers/artifact-card-links';
 export * from './renderers/artifact-card-screen';
 export * from './renderers/verification-report';
