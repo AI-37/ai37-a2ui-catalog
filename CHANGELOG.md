@@ -4,6 +4,36 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.48.0] - 2026-11-24
+
+### Added
+
+- **Новый пакет `@ai37/a2ui-mcp-app` — A2UI-поверхность внутри MCP App** (план AI-37/docs
+  `plans/mcp-apps-a2ui-bridge.md`, срез 2). Однофайловый HTML-view (Vite + `vite-plugin-singlefile`,
+  `ai37Catalog` + `A2uiSurface`, `App` из `@modelcontextprotocol/ext-apps` 2.0.4): берёт поверхность из
+  `_meta["ai37/a2ui"]` результата инструмента, действия отправляет app-only инструментом
+  `callServerTool(actionTool, {name, context, state})`, ответ того же формата перерисовывает
+  поверхность, черновик (`*:draft`) её не пересоздаёт, итог хода уходит модели через
+  `updateModelContext`. Тема хоста — в `data-a2ui-theme`, переменные и шрифты хоста —
+  `applyHostStyleVariables`/`applyHostFonts`. Наружу: строка `A2UI_MCP_APP_HTML` (и файл
+  `@ai37/a2ui-mcp-app/a2ui-mcp-app.html`), `A2UI_META_KEY = 'ai37/a2ui'`, типы `A2uiAppPayload`,
+  `A2uiAppActionArgs`, помощники `a2uiAppResult`, `a2uiResourceResult`, `a2uiSurfaceMessages`,
+  `readA2uiAppPayload`, `parseResourceActionName`.
+- **Ресурсный канал внутри view.** Справочники lookup и блок подбора `LiftEditorNext` ходят same-origin
+  GET `/api/agent-resource?resource=<id>&…`; во view этот запрос подменяется вызовом `actionTool` с
+  действием `resource:<id>` и остальным query в `context`. Рендереры не менялись.
+- **Python-пара: `ai37_a2ui_catalog.mcp_app`** — `html()` (тот же HTML, лежит в колесе как package data),
+  `a2ui_app_result(...)`, `a2ui_resource_result(...)`, `a2ui_surface_messages(...)`,
+  `parse_resource_action_name(...)`, `A2UI_META_KEY`. Формат совпадает с TS байт в байт — общий тест на
+  фикстуре `tests/mcp-app/a2ui-app-result.fixture.json`.
+- Бюджет размера HTML view в тестах: 1 120 000 байт (сейчас ~1,10 МБ, цель плана — 800 КБ). В view
+  KaTeX заменён показом исходного TeX, а из zod 4 убраны неанглийские локали.
+
+### Changed
+
+- CI собирает пакеты до тестов: тесты view и Python-пакета читают собранный HTML. CD публикует
+  `@ai37/a2ui-mcp-app`, а перед `poetry build` собирает view.
+
 ## [0.47.0] - 2026-11-18
 
 ### Added

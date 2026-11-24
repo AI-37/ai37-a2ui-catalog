@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI37 · A2UI</title>
+    <style>
+      /* Фон — у хоста: view живёт в его ленте. Шрифт и цвета подписей — переменные
+         хоста MCP Apps (applyHostStyleVariables), без них — системные. */
+      body {
+        margin: 0;
+        background: transparent;
+        font-family: var(--font-sans, system-ui, sans-serif);
+      }
+      .a2ui-mcp-app[aria-busy='true'] .a2ui-mcp-app__surface {
+        opacity: 0.6;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .a2ui-mcp-app__status,
+      .a2ui-mcp-app__error {
+        margin: 0;
+        padding: 8px 12px;
+        font-size: var(--font-text-sm-size, 14px);
+      }
+      .a2ui-mcp-app__status {
+        color: var(--color-text-secondary, GrayText);
+      }
+      .a2ui-mcp-app__error {
+        color: var(--color-text-danger, #b42318);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/view/main.tsx"></script>
+  </body>
+</html>
