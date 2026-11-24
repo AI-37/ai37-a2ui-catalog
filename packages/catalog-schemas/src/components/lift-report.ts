@@ -90,7 +90,8 @@ export const liftReportProtocolSchema = z
     downloadFileName: z.string().min(1).max(120).optional(),
     /**
      * Содержимое скачиваемого файла (полная markdown-простыня). Без него
-     * «Скачать» отдаёт `content`. На экран не выводится.
+     * «Скачать» отдаёт `content`. У `LiftReportNext` раскрывает протокол:
+     * под строкой — весь расчёт с формулами TeX (markdown → MathML).
      */
     downloadContent: z.string().min(1).max(120000).optional(),
     /**

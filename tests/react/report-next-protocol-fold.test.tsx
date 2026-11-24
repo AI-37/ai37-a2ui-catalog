@@ -74,6 +74,18 @@ describe('renderProtocolMarkdown', () => {
     expect(html).toContain('&lt;script&gt;');
   });
 
+  it('ссылка — только http(s) или путь от корня; javascript: и картинки — текстом', () => {
+    const html = renderProtocolMarkdown(
+      '[норма](https://docs.cntd.ru/x) [клик](javascript:alert(1)) [свой](/api/x) ![пиксель](https://evil.test/p.png)',
+    );
+    expect(html).toContain('<a href="https://docs.cntd.ru/x"');
+    expect(html).toContain('<a href="/api/x"');
+    expect(html).not.toContain('javascript:');
+    expect(html).toContain('клик');
+    expect(html).not.toContain('<img');
+    expect(html).toContain('пиксель');
+  });
+
   it('доллар без формулы (цена, «$ 5») остаётся текстом', () => {
     const html = renderProtocolMarkdown('Стоимость 5 $ и 7 $ за метр');
     expect(html).not.toContain('<math');

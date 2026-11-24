@@ -1,5 +1,6 @@
 import katex from 'katex';
 import {Marked} from 'marked';
+import {isProposalHref} from './is-proposal-href';
 
 /**
  * Полный протокол расчёта (markdown агента) → HTML для раскрытого блока
@@ -14,6 +15,9 @@ import {Marked} from 'marked';
  *
  * Сырой HTML из markdown не проходит: текст протокола собирает агент из
  * ввода пользователя, и `<script>` в подписи поля не должен стать разметкой.
+ * По той же причине ссылка остаётся ссылкой, только если адрес — http(s) или
+ * путь от корня хоста (правило `isProposalHref`); `javascript:` и прочее —
+ * просто текст. Картинок в протоколе нет: `![]()` показывается подписью.
  */
 export function renderProtocolMarkdown(source: string): string {
   const formulas: string[] = [];
@@ -31,13 +35,20 @@ export function renderProtocolMarkdown(source: string): string {
 }
 
 /** Метка места формулы: символы из Private Use Area, в тексте протокола их не бывает. */
-const MARK = '';
-const MARK_PATTERN = /(\d+)/g;
+const MARK = '\uE000';
+const MARK_PATTERN = /\uE000(\d+)\uE000/g;
 
 const markdown = new Marked({
   gfm: true,
   renderer: {
     html: ({text}) => escapeHtml(text),
+    link({href, title, tokens}) {
+      const text = this.parser.parseInline(tokens);
+      if (!isProposalHref(href)) return text;
+      const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+      return `<a href="${escapeHtml(href)}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+    },
+    image: ({text}) => escapeHtml(text),
   },
 });
 

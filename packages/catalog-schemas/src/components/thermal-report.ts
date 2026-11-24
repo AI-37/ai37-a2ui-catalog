@@ -107,8 +107,8 @@ export const thermalReportProtocolSchema = z
     downloadFileName: z.string().min(1).max(120).optional(),
     /**
      * Содержимое скачиваемого файла (полная markdown-простыня отчёта).
-     * Без него «Скачать» отдаёт `content`. В чат простыня не выводится —
-     * она живёт только здесь.
+     * Без него «Скачать» отдаёт `content`. У `ThermalReportNext` раскрывает
+     * протокол: под строкой — весь расчёт с формулами TeX (markdown → MathML).
      */
     downloadContent: z.string().min(1).max(120000).optional(),
     /**
