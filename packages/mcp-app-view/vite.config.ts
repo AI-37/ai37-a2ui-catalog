@@ -31,7 +31,7 @@ function zodEnglishOnly(): Plugin {
  * View — один HTML без внешних ресурсов: хост MCP Apps отдаёт его ресурсом
  * `ui://…` в песочницу, где CSP закрыт. Каталог берётся из исходников
  * workspace (как в vitest), а не из `dist`: сборка view не зависит от порядка
- * сборки пакетов. KaTeX заменён показом исходного TeX — см. katex-plain.ts.
+ * сборки пакетов. KaTeX — только MathML, см. katex-mathml.ts.
  */
 export default defineConfig({
   plugins: [zodEnglishOnly(), react(), viteSingleFile()],
@@ -45,7 +45,7 @@ export default defineConfig({
         find: '@ai37/a2ui-catalog-react',
         replacement: path.join(packages, 'catalog-react/src/index.ts'),
       },
-      {find: /^katex$/, replacement: path.resolve(import.meta.dirname, 'src/view/katex-plain.ts')},
+      {find: /^katex$/, replacement: path.resolve(import.meta.dirname, 'src/view/katex-mathml.ts')},
     ],
   },
   build: {
