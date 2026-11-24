@@ -22,6 +22,7 @@ const updateJsonVersion = filePath => {
 updateJsonVersion(path.join(repoRoot, 'package.json'));
 updateJsonVersion(path.join(repoRoot, 'packages/catalog-schemas/package.json'));
 updateJsonVersion(path.join(repoRoot, 'packages/catalog-react/package.json'));
+updateJsonVersion(path.join(repoRoot, 'packages/mcp-app-view/package.json'));
 updateJsonVersion(path.join(repoRoot, 'apps/demo/package.json'));
 
 const pythonFile = path.join(repoRoot, 'packages/catalog-python/pyproject.toml');

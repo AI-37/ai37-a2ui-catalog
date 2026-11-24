@@ -98,14 +98,16 @@ jobs:
       #     HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       #   run: node scripts/check-pr-release-metadata.mjs "$BASE_SHA" "$HEAD_SHA"
 
+      # Сборка — до тестов: тесты @ai37/a2ui-mcp-app читают собранный HTML view (бюджет
+      # размера, экспорт A2UI_MCP_APP_HTML), а Python-тесты — его копию в catalog-python.
+      - name: Run build
+        run: pnpm run build
+
       - name: Run TypeScript tests
         run: pnpm run test:ts
 
       - name: Run Python tests
         run: pnpm run test:python
-
-      - name: Run build
-        run: pnpm run build
 
       # Guard: закоммиченный ./public должен совпадать с исходником текущей версии каталога.
       # Падает, если забыли `pnpm run export:public` + commit после правки компонентов/бампа версии.
