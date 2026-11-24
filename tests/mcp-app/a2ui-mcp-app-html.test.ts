@@ -8,8 +8,12 @@ import {describe, expect, it} from 'vitest';
  * (React + @base-ui ≈ 40 %, два zod — у каталога 3.x, у web_core и MCP SDK 4.x,
  * MCP client SDK 2.x, все рендереры каталога). Порог фиксирует факт с запасом
  * ~1,5 % и не даёт расти: поднимать его — отдельное решение с замером в PR.
+ *
+ * 0.50.0: 1 105 234 → 1 411 901 байт (+307 КБ) — KaTeX (MathML-вывод, без CSS и
+ * шрифтов) и marked: раскрытый протокол расчёта показывает формулы во внешнем
+ * клиенте (Claude, ChatGPT). Запас ~2,7 %.
  */
-const HTML_BUDGET_BYTES = 1_120_000;
+const HTML_BUDGET_BYTES = 1_450_000;
 
 const dist = path.join(process.cwd(), 'packages/mcp-app-view/dist');
 const htmlFile = path.join(dist, 'a2ui-mcp-app.html');

@@ -4,6 +4,26 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
+## [0.50.0] - 2026-11-24
+
+### Added
+
+- **Раскрываемый протокол расчёта с формулами** (`LiftReportNext`, `KeoReportNext`, `ThermalReportNext`
+  через общий `ReportNextProtocolCard`). С `protocol.downloadContent` строка «Протокол расчёта»
+  раскрывается, как «Исходные данные»: под ней весь расчёт из markdown агента — заголовки, таблицы,
+  списки и формулы TeX (`$…$` в строке, `$$…$$` блоком). «Скачать ⌄» остаётся в шапке. Свёрнут по
+  умолчанию, HTML собирается при первом раскрытии. Без `downloadContent` (чат spai-ui) — прежняя
+  строка без раскрытия. Формулы — KaTeX с выводом MathML: браузер рисует их сам, без `katex.css` и
+  шрифтов; сырой HTML из текста протокола экранируется. Новая зависимость `marked`.
+- **`@ai37/a2ui-mcp-app`: KaTeX в view — MathML** (`katex-mathml.ts` вместо `katex-plain.ts`): формулы
+  видны во внешнем клиенте, `LatexFormula` тоже. HTML view 1 105 234 → 1 412 190 байт, бюджет теста
+  поднят до 1 450 000.
+
+### Changed
+
+- Описания `LiftReportNext`, `KeoReportNext`, `ThermalReportNext` в схемах: протокол раскрывается при
+  `downloadContent`. Артефакты каталога v2 перегенерированы.
+
 ## [0.49.0] - 2026-11-24
 
 ### Added

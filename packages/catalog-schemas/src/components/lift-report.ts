@@ -90,7 +90,8 @@ export const liftReportProtocolSchema = z
     downloadFileName: z.string().min(1).max(120).optional(),
     /**
      * Содержимое скачиваемого файла (полная markdown-простыня). Без него
-     * «Скачать» отдаёт `content`. На экран не выводится.
+     * «Скачать» отдаёт `content`. У `LiftReportNext` раскрывает протокол:
+     * под строкой — весь расчёт с формулами TeX (markdown → MathML).
      */
     downloadContent: z.string().min(1).max(120000).optional(),
     /**
@@ -144,6 +145,6 @@ export const liftReportNextDefinition: CatalogComponentDefinition<typeof liftRep
   name: 'LiftReportNext',
   slug: 'lift-report-next',
   description:
-    'The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single non-expanding row without `<details>`/`<pre>` (`protocol.content` is never printed on screen), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.',
+    'The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single row without `<details>`/`<pre>` (`protocol.content` is never printed on screen) unless `protocol.downloadContent` is present — then the row folds open into the full calculation rendered from markdown with TeX formulas (`$…$`, `$$…$$`), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.',
   schema: liftReportPropsSchema,
 };
