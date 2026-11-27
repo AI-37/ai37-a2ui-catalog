@@ -1,0 +1,16 @@
+{
+  "component": "AttachmentChoiceCard",
+  "props": {
+    "title": "Приложите расчёт для проверки",
+    "description": "Проверю теплотехнический расчёт по СП 50.13330.2024: сверю исходные данные, R₀норм и R₀пр по каждой конструкции.",
+    "contextId": "thread-1",
+    "attach": {
+      "label": "Продолжить",
+      "value": "verify",
+      "pickLabel": "Выбрать файл…",
+      "accept": ".pdf,.docx,.md,.xlsx",
+      "hint": "PDF, docx, md или xlsx — пояснительная записка или таблица расчёта."
+    },
+    "action": "verify_file"
+  }
+}

@@ -1,4 +1,8 @@
-import type {AttachmentChoiceAttach, AttachmentChoiceCardProps} from '@ai37/a2ui-catalog-schemas';
+import type {
+  AttachmentChoiceAttach,
+  AttachmentChoiceCardProps,
+  AttachmentChoiceSkip,
+} from '@ai37/a2ui-catalog-schemas';
 
 /** Состояние файла в карточке: от выбора до готового `fileId` на полке треда. */
 export type AttachmentUpload =
@@ -35,4 +39,10 @@ export interface AttachmentChoiceFileSlotProps {
   disabled: boolean;
   onPick: (file: File) => void;
   onClear: () => void;
+}
+
+export interface AttachmentChoiceCardSkipButtonProps {
+  skip: AttachmentChoiceSkip | undefined;
+  disabled: boolean;
+  onSkip: () => void;
 }

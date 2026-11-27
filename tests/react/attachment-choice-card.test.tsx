@@ -10,10 +10,10 @@ import {ai37Catalog, SurfaceReadOnlyProvider} from '@ai37/a2ui-catalog-react';
 const CATALOG_ID =
   'https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json';
 
-function readProps() {
+function readProps(name = 'attachment-choice-card-signature.json') {
   return JSON.parse(
     fs.readFileSync(
-      path.join(process.cwd(), 'fixtures', 'valid', 'attachment-choice-card-signature.json'),
+      path.join(process.cwd(), 'fixtures', 'valid', name),
       'utf8',
     ),
   ).props as Record<string, unknown>;
@@ -38,8 +38,8 @@ function createSurface(props: Record<string, unknown>) {
   return {surface, actions};
 }
 
-function renderCard(readOnly?: boolean) {
-  const {surface, actions} = createSurface(readProps());
+function renderCard(readOnly?: boolean, props = readProps()) {
+  const {surface, actions} = createSurface(props);
   const tree = <A2uiSurface surface={surface} />;
   const view = render(
     readOnly === undefined ? tree : <SurfaceReadOnlyProvider readOnly={readOnly}>{tree}</SurfaceReadOnlyProvider>,
@@ -134,5 +134,35 @@ describe('AttachmentChoiceCard', () => {
   it('на прошлой поверхности карточка заглушена', () => {
     const {container} = renderCard(true);
     expect(container.querySelector('[inert]')).toBeTruthy();
+  });
+
+  describe('без skip', () => {
+    const renderAttachOnly = () => renderCard(undefined, readProps('attachment-choice-card-attach-only.json'));
+    const proceed = () => screen.getByRole('button', {name: 'Продолжить'});
+
+    it('кнопка одна — «Продолжить», неактивна до загрузки файла', () => {
+      renderAttachOnly();
+      expect(screen.queryByRole('button', {name: /без/})).toBeNull();
+      expect((proceed() as HTMLButtonElement).disabled).toBe(true);
+      expect(screen.getByRole('button', {name: 'Выбрать файл…'})).toBeTruthy();
+    });
+
+    it('после загрузки «Продолжить» шлёт {value, fileId, fileName}', async () => {
+      mockUpload(new Response(JSON.stringify({fileId: 'f_calc', bytes: 2048}), {status: 200}));
+      const {container, actions} = renderAttachOnly();
+      const pdf = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], 'calc.pdf', {type: 'application/pdf'});
+
+      await act(async () => fireEvent.change(fileInput(container), {target: {files: [pdf]}}));
+      await waitFor(() => expect((proceed() as HTMLButtonElement).disabled).toBe(false));
+      await act(async () => fireEvent.click(proceed()));
+
+      expect(actions).toHaveLength(1);
+      const sent = JSON.stringify(actions[0]);
+      expect(sent).toContain('"name":"verify_file"');
+      expect(sent).toContain('"value":"verify"');
+      expect(sent).toContain('"fileId":"f_calc"');
+      expect(sent).toContain('"fileName":"calc.pdf"');
+      expect((proceed() as HTMLButtonElement).disabled).toBe(true);
+    });
   });
 });

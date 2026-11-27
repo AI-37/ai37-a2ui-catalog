@@ -32,7 +32,7 @@ export const AttachmentChoiceCard = createComponentImplementation(
         file={file}
         sent={sent}
         sink={{
-          onSkip: () => dispatch({value: props.skip.value}),
+          onSkip: () => props.skip && dispatch({value: props.skip.value}),
           onAttach: ({fileId, fileName}) =>
             dispatch({value: props.attach.value, fileId, fileName}),
         }}

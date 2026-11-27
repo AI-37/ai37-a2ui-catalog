@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, Card, CardHeader, KIT_SCOPE, KitStyles} from '../primitives';
 import {AttachmentChoiceCardError} from './attachment-choice-card-error';
 import {AttachmentChoiceFileSlot} from './attachment-choice-card-file';
+import {AttachmentChoiceCardSkipButton} from './attachment-choice-card-skip-button';
 import {AttachmentChoiceCardNote} from './attachment-choice-card-note';
 import type {AttachmentChoiceCardScreenProps} from './attachment-choice-card.types';
 
@@ -11,7 +12,7 @@ import type {AttachmentChoiceCardScreenProps} from './attachment-choice-card.typ
  * Раскладка — канон `*Next`: шапка утопленной полосой (`Card flat` +
  * `CardHeader`, как у КЕО и лифтов), строка файла и подвал. Подвал — как у
  * `ConstructionsNextFooter`: вторичная кнопка `lg` рядом с главной
- * `filled lg`. Выбор и есть отправка, поэтому radio и «Продолжить» нет.
+ * `filled lg`; без `skip` главная остаётся одна. Выбор и есть отправка, поэтому radio и «Продолжить» нет.
  */
 export function AttachmentChoiceCardScreen({props, file, sent, sink}: AttachmentChoiceCardScreenProps) {
   const {upload} = file;
@@ -48,9 +49,11 @@ export function AttachmentChoiceCardScreen({props, file, sent, sink}: Attachment
           <AttachmentChoiceCardNote text={upload.status === 'error' ? undefined : props.attach.hint} />
 
           <div style={footerStyle}>
-            <Button size="lg" disabled={sent || upload.status === 'uploading'} onClick={sink.onSkip}>
-              {props.skip.label}
-            </Button>
+            <AttachmentChoiceCardSkipButton
+              skip={props.skip}
+              disabled={sent || upload.status === 'uploading'}
+              onSkip={sink.onSkip}
+            />
             <Button
               variant="filled"
               size="lg"

@@ -36,6 +36,7 @@ import liftReportFixture from '../../../fixtures/valid/lift-report.json';
 import verificationReportReviewFixture from '../../../fixtures/valid/verification-report-review.json';
 import verificationReportPassFixture from '../../../fixtures/valid/verification-report-pass.json';
 import attachmentChoiceCardFixture from '../../../fixtures/valid/attachment-choice-card-signature.json';
+import attachmentChoiceCardAttachOnlyFixture from '../../../fixtures/valid/attachment-choice-card-attach-only.json';
 import proposalCardVoiceFixture from '../../../fixtures/valid/proposal-card-voice.json';
 import proposalCardParamsFixture from '../../../fixtures/valid/proposal-card-params.json';
 import proposalCardSupersededFixture from '../../../fixtures/valid/proposal-card-superseded.json';
@@ -329,6 +330,16 @@ const examples = [
     messages: createSurfaceMessages(
       'AttachmentChoiceCard',
       attachmentChoiceCardFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'attachment-choice-card-attach-only-preview',
+    title: 'Attachment Choice Card — только загрузка (проверка теплотеха)',
+    description:
+      'Без skip: кнопка одна, «Продолжить» неактивна, пока файл не выбран и не загружен на полку треда. Так агент thermal-calc просит расчёт на ходе «проверь» без файла. Файл с «fail» в имени отвечает ошибкой.',
+    messages: createSurfaceMessages(
+      'AttachmentChoiceCard',
+      attachmentChoiceCardAttachOnlyFixture.props as Record<string, unknown>,
     ),
   },
   {
