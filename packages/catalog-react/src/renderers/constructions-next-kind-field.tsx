@@ -1,7 +1,8 @@
 import React from 'react';
 import type {ConstructionLayer, ConstructionLayerKind} from '@ai37/a2ui-catalog-schemas';
 import {Field, Select} from '../primitives';
-import {LAYER_KIND_ITEMS} from './layer-kind-labels';
+import {layerKindItems} from './layer-kind-labels';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Вид слоя явным селектором на строке формы (change
@@ -21,6 +22,7 @@ export function ConstructionsNextKindField({
   layer: ConstructionLayer;
   onChange: (next: ConstructionLayer) => void;
 }) {
+  const m = useA2uiMessages();
   const value: ConstructionLayerKind = layer.kind ?? 'material';
 
   const handleChange = (next: string | null) => {
@@ -40,8 +42,8 @@ export function ConstructionsNextKindField({
   };
 
   return (
-    <Field label="Вид слоя">
-      <Select items={LAYER_KIND_ITEMS} value={value} onValueChange={handleChange} />
+    <Field label={m.constructions.layerKind}>
+      <Select items={layerKindItems(m)} value={value} onValueChange={handleChange} />
     </Field>
   );
 }

@@ -101,6 +101,29 @@ from .lift_editor import (
     LiftEditorRecommendParam,
     LiftsMode,
 )
+from .lift_report import (
+    LiftReportAction,
+    LiftReportInputChip,
+    LiftReportInputGroup,
+    LiftReportInputs,
+    LiftReportProps,
+    LiftReportProtocol,
+    LiftReportSuggestion,
+    LiftReportSuggestions,
+    LiftReportVerdict,
+)
+from .proposal_card import (
+    ProposalCardProps,
+    ProposalCardState,
+    ProposalCardView,
+    ProposalConfirm,
+    ProposalDecideLink,
+    ProposalItem,
+    ProposalItemKind,
+    ProposalItemStatus,
+    ProposalSource,
+    ProposalSourceLink,
+)
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
 from .verification_report import (
@@ -135,10 +158,14 @@ COMPONENT_MODELS = {
     # Новый рендерер того же отчёта на примитивах каталога: схема props общая
     # со старым, поэтому и модель одна (change keo-report-next).
     "KeoReportNext": KeoReportProps,
+    # Отчёт лифтов: схема props общая у старого и нового рендерера.
+    "LiftReport": LiftReportProps,
+    "LiftReportNext": LiftReportProps,
     "InsolationEditor": InsolationEditorProps,
     "InsolationReport": InsolationReportProps,
     "ArtifactCard": ArtifactCardProps,
     "VerificationReport": VerificationReportProps,
+    "ProposalCard": ProposalCardProps,
 }
 
 __all__ = [
@@ -235,8 +262,27 @@ __all__ = [
     "LiftEditorProps",
     "LiftEditorRecommend",
     "LiftEditorRecommendParam",
+    "LiftReportAction",
+    "LiftReportInputChip",
+    "LiftReportInputGroup",
+    "LiftReportInputs",
+    "LiftReportProps",
+    "LiftReportProtocol",
+    "LiftReportSuggestion",
+    "LiftReportSuggestions",
+    "LiftReportVerdict",
     "LiftsMode",
     "LookupSuggestMode",
+    "ProposalCardProps",
+    "ProposalCardState",
+    "ProposalCardView",
+    "ProposalConfirm",
+    "ProposalDecideLink",
+    "ProposalItem",
+    "ProposalItemKind",
+    "ProposalItemStatus",
+    "ProposalSource",
+    "ProposalSourceLink",
     "SimpleTableColumn",
     "SimpleTableProps",
     "SimpleTableRow",

@@ -2,6 +2,7 @@ import React from 'react';
 import {reportDocxUrl} from './report-docx-url';
 import {saveToProjectLabel} from './save-to-project-label';
 import {useReportSaveToProject} from './use-report-save-to-project';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Скачать ▾» — dropdown форматов протокола (план report-download-thread-attachments, ред. 2):
@@ -25,10 +26,11 @@ export function DownloadFormatMenu({
 }) {
   const docxUrl = reportDocxUrl(downloadUrl);
   const save = useReportSaveToProject(downloadUrl);
+  const m = useA2uiMessages();
 
   return (
     <details className="a2ui-dfm">
-      <summary className={`${buttonClassName} a2ui-dfm__toggle`}>Скачать ▾</summary>
+      <summary className={`${buttonClassName} a2ui-dfm__toggle`}>{m.common.downloadMenu}</summary>
       <div className="a2ui-dfm__list" role="menu">
         <a className="a2ui-dfm__item" role="menuitem" href={downloadUrl}>
           Markdown (.md)
@@ -46,7 +48,7 @@ export function DownloadFormatMenu({
             disabled={save.state === 'saving' || save.state === 'saved'}
             onClick={save.save}
           >
-            {saveToProjectLabel(save.state)}
+            {saveToProjectLabel(save.state, m)}
           </button>
         ) : null}
       </div>

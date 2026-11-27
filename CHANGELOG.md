@@ -4,7 +4,7 @@ All notable changes to this repository should be recorded in this file.
 
 The format follows Keep a Changelog with version headings in the form `## [x.y.z] - YYYY-MM-DD`.
 
-## [0.42.0] - 2026-10-22
+## [0.51.0] - 2026-11-27
 
 ### Changed
 
@@ -13,6 +13,180 @@ The format follows Keep a Changelog with version headings in the form `## [x.y.z
   главная, неактивная до загрузки. Payload attach и disabled-логика не менялись; прежние эмитенты (Минстрой) всегда
   шлют `skip` — их рендер тот же. Python-зеркало: `skip` по умолчанию `None`. Фикстура
   `attachment-choice-card-attach-only.json`, превью «только загрузка» в demo.
+
+## [0.50.0] - 2026-11-24
+
+### Added
+
+- **Раскрываемый протокол расчёта с формулами** (`LiftReportNext`, `KeoReportNext`, `ThermalReportNext`
+  через общий `ReportNextProtocolCard`). С `protocol.downloadContent` строка «Протокол расчёта»
+  раскрывается, как «Исходные данные»: под ней весь расчёт из markdown агента — заголовки, таблицы,
+  списки и формулы TeX (`$…$` в строке, `$$…$$` блоком). «Скачать ⌄» остаётся в шапке. Свёрнут по
+  умолчанию, HTML собирается при первом раскрытии. Без `downloadContent` (чат spai-ui) — прежняя
+  строка без раскрытия. Формулы — KaTeX с выводом MathML: браузер рисует их сам, без `katex.css` и
+  шрифтов; сырой HTML из текста протокола экранируется. Новая зависимость `marked`.
+- **`@ai37/a2ui-mcp-app`: KaTeX в view — MathML** (`katex-mathml.ts` вместо `katex-plain.ts`): формулы
+  видны во внешнем клиенте, `LatexFormula` тоже. HTML view 1 105 234 → 1 412 190 байт, бюджет теста
+  поднят до 1 450 000.
+
+### Changed
+
+- Описания `LiftReportNext`, `KeoReportNext`, `ThermalReportNext` в схемах: протокол раскрывается при
+  `downloadContent`. Артефакты каталога v2 перегенерированы.
+
+## [0.49.0] - 2026-11-24
+
+### Added
+
+- **Протокол лифтов текстом в props** (план AI-37/docs `plans/mcp-apps-a2ui-bridge.md`, волна 2 по
+  приёмке владельца). У `liftReportProtocolSchema` (`LiftReport` и `LiftReportNext`) — необязательные
+  `downloadFileName` (1–120) и `downloadContent` (1–120000), ровно как у протокола теплотеха;
+  `.strict()` остался, лишние поля по-прежнему отклоняются. При `downloadFileName` без `downloadUrl`
+  «Скачать» у `LiftReportNext` — меню с одним пунктом `Markdown (.md)`, у старого `LiftReport` — кнопка;
+  в файл уходит `downloadContent ?? content`. Так протокол скачивается там, где полки chat-backend нет
+  (внешний хост MCP App). Артефакты каталога v2 перегенерированы.
+- **Python-зеркало `LiftReportProps`** (`LiftReport`, `LiftReportNext` в `COMPONENT_MODELS`) с теми же
+  полями и проверкой консистентности со схемой.
+- **Точка инъекции загрузчика файлов: `ArtifactCardHost.downloadFile`.** Все Blob-скачивания протоколов
+  (теплотех, КЕО, инсоляция, лифты — старые и `*Next`) идут через неё. Не задана — прежний клиентский
+  Blob и `<a download>`; функция — хост скачивает сам; `null` — хост скачивать не умеет, и пункта
+  «Скачать» у протокола текстом нет. Ссылки на полку (`downloadUrl`) не тронуты. Наружу:
+  `downloadTextFileAsBlob`, типы `FileDownloader`, `TextFile`.
+- **`@ai37/a2ui-mcp-app`: скачивание через хост.** View подставляет загрузчик, который отправляет файл
+  хосту как `ui/download-file` (`App.downloadFile`, `EmbeddedResource` с `uri: file:///<имя>`,
+  `mimeType: text/markdown`, `text`). Хост без capability `downloadFile` — пункта «Скачать» у протокола
+  текстом нет. Отказ или отмена в диалоге хоста (`isError`) — без ошибки на экране; оборванный вызов —
+  «Не удалось скачать файл: …».
+
+### Removed
+
+- Внутренний `download-report-next-blob.ts` — его заменил загрузчик по умолчанию `downloadTextFileAsBlob`.
+
+## [0.48.0] - 2026-11-24
+
+### Added
+
+- **Новый пакет `@ai37/a2ui-mcp-app` — A2UI-поверхность внутри MCP App** (план AI-37/docs
+  `plans/mcp-apps-a2ui-bridge.md`, срез 2). Однофайловый HTML-view (Vite + `vite-plugin-singlefile`,
+  `ai37Catalog` + `A2uiSurface`, `App` из `@modelcontextprotocol/ext-apps` 2.0.4): берёт поверхность из
+  `_meta["ai37/a2ui"]` результата инструмента, действия отправляет app-only инструментом
+  `callServerTool(actionTool, {name, context, state})`, ответ того же формата перерисовывает
+  поверхность, черновик (`*:draft`) её не пересоздаёт, итог хода уходит модели через
+  `updateModelContext`. Тема хоста — в `data-a2ui-theme`, переменные и шрифты хоста —
+  `applyHostStyleVariables`/`applyHostFonts`. Наружу: строка `A2UI_MCP_APP_HTML` (и файл
+  `@ai37/a2ui-mcp-app/a2ui-mcp-app.html`), `A2UI_META_KEY = 'ai37/a2ui'`, типы `A2uiAppPayload`,
+  `A2uiAppActionArgs`, помощники `a2uiAppResult`, `a2uiResourceResult`, `a2uiSurfaceMessages`,
+  `readA2uiAppPayload`, `parseResourceActionName`.
+- **Ресурсный канал внутри view.** Справочники lookup и блок подбора `LiftEditorNext` ходят same-origin
+  GET `/api/agent-resource?resource=<id>&…`; во view этот запрос подменяется вызовом `actionTool` с
+  действием `resource:<id>` и остальным query в `context`. Рендереры не менялись.
+- **Python-пара: `ai37_a2ui_catalog.mcp_app`** — `html()` (тот же HTML, лежит в колесе как package data),
+  `a2ui_app_result(...)`, `a2ui_resource_result(...)`, `a2ui_surface_messages(...)`,
+  `parse_resource_action_name(...)`, `A2UI_META_KEY`. Формат совпадает с TS байт в байт — общий тест на
+  фикстуре `tests/mcp-app/a2ui-app-result.fixture.json`.
+- Бюджет размера HTML view в тестах: 1 120 000 байт (сейчас ~1,10 МБ, цель плана — 800 КБ). В view
+  KaTeX заменён показом исходного TeX, а из zod 4 убраны неанглийские локали.
+
+### Changed
+
+- CI собирает пакеты до тестов: тесты view и Python-пакета читают собранный HTML. CD публикует
+  `@ai37/a2ui-mcp-app`, а перед `poetry build` собирает view.
+
+## [0.47.0] - 2026-11-18
+
+### Added
+
+- **`A2uiI18nProvider`: язык подписей каталога** (план AI-37/docs#589, срез 7; контракт локали
+  `ecosystem/v2.4/06-i18n-locale.md`). Всё, что рендерер пишет сам — статусы, кнопки, подписи полей,
+  сводки, «Скачать», «Сохранить в проект», «! проверить», формы по числу, — теперь берётся из словаря.
+  Встроенные словари на шесть языков: `ru, en, es, de, fr, pt`, русский — источник, остальные
+  переведены с него. Хост ставит провайдер над поверхностями и передаёт `locale` — полный тег BCP-47,
+  он не обрезается: `es-MX` берёт словарь `es`, а числа форматирует по `es-MX`. Цепочка фолбэка:
+  точный тег → язык → `en`; язык без словаря (`pl`) и битый тег уходят в `en` целиком. Проп
+  `messages` — переводы хоста, ложатся поверх встроенных по ключам (deep-merge; пустая строка и
+  неизвестный ключ игнорируются). Без провайдера каталог говорит по-русски, как раньше: существующие
+  тесты не правились. Тексты, которые присылает агент, каталог не трогает — их переводит агент.
+  Наружу: `A2uiI18nProvider`, `useA2uiI18n`, `useA2uiMessages`, `createA2uiI18n`,
+  `resolveA2uiLocale`, `A2UI_MESSAGES`, `RU_MESSAGES`, `formatMessage`, `formatPlural`, типы
+  `A2uiMessages`, `A2uiMessagesOverride`.
+- Тест паритета словарей: тот же набор ключей и те же подстановки `{имя}`, что у русского; у форм по
+  числу есть `one` и `other`; обозначения норм (ГСОП, СП 131, Rпр, tв, РТ) не переведены.
+
+### Changed
+
+- **Числа по локали провайдера.** `NumberField` (было `locale="ru-RU"`), чип отклонения ThermalReport
+  (было `toLocaleString('ru-RU')`), ГСОП, числа на чертежах КЕО и границы поля в пометке «вне
+  диапазона» форматируются по `locale` из контекста. Без провайдера вывод прежний, байт в байт.
+- Формы по числу считаются через `Intl.PluralRules` локали; `plural-ru.ts` и ручное правило в
+  `formatMissingLambda` удалены.
+- Вспомогательные функции подписей (`fieldSourceLabel`, `buildConditionsSummary`,
+  `formatCalcSourceCounter`, `calcFieldRangeWarning` и др.) приняли необязательный последний аргумент
+  — словарь или `{locale, messages}`; без него — русский. Внутренние константы с русскими словами
+  (`CHERDACHNYE_SUBTYPE_LABELS`, `LAYER_KIND_LABELS`, `R_FIELD_LABEL`, `REPORT_NEXT_STATUS_TEXT`,
+  `CALC_EDITED_LABEL`) заменены функциями от словаря; из пакета они не экспортировались.
+
+## [0.46.0] - 2026-11-10
+
+### Added
+
+- **`ProposalCardScreen`: проп хоста `flat`** (план AI-37/docs#618, ревью AI-37/polimetrika-ui#45).
+  Полиметрика кладёт карточку пачки в свою рамку («пачка целиком в одной рамке») и снимала рамку
+  каталога правилом форка по внутренним классам `.a2ui-kit > .a2ui-card`. Теперь хост передаёт
+  `flat`, и внешняя карточка рисуется `Card flat`: без рамки, остальное как было. По умолчанию
+  `false`, без пропа рендер прежний. Это проп экрана, а не поле A2UI-схемы: агент его не присылает,
+  рендерер `ProposalCard` его не ставит, схема и Python-зеркало не менялись.
+
+## [0.45.0] - 2026-11-05
+
+### Added
+
+- **`ProposalSource.links`: несколько ссылок в источнике** (change `proposal-source-links`, план
+  AI-37/docs#599, срез S5). Пачка из двух голосовых сообщений ссылается на обе записи в документах
+  проекта: `links: [{label, href?}]`, до двадцати штук. Рендерер ставит их после подписи источника
+  пачки (в той же строке под цитатой), у источника пункта — после цитаты. Ссылка с `href` открывается
+  в новой вкладке по тому же правилу адреса, что подпись (путь от корня хоста или http(s)). Без `href`
+  остаётся подпись: зритель без права открыть запись видит «Голосовое сообщение 1», но не переходит.
+  Одиночный `href` у источника не менялся. Пустой список рисуется так же, как отсутствие поля, а одних
+  ссылок без подписи или цитаты по-прежнему мало. Python-зеркало: `ProposalSource.links:
+  list[ProposalSourceLink]`.
+
+## [0.44.0] - 2026-11-02
+
+### Added
+
+- **`ProposalCard`: источник у пункта** (change `proposal-item-source`, план AI-37/docs#569, срез D).
+  У `ProposalItem` появилось необязательное поле `source`: документ и страница, откуда агент взял пункт
+  (`Счёт за сентябрь.pdf, стр. 2`), цитата и ссылка. Форма та же, что у источника всей пачки
+  (`ProposalSource`), второй схемы нет. Источник пункта стоит приглушённой строкой под текстом в списке и
+  под «Что» в таблице, цитата идёт в кавычках. Подпись становится ссылкой (в новой вкладке), только если
+  `href` — путь от корня хоста или http(s). Служебная ссылка агента (`project-attachment:…`) остаётся
+  текстом. Пункт без `source` рисуется как раньше. Python-зеркало: `ProposalItem.source: ProposalSource`.
+
+### Changed
+
+- **`ProposalSource`**: `quote` стал необязательным, добавлен `href`. Нужна подпись или цитата: пустой
+  источник и источник с одной ссылкой схема отклоняет (Zod `refine`, в Python `model_validator`). Всё,
+  что было валидно в 0.43.0, валидно и сейчас. У источника пачки без цитаты нет блока цитаты, подпись с
+  `href` стала ссылкой. Внутренний `isProposalDecideHref` переименован в `isProposalHref`: тем же
+  правилом теперь проверяется и ссылка источника.
+
+## [0.43.0] - 2026-10-28
+
+### Added
+
+- **`ProposalCard` — подтверждение пачки предложений агента** (change `proposal-card`, план
+  AI-37/docs#545, срез B1). Агент данных сам в реестр не пишет: он присылает пачку, человек её
+  подтверждает. В шапке заголовок и состояние пачки (`open | accepted | rejected | superseded`),
+  слово к нему пишет рендерер. Пункты идут списком «новое / изменено / удалено» или таблицей
+  «Что · Было · Станет · С какой даты» (`view`). У пункта бывает свой статус: `accepted`,
+  `rejected` или `stale`, у ждущего пилюли нет. Ниже цитата источника и заметка. «Подтвердить»
+  шлёт `action` с `{proposalId, decision: 'accept'}` один раз. Если живой задачи у агента нет
+  (`confirm` не пришёл или поверхность прошлая), вместо кнопки стоит ссылка `decideLink` на
+  «Требуют решения». Ссылкой становится только путь от корня хоста или `http(s)`. При
+  `canDecide: false` нет ни кнопки, ни ссылки. Под `withReadOnlyGate` карточка не стоит, чтобы
+  ссылка на прошлой поверхности оставалась рабочей. Собрана на примитивах набора, новых
+  примитивов нет. Есть Python-зеркало `ProposalCardProps`: эмитент — Python-агент данных
+  Полиметрики, позже pd-ai.
 
 ## [0.41.0] - 2026-10-12
 

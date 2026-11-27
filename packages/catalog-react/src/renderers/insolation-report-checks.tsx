@@ -2,11 +2,7 @@ import React from 'react';
 import type {InsolationReportCheck} from '@ai37/a2ui-catalog-schemas';
 import {InsolationReportActionButton} from './insolation-report-action-button';
 import type {InsolationReportOnAction} from './insolation-report.types';
-
-const STATUS_TEXT = {
-  pass: 'Соответствует',
-  fail: 'Не соответствует',
-} as const;
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Блок «ПРОВЕРКИ» по СанПиН: продолжительность, максимальный непрерывный
@@ -21,9 +17,10 @@ export function InsolationReportChecksSection({
   checks: InsolationReportCheck[];
   onAction: InsolationReportOnAction;
 }) {
+  const m = useA2uiMessages();
   return (
     <section className="a2ui-ir__section">
-      <p className="a2ui-ir__list-label">Проверки</p>
+      <p className="a2ui-ir__list-label">{m.report.checks}</p>
       <div className="a2ui-ir__rows">
         {checks.map((check, index) => (
           <div key={`${check.title}-${index}`} className="a2ui-ir__row">
@@ -34,7 +31,7 @@ export function InsolationReportChecksSection({
             <span className="a2ui-ir__row-side">
               <span className={`a2ui-ir__status a2ui-ir__status--${check.status}`}>
                 <span className="a2ui-ir__dot" aria-hidden="true" />
-                {check.status === 'info' ? null : STATUS_TEXT[check.status]}
+                {check.status === 'info' ? null : m.report[check.status]}
               </span>
               {check.action ? (
                 <InsolationReportActionButton

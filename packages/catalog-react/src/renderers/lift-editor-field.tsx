@@ -1,6 +1,7 @@
 import React from 'react';
 import {LiftEditorSourceNote} from './lift-editor-source-note';
 import type {LiftEditorFieldProps} from './lift-editor.types';
+import {useA2uiMessages} from '../i18n';
 
 let comboListSeq = 0;
 
@@ -14,6 +15,7 @@ let comboListSeq = 0;
  * отправку дебаунсом в корне (Решение 6 design lift-editor-sections-responsive).
  */
 export function LiftEditorField({field, value, options, missing, source, note, onChange}: LiftEditorFieldProps) {
+  const m = useA2uiMessages();
   // datalist привязывается по id — он должен пережить перерисовки поля.
   const listId = React.useMemo(() => `lift-editor-combo-${(comboListSeq += 1)}`, []);
   const text = value === undefined || value === null ? '' : String(value);
@@ -32,7 +34,7 @@ export function LiftEditorField({field, value, options, missing, source, note, o
           onChange={event => onChange(event.target.value)}
           className={controlClass}
         >
-          <option value="">— выберите —</option>
+          <option value="">{m.common.choose}</option>
           {options.map(option => (
             <option key={option.value} value={option.value}>
               {option.label}

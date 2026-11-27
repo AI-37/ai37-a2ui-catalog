@@ -1,6 +1,7 @@
 import React from 'react';
 import {fieldSourceLabel} from './field-source-label';
 import type {ConstructionsNextSourceNoteProps} from './constructions-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Подпись источника под контролом: обоснование агента (`note`) или, если его
@@ -12,6 +13,7 @@ import type {ConstructionsNextSourceNoteProps} from './constructions-next.types'
  * (`omitTouchedSources`), поэтому у компонента одна ветка — «источника нет».
  */
 export function ConstructionsNextSourceNote({source}: ConstructionsNextSourceNoteProps) {
+  const m = useA2uiMessages();
   if (source === undefined) {
     return null;
   }
@@ -20,7 +22,7 @@ export function ConstructionsNextSourceNote({source}: ConstructionsNextSourceNot
 
   return (
     <span className={`a2ui-t--sub ${accent ? 'a2ui-t--accent' : 'a2ui-t--muted'}`}>
-      {source.note ?? fieldSourceLabel(source.source)}
+      {source.note ?? fieldSourceLabel(source.source, m)}
     </span>
   );
 }

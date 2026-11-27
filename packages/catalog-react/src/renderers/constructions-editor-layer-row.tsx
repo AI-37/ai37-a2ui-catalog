@@ -6,6 +6,7 @@ import {LookupCombobox} from './lookup-combobox';
 import {readOptionLambda} from './read-option-lambda';
 import {resolveLayerLambda} from './resolve-layer-lambda';
 import {useLookupSuggest} from './use-lookup-suggest';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Строка слоя в двух режимах. `summary` — компактная сводка
@@ -32,6 +33,7 @@ export function ConstructionsEditorLayerRow(props: ConstructionsEditorLayerRowPr
  * предупреждающим цветом.
  */
 function LayerSummary({layer, index, condition, onOpen}: ConstructionsEditorLayerRowProps) {
+  const m = useA2uiMessages().constructions;
   const isGap = layer.kind !== undefined && layer.kind !== 'material';
   const hasManual = typeof layer.lambdaManual === 'number';
   const hasReferenceLambda =
@@ -44,24 +46,26 @@ function LayerSummary({layer, index, condition, onOpen}: ConstructionsEditorLaye
       <span
         className={`a2ui-ce-layer__material${materialMissing ? ' a2ui-ce-layer__warn' : ''}`}
       >
-        {materialMissing ? 'материал не указан' : layer.material}
+        {materialMissing ? m.materialMissing : layer.material}
       </span>
       <span className="a2ui-ce-layer__numbers">
         <span className={thicknessMissing ? 'a2ui-ce-layer__warn' : undefined}>
-          {thicknessMissing ? 'толщина не задана' : `${layer.thicknessMm} мм`}
+          {thicknessMissing
+            ? m.thicknessMissing
+            : formatMessage(m.thicknessValue, {value: String(layer.thicknessMm)})}
         </span>
         <span className="a2ui-ce-layer__dot">·</span>
         {isGap ? (
-          <span className="a2ui-ce-layer__hint">Rs — в итоговом расчёте</span>
+          <span className="a2ui-ce-layer__hint">{m.gapInFinal}</span>
         ) : hasManual ? (
           <span>λ {layer.lambdaManual}</span>
         ) : hasReferenceLambda ? (
           <span>
             λ {resolveLayerLambda(layer, condition)}
-            <span className="a2ui-ce-auto"> авто</span>
+            <span className="a2ui-ce-auto">{` ${m.lambdaAuto}`}</span>
           </span>
         ) : (
-          <span className="a2ui-ce-layer__warn">λ не задана</span>
+          <span className="a2ui-ce-layer__warn">{m.lambdaMissing}</span>
         )}
       </span>
     </button>
@@ -85,6 +89,7 @@ function LayerForm({
   onRemove,
   onDraftChange,
 }: ConstructionsEditorLayerRowProps) {
+  const m = useA2uiMessages();
   const [draft, setDraft] = React.useState<ConstructionLayer>(layer);
   const {options, loading, queried, handleInputText, closeOptions} = useLookupSuggest({
     referenceId: materialsReferenceId,
@@ -164,10 +169,10 @@ function LayerForm({
     // кнопки коммита — последней.
     <div className="a2ui-ce-form">
       <label className="a2ui-ce-field">
-        <span className="a2ui-ce-field__label">Материал</span>
+        <span className="a2ui-ce-field__label">{m.constructions.material}</span>
         <LookupCombobox
           name={rowName}
-          placeholder="Материал из справочника или свой"
+          placeholder={m.constructions.materialPlaceholder}
           inputText={draft.material}
           selected={selected}
           options={options}
@@ -181,7 +186,7 @@ function LayerForm({
       </label>
       <div className="a2ui-ce-pair">
         <label className="a2ui-ce-field">
-          <span className="a2ui-ce-field__label">Толщина, мм</span>
+          <span className="a2ui-ce-field__label">{m.constructions.thickness}</span>
           <input
             type="number"
             min={1}
@@ -192,21 +197,23 @@ function LayerForm({
           />
         </label>
         <div className="a2ui-ce-field">
-          <span className="a2ui-ce-field__label">λ, Вт/(м·°C)</span>
+          <span className="a2ui-ce-field__label">{m.constructions.lambda}</span>
           {isGap ? (
-            <span className="a2ui-ce-static a2ui-ce-static--muted">Rs — в итоговом расчёте</span>
+            <span className="a2ui-ce-static a2ui-ce-static--muted">
+              {m.constructions.gapInFinal}
+            </span>
           ) : hasReferenceLambda ? (
             <span className="a2ui-ce-static">
               {resolvedLambda}
-              <span className="a2ui-ce-auto"> авто</span>
+              <span className="a2ui-ce-auto">{` ${m.constructions.lambdaAuto}`}</span>
             </span>
           ) : (
             <input
               type="number"
               min={0.001}
               step="any"
-              aria-label="λ, Вт/(м·°C), вручную"
-              placeholder="λ вручную"
+              aria-label={m.constructions.lambdaManualLabel}
+              placeholder={m.constructions.lambdaManualPlaceholder}
               value={draft.lambdaManual ?? ''}
               onChange={handleLambdaManualChange}
               className="a2ui-ce-control"
@@ -216,14 +223,14 @@ function LayerForm({
       </div>
       <div className="a2ui-ce-actions">
         <button type="button" onClick={handleApply} className="a2ui-ce-btn a2ui-ce-btn--commit">
-          {mode === 'new' ? 'Добавить' : 'Применить'}
+          {mode === 'new' ? m.common.add : m.common.apply}
         </button>
         <button type="button" onClick={onCancel} className="a2ui-ce-btn">
-          Отмена
+          {m.common.cancel}
         </button>
         {mode === 'edit' ? (
           <button type="button" onClick={onRemove} className="a2ui-ce-btn a2ui-ce-btn--danger">
-            Удалить слой
+            {m.constructions.removeLayer}
           </button>
         ) : null}
       </div>

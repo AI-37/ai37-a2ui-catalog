@@ -28,6 +28,7 @@ import {insolationReportDefinition} from './components/insolation-report';
 import {liftReportDefinition, liftReportNextDefinition} from './components/lift-report';
 import {artifactCardDefinition} from './components/artifact-card';
 import {verificationReportDefinition} from './components/verification-report';
+import {proposalCardDefinition} from './components/proposal-card';
 import {getBaseComponentEntries} from './base-components';
 import type {CatalogComponentDefinition, JsonSchema} from './types';
 
@@ -54,6 +55,7 @@ export const componentDefinitions = [
   liftReportNextDefinition,
   artifactCardDefinition,
   verificationReportDefinition,
+  proposalCardDefinition,
 ] as const satisfies ReadonlyArray<CatalogComponentDefinition<any>>;
 
 export const componentDefinitionMap = new Map(

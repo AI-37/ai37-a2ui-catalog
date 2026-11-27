@@ -1,4 +1,5 @@
 import React, {createContext, useContext} from 'react';
+import type {FileDownloader} from './download-text-file';
 
 /**
  * Что карточке артефакта нужно от хоста. Каталог не знает ни BFF хоста, ни
@@ -18,6 +19,14 @@ export interface ArtifactCardHost {
    * сохранения: карточка покажет «Не удалось сохранить».
    */
   onSaveToProject?: (artifactId: string) => Promise<void>;
+  /**
+   * Скачивание протокола, пришедшего текстом в props (`downloadFileName`).
+   * Не задано — клиентский Blob и `<a download>`; функция — хост отдаёт файл
+   * сам (MCP App: `ui/download-file`); `null` — хост скачивать не умеет, и
+   * пункта «Скачать» у такого протокола нет. Ссылки на полку (`downloadUrl`)
+   * это не касается — они остаются ссылками.
+   */
+  downloadFile?: FileDownloader | null;
 }
 
 const ArtifactCardHostContext = createContext<ArtifactCardHost>({});

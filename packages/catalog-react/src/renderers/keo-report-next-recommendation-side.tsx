@@ -3,8 +3,9 @@ import type {KeoReportRecommendation} from '@ai37/a2ui-catalog-schemas';
 import {StatusPill} from '../primitives';
 import {KEO_REPORT_NEXT_STATUS} from './keo-report-next-recommendation-tone';
 import {ReportNextActionButton} from './report-next-action-button';
-import {REPORT_NEXT_STATUS_TEXT} from './report-next-status-text';
+import {reportNextStatusText} from './report-next-status-text';
 import type {ReportNextActionSink} from './report-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Правый слот варианта «Что изменить»: кнопка принятия либо состояние тоном
@@ -24,6 +25,8 @@ export function KeoReportNextRecommendationSide({
   recommendation: KeoReportRecommendation;
   onAction: ReportNextActionSink;
 }) {
+  const m = useA2uiMessages();
+
   if (recommendation.action !== undefined) {
     return (
       <ReportNextActionButton action={recommendation.action} weight="outline" onAction={onAction} />
@@ -36,5 +39,5 @@ export function KeoReportNextRecommendationSide({
 
   const status = KEO_REPORT_NEXT_STATUS[recommendation.tone];
 
-  return <StatusPill tone={status}>{REPORT_NEXT_STATUS_TEXT[status]}</StatusPill>;
+  return <StatusPill tone={status}>{reportNextStatusText(status, m)}</StatusPill>;
 }

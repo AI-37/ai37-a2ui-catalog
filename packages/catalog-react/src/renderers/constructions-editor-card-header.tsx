@@ -1,12 +1,13 @@
 import React from 'react';
 import type {CherdachnyeSubtype, ConstructionType} from '@ai37/a2ui-catalog-schemas';
-import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
+import {cherdachnyeSubtypeLabels} from './cherdachnye-subtype-labels';
 import {ConstructionsEditorSelect} from './constructions-editor-select';
 import type {
   ConstructionHeaderFields,
   ConstructionsEditorCardHeaderProps,
 } from './constructions-editor.types';
 import {headerFieldsEqual} from './header-fields-equal';
+import {useA2uiMessages} from '../i18n';
 
 /** Единственный тип с разновидностями: селект subtype только у него. */
 const SUBTYPED_TYPE: ConstructionType = 'cherdachnye_podval_grunt';
@@ -27,8 +28,9 @@ export function ConstructionsEditorCardHeader(props: ConstructionsEditorCardHead
 }
 
 function HeaderSummary({entry, typeConfigs, onOpen}: ConstructionsEditorCardHeaderProps) {
+  const m = useA2uiMessages();
   const config = typeConfigs.find(candidate => candidate.type === entry.type);
-  const subtypeLabel = entry.subtype ? CHERDACHNYE_SUBTYPE_LABELS[entry.subtype] : undefined;
+  const subtypeLabel = entry.subtype ? cherdachnyeSubtypeLabels(m)[entry.subtype] : undefined;
   const name = entry.name?.trim();
 
   return (
@@ -44,17 +46,18 @@ function HeaderSummary({entry, typeConfigs, onOpen}: ConstructionsEditorCardHead
           (шапка и паспортное Rпр) — на слух они были бы одинаковы. */}
       <button
         type="button"
-        aria-label="Изменить тип и название"
+        aria-label={m.constructions.editHeader}
         onClick={onOpen}
         className="a2ui-ce-btn a2ui-ce-btn--edit"
       >
-        Изменить
+        {m.common.edit}
       </button>
     </div>
   );
 }
 
 function HeaderForm({entry, typeConfigs, onCommit, onCancel}: ConstructionsEditorCardHeaderProps) {
+  const m = useA2uiMessages();
   const [draft, setDraft] = React.useState<ConstructionHeaderFields>({
     type: entry.type,
     subtype: entry.subtype,
@@ -87,7 +90,7 @@ function HeaderForm({entry, typeConfigs, onCommit, onCancel}: ConstructionsEdito
   return (
     <div className="a2ui-ce-form">
       <label className="a2ui-ce-field">
-        <span className="a2ui-ce-field__label">Тип конструкции</span>
+        <span className="a2ui-ce-field__label">{m.constructions.type}</span>
         <ConstructionsEditorSelect
           value={draft.type}
           onChange={handleTypeChange}
@@ -102,14 +105,14 @@ function HeaderForm({entry, typeConfigs, onCommit, onCancel}: ConstructionsEdito
       </label>
       {draft.type === SUBTYPED_TYPE ? (
         <label className="a2ui-ce-field">
-          <span className="a2ui-ce-field__label">Разновидность</span>
+          <span className="a2ui-ce-field__label">{m.constructions.subtype}</span>
           <ConstructionsEditorSelect
             value={draft.subtype ?? ''}
             onChange={handleSubtypeChange}
             className="a2ui-ce-control"
           >
             <option value="">—</option>
-            {Object.entries(CHERDACHNYE_SUBTYPE_LABELS).map(([value, label]) => (
+            {Object.entries(cherdachnyeSubtypeLabels(m)).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
@@ -118,7 +121,7 @@ function HeaderForm({entry, typeConfigs, onCommit, onCancel}: ConstructionsEdito
         </label>
       ) : null}
       <label className="a2ui-ce-field">
-        <span className="a2ui-ce-field__label">Название</span>
+        <span className="a2ui-ce-field__label">{m.constructions.name}</span>
         <input
           type="text"
           value={draft.name ?? ''}
@@ -128,10 +131,10 @@ function HeaderForm({entry, typeConfigs, onCommit, onCancel}: ConstructionsEdito
       </label>
       <div className="a2ui-ce-actions">
         <button type="button" onClick={handleSave} className="a2ui-ce-btn a2ui-ce-btn--commit">
-          Сохранить
+          {m.common.save}
         </button>
         <button type="button" onClick={onCancel} className="a2ui-ce-btn">
-          Отмена
+          {m.common.cancel}
         </button>
       </div>
     </div>

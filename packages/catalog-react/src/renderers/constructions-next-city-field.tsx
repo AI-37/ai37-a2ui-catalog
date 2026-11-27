@@ -1,8 +1,7 @@
 import React from 'react';
 import type {LookupOption} from '@ai37/a2ui-catalog-schemas';
 import {Input, Lookup} from '../primitives';
-
-const PLACEHOLDER = 'Город из справочника';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Поле города: со справочником — `Autocomplete` с подсказками, без него —
@@ -22,11 +21,13 @@ export function ConstructionsNextCityField({
   onTextChange: (text: string) => void;
   onPick: (option: LookupOption) => void;
 }) {
+  const placeholder = useA2uiMessages().constructions.cityPlaceholder;
+
   if (referenceId === undefined) {
     return (
       <Input
         value={text}
-        placeholder={PLACEHOLDER}
+        placeholder={placeholder}
         onChange={event => onTextChange(event.target.value)}
       />
     );
@@ -36,7 +37,7 @@ export function ConstructionsNextCityField({
     <Lookup
       name="constructions-next-city"
       referenceId={referenceId}
-      placeholder={PLACEHOLDER}
+      placeholder={placeholder}
       text={text}
       minChars={minChars}
       onTextChange={onTextChange}

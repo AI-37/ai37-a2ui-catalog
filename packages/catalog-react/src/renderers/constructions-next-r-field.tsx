@@ -1,7 +1,6 @@
 import React from 'react';
 import {Field, NumberField} from '../primitives';
-
-export const R_FIELD_LABEL = 'r (однородность)';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Коэффициент теплотехнической однородности r (Г.4 СП 50): множитель к Rусл,
@@ -20,12 +19,13 @@ export function ConstructionsNextRField({
   value: number | undefined;
   onChange: (value: number | undefined) => void;
 }) {
+  const m = useA2uiMessages();
   if (!show) {
     return null;
   }
 
   return (
-    <Field label={R_FIELD_LABEL}>
+    <Field label={m.constructions.homogeneity}>
       <NumberField
         value={value ?? null}
         min={0.01}

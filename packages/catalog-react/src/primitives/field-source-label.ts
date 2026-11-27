@@ -1,4 +1,5 @@
 import type {CalcFieldSourceKind, ConstructionsFieldSourceKind} from '@ai37/a2ui-catalog-schemas';
+import {RU_MESSAGES, type A2uiMessages} from '../i18n';
 
 /**
  * Вид источника, который знает набор: четыре вида редакторов состава
@@ -16,16 +17,11 @@ export type KitFieldSourceKind = ConstructionsFieldSourceKind | CalcFieldSourceK
  * словарь провенанса каталога: им пользуются и `ConstructionsEditor`, и
  * `LiftEditor` (схема источника у них одна — `liftEditorFieldSourceSchema`
  * переиспользует констракшновскую), и расчётные редакторы (КЕО, инсоляция).
+ * Слова — из словаря подписей (`fieldSource`), по умолчанию русские.
  */
-const LABELS: Record<KitFieldSourceKind, string> = {
-  project: 'из проекта',
-  question: 'из вопроса',
-  suggested: 'предложено агентом',
-  default: 'принято по умолчанию',
-  calculated: 'рассчитано',
-  assumption: 'допущение',
-};
-
-export function fieldSourceLabel(source: KitFieldSourceKind): string {
-  return LABELS[source];
+export function fieldSourceLabel(
+  source: KitFieldSourceKind,
+  messages: A2uiMessages = RU_MESSAGES,
+): string {
+  return messages.fieldSource[source];
 }

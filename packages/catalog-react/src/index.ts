@@ -1,4 +1,6 @@
 export * from './catalog';
+// Язык подписей каталога: провайдер, встроенные словари на шесть языков, форматтеры по локали.
+export * from './i18n';
 export * from './renderers/tokens';
 export * from './renderers/simple-table';
 export * from './renderers/flex-table';
@@ -46,9 +48,14 @@ export * from './renderers/lift-report-next';
 export * from './renderers/lift-report-next-screen';
 export * from './renderers/artifact-card';
 export * from './renderers/artifact-card-host';
+export {downloadTextFileAsBlob, type FileDownloader, type TextFile} from './renderers/download-text-file';
 export * from './renderers/artifact-card-links';
 export * from './renderers/artifact-card-screen';
 export * from './renderers/verification-report';
 export * from './renderers/verification-report-screen';
+export * from './renderers/proposal-card';
+export * from './renderers/proposal-card-screen';
+export * from './renderers/proposal-card.types';
+export * from './renderers/resolve-proposal-card-footer';
 // Режим «только чтение» для прошлых поверхностей ленты: ввод глушится, скачивание и ссылки — нет.
 export * from './renderers/surface-read-only';

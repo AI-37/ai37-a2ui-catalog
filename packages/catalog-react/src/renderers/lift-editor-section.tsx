@@ -1,9 +1,7 @@
 import React from 'react';
 import {LiftEditorChevron} from './lift-editor-chevron';
 import type {LiftEditorSectionProps} from './lift-editor.types';
-
-/** Тексты бейджей секции: пустые обязательные сильнее «просмотреть». */
-const BADGE_LABELS = {fill: 'заполните', review: 'просмотреть'} as const;
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Секция экрана (здание, лифт, лифтовая группа): баннер-строка «шеврон ·
@@ -22,8 +20,11 @@ export function LiftEditorSection({
   children,
   sectionRef,
 }: LiftEditorSectionProps) {
+  const m = useA2uiMessages().common;
   const badgeNode =
-    badge !== undefined ? <span className="a2ui-le-badge">{BADGE_LABELS[badge]}</span> : null;
+    badge !== undefined ? (
+      <span className="a2ui-le-badge">{badge === 'fill' ? m.badgeFill : m.badgeReview}</span>
+    ) : null;
 
   if (!open) {
     return (
@@ -32,10 +33,10 @@ export function LiftEditorSection({
           <LiftEditorChevron open={false} />
           <span className="a2ui-le-banner__title">{title}</span>
           <span className="a2ui-le-banner__summary">
-            {summary === '' ? 'не заполнено' : summary}
+            {summary === '' ? m.notFilled : summary}
           </span>
           {badgeNode}
-          <span className="a2ui-le-link">Показать</span>
+          <span className="a2ui-le-link">{m.show}</span>
         </button>
       </section>
     );
@@ -57,7 +58,7 @@ export function LiftEditorSection({
         <span className="a2ui-le-section__spacer" />
         {headerAction}
         <button type="button" className="a2ui-le-link" onClick={onToggle}>
-          Свернуть
+          {m.collapse}
         </button>
       </div>
       {children}

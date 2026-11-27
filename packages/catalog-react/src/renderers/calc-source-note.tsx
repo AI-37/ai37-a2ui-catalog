@@ -1,6 +1,7 @@
 import React from 'react';
-import {CALC_EDITED_LABEL, calcFieldSourceLabel} from './calc-field-source-label';
+import {calcFieldSourceLabel} from './calc-field-source-label';
 import type {CalcSourceNoteProps} from './calc-editor.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Подпись под контролом расчётного редактора: «изменено вами» у правленного
@@ -10,8 +11,9 @@ import type {CalcSourceNoteProps} from './calc-editor.types';
  * `assumption` дополнительно помечен точкой — допущение видно взглядом.
  */
 export function CalcSourceNote({prefix, source, edited, hint}: CalcSourceNoteProps) {
+  const m = useA2uiMessages();
   if (edited) {
-    return <span className={`a2ui-${prefix}-caption`}>{CALC_EDITED_LABEL}</span>;
+    return <span className={`a2ui-${prefix}-caption`}>{m.calcSource.edited}</span>;
   }
 
   if (source === undefined) {
@@ -25,7 +27,7 @@ export function CalcSourceNote({prefix, source, edited, hint}: CalcSourceNotePro
       {source.source === 'assumption' ? (
         <span className={`a2ui-${prefix}-dot`} aria-hidden="true" />
       ) : null}
-      {source.note ?? calcFieldSourceLabel(source.source)}
+      {source.note ?? calcFieldSourceLabel(source.source, m)}
     </span>
   );
 }

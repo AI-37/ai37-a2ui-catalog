@@ -33,6 +33,7 @@ import {LiftReport} from './renderers/lift-report';
 import {LiftReportNext} from './renderers/lift-report-next';
 import {ArtifactCard} from './renderers/artifact-card';
 import {VerificationReport} from './renderers/verification-report';
+import {ProposalCard} from './renderers/proposal-card';
 import {withReadOnlyGate} from './renderers/surface-read-only';
 
 /**
@@ -92,6 +93,10 @@ const customComponents: ReactComponentImplementation[] = [
   // Проверка контрагента (Минстрой): отчёт без действий, раскрытие строк
   // остаётся рабочим на прошлой поверхности (change verification-report).
   VerificationReport,
+  // Подтверждение пачки предложений агента данных (план AI-37/docs#545): не под
+  // withReadOnlyGate — кнопку на прошлой поверхности прячет сама, ссылка на
+  // «Требуют решения» остаётся рабочей.
+  ProposalCard,
 ];
 
 export const ai37Catalog = new Catalog<ReactComponentImplementation>(

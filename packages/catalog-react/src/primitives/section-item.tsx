@@ -7,6 +7,7 @@ import {buttonClassName} from './button-class-name';
 import {cardClassName} from './card-class-name';
 import {renderLabelSubscripts} from './render-label-subscripts';
 import type {SectionItemProps} from './section-item.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Секция-раскрывашка с пометкой — элемент `Accordion`: карточкой её делает
@@ -31,6 +32,7 @@ export function SectionItem({
   sectionRef,
   children,
 }: SectionItemProps) {
+  const m = useA2uiMessages();
   return (
     <Accordion.Item ref={sectionRef} value={value} className={cardClassName()}>
       <CardHeader
@@ -45,7 +47,7 @@ export function SectionItem({
                   уступает сводка — она длиннее и переносится осмысленно. */}
               <CardTriggerLabel title={<span style={titleStyle}>{title}</span>} />
               <span className="a2ui-t--sub a2ui-t--muted">
-                {summary === '' ? 'не заполнено' : renderLabelSubscripts(summary)}
+                {summary === '' ? m.common.notFilled : renderLabelSubscripts(summary)}
               </span>
             </Accordion.Trigger>
           </Accordion.Header>

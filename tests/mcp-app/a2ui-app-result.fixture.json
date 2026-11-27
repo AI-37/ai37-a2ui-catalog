@@ -1,0 +1,69 @@
+{
+  "_comment": "Общая фикстура протокола «A2UI внутри MCP App» v1: a2uiAppResult (TS) и a2ui_app_result (Python) обязаны дать ровно expected.",
+  "input": {
+    "text": "Форма расчёта открыта. Предзаполнено: N=17, A=120.",
+    "surfaceId": "lift",
+    "actionTool": "lift_form_action",
+    "state": {
+      "gost": "52941",
+      "building": {
+        "N": 17,
+        "A": 120
+      }
+    },
+    "node": {
+      "component": "LiftEditorNext",
+      "props": {
+        "headerTitle": "Лифты",
+        "submitAction": "calc",
+        "draftAction": "calc:draft"
+      }
+    }
+  },
+  "expected": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Форма расчёта открыта. Предзаполнено: N=17, A=120."
+      }
+    ],
+    "_meta": {
+      "ai37/a2ui": {
+        "version": 1,
+        "messages": [
+          {
+            "version": "v0.9",
+            "createSurface": {
+              "surfaceId": "lift",
+              "catalogId": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/catalog.json"
+            }
+          },
+          {
+            "version": "v0.9",
+            "updateComponents": {
+              "surfaceId": "lift",
+              "components": [
+                {
+                  "id": "root",
+                  "component": "LiftEditorNext",
+                  "headerTitle": "Лифты",
+                  "submitAction": "calc",
+                  "draftAction": "calc:draft"
+                }
+              ]
+            }
+          }
+        ],
+        "surfaceId": "lift",
+        "state": {
+          "gost": "52941",
+          "building": {
+            "N": 17,
+            "A": 120
+          }
+        },
+        "actionTool": "lift_form_action"
+      }
+    }
+  }
+}

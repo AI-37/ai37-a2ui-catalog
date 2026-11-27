@@ -37,6 +37,11 @@ import verificationReportReviewFixture from '../../../fixtures/valid/verificatio
 import verificationReportPassFixture from '../../../fixtures/valid/verification-report-pass.json';
 import attachmentChoiceCardFixture from '../../../fixtures/valid/attachment-choice-card-signature.json';
 import attachmentChoiceCardAttachOnlyFixture from '../../../fixtures/valid/attachment-choice-card-attach-only.json';
+import proposalCardVoiceFixture from '../../../fixtures/valid/proposal-card-voice.json';
+import proposalCardParamsFixture from '../../../fixtures/valid/proposal-card-params.json';
+import proposalCardSupersededFixture from '../../../fixtures/valid/proposal-card-superseded.json';
+import proposalCardDocumentsFixture from '../../../fixtures/valid/proposal-card-documents.json';
+import proposalCardVoiceLinksFixture from '../../../fixtures/valid/proposal-card-voice-links.json';
 import {attachDemoLookupHost} from './demo-lookup-host';
 import {attachDemoAttachmentHost} from './demo-attachment-host';
 
@@ -335,6 +340,56 @@ const examples = [
     messages: createSurfaceMessages(
       'AttachmentChoiceCard',
       attachmentChoiceCardAttachOnlyFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'proposal-card-voice-preview',
+    title: 'Proposal Card — правка модели голосом',
+    description:
+      'Пачка предложений агента данных списком «новое / изменено»: состояние в шапке, цитата голосового сообщения, заметка о правах и «Подтвердить». Клик шлёт action с proposalId один раз — действие в консоли.',
+    messages: createSurfaceMessages(
+      'ProposalCard',
+      proposalCardVoiceFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'proposal-card-params-preview',
+    title: 'Proposal Card — параметры из файла, задачи уже нет',
+    description:
+      'Таблица «Что · Было · Станет · С какой даты», устаревший пункт помечен. Кнопки нет — агент закрыл задачу, поэтому вместо неё ссылка на «Требуют решения».',
+    messages: createSurfaceMessages(
+      'ProposalCard',
+      proposalCardParamsFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'proposal-card-superseded-preview',
+    title: 'Proposal Card — заменённая пачка',
+    description:
+      'Поправка следующим сообщением закрыла пачку: «заменено», пункты приглушены, ни кнопки, ни ссылки.',
+    messages: createSurfaceMessages(
+      'ProposalCard',
+      proposalCardSupersededFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'proposal-card-documents-preview',
+    title: 'Proposal Card — параметры из документации, источник у пункта',
+    description:
+      'У каждого пункта свой источник под «Что»: документ и страница, цитата в кавычках. Подпись — ссылка, только если агент прислал открываемый href (путь от корня или http(s)).',
+    messages: createSurfaceMessages(
+      'ProposalCard',
+      proposalCardDocumentsFixture.props as Record<string, unknown>,
+    ),
+  },
+  {
+    key: 'proposal-card-voice-links-preview',
+    title: 'Proposal Card — отклонённая пачка, ссылки на записи',
+    description:
+      'Источник из двух голосовых: после подписи ссылки на записи в документах проекта. Запись без href (нет прав или она удалена) — подпись без перехода.',
+    messages: createSurfaceMessages(
+      'ProposalCard',
+      proposalCardVoiceLinksFixture.props as Record<string, unknown>,
     ),
   },
 ] as const;

@@ -1,0 +1,15 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_bad_link",
+    "title": "Изменения из голосовых сообщений",
+    "state": "open",
+    "items": [
+      {"id": "s1", "kind": "changed", "label": "уставка приточки, °C", "before": "18", "after": "20"}
+    ],
+    "source": {
+      "label": "Голосовые сообщения · 2",
+      "links": [{"href": "https://docs.polimetrika.example/documents/ser_4b7d21"}]
+    }
+  }
+}

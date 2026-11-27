@@ -1,12 +1,9 @@
-/** Текст чипа «N слой/слоя/слоёв без λ» по русским правилам множественного числа. */
-export function formatMissingLambda(count: number): string {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  const noun =
-    mod10 === 1 && mod100 !== 11
-      ? 'слой'
-      : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)
-        ? 'слоя'
-        : 'слоёв';
-  return `${count} ${noun} без λ`;
+import {A2UI_DEFAULT_I18N, formatPlural, type A2uiI18n} from '../i18n';
+
+/** Текст чипа «N слой/слоя/слоёв без λ» по правилам множественного числа локали. */
+export function formatMissingLambda(
+  count: number,
+  {locale, messages}: A2uiI18n = A2UI_DEFAULT_I18N,
+): string {
+  return formatPlural(locale, messages.constructions.missingLambda, count);
 }

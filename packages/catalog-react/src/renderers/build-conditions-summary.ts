@@ -1,4 +1,5 @@
 import type {ConstructionsGeneral} from '@ai37/a2ui-catalog-schemas';
+import {RU_MESSAGES, formatMessage, type A2uiMessages} from '../i18n';
 
 /**
  * Сводка свёрнутого блока условий: «Москва · климат по СП 131 · tв +20 °C ·
@@ -11,15 +12,23 @@ import type {ConstructionsGeneral} from '@ai37/a2ui-catalog-schemas';
  * заполнена вся тройка tот/zот/tн: в компоненте она приходит из справочника
  * городов СП 131 либо правится руками поверх него.
  */
-export function buildConditionsSummary(general: ConstructionsGeneral): string {
+export function buildConditionsSummary(
+  general: ConstructionsGeneral,
+  messages: A2uiMessages = RU_MESSAGES,
+): string {
+  const m = messages.constructions;
   const parts: string[] = [];
 
   if (general.city?.label) parts.push(general.city.label);
   if (general.tot !== null && general.zot !== null && general.tn !== null) {
-    parts.push('климат по СП 131');
+    parts.push(m.summaryClimate);
   }
-  if (general.tv !== null) parts.push(`tв ${general.tv > 0 ? '+' : ''}${general.tv} °C`);
-  if (general.condition !== null) parts.push(`условия ${general.condition}`);
+  if (general.tv !== null) {
+    parts.push(formatMessage(m.summaryTv, {value: `${general.tv > 0 ? '+' : ''}${general.tv}`}));
+  }
+  if (general.condition !== null) {
+    parts.push(formatMessage(m.summaryCondition, {value: general.condition}));
+  }
 
   return parts.join(' · ');
 }

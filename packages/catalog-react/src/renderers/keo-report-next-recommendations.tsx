@@ -4,6 +4,7 @@ import {ReportRow} from '../primitives';
 import {KeoReportNextRecommendationSide} from './keo-report-next-recommendation-side';
 import {ReportNextSection} from './report-next-section';
 import type {ReportNextActionSink} from './report-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Что изменить»: варианты исправления с уже посчитанным результатом.
@@ -19,12 +20,13 @@ export function KeoReportNextRecommendations({
   recommendations: KeoReportRecommendation[] | undefined;
   onAction: ReportNextActionSink;
 }) {
+  const m = useA2uiMessages();
   if (recommendations === undefined) {
     return null;
   }
 
   return (
-    <ReportNextSection label="Что изменить">
+    <ReportNextSection label={m.report.whatToChange}>
       {recommendations.map((recommendation, index) => (
         <ReportRow
           key={`${recommendation.title}-${index}`}
