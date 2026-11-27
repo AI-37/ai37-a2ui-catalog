@@ -41,6 +41,7 @@ describe('lift-editor schema', () => {
       'lift-editor-empty-lift-fields.json',
       'lift-editor-when-length-mismatch.json',
       'lift-editor-empty-draft-action.json',
+      'lift-editor-rule-row-empty.json',
     ]) {
       expect(liftEditorPropsSchema.safeParse(readFixture('invalid', fileName).props).success).toBe(
         false,
@@ -73,6 +74,35 @@ describe('lift-editor schema', () => {
     const {props} = readFixture('valid', 'lift-editor-per-lift.json');
 
     expect(liftEditorPropsSchema.safeParse({...props, methodConfigs: []}).success).toBe(false);
+  });
+
+  it('строка правила с одной подписью (note) валидна, без set и note — нет', () => {
+    const withNote = readFixture('valid', 'lift-editor-note-rule.json');
+    expect(liftEditorPropsSchema.safeParse(withNote.props).success).toBe(true);
+
+    const empty = liftEditorPropsSchema.safeParse(
+      readFixture('invalid', 'lift-editor-rule-row-empty.json').props,
+    );
+    expect(empty.success).toBe(false);
+    if (!empty.success) {
+      expect(empty.error.issues[0]!.message).toContain('"set", "note"');
+    }
+
+    const {props} = withNote;
+    const [first, ...rest] = props.methodConfigs;
+    const longText = {
+      ...props,
+      methodConfigs: [
+        {
+          ...first!,
+          dependentRules: [
+            {sources: [{field: 'Vn'}], rows: [{when: ['1'], note: {field: 'Vn', text: 'x'.repeat(161)}}]},
+          ],
+        },
+        ...rest,
+      ],
+    };
+    expect(liftEditorPropsSchema.safeParse(longText).success).toBe(false);
   });
 
   it('длина when каждой строки совпадает с числом sources', () => {

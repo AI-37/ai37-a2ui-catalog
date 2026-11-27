@@ -841,3 +841,20 @@ describe('LiftEditor: свободный ввод и зависимые знач
     expect(field(container, 'h').value).toBe('15');
   });
 });
+
+describe('LiftEditor: подписи правил', () => {
+  it('подпись правила по этажности и Vн заменяет источник под полем', () => {
+    const {container} = renderEditor(readProps('lift-editor-note-rule.json'));
+    const NOTE = /Ниже минимума СП 54 прил\. В для 18 эт\./;
+
+    typeInto(field(container, 'N'), '18');
+    openSection('Лифт 2');
+
+    const warning = screen.getByText(NOTE);
+    expect(warning.className).toContain('a2ui-le-caption--warning');
+    expect(warning.closest('.a2ui-le-field')?.querySelector('[name="Vn"]')).toBeTruthy();
+
+    typeInto(field(container, 'N'), '17');
+    expect(screen.queryByText(NOTE)).toBeNull();
+  });
+});

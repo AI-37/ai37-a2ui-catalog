@@ -1,6 +1,7 @@
 import React from 'react';
 import type {ThermalReportInputGroup} from '@ai37/a2ui-catalog-schemas';
 import {DataChip} from '../primitives';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
 import {ReportNextGroupNote} from './report-next-group-note';
 
 /**
@@ -17,7 +18,7 @@ export function ReportNextInputGroup({group}: {group: ThermalReportInputGroup}) 
       <span
         className={`a2ui-t--sub a2ui-t--overline ${warning ? 'a2ui-t--warning' : 'a2ui-t--muted'}`}
       >
-        {group.label}
+        {renderLabelSubscripts(group.label)}
       </span>
       <div style={chipsStyle}>
         {group.chips.map((chip, index) => (

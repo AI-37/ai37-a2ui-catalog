@@ -1,4 +1,8 @@
-import type {LiftReportProps, ThermalReportProps} from '@ai37/a2ui-catalog-schemas';
+import type {
+  LiftReportProps,
+  ThermalReportProps,
+  VerificationReportProps,
+} from '@ai37/a2ui-catalog-schemas';
 
 /** Подпись блока страницы: одна на все три наполнения. */
 interface ReportBlockMeta {
@@ -17,4 +21,9 @@ export interface LiftReportBlock extends ReportBlockMeta {
   props: LiftReportProps;
 }
 
-export type ReportAssemblyBlock = ThermalReportBlock | LiftReportBlock;
+export interface VerificationReportBlock extends ReportBlockMeta {
+  kind: 'verification';
+  props: VerificationReportProps;
+}
+
+export type ReportAssemblyBlock = ThermalReportBlock | LiftReportBlock | VerificationReportBlock;

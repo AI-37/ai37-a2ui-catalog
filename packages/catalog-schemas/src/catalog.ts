@@ -10,6 +10,7 @@ import {flexTableDefinition} from './components/flex-table';
 import {latexFormulaDefinition} from './components/latex-formula';
 import {simpleTableDefinition} from './components/simple-table';
 import {choiceCardDefinition} from './components/choice-card';
+import {attachmentChoiceCardDefinition} from './components/attachment-choice-card';
 import {formCardDefinition} from './components/form-card';
 import {
   constructionsEditorDefinition,
@@ -25,6 +26,9 @@ import {keoReportDefinition, keoReportNextDefinition} from './components/keo-rep
 import {insolationEditorDefinition} from './components/insolation-editor';
 import {insolationReportDefinition} from './components/insolation-report';
 import {liftReportDefinition, liftReportNextDefinition} from './components/lift-report';
+import {artifactCardDefinition} from './components/artifact-card';
+import {verificationReportDefinition} from './components/verification-report';
+import {proposalCardDefinition} from './components/proposal-card';
 import {getBaseComponentEntries} from './base-components';
 import type {CatalogComponentDefinition, JsonSchema} from './types';
 
@@ -33,6 +37,7 @@ export const componentDefinitions = [
   flexTableDefinition,
   latexFormulaDefinition,
   choiceCardDefinition,
+  attachmentChoiceCardDefinition,
   formCardDefinition,
   constructionsEditorDefinition,
   constructionsEditorNextDefinition,
@@ -48,6 +53,9 @@ export const componentDefinitions = [
   insolationReportDefinition,
   liftReportDefinition,
   liftReportNextDefinition,
+  artifactCardDefinition,
+  verificationReportDefinition,
+  proposalCardDefinition,
 ] as const satisfies ReadonlyArray<CatalogComponentDefinition<any>>;
 
 export const componentDefinitionMap = new Map(

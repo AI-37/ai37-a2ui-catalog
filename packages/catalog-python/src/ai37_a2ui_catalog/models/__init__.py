@@ -1,3 +1,4 @@
+from .artifact_card import ArtifactCardFile, ArtifactCardFormat, ArtifactCardProps
 from .calc_editor_common import (
     CalcCondition,
     CalcEditorField,
@@ -7,6 +8,7 @@ from .calc_editor_common import (
     CalcRevealBy,
     CalcSubmit,
 )
+from .attachment_choice_card import AttachmentChoiceAttach, AttachmentChoiceCardProps, AttachmentChoiceSkip
 from .choice_card import ChoiceCardProps, ChoiceCardSubmit, ChoiceOption
 from .constructions_editor import (
     CherdachnyeSubtype,
@@ -61,6 +63,15 @@ from .keo_editor import (
     KeoValidationRule,
     KeoValidationRuleKind,
 )
+from .keo_drawings import (
+    KeoDrawingOpposing,
+    KeoDrawingPlanPoint,
+    KeoDrawingPoint,
+    KeoDrawings,
+    KeoDrawingWindow,
+    KeoPlanDrawing,
+    KeoSectionDrawing,
+)
 from .keo_report import (
     KeoReportAction,
     KeoReportInputChip,
@@ -77,6 +88,7 @@ from .lift_editor import (
     LiftEditorDependentRule,
     LiftEditorDependentRuleRow,
     LiftEditorDependentRuleSource,
+    LiftEditorFieldNote,
     LiftEditorField,
     LiftEditorFieldOptionsBy,
     LiftEditorFieldScope,
@@ -89,14 +101,46 @@ from .lift_editor import (
     LiftEditorRecommendParam,
     LiftsMode,
 )
+from .lift_report import (
+    LiftReportAction,
+    LiftReportInputChip,
+    LiftReportInputGroup,
+    LiftReportInputs,
+    LiftReportProps,
+    LiftReportProtocol,
+    LiftReportSuggestion,
+    LiftReportSuggestions,
+    LiftReportVerdict,
+)
+from .proposal_card import (
+    ProposalCardProps,
+    ProposalCardState,
+    ProposalCardView,
+    ProposalConfirm,
+    ProposalDecideLink,
+    ProposalItem,
+    ProposalItemKind,
+    ProposalItemStatus,
+    ProposalSource,
+    ProposalSourceLink,
+)
 from .shared import CellPrimitive, StrictModel, TextAlign
 from .simple_table import SimpleTableColumn, SimpleTableProps, SimpleTableRow
+from .verification_report import (
+    VerificationReportCheck,
+    VerificationReportCheckStatus,
+    VerificationReportDetail,
+    VerificationReportProps,
+    VerificationReportSource,
+    VerificationReportVerdict,
+)
 
 COMPONENT_MODELS = {
     "SimpleTable": SimpleTableProps,
     "FlexTable": FlexTableProps,
     "LatexFormula": LatexFormulaProps,
     "ChoiceCard": ChoiceCardProps,
+    "AttachmentChoiceCard": AttachmentChoiceCardProps,
     "FormCard": FormCardProps,
     "ConstructionsEditor": ConstructionsEditorProps,
     # Новый рендерер того же экрана на новых примитивах: схема props общая со
@@ -114,12 +158,21 @@ COMPONENT_MODELS = {
     # Новый рендерер того же отчёта на примитивах каталога: схема props общая
     # со старым, поэтому и модель одна (change keo-report-next).
     "KeoReportNext": KeoReportProps,
+    # Отчёт лифтов: схема props общая у старого и нового рендерера.
+    "LiftReport": LiftReportProps,
+    "LiftReportNext": LiftReportProps,
     "InsolationEditor": InsolationEditorProps,
     "InsolationReport": InsolationReportProps,
+    "ArtifactCard": ArtifactCardProps,
+    "VerificationReport": VerificationReportProps,
+    "ProposalCard": ProposalCardProps,
 }
 
 __all__ = [
     "COMPONENT_MODELS",
+    "ArtifactCardFile",
+    "ArtifactCardFormat",
+    "ArtifactCardProps",
     "CalcCondition",
     "CalcEditorField",
     "CalcEditorFieldType",
@@ -129,6 +182,9 @@ __all__ = [
     "CalcSubmit",
     "CellPrimitive",
     "CherdachnyeSubtype",
+    "AttachmentChoiceAttach",
+    "AttachmentChoiceCardProps",
+    "AttachmentChoiceSkip",
     "ChoiceCardProps",
     "ChoiceCardSubmit",
     "ChoiceOption",
@@ -173,6 +229,12 @@ __all__ = [
     "KeoEditorRoom",
     "KeoEditorRoomTemplate",
     "KeoEditorSection",
+    "KeoDrawingOpposing",
+    "KeoDrawingPlanPoint",
+    "KeoDrawingPoint",
+    "KeoDrawingWindow",
+    "KeoDrawings",
+    "KeoPlanDrawing",
     "KeoReportAction",
     "KeoReportInputChip",
     "KeoReportInputGroup",
@@ -182,12 +244,14 @@ __all__ = [
     "KeoReportRecommendation",
     "KeoReportRoom",
     "KeoReportVerdict",
+    "KeoSectionDrawing",
     "KeoValidationRule",
     "KeoValidationRuleKind",
     "LatexFormulaProps",
     "LiftEditorDependentRule",
     "LiftEditorDependentRuleRow",
     "LiftEditorDependentRuleSource",
+    "LiftEditorFieldNote",
     "LiftEditorField",
     "LiftEditorFieldOptionsBy",
     "LiftEditorFieldScope",
@@ -198,11 +262,36 @@ __all__ = [
     "LiftEditorProps",
     "LiftEditorRecommend",
     "LiftEditorRecommendParam",
+    "LiftReportAction",
+    "LiftReportInputChip",
+    "LiftReportInputGroup",
+    "LiftReportInputs",
+    "LiftReportProps",
+    "LiftReportProtocol",
+    "LiftReportSuggestion",
+    "LiftReportSuggestions",
+    "LiftReportVerdict",
     "LiftsMode",
     "LookupSuggestMode",
+    "ProposalCardProps",
+    "ProposalCardState",
+    "ProposalCardView",
+    "ProposalConfirm",
+    "ProposalDecideLink",
+    "ProposalItem",
+    "ProposalItemKind",
+    "ProposalItemStatus",
+    "ProposalSource",
+    "ProposalSourceLink",
     "SimpleTableColumn",
     "SimpleTableProps",
     "SimpleTableRow",
     "StrictModel",
     "TextAlign",
+    "VerificationReportCheck",
+    "VerificationReportCheckStatus",
+    "VerificationReportDetail",
+    "VerificationReportProps",
+    "VerificationReportSource",
+    "VerificationReportVerdict",
 ]

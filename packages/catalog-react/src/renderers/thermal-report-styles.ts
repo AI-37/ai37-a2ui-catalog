@@ -312,6 +312,17 @@ export const THERMAL_REPORT_CSS = `
   white-space: nowrap;
 }
 .a2ui-dfm__item:hover { background: ${tokens.trBorder}; }
+/* «Сохранить в проект» — действие, а не ссылка: кнопка в облике пункта. */
+.a2ui-dfm__item--action {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.a2ui-dfm__item--action:disabled { cursor: default; opacity: 0.6; }
+.a2ui-dfm__item--action:disabled:hover { background: none; }
 `;
 
 export const THERMAL_REPORT_STYLE_HREF = `${THERMAL_REPORT_STYLE_PREFIX}-${hashCss(

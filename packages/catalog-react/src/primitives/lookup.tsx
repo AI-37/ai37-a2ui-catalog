@@ -6,6 +6,7 @@ import {findOptionByLabel} from './find-option-by-label';
 import {LookupOptionContent} from './lookup-option-content';
 import {usePopupScheme} from './use-popup-scheme';
 import type {LookupProps} from './lookup.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Поиск по справочнику на Base UI Autocomplete. Сеть — наш `useLookupSuggest`
@@ -24,6 +25,7 @@ export function Lookup({
   onTextChange,
   onPick,
 }: LookupProps) {
+  const m = useA2uiMessages().common;
   const {anchorRef, popupRef} = usePopupScheme<HTMLInputElement>();
   const [selected, setSelected] = React.useState<LookupOption | null>(null);
   const [dismissed, setDismissed] = React.useState(false);
@@ -85,10 +87,10 @@ export function Lookup({
         <Autocomplete.Positioner sideOffset={4}>
           <Autocomplete.Popup ref={popupRef} className="a2ui-popup a2ui-popup--anchored">
             <Autocomplete.Status className="a2ui-popup__status">
-              {loading ? 'Ищем…' : null}
+              {loading ? m.searching : null}
             </Autocomplete.Status>
             <Autocomplete.Empty className="a2ui-popup__empty">
-              {queried ? 'Ничего не найдено' : null}
+              {queried ? m.nothingFound : null}
             </Autocomplete.Empty>
 
             <Autocomplete.List>

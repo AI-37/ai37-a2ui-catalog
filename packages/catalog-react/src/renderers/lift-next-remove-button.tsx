@@ -1,5 +1,6 @@
 import React from 'react';
 import {Button} from '../primitives';
+import {MIN_EDITOR_ITEMS} from './min-editor-items';
 import type {LiftNextRemoveButtonProps} from './lift-next.types';
 
 /**
@@ -16,7 +17,7 @@ export function LiftNextRemoveButton({
   label,
   onClick,
 }: LiftNextRemoveButtonProps) {
-  if (!perLift || count <= 1) {
+  if (!perLift || count <= MIN_EDITOR_ITEMS) {
     return null;
   }
 

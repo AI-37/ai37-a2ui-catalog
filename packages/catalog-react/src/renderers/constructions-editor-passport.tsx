@@ -1,7 +1,6 @@
 import React from 'react';
 import type {ConstructionsEditorPassportProps} from './constructions-editor.types';
-
-const PASSPORT_LABEL = 'Rпр по паспорту, м²·°C/Вт';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * «Rпр по паспорту» типов без слоёв — тот же паттерн, что у слоя и шапки:
@@ -18,29 +17,31 @@ export function ConstructionsEditorPassport(props: ConstructionsEditorPassportPr
 }
 
 function PassportSummary({value, onOpen}: ConstructionsEditorPassportProps) {
+  const m = useA2uiMessages();
   const missing = value === undefined;
 
   return (
     <div className="a2ui-ce-passport">
-      <span className="a2ui-ce-passport__label">Rпр по паспорту:</span>
+      <span className="a2ui-ce-passport__label">{m.constructions.passport}</span>
       <span
         className={`a2ui-ce-passport__value${missing ? ' a2ui-ce-passport__value--missing' : ''}`}
       >
-        {missing ? 'не задано' : value.toFixed(2)}
+        {missing ? m.common.notSet : value.toFixed(2)}
       </span>
       <button
         type="button"
-        aria-label="Изменить Rпр по паспорту"
+        aria-label={m.constructions.editPassport}
         onClick={onOpen}
         className="a2ui-ce-btn a2ui-ce-btn--edit"
       >
-        Изменить
+        {m.common.edit}
       </button>
     </div>
   );
 }
 
 function PassportForm({value, onCommit, onCancel, onDraftChange}: ConstructionsEditorPassportProps) {
+  const m = useA2uiMessages();
   const [draft, setDraft] = React.useState<number | undefined>(value);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +64,7 @@ function PassportForm({value, onCommit, onCancel, onDraftChange}: ConstructionsE
   return (
     <div className="a2ui-ce-form a2ui-ce-form--compact">
       <label className="a2ui-ce-field">
-        <span className="a2ui-ce-field__label">{PASSPORT_LABEL}</span>
+        <span className="a2ui-ce-field__label">{m.constructions.passportField}</span>
         <input
           type="number"
           min={0.01}
@@ -75,10 +76,10 @@ function PassportForm({value, onCommit, onCancel, onDraftChange}: ConstructionsE
       </label>
       <div className="a2ui-ce-actions">
         <button type="button" onClick={handleApply} className="a2ui-ce-btn a2ui-ce-btn--commit">
-          Применить
+          {m.common.apply}
         </button>
         <button type="button" onClick={onCancel} className="a2ui-ce-btn">
-          Отмена
+          {m.common.cancel}
         </button>
       </div>
     </div>

@@ -8,15 +8,25 @@ import type {LiftNextAddButtonProps} from './lift-next.types';
  *
  * Кнопка стоит вне `Accordion.Root`: внутри него живут только секции, иначе
  * клавиатура начнёт ходить по чужим кнопкам.
+ *
+ * `maxLifts` из props гасит кнопку, пока предел освобождается удалением, и
+ * убирает её из разметки, когда освобождать нечем (design
+ * next-add-item-limit, Решения 2 и 4).
  */
-export function LiftNextAddButton({perLift, label, disabled, onClick}: LiftNextAddButtonProps) {
-  if (!perLift) {
+export function LiftNextAddButton({perLift, label, state, onClick}: LiftNextAddButtonProps) {
+  if (!perLift || state === 'hidden') {
     return null;
   }
 
   return (
     <div style={{justifySelf: 'start'}}>
-      <Button variant="link" tone="accent" icon={<PlusIcon />} disabled={disabled} onClick={onClick}>
+      <Button
+        variant="link"
+        tone="accent"
+        icon={<PlusIcon />}
+        disabled={state === 'disabled'}
+        onClick={onClick}
+      >
         {label}
       </Button>
     </div>

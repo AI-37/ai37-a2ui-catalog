@@ -1,39 +1,46 @@
 import React from 'react';
 import {NumberField as BaseNumberField} from '@base-ui/react/number-field';
 import type {NumberFieldProps} from './number-field.types';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Числовое поле на Base UI NumberField. Кнопок-ступеней у него нет намеренно:
  * в форме условий четыре числовых поля подряд, и восемь квадратов рядом с
  * ними читаются как панель, а не как значения. Шаг остаётся на `↑`/`↓`.
  *
- * `locale="ru-RU"`: запятая — десятичный разделитель, как в остальном экране;
- * точку разбор тоже принимает. Наружу уходит `number | null` — состояние формы
- * держит число, а не строку поля.
+ * Локаль — из `A2uiI18nProvider` (без него русская): десятичный разделитель
+ * тот же, что в остальном экране; точку разбор принимает и по-русски. Наружу
+ * уходит `number | null` — состояние формы держит число, а не строку поля.
  */
 export function NumberField({
   value,
   onValueChange,
   step,
   min,
+  max,
   compact,
   disabled,
   name,
+  placeholder,
   'aria-label': ariaLabel,
 }: NumberFieldProps) {
+  const {locale} = useA2uiI18n();
+
   return (
     <BaseNumberField.Root
       value={value}
       onValueChange={onValueChange}
       step={step}
       min={min}
+      max={max}
       disabled={disabled}
       name={name}
-      locale="ru-RU"
+      locale={locale}
     >
       <BaseNumberField.Input
         className={`a2ui-control a2ui-t--body${compact ? ' a2ui-control--compact' : ''}`}
         aria-label={ariaLabel}
+        placeholder={placeholder}
       />
     </BaseNumberField.Root>
   );

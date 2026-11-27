@@ -1,0 +1,18 @@
+{
+  "component": "ArtifactCard",
+  "props": {
+    "artifactId": "6f1c2a3b-4d5e-4f60-8a7b-9c0d1e2f3a4b",
+    "name": "Протокол расчёта лифтов",
+    "kind": "lift-report",
+    "meta": "ГОСТ Р 52941-2008 · Прил. А · 12 шагов",
+    "summary": "Расчёт интервала движения и провозной способности",
+    "scope": "chat",
+    "files": [
+      {
+        "id": "0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+        "fileName": "исходные-данные.xlsx",
+        "label": "Исходные данные (.xlsx)"
+      }
+    ]
+  }
+}

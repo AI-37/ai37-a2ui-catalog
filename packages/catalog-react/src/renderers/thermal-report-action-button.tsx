@@ -1,6 +1,7 @@
 import React from 'react';
 import type {ThermalReportAction} from '@ai37/a2ui-catalog-schemas';
 import type {ThermalReportOnAction} from './thermal-report.types';
+import {useSurfaceReadOnly} from './surface-read-only';
 
 const VARIANT_CLASS = {
   solid: 'a2ui-tr-btn a2ui-tr-btn--solid',
@@ -19,6 +20,11 @@ export function ThermalReportActionButton({
   variant: keyof typeof VARIANT_CLASS;
   onAction: ThermalReportOnAction;
 }) {
+  // На прошлой поверхности кнопки нет: действие ушло бы агенту и сменило диалог.
+  if (useSurfaceReadOnly()) {
+    return null;
+  }
+
   return (
     <button
       type="button"

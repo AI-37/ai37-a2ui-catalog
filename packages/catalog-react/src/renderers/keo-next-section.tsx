@@ -22,6 +22,7 @@ export function KeoNextSection({control, room, section, panelId, computedLabel}:
       title={section.title}
       summary={buildCalcSectionSummary(section.fields, room.values)}
       badge={<KeoNextBadge tone={control.badgeFor(key)} />}
+      sectionRef={control.bindSection(key)}
     >
       <KeoNextFields
         control={control}

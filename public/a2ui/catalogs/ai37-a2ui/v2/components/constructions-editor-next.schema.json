@@ -64,7 +64,8 @@
                       "enum": [
                         "material",
                         "vent-gap",
-                        "closed-gap"
+                        "closed-gap",
+                        "thin"
                       ]
                     },
                     "materialKey": {
@@ -98,6 +99,18 @@
                 "type": "number",
                 "exclusiveMinimum": true,
                 "minimum": 0
+              },
+              "r": {
+                "type": "number",
+                "exclusiveMinimum": true,
+                "minimum": 0,
+                "maximum": 1
+              },
+              "tvRoom": {
+                "type": "number"
+              },
+              "totRoom": {
+                "type": "number"
               },
               "status": {
                 "type": "string",

@@ -1,10 +1,13 @@
 import {z} from 'zod';
 import {type CatalogComponentDefinition} from '../types';
 
-// Вид строки слоя: материал (участвует в Σ δ/λ) или воздушный зазор —
+// Вид строки слоя: материал (участвует в Σ δ/λ), воздушный зазор —
 // вентилируемый/невентилируемый (в live-Rпр слагаемое опускается, канонический
-// Rs считает сервер).
-export const constructionLayerKindSchema = z.enum(['material', 'vent-gap', 'closed-gap']);
+// Rs считает сервер) — либо тонкий нетепловой слой `thin` (плёнка, клей, сетка,
+// краска: Rs = 0, толщина и λ не нужны; change `constructions-layer-kind-thin`).
+// Толщина обязательна у материала и замкнутого зазора; у вентилируемого зазора
+// и тонкого слоя `thicknessMm: null` — полная строка, а не черновик.
+export const constructionLayerKindSchema = z.enum(['material', 'vent-gap', 'closed-gap', 'thin']);
 
 export const constructionLayerSchema = z
   .object({
@@ -54,6 +57,18 @@ export const constructionEntrySchema = z
     layers: z.array(constructionLayerSchema).max(50),
     // Типы без слоёв (окна/фонари/двери): паспортное Rпр вместо таблицы.
     rprPassport: z.number().positive().optional(),
+    // Коэффициент теплотехнической однородности r (Г.4 СП 50): Rпр = r·Rусл.
+    // Только у типов со слоями; не задан → агент считает с r = 1 (доп).
+    // Диапазон (0; 1]: r > 1 «улучшал» бы конструкцию относительно глади.
+    r: z.number().gt(0).max(1).optional(),
+    // tв* — средняя температура воздуха САМОГО помещения, °C (5.3 СП 50):
+    // лестничная клетка 16, тёплый чердак, тамбур. Не задано — как у здания.
+    tvRoom: z.number().optional(),
+    // tот* — средняя температура с ХОЛОДНОЙ стороны этой конструкции, °C: у
+    // перекрытия над подвалом это воздух подвала (+8 в примере К СП 50), а не
+    // наружный. Не задано — как у здания. Диапазона нет: температуры бывают
+    // любого знака, осмысленность пары проверяет агент.
+    totRoom: z.number().optional(),
     status: constructionStatusSchema.optional(),
   })
   .strict();

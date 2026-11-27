@@ -1,6 +1,7 @@
 import React from 'react';
 import type {LiftReportAction} from '@ai37/a2ui-catalog-schemas';
 import type {LiftReportOnAction} from './lift-report.types';
+import {useSurfaceReadOnly} from './surface-read-only';
 
 const VARIANT_CLASS = {
   solid: 'a2ui-lr-btn a2ui-lr-btn--solid',
@@ -20,6 +21,11 @@ export function LiftReportActionButton({
   variant: keyof typeof VARIANT_CLASS;
   onAction: LiftReportOnAction;
 }) {
+  // На прошлой поверхности кнопки нет: действие ушло бы агенту и сменило диалог.
+  if (useSurfaceReadOnly()) {
+    return null;
+  }
+
   return (
     <button
       type="button"

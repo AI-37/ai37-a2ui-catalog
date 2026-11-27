@@ -1,5 +1,3 @@
-import type {KeoRoomDraft} from './keo-next.types';
-
 /**
  * Ключ ДОКУМЕНТА снапшота: значения условий и значения помещений. Подписей,
  * `note`, источников и имён помещений в нём нет намеренно — по нему отличается
@@ -13,10 +11,30 @@ import type {KeoRoomDraft} from './keo-next.types';
  * Имя помещения вне ключа по той же причине: черновик уезжает с ПОДСТАВЛЕННОЙ
  * подписью («Помещение 1»), которой в состоянии экрана нет, и снапшот-ответ
  * вернул бы её обратно — то есть выглядел бы новым документом, ничего не изменив.
+ *
+ * Ключи записей СОРТИРУЮТСЯ: порядок ключей — не содержание. Снапшот из истории
+ * треда проходит через jsonb Postgres, который пересортировывает ключи объекта,
+ * а живое эхо агента несёт порядок `KEO_FIELD_MAP` — без сортировки первый же
+ * ответ на черновик после перезагрузки выглядел бы новым документом
+ * (change `keo-draft-echo-ack`).
  */
 export function keoDocumentKey(snapshot: {
   conditions: Record<string, string>;
-  rooms: readonly KeoRoomDraft[];
+  rooms: ReadonlyArray<{values: Record<string, unknown>}>;
 }): string {
-  return JSON.stringify([snapshot.conditions, snapshot.rooms.map(room => room.values)]);
+  return JSON.stringify([
+    sortedEntries(snapshot.conditions),
+    snapshot.rooms.map(room => sortedEntries(room.values)),
+  ]);
+}
+
+/**
+ * Пары [ключ, значение] в порядке ключей — канонический вид записи для ключа.
+ * `undefined` отбрасывается, как его отбросил бы `JSON.stringify` объекта:
+ * значение, которого нет, и ключ со значением-`undefined` — один документ.
+ */
+function sortedEntries(record: Record<string, unknown>): Array<[string, unknown]> {
+  return Object.entries(record)
+    .filter(([, value]) => value !== undefined)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 }

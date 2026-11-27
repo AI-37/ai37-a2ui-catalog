@@ -5044,6 +5044,106 @@
         "$schema": "https://json-schema.org/draft/2019-09/schema#"
       }
     },
+    "AttachmentChoiceCard": {
+      "description": "A two-way human-in-the-loop card where one option needs a file. One button continues without a file; the other stays disabled until the user picks a file inside the card, which is uploaded to the chat shelf immediately. Use it when the agent asks \"continue as is, or with this file?\" (e.g. a signature scan). Both buttons dispatch the same action: skip sends { value }, attach sends { value, fileId, fileName }.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/attachment-choice-card.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/AttachmentChoiceCard",
+        "definitions": {
+          "AttachmentChoiceCard": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "contextId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "skip": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "label",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "attach": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "pickLabel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "accept": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "hint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240
+                  }
+                },
+                "required": [
+                  "label",
+                  "value",
+                  "pickLabel",
+                  "accept"
+                ],
+                "additionalProperties": false
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "title",
+              "contextId",
+              "skip",
+              "attach",
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
     "FormCard": {
       "description": "An interactive form card with typed fields for human-in-the-loop prompts. Use it when the agent must collect structured parameters (text, number, select, boolean, or lookup with reference-backed autocomplete) from the user and return them via a submit action.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/form-card.schema.json",
@@ -5260,7 +5360,8 @@
                             "enum": [
                               "material",
                               "vent-gap",
-                              "closed-gap"
+                              "closed-gap",
+                              "thin"
                             ]
                           },
                           "materialKey": {
@@ -5294,6 +5395,18 @@
                       "type": "number",
                       "exclusiveMinimum": true,
                       "minimum": 0
+                    },
+                    "r": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "tvRoom": {
+                      "type": "number"
+                    },
+                    "totRoom": {
+                      "type": "number"
                     },
                     "status": {
                       "type": "string",
@@ -5847,7 +5960,8 @@
                             "enum": [
                               "material",
                               "vent-gap",
-                              "closed-gap"
+                              "closed-gap",
+                              "thin"
                             ]
                           },
                           "materialKey": {
@@ -5881,6 +5995,18 @@
                       "type": "number",
                       "exclusiveMinimum": true,
                       "minimum": 0
+                    },
+                    "r": {
+                      "type": "number",
+                      "exclusiveMinimum": true,
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "tvRoom": {
+                      "type": "number"
+                    },
+                    "totRoom": {
+                      "type": "number"
                     },
                     "status": {
                       "type": "string",
@@ -6920,11 +7046,37 @@
                                       "number"
                                     ]
                                   }
+                                },
+                                "note": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 80
+                                    },
+                                    "text": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "tone": {
+                                      "type": "string",
+                                      "enum": [
+                                        "muted",
+                                        "warning"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "field",
+                                    "text"
+                                  ],
+                                  "additionalProperties": false
                                 }
                               },
                               "required": [
-                                "when",
-                                "set"
+                                "when"
                               ],
                               "additionalProperties": false
                             },
@@ -7736,11 +7888,37 @@
                                       "number"
                                     ]
                                   }
+                                },
+                                "note": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 80
+                                    },
+                                    "text": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "tone": {
+                                      "type": "string",
+                                      "enum": [
+                                        "muted",
+                                        "warning"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "field",
+                                    "text"
+                                  ],
+                                  "additionalProperties": false
                                 }
                               },
                               "required": [
-                                "when",
-                                "set"
+                                "when"
                               ],
                               "additionalProperties": false
                             },
@@ -8386,7 +8564,7 @@
       }
     },
     "ThermalReportNext": {
-      "description": "The same thermal-calculation result card as `ThermalReport` — identical props, identical data contract — rendered on the catalog primitive set (report row, two-part data chip, status pill, serif verdict headline, layer table with a total row, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: the protocol is a single non-expanding row (`protocol.content` is never printed, it only feeds the downloaded file), status words for `pass | fail | info` are fixed by the renderer so both reports say the same thing, and the accept-the-suggestion button is `outline`. Prefer it when the surface should read as one system with `LiftReportNext`; emit the same props as for `ThermalReport`.",
+      "description": "The same thermal-calculation result card as `ThermalReport` — identical props, identical data contract — rendered on the catalog primitive set (report row, two-part data chip, status pill, serif verdict headline, layer table with a total row, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: the protocol is a single row (`protocol.content` is never printed, it only feeds the downloaded file) unless `protocol.downloadContent` is present — then the row folds open into the full calculation rendered from markdown with TeX formulas (`$…$`, `$$…$$`), status words for `pass | fail | info` are fixed by the renderer so both reports say the same thing, and the accept-the-suggestion button is `outline`. Prefer it when the surface should read as one system with `LiftReportNext`; emit the same props as for `ThermalReport`.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/thermal-report-next.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/ThermalReportNext",
@@ -9262,6 +9440,12 @@
                 "minLength": 1,
                 "maxLength": 120
               },
+              "draftUrl": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "pattern": "^\\/(?:$|[^\\/\\\\])"
+              },
               "submit": {
                 "type": "object",
                 "properties": {
@@ -9788,6 +9972,12 @@
                 "minLength": 1,
                 "maxLength": 120
               },
+              "draftUrl": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "pattern": "^\\/(?:$|[^\\/\\\\])"
+              },
               "submit": {
                 "type": "object",
                 "properties": {
@@ -9826,7 +10016,7 @@
       }
     },
     "KeoReport": {
-      "description": "A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a \"what to change\" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed \"assumed by the system — check it\" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent.",
+      "description": "A daylight-factor (KEO, SP 367.1325800) result card: verdict badge with the headline value against the norm, a \"what to change\" section of toned recommendation cards (each may carry a recalculate action with payload), optional per-room results, input-data chips grouped by provenance (with a dashed \"assumed by the system — check it\" group) and a one-line calculation protocol with a client-side download. Use it to present the finished KEO comparison instead of a markdown report; all normative logic stays with the agent. The optional `drawings` model is NOT rendered by this renderer — for the Danilyuk section/plan sheets emit `KeoReportNext`.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-report.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/KeoReport",
@@ -10099,6 +10289,211 @@
                 ],
                 "additionalProperties": false
               },
+              "drawings": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "object",
+                    "properties": {
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomHeight": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "sillHeight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 200
+                      },
+                      "windowTop": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "alphaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "betaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "opposing": {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "distance",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "skyVisible": {
+                        "type": "boolean"
+                      },
+                      "n1": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomDepth",
+                      "roomHeight",
+                      "wallThickness",
+                      "sillHeight",
+                      "windowTop",
+                      "point",
+                      "alphaDeg",
+                      "skyVisible"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "plan": {
+                    "type": "object",
+                    "properties": {
+                      "roomWidth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "window": {
+                        "type": "object",
+                        "properties": {
+                          "width": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "offset": {
+                            "type": "number",
+                            "minimum": -200,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "width",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "thetaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "fanRayAnglesDeg": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 89.9
+                        },
+                        "minItems": 1,
+                        "maxItems": 49
+                      },
+                      "psi1Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "psi2Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "n2": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomWidth",
+                      "roomDepth",
+                      "wallThickness",
+                      "window",
+                      "point",
+                      "thetaDeg",
+                      "fanRayAnglesDeg",
+                      "psi1Deg",
+                      "psi2Deg"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "section",
+                  "plan"
+                ],
+                "additionalProperties": false
+              },
               "protocol": {
                 "type": "object",
                 "properties": {
@@ -10121,6 +10516,11 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 120000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
                   }
                 },
                 "required": [
@@ -10140,7 +10540,7 @@
       }
     },
     "KeoReportNext": {
-      "description": "The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent) and the protocol download is a menu. Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`.",
+      "description": "The same daylight-factor (KEO, SP 367.1325800) result card as `KeoReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` and `LiftReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu) with tokenised colours and one type scale. Differences are behavioural, not contractual: status words for `pass | fail` are fixed by the renderer so all reports say the same thing, the accent border is reserved for the recommended option, accept-the-suggestion buttons are `outline` (the verdict stays the only filled accent) and the protocol download is a menu; with `protocol.downloadContent` the protocol row folds open into the full calculation rendered from markdown with TeX formulas (`$…$`, `$$…$$`). Prefer it when the surface should read as one system with the other Next reports; emit the same props as for `KeoReport`. It also renders the optional `drawings` model — the Danilyuk section and plan of the room as numbers (room sizes, opening, calculation point, angles, sector edges, n1/n2 and the graph II fan azimuths) — as a collapsed \"Чертежи\" fold; send numbers in metres and degrees, never raw SVG.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/keo-report-next.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/KeoReportNext",
@@ -10413,6 +10813,211 @@
                 ],
                 "additionalProperties": false
               },
+              "drawings": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "object",
+                    "properties": {
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomHeight": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "sillHeight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 200
+                      },
+                      "windowTop": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "alphaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "betaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "opposing": {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "distance",
+                          "height"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "skyVisible": {
+                        "type": "boolean"
+                      },
+                      "n1": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomDepth",
+                      "roomHeight",
+                      "wallThickness",
+                      "sillHeight",
+                      "windowTop",
+                      "point",
+                      "alphaDeg",
+                      "skyVisible"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "plan": {
+                    "type": "object",
+                    "properties": {
+                      "roomWidth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "roomDepth": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "wallThickness": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 200
+                      },
+                      "window": {
+                        "type": "object",
+                        "properties": {
+                          "width": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          },
+                          "offset": {
+                            "type": "number",
+                            "minimum": -200,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "width",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "point": {
+                        "type": "object",
+                        "properties": {
+                          "lt": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 200
+                          }
+                        },
+                        "required": [
+                          "lt"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "thetaDeg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "fanRayAnglesDeg": {
+                        "type": "array",
+                        "items": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 89.9
+                        },
+                        "minItems": 1,
+                        "maxItems": 49
+                      },
+                      "psi1Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "psi2Deg": {
+                        "type": "number",
+                        "minimum": -89.9,
+                        "maximum": 89.9
+                      },
+                      "n2": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    },
+                    "required": [
+                      "roomWidth",
+                      "roomDepth",
+                      "wallThickness",
+                      "window",
+                      "point",
+                      "thetaDeg",
+                      "fanRayAnglesDeg",
+                      "psi1Deg",
+                      "psi2Deg"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "section",
+                  "plan"
+                ],
+                "additionalProperties": false
+              },
               "protocol": {
                 "type": "object",
                 "properties": {
@@ -10435,6 +11040,11 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 120000
+                  },
+                  "downloadUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
                   }
                 },
                 "required": [
@@ -11627,6 +12237,16 @@
                     "minLength": 1,
                     "maxLength": 60000
                   },
+                  "downloadFileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "downloadContent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120000
+                  },
                   "downloadUrl": {
                     "type": "string",
                     "minLength": 1,
@@ -11650,7 +12270,7 @@
       }
     },
     "LiftReportNext": {
-      "description": "The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single non-expanding row without `<details>`/`<pre>` (`protocol.content` is never printed on screen), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.",
+      "description": "The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single row without `<details>`/`<pre>` (`protocol.content` is never printed on screen) unless `protocol.downloadContent` is present — then the row folds open into the full calculation rendered from markdown with TeX formulas (`$…$`, `$$…$$`), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.",
       "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/lift-report-next.schema.json",
       "propsSchema": {
         "$ref": "#/definitions/LiftReportNext",
@@ -11880,6 +12500,16 @@
                     "minLength": 1,
                     "maxLength": 60000
                   },
+                  "downloadFileName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "downloadContent": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120000
+                  },
                   "downloadUrl": {
                     "type": "string",
                     "minLength": 1,
@@ -11895,6 +12525,486 @@
             "required": [
               "verdict",
               "inputs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "ArtifactCard": {
+      "description": "A saved agent artifact (calculation protocol, generated document, package) stored in the chat-backend output shelf: one row with the artifact name, a meta line and a \"Download\" menu (Word and Markdown rendered from the artifact markdown, plus any binary files), and — when the host supports it — a \"Save to project\" button. Emit it after `publishArtifact` with the returned id; download links are built by the renderer from the ids, never taken from props. Always accompany it with a plain-text answer that contains the markdown link to `/api/artifacts/<id>` for clients that do not render this catalog.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/artifact-card.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/ArtifactCard",
+        "definitions": {
+          "ArtifactCard": {
+            "type": "object",
+            "properties": {
+              "artifactId": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "kind": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "meta": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "scope": {
+                "type": "string",
+                "enum": [
+                  "chat",
+                  "project"
+                ]
+              },
+              "formats": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "docx",
+                    "md"
+                  ]
+                },
+                "maxItems": 2
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+                    },
+                    "fileName": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "fileName"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "artifactId",
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "VerificationReport": {
+      "description": "A counterparty-verification result card: a verdict header (status pill, company as the headline, one-line summary) and a list of checks, each with a status and a one-line basis. A check that carries `details` (label/value pairs) or `sources` (registry links) expands to show them; a check without them is a plain row. Use it to present a supplier/contractor check (registry status, OKVED, financials, unfair-supplier registry, website) instead of a markdown checklist; for a single targeted check send one row. Values arrive as ready strings — the renderer does not format numbers.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/verification-report.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/VerificationReport",
+        "definitions": {
+          "VerificationReport": {
+            "type": "object",
+            "properties": {
+              "verdict": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pass",
+                      "fail",
+                      "warning"
+                    ]
+                  },
+                  "badge": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "headline": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  }
+                },
+                "required": [
+                  "status",
+                  "badge",
+                  "headline"
+                ],
+                "additionalProperties": false
+              },
+              "checks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail",
+                        "warning",
+                        "error",
+                        "skipped"
+                      ]
+                    },
+                    "summary": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 400
+                    },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                          },
+                          "value": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 600
+                          }
+                        },
+                        "required": [
+                          "label",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 16
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "url": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 2000
+                          }
+                        },
+                        "required": [
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 8
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "verdict",
+              "checks"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2019-09/schema#"
+      }
+    },
+    "ProposalCard": {
+      "description": "A human-in-the-loop confirmation card for a batch of proposed changes (a data agent never writes on its own: it proposes, a person confirms). Shows a title, the batch state (open, accepted, rejected, superseded), the items either as a list grouped by kind (added / changed / removed) or as a table \"What · Was · Becomes · Effective from\", an optional source of the batch (label, quote, optional link, and optional extra `links` such as the voice recordings the batch came from — a link without href renders as plain text), an optional per-item source of the same shape (the document and page an item was taken from, with a quote and an optional link), an optional note, and a confirm button that dispatches `action` with context { proposalId, decision: \"accept\" }. Item statuses: pending, accepted, rejected, stale. When the agent task is gone (no `confirm`, or the host shows the surface read-only) the card shows `decideLink` instead of the button; with `canDecide: false` it shows neither. Values arrive as ready strings — the renderer does not format them.",
+      "schemaPath": "https://ai-37.github.io/ai37-a2ui-catalog/a2ui/catalogs/ai37-a2ui/v2/components/proposal-card.schema.json",
+      "propsSchema": {
+        "$ref": "#/definitions/ProposalCard",
+        "definitions": {
+          "ProposalCard": {
+            "type": "object",
+            "properties": {
+              "proposalId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "accepted",
+                  "rejected",
+                  "superseded"
+                ]
+              },
+              "view": {
+                "type": "string",
+                "enum": [
+                  "list",
+                  "table"
+                ]
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "added",
+                        "changed",
+                        "removed"
+                      ]
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "before": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "after": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "effectiveFrom": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 40
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "accepted",
+                        "rejected",
+                        "stale"
+                      ]
+                    },
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "quote": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        "href": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "href": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 2000
+                              }
+                            },
+                            "required": [
+                              "label"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "maxItems": 20
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "label"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 50
+              },
+              "source": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "quote": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "href": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "href": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        }
+                      },
+                      "required": [
+                        "label"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 20
+                  }
+                },
+                "additionalProperties": false
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "confirm": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "label",
+                  "action"
+                ],
+                "additionalProperties": false
+              },
+              "canDecide": {
+                "type": "boolean"
+              },
+              "decideLink": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "href": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "label",
+                  "href"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "proposalId",
+              "title",
+              "state",
+              "items"
             ],
             "additionalProperties": false
           }

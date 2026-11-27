@@ -3,11 +3,13 @@ import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import {NumberField, Static} from '../primitives';
 import type {OperatingCondition} from './constructions-editor.types';
 import {resolveLayerLambda} from './resolve-layer-lambda';
+import {useA2uiMessages} from '../i18n';
 
 /**
- * Поле λ в форме слоя тремя ветками: у зазора λ не бывает (Rs считает сервер),
- * у материала из справочника она приходит с опцией и показана значением с
- * пометкой «авто», у своего материала — вводится вручную.
+ * Поле λ в форме слоя четырьмя ветками: у тонкого слоя λ не бывает (Rs = 0),
+ * у зазора тоже (Rs считает сервер), у материала из справочника она приходит
+ * с опцией и показана значением с пометкой «авто», у своего материала —
+ * вводится вручную.
  */
 export function ConstructionsNextLambdaField({
   layer,
@@ -18,15 +20,21 @@ export function ConstructionsNextLambdaField({
   condition: OperatingCondition;
   onChange: (lambdaManual: number | undefined) => void;
 }) {
+  const m = useA2uiMessages().constructions;
+
+  if (layer.kind === 'thin') {
+    return <Static>{m.lambdaNotCounted}</Static>;
+  }
+
   if (layer.kind !== undefined && layer.kind !== 'material') {
-    return <Static>Rs — в итоговом расчёте</Static>;
+    return <Static>{m.gapInFinal}</Static>;
   }
 
   if (typeof layer.lambdaA === 'number' || typeof layer.lambdaB === 'number') {
     return (
       <Static>
         {resolveLayerLambda(layer, condition)}
-        <span className="a2ui-t--sub a2ui-t--muted"> авто</span>
+        <span className="a2ui-t--sub a2ui-t--muted">{` ${m.lambdaAuto}`}</span>
       </Static>
     );
   }

@@ -37,7 +37,7 @@ export function applyDependentRules({
     );
 
     if (row) {
-      for (const [field, value] of Object.entries(row.set)) {
+      for (const [field, value] of Object.entries(row.set ?? {})) {
         if (isTouched(field)) continue;
         next[field] = value;
       }

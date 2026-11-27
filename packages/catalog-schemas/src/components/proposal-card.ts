@@ -1,0 +1,137 @@
+import {z} from 'zod';
+import {type CatalogComponentDefinition} from '../types';
+
+/**
+ * Состояние пачки предложений. `superseded` — пачку закрыла поправка
+ * следующим сообщением: решение по ней больше не принимается, актуальна
+ * новая карточка. Слово к состоянию пишет рендерер, агент шлёт перечисление.
+ */
+export const proposalCardStateSchema = z.enum(['open', 'accepted', 'rejected', 'superseded']);
+
+/**
+ * Состояние пункта. `stale` — цель изменилась после того, как пункт
+ * предложили (агент вычисляет при чтении по ревизии цели).
+ */
+export const proposalItemStatusSchema = z.enum(['pending', 'accepted', 'rejected', 'stale']);
+
+/** Вид правки: новое, изменено, удалено. */
+export const proposalItemKindSchema = z.enum(['added', 'changed', 'removed']);
+
+/**
+ * Одна из нескольких ссылок источника, например запись голосового сообщения
+ * в документах проекта. Без `href` рендерер рисует подпись текстом: зритель
+ * без права открыть запись видит «Голосовое сообщение 1», но перейти не может.
+ * С `href` действует то же правило адреса, что у подписи источника.
+ */
+export const proposalSourceLinkSchema = z
+  .object({
+    label: z.string().min(1).max(120),
+    href: z.string().min(1).max(2000).optional(),
+  })
+  .strict();
+
+/**
+ * Откуда предложение. Одна форма на два места: у карточки — сообщение, из
+ * которого собрана пачка (`Голосовое сообщение · 0:21` и цитата), у пункта —
+ * документ и страница (`Счёт за сентябрь.pdf, стр. 2`), цитата и ссылка.
+ * Нужна подпись или цитата. Ссылкой рендерер делает подпись, только если
+ * `href` — путь от корня хоста или http(s); служебную ссылку агента
+ * (`project-attachment:…`) в `href` не кладут. `href` — одна ссылка на всю
+ * подпись; если записей несколько (пачка из двух голосовых), они идут в
+ * `links` и рисуются после подписи.
+ */
+export const proposalSourceSchema = z
+  .object({
+    label: z.string().min(1).max(120).optional(),
+    quote: z.string().min(1).max(1000).optional(),
+    href: z.string().min(1).max(2000).optional(),
+    /** Пустой список равен отсутствию поля: агенту не нужно выкидывать ключ, когда записей нет. */
+    links: z.array(proposalSourceLinkSchema).max(20).optional(),
+  })
+  .strict()
+  .refine(source => source.label !== undefined || source.quote !== undefined, {
+    message: 'source needs a label or a quote',
+  });
+
+/**
+ * Пункт пачки: «Что · Было · Станет · С какой даты». Значения — готовые
+ * строки от агента, рендерер их не форматирует. У нового пункта обычно нет
+ * `before`, у удалённого — `after`; схема этого не требует, рендерер
+ * показывает то, что пришло.
+ */
+export const proposalItemSchema = z
+  .object({
+    id: z.string().min(1).max(120),
+    kind: proposalItemKindSchema,
+    label: z.string().min(1).max(200),
+    before: z.string().min(1).max(200).optional(),
+    after: z.string().min(1).max(200).optional(),
+    /** «С какой даты» действует изменение — готовая строка, напр. `01.11.2026`. */
+    effectiveFrom: z.string().min(1).max(40).optional(),
+    /** Без поля пункт ждёт решения (`pending`). */
+    status: proposalItemStatusSchema.optional(),
+    /** Откуда взят пункт: документ и страница. Без поля пункт идёт от источника всей пачки. */
+    source: proposalSourceSchema.optional(),
+  })
+  .strict();
+
+/** Кнопка подтверждения: шлёт `action` с контекстом `{proposalId, decision: 'accept'}`. */
+export const proposalConfirmSchema = z
+  .object({
+    label: z.string().min(1).max(80),
+    action: z.string().min(1).max(120),
+  })
+  .strict();
+
+/**
+ * Ссылка на страницу решений («Решить в „Требуют решения“»). Показывается
+ * вместо кнопки, когда живой задачи у агента уже нет: `confirm` не пришёл
+ * или поверхность прошлая (режим «только чтение» хоста). Ссылкой рендерер
+ * делает только путь от корня хоста или http(s), остальное не показывает.
+ */
+export const proposalDecideLinkSchema = z
+  .object({
+    label: z.string().min(1).max(120),
+    href: z.string().min(1).max(2000),
+  })
+  .strict();
+
+/**
+ * Карточка подтверждения пачки предложений. `view` выбирает раскладку
+ * пунктов: `list` — строки «новое / изменено / удалено», `table` — таблица
+ * «Что · Было · Станет · С какой даты». `canDecide: false` — у зрителя нет
+ * права решать: карточка без кнопки и без ссылки.
+ */
+export const proposalCardPropsSchema = z
+  .object({
+    proposalId: z.string().min(1).max(200),
+    title: z.string().min(1).max(120),
+    state: proposalCardStateSchema,
+    view: z.enum(['list', 'table']).optional(),
+    items: z.array(proposalItemSchema).min(1).max(50),
+    source: proposalSourceSchema.optional(),
+    /** Приглушённая строка под пунктами: что будет после подтверждения и кто может решать. */
+    note: z.string().min(1).max(400).optional(),
+    confirm: proposalConfirmSchema.optional(),
+    canDecide: z.boolean().optional(),
+    decideLink: proposalDecideLinkSchema.optional(),
+  })
+  .strict();
+
+export type ProposalCardState = z.infer<typeof proposalCardStateSchema>;
+export type ProposalItemStatus = z.infer<typeof proposalItemStatusSchema>;
+export type ProposalItemKind = z.infer<typeof proposalItemKindSchema>;
+export type ProposalItem = z.infer<typeof proposalItemSchema>;
+export type ProposalSource = z.infer<typeof proposalSourceSchema>;
+export type ProposalSourceLink = z.infer<typeof proposalSourceLinkSchema>;
+export type ProposalConfirm = z.infer<typeof proposalConfirmSchema>;
+export type ProposalDecideLink = z.infer<typeof proposalDecideLinkSchema>;
+export type ProposalCardProps = z.infer<typeof proposalCardPropsSchema>;
+
+export const proposalCardDefinition: CatalogComponentDefinition<typeof proposalCardPropsSchema> = {
+  name: 'ProposalCard',
+  slug: 'proposal-card',
+  description:
+    'A human-in-the-loop confirmation card for a batch of proposed changes (a data agent never writes on its own: it proposes, a person confirms). Shows a title, the batch state (open, accepted, rejected, superseded), the items either as a list grouped by kind (added / changed / removed) or as a table "What · Was · Becomes · Effective from", an optional source of the batch (label, quote, optional link, and optional extra `links` such as the voice recordings the batch came from — a link without href renders as plain text), an optional per-item source of the same shape (the document and page an item was taken from, with a quote and an optional link), an optional note, and a confirm button that dispatches `action` with context { proposalId, decision: "accept" }. Item statuses: pending, accepted, rejected, stale. When the agent task is gone (no `confirm`, or the host shows the surface read-only) the card shows `decideLink` instead of the button; with `canDecide: false` it shows neither. Values arrive as ready strings — the renderer does not format them.',
+  schema: proposalCardPropsSchema,
+};

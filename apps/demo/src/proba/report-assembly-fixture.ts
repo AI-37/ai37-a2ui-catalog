@@ -1,7 +1,13 @@
-import {liftReportPropsSchema, thermalReportPropsSchema} from '@ai37/a2ui-catalog-schemas';
+import {
+  liftReportPropsSchema,
+  thermalReportPropsSchema,
+  verificationReportPropsSchema,
+} from '@ai37/a2ui-catalog-schemas';
 import liftFixture from '../../../../fixtures/valid/lift-report.json';
 import multiFixture from '../../../../fixtures/valid/thermal-report-multi.json';
 import singleFixture from '../../../../fixtures/valid/thermal-report-single.json';
+import verificationPassFixture from '../../../../fixtures/valid/verification-report-pass.json';
+import verificationReviewFixture from '../../../../fixtures/valid/verification-report-review.json';
 import type {ReportAssemblyBlock} from './report-assembly.types';
 
 /**
@@ -35,5 +41,19 @@ export const REPORT_BLOCKS: ReportAssemblyBlock[] = [
     title: 'LiftReport',
     lead: 'Вердикт, «Что изменить» с пересчитанными вариантами, исходные данные, протокол.',
     props: liftReportPropsSchema.parse(liftFixture.props),
+  },
+  {
+    kind: 'verification',
+    id: 'verification-review',
+    title: 'VerificationReport · проверка контрагента',
+    lead: 'Вердикт «требует проверки», восемь проверок: строки с деталями раскрываются, остальные — обычные строки.',
+    props: verificationReportPropsSchema.parse(verificationReviewFixture.props),
+  },
+  {
+    kind: 'verification',
+    id: 'verification-single',
+    title: 'VerificationReport · точечная проверка',
+    lead: 'Тот же компонент с одной строкой: вердикт карточки — статус этой проверки.',
+    props: verificationReportPropsSchema.parse(verificationPassFixture.props),
   },
 ];

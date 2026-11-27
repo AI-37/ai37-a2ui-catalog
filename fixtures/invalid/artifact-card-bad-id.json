@@ -1,0 +1,7 @@
+{
+  "component": "ArtifactCard",
+  "props": {
+    "artifactId": "../../api/admin",
+    "name": "Протокол"
+  }
+}

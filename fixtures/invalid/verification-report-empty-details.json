@@ -1,0 +1,7 @@
+{
+  "component": "VerificationReport",
+  "props": {
+    "verdict": {"status": "warning", "badge": "Требует дополнительной проверки", "headline": "ООО «Ромашка»"},
+    "checks": [{"id": "okved", "label": "Профильный ОКВЭД", "status": "pass", "details": []}]
+  }
+}

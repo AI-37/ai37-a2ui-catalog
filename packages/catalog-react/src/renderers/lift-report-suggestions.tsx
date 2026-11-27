@@ -2,6 +2,7 @@ import React from 'react';
 import type {LiftReportSuggestions} from '@ai37/a2ui-catalog-schemas';
 import {LiftReportActionButton} from './lift-report-action-button';
 import type {LiftReportOnAction} from './lift-report.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Блок «Что изменить»: варианты с уже пересчитанным результатом в `detail`.
@@ -16,9 +17,10 @@ export function LiftReportSuggestionsSection({
   suggestions: LiftReportSuggestions;
   onAction: LiftReportOnAction;
 }) {
+  const m = useA2uiMessages();
   return (
     <section className="a2ui-lr__section">
-      <p className="a2ui-lr__list-label">{suggestions.title ?? 'Что изменить'}</p>
+      <p className="a2ui-lr__list-label">{suggestions.title ?? m.report.whatToChange}</p>
       <div className="a2ui-lr__rows">
         {suggestions.items.map(item => (
           <div key={item.id} className={`a2ui-lr__row a2ui-lr__row--${item.tone}`}>

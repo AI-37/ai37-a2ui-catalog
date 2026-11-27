@@ -1,0 +1,27 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_7f3a2c",
+    "title": "Изменения из голосового сообщения",
+    "state": "open",
+    "view": "list",
+    "items": [
+      {
+        "id": "n1",
+        "kind": "added",
+        "label": "узел",
+        "after": "камера охлаждения зерна (система, круглый год)"
+      },
+      {"id": "l1", "kind": "added", "label": "связь", "after": "улица → камера"},
+      {"id": "c1", "kind": "changed", "label": "вытяжка ростеров", "before": "1", "after": "2"},
+      {"id": "c2", "kind": "changed", "label": "план датчиков", "before": "15", "after": "17 каналов"}
+    ],
+    "source": {
+      "label": "Голосовое сообщение · 0:21",
+      "quote": "Вытяжек над ростерами две, а не одна, и есть камера охлаждения зерна — работает круглый год."
+    },
+    "note": "После подтверждения: модель v2, запись в журнале от вашего имени. Подтвердить может владелец или редактор.",
+    "confirm": {"label": "Подтвердить", "action": "proposal.accept"},
+    "decideLink": {"label": "Решить в «Требуют решения»", "href": "/cabinet/decisions?proposal=pb_7f3a2c"}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "component": "VerificationReport",
+  "props": {
+    "verdict": {
+      "status": "fail",
+      "badge": "ИНН не найден",
+      "headline": "ИНН 7700000000"
+    },
+    "checks": [],
+    "note": "Организация с таким ИНН не найдена в ЕГРЮЛ — проверьте номер."
+  }
+}

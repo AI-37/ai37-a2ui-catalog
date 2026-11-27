@@ -20,6 +20,7 @@ import {isRevealedField} from './is-revealed-field';
 import {seedCalcValues} from './seed-calc-values';
 import {StyleTag} from './style-tag';
 import {useA2uiBaseStyles} from './shared';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Сбор исходных данных расчёта инсоляции одним экраном: readonly-условия
@@ -37,6 +38,7 @@ export const InsolationEditor = createComponentImplementation(
   insolationEditorDefinition,
   ({props, context}) => {
     useA2uiBaseStyles();
+    const i18n = useA2uiI18n();
 
     const [points, setPoints] = React.useState(() => createCalcScreens(props.points));
     const [buildings, setBuildings] = React.useState(() => createCalcScreens(props.buildings));
@@ -160,6 +162,7 @@ export const InsolationEditor = createComponentImplementation(
           })),
         ),
       ]),
+      i18n.messages,
     );
 
     return (
@@ -200,7 +203,7 @@ export const InsolationEditor = createComponentImplementation(
             {props.pointTemplate.fields
               .filter(field => isRevealedField(field, active.values))
               .map(field => {
-                const range = calcFieldRangeWarning(field, active.values[field.name]);
+                const range = calcFieldRangeWarning(field, active.values[field.name], i18n);
 
                 return (
                   <CalcField

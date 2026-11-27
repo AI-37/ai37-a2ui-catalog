@@ -29,6 +29,11 @@ describe('catalog-schemas', () => {
     const form = readFixture('valid', 'form-card.json');
     const constructions = readFixture('valid', 'constructions-editor.json');
     const conditions = readFixture('valid', 'constructions-editor-conditions.json');
+    const withR = readFixture('valid', 'constructions-editor-r.json');
+    const withNt = readFixture('valid', 'constructions-editor-nt.json');
+    // Тонкий слой и облицовка вентфасада без толщины — полные строки
+    // (change constructions-layer-kind-thin).
+    const withThin = readFixture('valid', 'constructions-editor-thin.json');
 
     expect(simpleTablePropsSchema.safeParse(simple.props).success).toBe(true);
     expect(flexTablePropsSchema.safeParse(flex.props).success).toBe(true);
@@ -37,6 +42,9 @@ describe('catalog-schemas', () => {
     expect(formCardPropsSchema.safeParse(form.props).success).toBe(true);
     expect(constructionsEditorPropsSchema.safeParse(constructions.props).success).toBe(true);
     expect(constructionsEditorPropsSchema.safeParse(conditions.props).success).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse(withR.props).success).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse(withNt.props).success).toBe(true);
+    expect(constructionsEditorPropsSchema.safeParse(withThin.props).success).toBe(true);
   });
 
   it('rejects invalid fixtures', () => {
@@ -58,6 +66,13 @@ describe('catalog-schemas', () => {
       'invalid',
       'constructions-editor-unknown-type.json',
     );
+    const invalidConstructionsR = readFixture('invalid', 'constructions-editor-r-above-one.json');
+    // Незаданная температура выражается ОТСУТСТВИЕМ ключа, не null.
+    const invalidConstructionsTv = readFixture(
+      'invalid',
+      'constructions-editor-tv-room-null.json',
+    );
+    const invalidLayerKind = readFixture('invalid', 'constructions-editor-unknown-layer-kind.json');
 
     expect(simpleTablePropsSchema.safeParse(invalidSimple.props).success).toBe(false);
     expect(flexTablePropsSchema.safeParse(invalidFlex.props).success).toBe(false);
@@ -71,6 +86,13 @@ describe('catalog-schemas', () => {
     expect(
       constructionsEditorPropsSchema.safeParse(invalidConstructionsThickness.props).success,
     ).toBe(false);
+    expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsR.props).success).toBe(
+      false,
+    );
+    expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsTv.props).success).toBe(
+      false,
+    );
+    expect(constructionsEditorPropsSchema.safeParse(invalidLayerKind.props).success).toBe(false);
     expect(constructionsEditorPropsSchema.safeParse(invalidConstructionsType.props).success).toBe(
       false,
     );

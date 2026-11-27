@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
+from .keo_drawings import KeoDrawings
 from .shared import StrictModel
 
 
@@ -66,6 +67,8 @@ class KeoReportProtocol(StrictModel):
     # Без имени файла кнопки «Скачать» нет.
     downloadFileName: str = Field(default=None, min_length=1, max_length=120)
     downloadContent: str = Field(default=None, min_length=1, max_length=120000)
+    # Относительный URL ручки агента для «Скачать» — меню форматов .md/.docx.
+    downloadUrl: str = Field(default=None, min_length=1, max_length=2000)
 
 
 class KeoReportProps(StrictModel):
@@ -78,4 +81,6 @@ class KeoReportProps(StrictModel):
         default=None, min_length=1
     )
     inputs: KeoReportInputs
+    # Модель чертежей Данилюка числами; нет поля — секции «Чертежи» нет.
+    drawings: KeoDrawings = None
     protocol: KeoReportProtocol = None

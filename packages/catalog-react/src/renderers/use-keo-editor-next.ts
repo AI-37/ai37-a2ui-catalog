@@ -12,14 +12,18 @@ import {formatCalcSourceCounter} from './format-calc-source-counter';
 import {isRevealedField} from './is-revealed-field';
 import {resolveKeoComputedNote} from './resolve-keo-computed-note';
 import {seedCalcValues} from './seed-calc-values';
+import {useWalkthroughFocus} from './use-walkthrough-focus';
 import {findMissingKeoTargets} from './find-missing-keo-targets';
 import {KEO_CONDITIONS_KEY} from './keo-conditions-key';
 import {keoDocumentKey} from './keo-document-key';
 import {keoNavigationTargets} from './keo-navigation-targets';
 import {keoOpenWithRoom} from './keo-open-with-room';
 import {keoRoomLabels} from './keo-room-labels';
+import {MIN_EDITOR_ITEMS} from './min-editor-items';
+import {resolveAddItemState} from './resolve-add-item-state';
 import {keoTargetRoom} from './keo-target-room';
 import type {KeoControl, KeoDocument, KeoRoomDraft, KeoSink} from './keo-next.types';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Состояние экрана КЕО: помещения, раскрытие, просмотр секций и счётчик
@@ -40,6 +44,7 @@ import type {KeoControl, KeoDocument, KeoRoomDraft, KeoSink} from './keo-next.ty
  * черновик про данные.
  */
 export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoControl {
+  const i18n = useA2uiI18n();
   const sections = props.roomTemplate.sections;
   const templateFields = sections.flatMap(section => section.fields);
   // Группа условий — раскрывашка только с заголовком: без него ей нечем
@@ -65,6 +70,10 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
     };
   };
 
+  // Проход ведёт не только глазами: цель шага получает каретку (change
+  // `next-walkthrough-focus`).
+  const walkthroughFocus = useWalkthroughFocus<string>();
+
   const [state, setState] = React.useState(() => seed(props));
   const [touched, setTouched] = React.useState<ReadonlySet<string>>(() => new Set());
   const [reviewed, setReviewed] = React.useState<ReadonlySet<string>>(() => new Set(state.open));
@@ -73,6 +82,9 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
   // Сериализация последнего отправленного черновика — дедуп по содержимому:
   // «Далее» сразу после паузы ввода иначе слало бы то же самое дважды.
   const lastDraft = React.useRef<string | null>(null);
+  // Документный ключ того же черновика — для узнавания СВОЕГО эха. Отдельно от
+  // `lastDraft`: дедуп различает имена помещений, эхо по ним не отличают.
+  const lastDraftKey = React.useRef<string | null>(null);
 
   const cancelPendingDraft = () => {
     if (draftTimer.current === null) return;
@@ -91,13 +103,29 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
   // ровно подпись климата, ради которой всё и затевалось. Пересевать по ней
   // значило бы схлопывать секцию под руками у пользователя (Решение 5 design
   // `keo-editor-draft`).
-  const propsKey = JSON.stringify([props.rooms, props.roomTemplate, props.conditions]);
+  // Эхо может ОТСТАВАТЬ от живого ввода: пользователь печатает дальше, пока
+  // черновик в полёте, и состояние уже не равно снапшоту. Поэтому своё эхо
+  // узнаётся по ПОСЛЕДНЕМУ ОТПРАВЛЕННОМУ черновику, а не по текущему состоянию:
+  // совпало — это ack, пересев которого стёр бы свежие нажатия под руками.
+  // `note` условий В КЛЮЧ НЕ ВХОДИТ: подпись рендерится из props напрямую, а
+  // пересев существует ради значений и раскрытия. В REST-канале черновика
+  // (`draftUrl`) ответ меняет ровно `note` при СТАРЫХ значениях в props — ключ
+  // с подписью считал это новым сообщением, ack по документу не срабатывал
+  // (значения props ≠ отправленному черновику), и пересев схлопывал секции и
+  // откатывал ввод под руками на каждую паузу ввода.
+  const propsKey = JSON.stringify([
+    props.rooms,
+    props.roomTemplate,
+    props.conditions.map(({note: _note, ...rest}) => rest),
+  ]);
   const [baseKey, setBaseKey] = React.useState(propsKey);
   if (propsKey !== baseKey) {
     const next = seed(props);
     setBaseKey(propsKey);
 
-    if (keoDocumentKey(next) !== keoDocumentKey(state)) {
+    const nextKey = keoDocumentKey(next);
+    const ownEcho = nextKey === lastDraftKey.current || nextKey === keoDocumentKey(state);
+    if (!ownEcho) {
       cancelPendingDraft();
       setState(next);
       setTouched(new Set());
@@ -138,6 +166,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
     if (serialized === lastDraft.current) return;
 
     lastDraft.current = serialized;
+    lastDraftKey.current = keoDocumentKey(document);
     sink.onDraft(document);
   };
 
@@ -206,9 +235,14 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
             })),
         ),
       ]),
+      i18n.messages,
     ),
     pending,
-    canAddRoom: props.maxRooms === undefined || rooms.length < props.maxRooms,
+    addRoomState: resolveAddItemState({
+      count: rooms.length,
+      max: props.maxRooms,
+      minCount: MIN_EDITOR_ITEMS,
+    }),
 
     // Замена значения трогает только ключи своего списка: аккордеонов на экране
     // много, и общее множество иначе схлопывало бы соседний.
@@ -243,7 +277,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
     isEdited: (roomId, field) => touched.has(calcTouchedKey(roomId, field)),
 
     warningsFor: (room: KeoRoomDraft, field: CalcEditorField) => {
-      const range = calcFieldRangeWarning(field, room.values[field.name]);
+      const range = calcFieldRangeWarning(field, room.values[field.name], i18n);
 
       return [...(rulesFor(room).get(field.name) ?? []), ...(range === undefined ? [] : [range])];
     },
@@ -301,7 +335,7 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
     },
 
     removeRoom: roomId => {
-      if (rooms.length <= 1) return;
+      if (rooms.length <= MIN_EDITOR_ITEMS) return;
       const mine = (key: string) => key === roomId || keoTargetRoom(key) === roomId;
       const nextRooms = rooms.filter(room => room.id !== roomId);
 
@@ -334,7 +368,11 @@ export function useKeoEditorNext(props: KeoEditorProps, sink: KeoSink): KeoContr
 
       // «Далее» — структурный шаг: черновик уходит сразу, без паузы.
       sendDraftNow();
+      // Каретка переедет в цель эффектом: сейчас её панель ещё скрыта.
+      walkthroughFocus.aimAt(target);
       replaceOpen(keoOpenWithRoom(target));
     },
+
+    bindSection: walkthroughFocus.bindSection,
   };
 }

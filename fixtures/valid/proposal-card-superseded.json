@@ -1,0 +1,9 @@
+{
+  "component": "ProposalCard",
+  "props": {
+    "proposalId": "pb_5b81aa",
+    "title": "Изменения из сообщения 14:32",
+    "state": "superseded",
+    "items": [{"id": "c1", "kind": "changed", "label": "вытяжка ростеров", "before": "1", "after": "2", "status": "pending"}]
+  }
+}

@@ -57,6 +57,31 @@ describe('lift-report schema', () => {
     ).toBe(false);
   });
 
+  it('принимает протокол текстом (downloadFileName/downloadContent), как у теплотеха', () => {
+    const {props} = readValidFixture('lift-report-protocol-text.json');
+    const protocol = props.protocol as Record<string, unknown>;
+
+    expect(liftReportPropsSchema.safeParse(props).success).toBe(true);
+    // Те же ограничения, что у ThermalReport: имя 1–120, содержимое 1–120000.
+    const withProtocol = (patch: Record<string, unknown>) =>
+      liftReportPropsSchema.safeParse({...props, protocol: {...protocol, ...patch}}).success;
+    expect(withProtocol({downloadFileName: ''})).toBe(false);
+    expect(withProtocol({downloadFileName: 'п'.repeat(121)})).toBe(false);
+    expect(withProtocol({downloadContent: ''})).toBe(false);
+    expect(withProtocol({downloadContent: 'x'.repeat(120001)})).toBe(false);
+  });
+
+  it('лишнее поле протокола по-прежнему отклоняется', () => {
+    const invalid = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), 'fixtures', 'invalid', 'lift-report-protocol-extra-key.json'),
+        'utf8',
+      ),
+    ) as {props: unknown};
+
+    expect(liftReportPropsSchema.safeParse(invalid.props).success).toBe(false);
+  });
+
   it('accepts a suggestion tone only from the enum', () => {
     const {props} = readValidFixture('lift-report.json');
     const suggestions = props.suggestions as {items: Array<Record<string, unknown>>};

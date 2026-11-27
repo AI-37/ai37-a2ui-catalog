@@ -12,6 +12,7 @@ const versionFiles = [
   'package.json',
   'packages/catalog-schemas/package.json',
   'packages/catalog-react/package.json',
+  'packages/mcp-app-view/package.json',
   'apps/demo/package.json',
   'packages/catalog-python/pyproject.toml',
 ];

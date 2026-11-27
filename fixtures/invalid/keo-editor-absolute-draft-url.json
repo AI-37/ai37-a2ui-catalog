@@ -1,0 +1,55 @@
+{
+  "component": "KeoEditorNext",
+  "props": {
+    "title": "Параметры расчёта КЕО",
+    "conditions": [
+      {
+        "name": "region",
+        "label": "Город",
+        "value": "Тюмень",
+        "type": "lookup",
+        "referenceId": "cities",
+        "source": {
+          "source": "project",
+          "note": "из проекта · изменить только для расчёта"
+        },
+        "note": "группа светового климата 1 — C_N = 1,00 для любой ориентации"
+      }
+    ],
+    "roomTemplate": {
+      "sections": [
+        {
+          "key": "geometry",
+          "title": "Геометрия помещения",
+          "fields": [
+            {
+              "name": "depth",
+              "label": "d_п — глубина помещения, м",
+              "type": "number",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    "rooms": [
+      {
+        "values": {
+          "depth": 4.5
+        }
+      }
+    ],
+    "roomLabel": "Помещение",
+    "addRoomLabel": "Добавить помещение",
+    "removeRoomLabel": "Удалить помещение",
+    "sourcesLabel": "Источники значений",
+    "conditionsLabel": "Условия",
+    "submit": {
+      "name": "keo_calculate",
+      "label": "Рассчитать"
+    },
+    "nextLabel": "Далее",
+    "draftAction": "keo:draft",
+    "draftUrl": "https://evil.example/api/agent-resource?resource=keo-draft"
+  }
+}

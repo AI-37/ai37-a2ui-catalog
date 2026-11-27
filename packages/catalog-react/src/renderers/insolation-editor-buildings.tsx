@@ -2,6 +2,7 @@ import React from 'react';
 import {CalcEditorField as CalcField} from './calc-editor-field';
 import {calcFieldRangeWarning} from './calc-field-range-warning';
 import type {InsolationBuildingsProps} from './insolation-editor.types';
+import {useA2uiI18n} from '../i18n';
 
 /**
  * Секция затеняющей застройки: здания — компактные строки (направление
@@ -22,6 +23,7 @@ export function InsolationBuildings({
   onAdd,
   onRemove,
 }: InsolationBuildingsProps) {
+  const i18n = useA2uiI18n();
   return (
     <section className="a2ui-ie-section">
       <div className="a2ui-ie-section__head">
@@ -33,12 +35,14 @@ export function InsolationBuildings({
       </div>
       <div className="a2ui-ie-buildings">
         {buildings.length === 0 ? (
-          <span className="a2ui-ie-buildings__empty">Застройка не указана</span>
+          <span className="a2ui-ie-buildings__empty">
+            {i18n.messages.insolation.buildingsEmpty}
+          </span>
         ) : null}
         {buildings.map(building => (
           <div key={building.id} className="a2ui-ie-building">
             {fields.map(field => {
-              const range = calcFieldRangeWarning(field, building.values[field.name]);
+              const range = calcFieldRangeWarning(field, building.values[field.name], i18n);
 
               return (
                 <CalcField

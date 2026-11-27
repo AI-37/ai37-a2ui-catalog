@@ -1,6 +1,8 @@
 import React from 'react';
 import type {CalcFieldSource, LiftEditorFieldSource} from '@ai37/a2ui-catalog-schemas';
 import {fieldSourceLabel} from './field-source-label';
+import {renderLabelSubscripts} from './render-label-subscripts';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Подпись под контролом: откуда взялось значение. Обоснование агента (`note`)
@@ -13,10 +15,14 @@ import {fieldSourceLabel} from './field-source-label';
  * `assumption` дополнительно несёт точку-маркер: допущение должно быть видно
  * взглядом, не вчитыванием (так же сегодня устроен `CalcSourceNote`).
  *
+ * Обоснование — тот же инженерный текст, что и подписи: индексы в нём
+ * рендерятся тем же правилом.
+ *
  * Правку снимает вызывающий: источники приходят сюда уже без тронутых полей
  * (`omitTouchedLiftSources`).
  */
 export function SourceNote({source}: {source: LiftEditorFieldSource | CalcFieldSource}) {
+  const m = useA2uiMessages();
   const accent = source.source === 'suggested' || source.source === 'question';
   const marked = source.source === 'assumption';
 
@@ -26,7 +32,14 @@ export function SourceNote({source}: {source: LiftEditorFieldSource | CalcFieldS
       style={marked ? markedStyle : undefined}
     >
       {marked ? <span aria-hidden="true" style={dotStyle} /> : null}
-      {source.note ?? fieldSourceLabel(source.source)}
+      {/* Подпись целиком — ОДИН потомок: у допущения строка выложена
+          `inline-flex` с зазором, и куски `renderLabelSubscripts` стали бы
+          отдельными флекс-элементами — «ρ  ф  0,5» вместо «ρф 0,5». */}
+      <span>
+        {source.note === undefined
+          ? fieldSourceLabel(source.source, m)
+          : renderLabelSubscripts(source.note)}
+      </span>
     </span>
   );
 }

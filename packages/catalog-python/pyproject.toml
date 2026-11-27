@@ -1,6 +1,6 @@
 [project]
 name = "ai37-a2ui-catalog"
-version = "0.30.0"
+version = "0.50.0"
 description = "Pydantic models and validation helpers for the AI37 A2UI catalog"
 readme = "README.md"
 authors = [{ name = "AI37", email = "dev@ai37.ru" }]
@@ -14,6 +14,9 @@ dependencies = [
 
 [tool.poetry]
 packages = [{ include = "ai37_a2ui_catalog", from = "src" }]
+# HTML view не в git (его собирает packages/mcp-app-view), поэтому poetry сам его
+# не возьмёт — указываем явно. Без сборки view пакет не собрать: так и задумано.
+include = [{ path = "src/ai37_a2ui_catalog/mcp_app/a2ui-mcp-app.html", format = ["sdist", "wheel"] }]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"

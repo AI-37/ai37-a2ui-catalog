@@ -25,6 +25,7 @@ import {omitTouchedSources} from './omit-touched-sources';
 import {scrollToElement} from './scroll-to-element';
 import {StyleTag} from './style-tag';
 import {useA2uiBaseStyles} from './shared';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Экран теплотехнического расчёта одним сообщением: блок «Условия» в шапке и
@@ -64,6 +65,7 @@ export const ConstructionsEditor = createComponentImplementation(
   constructionsEditorDefinition,
   ({props, context}) => {
     useA2uiBaseStyles();
+    const m = useA2uiMessages();
 
     const hasGeneral = props.general !== undefined;
 
@@ -333,7 +335,9 @@ export const ConstructionsEditor = createComponentImplementation(
             </div>
           ) : null}
           <section className="a2ui-ce__group">
-            <h3 className="a2ui-ce-section-title">Конструкции · {constructions.length}</h3>
+            <h3 className="a2ui-ce-section-title">
+              {formatMessage(m.constructions.title, {count: constructions.length})}
+            </h3>
             <div className="a2ui-ce__list">
               {constructions.map(entry => (
                 <div
@@ -390,7 +394,10 @@ export const ConstructionsEditor = createComponentImplementation(
                 следующих props (Решение 4 design.md). */}
             {climateDirty ? null : (
               <span className="a2ui-ce__count">
-                проходит {passing.length} из {comparable.length}
+                {formatMessage(m.constructions.passing, {
+                  passing: passing.length,
+                  total: comparable.length,
+                })}
               </span>
             )}
           </footer>

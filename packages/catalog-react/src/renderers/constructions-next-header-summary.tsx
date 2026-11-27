@@ -1,7 +1,9 @@
 import React from 'react';
 import {Button} from '../primitives';
-import {CHERDACHNYE_SUBTYPE_LABELS} from './cherdachnye-subtype-labels';
+import {cherdachnyeSubtypeLabels} from './cherdachnye-subtype-labels';
+import {isSubtypeRequired} from './is-subtype-required';
 import type {ConstructionsNextHeaderRowProps} from './constructions-next.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Режим чтения шапки: тип (с разновидностью через «·») и название текстом,
@@ -13,8 +15,9 @@ export function ConstructionsNextHeaderSummary({
   typeConfigs,
   onOpen,
 }: ConstructionsNextHeaderRowProps) {
+  const m = useA2uiMessages();
   const config = typeConfigs.find(candidate => candidate.type === entry.type);
-  const subtypeLabel = entry.subtype ? CHERDACHNYE_SUBTYPE_LABELS[entry.subtype] : undefined;
+  const subtypeLabel = entry.subtype ? cherdachnyeSubtypeLabels(m)[entry.subtype] : undefined;
   const name = entry.name?.trim();
 
   return (
@@ -23,14 +26,68 @@ export function ConstructionsNextHeaderSummary({
         <span className="a2ui-t--sub">
           {config?.label ?? entry.type}
           {subtypeLabel ? ` · ${subtypeLabel}` : ''}
+          <ConstructionsNextHeaderSubtypeMissing
+            missing={entry.subtype === undefined && isSubtypeRequired(config)}
+          />
+          <ConstructionsNextHeaderR r={entry.r} />
+          <ConstructionsNextHeaderTemp label="t в" value={entry.tvRoom} />
+          <ConstructionsNextHeaderTemp label="t от" value={entry.totRoom} />
         </span>
         <ConstructionsNextHeaderName name={name} />
       </span>
-      <Button size="sm" aria-label="Изменить тип и название" onClick={onOpen}>
-        Изменить
+      <Button size="sm" aria-label={m.constructions.editHeader} onClick={onOpen}>
+        {m.common.edit}
       </Button>
     </div>
   );
+}
+
+/**
+ * Место разновидности не остаётся пустым: подсветка карточки говорит, где
+ * смотреть, а текст — что заполнить. Тот же приём, что «толщина не задана» в
+ * строке слоя. Разделитель внутри span, чтобы «·» не повис без текста у типов
+ * без разновидностей.
+ */
+function ConstructionsNextHeaderSubtypeMissing({missing}: {missing: boolean}) {
+  const m = useA2uiMessages();
+  if (!missing) {
+    return null;
+  }
+
+  return <span className="a2ui-t--warning">{` ·\u00A0${m.constructions.subtypeMissing}`}</span>;
+}
+
+/**
+ * Коэффициент однородности печатается в строке типа тем же «·», что и
+ * разновидность: без него строки нет — агент считает с r = 1 и скажет об этом
+ * в отчёте сам. Разделитель приклеен неразрывным пробелом (Решение 7 change
+ * `constructions-missing-subtype-invalid`).
+ */
+function ConstructionsNextHeaderR({r}: {r: number | undefined}) {
+  if (r === undefined) {
+    return null;
+  }
+
+  return <span>{` ·\u00A0r = ${r.toFixed(2)}`}</span>;
+}
+
+/**
+ * Температура помещения печатается в строке типа тем же «·», что r: заданная
+ * tв* или tот* меняет норму через nt, и не увидеть её в свёрнутой форме
+ * нельзя. Не задана — строки нет, конструкция считается по общим данным.
+ */
+function ConstructionsNextHeaderTemp({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | undefined;
+}) {
+  if (value === undefined) {
+    return null;
+  }
+
+  return <span>{` ·\u00A0${label} ${value > 0 ? '+' : ''}${value} °C`}</span>;
 }
 
 /** Название есть не у всех конструкций: пустая строка сдвигала бы тип вверх. */

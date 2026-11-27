@@ -332,7 +332,8 @@ export const CONSTRUCTIONS_EDITOR_CSS = `
 .a2ui-ce-note {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  /* 6px — общий зазор «точка ↔ подпись» каталога (ke/ie/le-caption). */
+  gap: 6px;
   font-size: 11.5px;
   line-height: 15px;
   color: ${tokens.ceTextMuted};

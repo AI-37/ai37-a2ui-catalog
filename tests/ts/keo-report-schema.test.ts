@@ -42,4 +42,21 @@ describe('keo-report schema', () => {
       keoReportPropsSchema.safeParse({...fail.props, recommendations}).success,
     ).toBe(false);
   });
+
+  it('протокол принимает downloadUrl ручки агента', () => {
+    const fail = readValidFixture('keo-report-fail.json');
+    const protocol = {...(fail.props.protocol as Record<string, unknown>)};
+    delete protocol.downloadFileName;
+    delete protocol.downloadContent;
+    protocol.downloadUrl = '/api/agent-resource?resource=keo-report&id=r1';
+
+    expect(keoReportPropsSchema.safeParse({...fail.props, protocol}).success).toBe(true);
+  });
+
+  it('пустой downloadUrl не проходит', () => {
+    const fail = readValidFixture('keo-report-fail.json');
+    const protocol = {...(fail.props.protocol as Record<string, unknown>), downloadUrl: ''};
+
+    expect(keoReportPropsSchema.safeParse({...fail.props, protocol}).success).toBe(false);
+  });
 });

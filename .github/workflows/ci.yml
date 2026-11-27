@@ -2,49 +2,85 @@ name: CI
 
 on:
   pull_request:
-  # Ручной запуск — чтобы можно было прогнать CI на self-hosted раннере
-  # (например когда исчерпаны минуты GitHub-hosted). На push/PR input не задан,
-  # inputs.runner пуст → все джобы идут на ubuntu-latest как раньше.
+  # Из cd.yml: ручной CD передаёт свой выбор раннера, чтобы CI-джобы шли туда же.
+  workflow_call:
+    inputs:
+      runner:
+        description: "Runner: auto = переменная CI_RUNNER, иначе ubuntu-latest"
+        type: string
+        required: false
+        default: auto
+  # Раннер (канон AI-37): ручной запуск с runner=ubuntu-latest или ai37-self-hosted выбирает
+  # явно; auto и автозапуск берут переменную организации CI_RUNNER — раннер тестов (CI),
+  # JSON-массив меток, напр. ["self-hosted","ai37-local-1"]; без неё — ubuntu-latest.
   workflow_dispatch:
     inputs:
       runner:
-        description: Runner for CI jobs
+        description: "Runner: auto = переменная CI_RUNNER, иначе ubuntu-latest"
         type: choice
         required: true
-        default: ubuntu-latest
+        default: auto
         options:
+          - auto
           - ubuntu-latest
           - ai37-self-hosted
-  workflow_call:
 jobs:
-  test:
-    runs-on: ${{ inputs.runner == 'ai37-self-hosted' && fromJSON('["self-hosted", "ai37-local-1"]') || 'ubuntu-latest' }}
+  # Одна джоба: раннер подбирает прогон один раз, и PR разблокируется сразу после последнего шага.
+  # Отдельный агрегатор вставал на единственном self-hosted раннере в очередь за чужими джобами и
+  # держал PR красным уже после зелёных проверок. Имя ci-green — единое для всех репозиториев AI-37
+  # и обязательная проверка ruleset (docs/plans/doc-bot-pr-review.md).
+  ci-green:
+    runs-on: ${{ inputs.runner == 'ai37-self-hosted' && fromJSON('["self-hosted", "ai37-local-1"]') || inputs.runner == 'ubuntu-latest' && 'ubuntu-latest' || vars.CI_RUNNER && fromJSON(vars.CI_RUNNER) || 'ubuntu-latest' }}
     permissions:
       contents: read
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.29.3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
+          package-manager-cache: ${{ runner.environment != 'self-hosted' }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
+      # Poetry — официальным установщиком (install.python-poetry.org), версия = та, что сгенерировала
+      # poetry.lock. POETRY_HOME в runner.temp: каталог чистится после каждой джобы, поэтому на
+      # self-hosted раннере ничего не копится в ~/.local и не ломается, когда из toolcache удаляют
+      # Python, на котором был поставлен инструмент (так сломался прежний `pipx install poetry`).
+      # Ставится после setup-python, на его Python 3.13.
       - name: Install Poetry
-        run: pipx install poetry==2.3.2
+        shell: bash
+        timeout-minutes: 10
+        env:
+          POETRY_HOME: ${{ runner.temp }}/poetry
+          POETRY_VERSION: 2.3.2
+        # Сеть раннера иногда залипает (30.10 curl висел 5 минут, джоба ушла в таймаут). Поэтому у curl
+        # таймауты и повторы, а установку целиком повторяем до трёх раз. Установщик сам качает Poetry с
+        # PyPI, и запрос метаданных у него без таймаута, поэтому он ограничен `timeout 180`. Скрипт
+        # сохраняется в файл: упавший curl не превратится в «успешный» пустой скрипт.
+        run: |
+          for attempt in 1 2 3; do
+            curl -fsSL --retry 3 --retry-all-errors --connect-timeout 20 --max-time 120 \
+              -o "$RUNNER_TEMP/install-poetry.py" https://install.python-poetry.org \
+              && timeout 180 python3 "$RUNNER_TEMP/install-poetry.py" && break
+            [ "$attempt" -eq 3 ] && exit 1
+            echo "::warning::Poetry: попытка $attempt не удалась, повторяю"
+            rm -rf "$POETRY_HOME"; sleep 15
+          done
+          echo "$POETRY_HOME/bin" >> "$GITHUB_PATH"
 
       - name: Install Node.js dependencies
         env:
@@ -62,14 +98,16 @@ jobs:
       #     HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       #   run: node scripts/check-pr-release-metadata.mjs "$BASE_SHA" "$HEAD_SHA"
 
+      # Сборка — до тестов: тесты @ai37/a2ui-mcp-app читают собранный HTML view (бюджет
+      # размера, экспорт A2UI_MCP_APP_HTML), а Python-тесты — его копию в catalog-python.
+      - name: Run build
+        run: pnpm run build
+
       - name: Run TypeScript tests
         run: pnpm run test:ts
 
       - name: Run Python tests
         run: pnpm run test:python
-
-      - name: Run build
-        run: pnpm run build
 
       # Guard: закоммиченный ./public должен совпадать с исходником текущей версии каталога.
       # Падает, если забыли `pnpm run export:public` + commit после правки компонентов/бампа версии.

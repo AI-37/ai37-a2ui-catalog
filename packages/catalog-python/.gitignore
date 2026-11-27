@@ -1,0 +1,3 @@
+# Копия собранного view — её кладёт сборка packages/mcp-app-view (scripts/emit-entry.mjs).
+# В колесо попадает через `include` в pyproject.toml.
+src/ai37_a2ui_catalog/mcp_app/a2ui-mcp-app.html

@@ -2,6 +2,7 @@ import React from 'react';
 import type {LiftReportInputs} from '@ai37/a2ui-catalog-schemas';
 import {LiftReportActionButton} from './lift-report-action-button';
 import type {LiftReportOnAction} from './lift-report.types';
+import {useA2uiMessages} from '../i18n';
 
 /** Карточка «Исходные данные»: группы чипов по источнику значения (канон
  * `ThermalReport`). `tone: 'warning'` («принято системой — проверьте») —
@@ -13,10 +14,11 @@ export function LiftReportInputsCard({
   inputs: LiftReportInputs;
   onAction: LiftReportOnAction;
 }) {
+  const m = useA2uiMessages();
   return (
     <div className="a2ui-lr__card">
       <div className="a2ui-lr__inputs-head">
-        <span className="a2ui-lr__inputs-title">Исходные данные</span>
+        <span className="a2ui-lr__inputs-title">{m.report.inputs}</span>
         {inputs.action ? (
           <LiftReportActionButton action={inputs.action} variant="link" onAction={onAction} />
         ) : null}

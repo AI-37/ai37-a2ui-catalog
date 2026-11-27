@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import React from 'react';
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, within} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {A2uiSurface} from '@a2ui/react/v0_9';
 import {MessageProcessor, type A2uiMessage} from '@a2ui/web_core/v0_9';
@@ -196,6 +196,62 @@ describe('KeoEditorNext: состав экрана', () => {
     renderEditor(keoProps());
 
     expect(screen.queryByRole('button', {name: /^Действия:/})).toBeNull();
+  });
+});
+
+describe('KeoEditorNext: подстрочные индексы', () => {
+  /** Подпись поля целиком — вместе с пометкой обязательного. */
+  function labelOf(container: HTMLElement, name: string) {
+    return container
+      .querySelector(`input[name="${name}"]`)!
+      .closest('.a2ui-field')!
+      .querySelector('.a2ui-field__label')! as HTMLElement;
+  }
+
+  it('подпись поля показывает индекс подстрочным, а не через подчёркивание', () => {
+    const {container} = renderEditor(keoProps());
+
+    const label = labelOf(container as HTMLElement, 'depth');
+
+    expect(label.querySelector('sub')?.textContent).toBe('п');
+    expect(label.textContent).toContain('dп — глубина помещения, м');
+    expect(label.textContent).not.toContain('_');
+  });
+
+  it('сводка свёрнутой секции идёт по тому же правилу', async () => {
+    renderEditor(keoProps());
+
+    await openSection(ROOM);
+    const summary = section('Геометрия помещения');
+
+    expect(Array.from(summary.querySelectorAll('sub')).map(node => node.textContent)).toEqual([
+      'п',
+      'п',
+    ]);
+    expect(summary.textContent).not.toContain('_');
+  });
+
+  it('подписи под контролом идут по тому же правилу', async () => {
+    const {container} = renderEditor(keoProps());
+
+    await openRoomSection(ROOM, 'Затенение');
+    const note = (container as HTMLElement)
+      .querySelector('input[name="facadeReflection"]')!
+      .closest('.a2ui-field')!
+      .querySelector('.a2ui-t--sub:not(.a2ui-field__label)')! as HTMLElement;
+
+    expect(note.querySelector('sub')?.textContent).toBe('ф');
+    expect(note.textContent).toContain('ρф 0,5 — допущение');
+    expect(note.textContent).not.toContain('_');
+    // Подпись допущения выложена `inline-flex` с зазором: без обёртки куски
+    // строки стали бы отдельными флекс-элементами — «ρ  ф  0,5».
+    expect(note.querySelector('sub')!.parentElement).not.toBe(note);
+  });
+
+  it('подпись без индексов не меняется', () => {
+    const {container} = renderEditor(keoProps());
+
+    expect(labelOf(container as HTMLElement, 'glazing').textContent).toContain('Остекление');
   });
 });
 
@@ -501,6 +557,71 @@ describe('KeoEditorNext: черновик', () => {
     expect(section('Условия').textContent).toContain('пересчитано');
   });
 
+  /**
+   * Наполнение с ДВУМЯ полями помещения: на одном ключе порядок неразличим, а
+   * пересортировка ключей jsonb'ом — ровно про порядок.
+   */
+  function twoFieldProps() {
+    const props = draftProps();
+    const section = (props.roomTemplate as {sections: Array<Record<string, unknown>>}).sections[0]!;
+    const fields = section.fields as Array<Record<string, unknown>>;
+    section.fields = [...fields, {...fields[0], name: 'height', label: 'Высота'}];
+    props.rooms = [{values: {depth: 4.5, height: 3}}];
+
+    return props;
+  }
+
+  it('эхо с другим порядком ключей — тот же документ, а не новый', async () => {
+    const {actions, container, processor} = renderEditor(twoFieldProps());
+    const root = container as HTMLElement;
+
+    await openRoomSection(ROOM_1, GEOMETRY);
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    // Снапшот из истории треда проходит через jsonb Postgres, который
+    // пересортировывает ключи объекта, — содержание от этого не меняется.
+    const draft = actions[0]!.context as {rooms: Array<{values: Record<string, unknown>}>};
+    await updateProps(processor, {
+      ...twoFieldProps(),
+      rooms: draft.rooms.map(room => ({
+        ...room,
+        values: Object.fromEntries(Object.entries(room.values).reverse()),
+      })),
+    });
+
+    expect(isOpen(ROOM_1)).toBe(true);
+    expect(isOpen(GEOMETRY)).toBe(true);
+    expect(screen.getByText(/Источники значений: /).textContent).toContain('1 изменено вами');
+  });
+
+  it('эхо, отставшее от живого ввода, — ack: свежие нажатия не стираются', async () => {
+    const {actions, container, processor} = renderEditor(draftProps());
+    const root = container as HTMLElement;
+
+    await openRoomSection(ROOM_1, GEOMETRY);
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    expect(actions).toHaveLength(1);
+
+    // Пользователь печатает дальше, пока черновик в полёте…
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+
+    // …и эхо ПЕРВОГО черновика (со старым значением) догоняет экран.
+    const draft = actions[0]!.context as {rooms: Array<{values: Record<string, unknown>}>};
+    await updateProps(processor, {...draftProps(), rooms: draft.rooms});
+
+    expect(fieldIn(root, 'depth').value).toBe('6');
+    expect(isOpen(ROOM_1)).toBe(true);
+    expect(isOpen(GEOMETRY)).toBe(true);
+  });
+
   it('новое сообщение агента по-прежнему пересевает состояние', async () => {
     const {container, processor} = renderEditor(draftProps());
     const root = container as HTMLElement;
@@ -546,6 +667,77 @@ describe('KeoEditorNext: подпись условия при автосохра
   });
 });
 
+/**
+ * Проход по секциям обязан вести не только глазами: раскрытая цель получает
+ * каретку. Панели живут `keepMounted`, поэтому цель ищется по РАСКРЫТОЙ
+ * панели, а не по наличию узла в DOM.
+ */
+describe('KeoEditorNext: проход отдаёт каретку цели', () => {
+  const nextButton = () => screen.getByRole('button', {name: 'Далее'});
+
+  /** Раскрытая панель секции; свёрнутая стоит `hidden` и целью не бывает. */
+  function openPanel(title: string) {
+    const card = section(title).closest('.a2ui-card') as HTMLElement;
+
+    return card.querySelector<HTMLElement>('.a2ui-card__panel:not([hidden])');
+  }
+
+  /**
+   * Каретка проверяется КОНКРЕТНЫМ узлом, а не «где-то внутри панели»: поля
+   * ищутся по подписи, которую Base UI `Field` связывает с видимым контролом.
+   * Проверка «внутри» пропустила бы фокус на служебном узле — у числового поля
+   * скрытый `input` стоит в разметке раньше видимого.
+   */
+  const controlByLabel = (title: string, label: RegExp) =>
+    within(openPanel(title)!).getByLabelText(label);
+
+  it('каждый шаг ставит каретку на первый контрол раскрытой секции', async () => {
+    renderEditor(keoProps());
+
+    await flush(() => {
+      nextButton().focus();
+      fireEvent.click(nextButton());
+    });
+
+    expect(isOpen('Назначение')).toBe(true);
+    expect(document.activeElement).toBe(controlByLabel('Назначение', /Назначение помещения/));
+
+    await flush(() => {
+      fireEvent.click(nextButton());
+    });
+
+    expect(isOpen('Геометрия помещения')).toBe(true);
+    expect(document.activeElement).toBe(controlByLabel('Геометрия помещения', /^dп — глубина/));
+  });
+
+  it('шаг отправки каретку не двигает', async () => {
+    renderEditor(keoProps());
+
+    await walkThroughSections();
+    const submit = screen.getByRole('button', {name: 'Рассчитать'});
+
+    await flush(() => {
+      submit.focus();
+      fireEvent.click(submit);
+    });
+
+    expect(document.activeElement).toBe(submit);
+  });
+
+  it('раскрытие заголовком не уводит каретку из поля', async () => {
+    renderEditor(keoProps());
+    const city = screen.getByPlaceholderText('Город');
+
+    await flush(() => {
+      city.focus();
+    });
+    await openSection(ROOM);
+
+    expect(isOpen(ROOM)).toBe(true);
+    expect(document.activeElement).toBe(city);
+  });
+});
+
 describe('KeoEditorNext: клавиатура и aria', () => {
   it('свёрнутая секция — кнопка с aria-expanded и aria-controls на свою панель', () => {
     const {container} = renderEditor(keoProps());
@@ -569,5 +761,302 @@ describe('KeoEditorNext: клавиатура и aria', () => {
 
     expect(ids).toHaveLength(2);
     expect(new Set(ids).size).toBe(2);
+  });
+});
+
+/**
+ * Предел бывает двух видов, и кнопка добавления реагирует на вид, а не на
+ * значение `maxRooms` (change next-add-item-limit): временный предел гасит
+ * кнопку, постоянный убирает её из разметки.
+ */
+describe('KeoEditorNext: предел помещений', () => {
+  it('предела нет — кнопка доступна', () => {
+    const props = keoProps();
+    delete props.maxRooms;
+    renderEditor(props);
+
+    const add = screen.getByRole('button', {name: 'Добавить помещение'}) as HTMLButtonElement;
+    expect(add.disabled).toBe(false);
+  });
+
+  it('предел в одно помещение — кнопки нет в разметке', () => {
+    // Боевой набор агента КЕО. Последнее помещение не удаляется, значит
+    // кнопка не оживёт ни при каком действии пользователя.
+    renderEditor({...keoProps(), maxRooms: 1});
+
+    expect(screen.queryByRole('button', {name: 'Добавить помещение'})).toBeNull();
+  });
+
+  it('предел достигнут, но удаление возможно — кнопка на месте и отключена', async () => {
+    renderEditor({...keoProps(), maxRooms: 2});
+
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Добавить помещение'}));
+    });
+
+    const add = screen.getByRole('button', {name: 'Добавить помещение'}) as HTMLButtonElement;
+    expect(add.disabled).toBe(true);
+
+    await flush(() => {
+      fireEvent.click(screen.getByRole('button', {name: 'Действия: Помещение 2'}));
+    });
+    await flush(() => {
+      fireEvent.click(screen.getByRole('menuitem', {name: 'Удалить помещение'}));
+    });
+
+    const back = screen.getByRole('button', {name: 'Добавить помещение'}) as HTMLButtonElement;
+    expect(back.disabled).toBe(false);
+  });
+});
+
+describe('KeoEditorNext: черновик REST-каналом (спайк keo-draft-rest-channel)', () => {
+  const DRAFT_URL = '/api/agent-resource?resource=keo-draft&taskId=t-1';
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  async function tick(ms: number) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ms);
+    });
+  }
+
+  const jsonResponse = (body: unknown) =>
+    ({ok: true, json: async () => body}) as unknown as Response;
+
+  it('пауза ввода шлёт POST на draftUrl, диалоговый action не уходит', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({notes: {}}));
+    const {actions, container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.change(fieldIn(container as HTMLElement, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    // Черновик уехал REST'ом: run AG-UI не поднимался, действий в тред нет.
+    // (Помимо POST на монтировании уходит GET посева — отфильтровываем.)
+    expect(actions).toHaveLength(0);
+    const posts = fetchMock.mock.calls.filter(
+      call => (call[1] as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(posts).toHaveLength(1);
+    const [url, init] = posts[0]! as [string, RequestInit];
+    expect(url).toBe(DRAFT_URL);
+    expect(init.method).toBe('POST');
+    const body = JSON.parse(init.body as string) as {rooms: Array<{values: Record<string, unknown>}>};
+    expect(body.rooms[0]!.values.depth).toBe(5);
+  });
+
+  it('notes ответа применяются к подписи условия локально, без эха формы', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({notes: {region: 'группа светового климата 4 — из ответа'}}),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.change(fieldIn(container as HTMLElement, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    // Микрозадачи ответа fetch: setState живёт в then-цепочке.
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('из ответа');
+  });
+
+  it('submit уходит прежним диалоговым action — REST-канал только про черновик', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({notes: {}}));
+    const props = draftProps();
+    delete (props as Record<string, unknown>).nextLabel;
+    const {actions} = renderEditor({...props, draftUrl: DRAFT_URL});
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Рассчитать'}));
+    });
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]!.name).toBe('keo_calculate');
+  });
+
+  it('сбой канала тих: подпись прежняя, следующая пауза шлёт снова', async () => {
+    fetchMock.mockRejectedValue(new Error('network down'));
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('группа светового климата 1');
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+
+    const posts = fetchMock.mock.calls.filter(
+      call => (call[1] as RequestInit | undefined)?.method === 'POST',
+    );
+    expect(posts).toHaveLength(2);
+  });
+
+  it('ответ с ИЗМЕНЁННОЙ подписью не схлопывает секции и не откатывает ввод', async () => {
+    // Прод-репро 2026-09-01: «ввожу значение — через мгновение всё
+    // схлопывается». Ответ на POST меняет note при старых значениях в props;
+    // ключ пересева с подписью считал это новым сообщением.
+    fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? jsonResponse({notes: {region: 'группа светового климата 3 — пересчитано'}})
+        : jsonResponse({draft: null}),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.click(section('Помещение 1'));
+    });
+    const wasOpen = section('Помещение 1').getAttribute('aria-expanded');
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '5'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS);
+    await tick(0); // микрозадачи ответа POST: оверрайд подписи применяется здесь
+
+    expect(section('Условия').textContent).toContain('пересчитано');
+    // Ввод и раскрытие пережили ответ: пересева не было.
+    expect(fieldIn(root, 'depth').value).toBe('5');
+    expect(section('Помещение 1').getAttribute('aria-expanded')).toBe(wasOpen);
+  });
+
+  it('поздний ответ GET посева не затирает живой ввод', async () => {
+    // Защитная ветвь activeRef: пользователь начал печатать (и POST уже ушёл),
+    // пока GET посева ещё в полёте — его поздний ответ игнорируется.
+    let resolveSeed!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? Promise.resolve(jsonResponse({notes: {}}))
+        : new Promise<Response>(resolve => {
+            resolveSeed = resolve;
+          }),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS); // POST ушёл — activeRef взведён
+
+    await act(async () => {
+      resolveSeed(
+        jsonResponse({
+          draft: {conditions: {region: 'Тюмень'}, rooms: [{name: 'Помещение 1', values: {depth: 9.9}}]},
+        }),
+      );
+    });
+    await tick(0);
+
+    expect(fieldIn(root, 'depth').value).toBe('6');
+  });
+
+  it('поздний ответ POST старого снапшота не перетирает подписи нового', async () => {
+    // Ревью 0.34.2: смена снапшота сбрасывала оверрайды, но in-flight POST не
+    // отменялся и его then-цепочка возвращала старые notes поверх новых props.
+    let resolvePost!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) => {
+      if (init?.method !== 'POST') return Promise.resolve(jsonResponse({draft: null}));
+      return new Promise<Response>((resolve, reject) => {
+        resolvePost = resolve;
+        init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+      });
+    });
+    const {container, processor} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    await act(async () => {
+      fireEvent.change(fieldIn(root, 'depth'), {target: {value: '6'}});
+    });
+    await tick(CONDITIONS_DRAFT_DEBOUNCE_MS); // POST в полёте
+
+    // Новый снапшот агента с другим документом и свежей подписью.
+    await updateProps(processor, {
+      ...draftProps(),
+      rooms: [{values: {depth: 9}}],
+      conditions: [
+        {
+          ...(draftProps().conditions as Array<Record<string, unknown>>)[0],
+          note: 'свежая подпись нового снапшота',
+        },
+      ],
+    });
+
+    await act(async () => {
+      resolvePost(jsonResponse({notes: {region: 'устаревшая подпись старого черновика'}}));
+    });
+    await tick(0);
+
+    expect(section('Условия').textContent).toContain('свежая подпись');
+    expect(section('Условия').textContent).not.toContain('устаревшая');
+  });
+
+  it('поздний GET посева старого снапшота не перезатирает новый снапшот', async () => {
+    // Ревью 0.34.3: смена снапшота абортила только POST — GET посева,
+    // запущенный при монтировании, доезжал позже и сеял устаревший черновик.
+    let resolveSeed!: (r: Response) => void;
+    fetchMock.mockImplementation((_url: string, init?: RequestInit) => {
+      if (init?.method === 'POST') return Promise.resolve(jsonResponse({notes: {}}));
+      return new Promise<Response>((resolve, reject) => {
+        resolveSeed = resolve;
+        init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+      });
+    });
+    const {container, processor} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+    const root = container as HTMLElement;
+
+    // Новое сообщение агента приходит, пока GET посева в полёте.
+    await updateProps(processor, {...draftProps(), rooms: [{values: {depth: 9}}]});
+
+    await act(async () => {
+      resolveSeed(
+        jsonResponse({
+          draft: {conditions: {region: 'Тюмень'}, rooms: [{name: 'Помещение 1', values: {depth: 1.1}}]},
+        }),
+      );
+    });
+    await tick(0);
+
+    // Значения нового снапшота на месте, устаревший черновик не посеян.
+    expect(fieldIn(root, 'depth').value).toBe('9');
+  });
+
+  it('после перезагрузки форма сеется сохранённым черновиком из GET', async () => {
+    fetchMock.mockImplementation(async (_url: string, init?: RequestInit) =>
+      init?.method === 'POST'
+        ? jsonResponse({notes: {}})
+        : jsonResponse({
+            draft: {
+              conditions: {region: 'Тюмень'},
+              rooms: [{name: 'Помещение 1', values: {depth: 7.5}}],
+            },
+          }),
+    );
+    const {container} = renderEditor({...draftProps(), draftUrl: DRAFT_URL});
+
+    // Микрозадачи ответа GET: посев живёт в then-цепочке эффекта монтирования.
+    await tick(0);
+
+    expect(fieldIn(container as HTMLElement, 'depth').value).toBe('7.5');
+    expect((screen.getByPlaceholderText('Город') as HTMLInputElement).value).toBe('Тюмень');
   });
 });

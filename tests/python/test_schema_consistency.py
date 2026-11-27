@@ -14,13 +14,18 @@ COMPONENT_NAMES = (
     "FlexTable",
     "LatexFormula",
     "ChoiceCard",
+    "AttachmentChoiceCard",
     "FormCard",
     "ConstructionsEditor",
     "LiftEditor",
+    "LiftReport",
     "KeoEditor",
     "KeoReport",
     "InsolationEditor",
     "InsolationReport",
+    "ArtifactCard",
+    "VerificationReport",
+    "ProposalCard",
 )
 
 

@@ -1,0 +1,25 @@
+{
+  "component": "ConstructionsEditor",
+  "props": {
+    "constructions": [
+      {
+        "id": "c-wall-1",
+        "type": "steny",
+        "name": "Наружная стена с вентфасадом",
+        "layers": [
+          {"material": "Кладка из глиняного обыкновенного кирпича", "thicknessMm": 380, "lambdaB": 0.81},
+          {"material": "Плиты минераловатные", "thicknessMm": 150, "lambdaB": 0.048},
+          {"material": "Воздушный зазор вентилируемый", "thicknessMm": 40, "kind": "vent-gap"}
+        ],
+        "r": 0.85
+      }
+    ],
+    "typeConfigs": [
+      {"type": "steny", "label": "Наружные стены", "hasLayers": true, "rnorm": 3.19, "alphaV": 8.7, "alphaN": 12}
+    ],
+    "materialsReferenceId": "sp50-materials",
+    "addLabel": "Добавить конструкцию",
+    "submitLabel": "Рассчитать",
+    "submitAction": "constructions:apply"
+  }
+}

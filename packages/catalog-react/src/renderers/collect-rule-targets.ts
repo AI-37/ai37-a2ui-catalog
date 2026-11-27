@@ -9,7 +9,7 @@ export function collectRuleTargets(rule: LiftEditorDependentRule): string[] {
   const targets = new Set<string>();
 
   for (const row of rule.rows) {
-    for (const field of Object.keys(row.set)) {
+    for (const field of Object.keys(row.set ?? {})) {
       targets.add(field);
     }
   }

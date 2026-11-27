@@ -1,4 +1,6 @@
 import React from 'react';
+import {renderLabelSubscripts} from '../primitives/render-label-subscripts';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Пометки «! проверить»: правила геометрии из props и выход числа за границы
@@ -7,6 +9,7 @@ import React from 'react';
  * если подпись потеряется среди подписей источников).
  */
 export function KeoNextWarnings({warnings}: {warnings: readonly string[]}) {
+  const m = useA2uiMessages();
   if (warnings.length === 0) {
     return null;
   }
@@ -15,7 +18,7 @@ export function KeoNextWarnings({warnings}: {warnings: readonly string[]}) {
     <>
       {warnings.map(warning => (
         <span key={warning} className="a2ui-t--sub a2ui-t--warning">
-          ! проверить — {warning}
+          {m.common.checkPrefix} {renderLabelSubscripts(warning)}
         </span>
       ))}
     </>

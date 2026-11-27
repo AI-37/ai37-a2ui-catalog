@@ -14,6 +14,13 @@ import type {
   OperatingCondition,
 } from './constructions-editor.types';
 
+/**
+ * Климат здания из блока «Условия» — знаменатель (tв − tот) формулы (5.3) и
+ * значения по умолчанию для температур конструкции. `null` в любом поле —
+ * поправка nt не вычислима.
+ */
+export type ConstructionsClimateBase = {tv: number | null; tot: number | null};
+
 /** Поля формы условий и подъём правок наверх — то же, чем владеет редактор. */
 export type ConstructionsNextGeneralProps = {
   general: ConstructionsGeneral;
@@ -41,6 +48,8 @@ export type ConstructionsNextCardProps = {
   entry: ConstructionEntry;
   typeConfigs: ConstructionTypeConfig[];
   condition: OperatingCondition;
+  /** База nt (5.3) и плейсхолдеры температур конструкции. */
+  climate: ConstructionsClimateBase;
   materialsReferenceId: string;
   minChars?: number | undefined;
   /** false — климат тронут, Rнорм протух: чип показывает Rпр без сравнения. */
@@ -81,6 +90,8 @@ export type ConstructionsNextPreview =
 export type ConstructionsNextHeaderRowProps = {
   entry: ConstructionEntry;
   typeConfigs: ConstructionTypeConfig[];
+  /** Плейсхолдеры температур конструкции: «как у здания». */
+  climate: ConstructionsClimateBase;
   /** true — вместо режима чтения раскрыта форма шапки. */
   editing: boolean;
   onOpen: () => void;
@@ -135,6 +146,7 @@ export type ConstructionsNextListProps = {
   entries: ConstructionEntry[];
   typeConfigs: ConstructionTypeConfig[];
   condition: OperatingCondition;
+  climate: ConstructionsClimateBase;
   materialsReferenceId: string;
   minChars?: number | undefined;
   showRnorm: boolean;

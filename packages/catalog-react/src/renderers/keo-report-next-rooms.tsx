@@ -4,6 +4,7 @@ import {ReportRow} from '../primitives';
 import {KeoReportNextRoomSide} from './keo-report-next-room-side';
 import {ReportNextSection} from './report-next-section';
 import type {ReportNextActionSink} from './report-next.types';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * «Помещения» — мультипомещенный расчёт: значение против нормы построчно.
@@ -17,17 +18,18 @@ export function KeoReportNextRooms({
   rooms: KeoReportRoom[] | undefined;
   onAction: ReportNextActionSink;
 }) {
+  const m = useA2uiMessages();
   if (rooms === undefined) {
     return null;
   }
 
   return (
-    <ReportNextSection label="Помещения">
+    <ReportNextSection label={m.report.rooms}>
       {rooms.map(room => (
         <ReportRow
           key={room.id}
           title={room.name}
-          detail={`норма ${room.norm}`}
+          detail={formatMessage(m.report.roomNorm, {norm: room.norm})}
           side={<KeoReportNextRoomSide room={room} onAction={onAction} />}
         />
       ))}

@@ -274,6 +274,17 @@ export const LIFT_REPORT_CSS = `
   white-space: nowrap;
 }
 .a2ui-dfm__item:hover { background: ${tokens.lrBorder}; }
+/* «Сохранить в проект» — действие, а не ссылка: кнопка в облике пункта. */
+.a2ui-dfm__item--action {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.a2ui-dfm__item--action:disabled { cursor: default; opacity: 0.6; }
+.a2ui-dfm__item--action:disabled:hover { background: none; }
 .a2ui-lr__protocol-body {
   margin: 0;
   padding: 14px 20px 16px;

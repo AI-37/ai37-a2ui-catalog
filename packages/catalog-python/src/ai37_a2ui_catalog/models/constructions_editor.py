@@ -6,9 +6,11 @@ from pydantic import Field
 
 from .shared import StrictModel
 
-# Вид строки слоя: материал или воздушный зазор (вент./невент.); зазоры в
-# live-Rпр клиента пропускаются, их Rs считает сервер.
-ConstructionLayerKind = Literal["material", "vent-gap", "closed-gap"]
+# Вид строки слоя: материал, воздушный зазор (вент./невент.) либо тонкий
+# нетепловой слой `thin` (плёнка, клей, сетка, краска — Rs = 0, толщина и λ не
+# нужны). Зазоры и тонкие слои в live-Rпр клиента пропускаются, их Rs считает
+# сервер (change constructions-layer-kind-thin).
+ConstructionLayerKind = Literal["material", "vent-gap", "closed-gap", "thin"]
 
 ConstructionType = Literal[
     "steny", "pokrytiya", "cherdachnye_podval_grunt", "okna", "fonari", "dver"
@@ -43,6 +45,14 @@ class ConstructionEntry(StrictModel):
     name: str = Field(default=None, max_length=200)
     layers: list[ConstructionLayer] = Field(max_length=50)
     rprPassport: float = Field(default=None, gt=0)
+    # Коэффициент теплотехнической однородности r (Г.4): Rпр = r·Rусл; только
+    # у типов со слоями, диапазон (0; 1]. Не задан → агент берёт r = 1 (доп).
+    r: float = Field(default=None, gt=0, le=1)
+    # tв* — средняя температура самого помещения, °C (5.3 СП 50).
+    tvRoom: float = None
+    # tот* — средняя температура с холодной стороны конструкции, °C: у
+    # перекрытия над подвалом это воздух подвала, а не наружный.
+    totRoom: float = None
     status: ConstructionStatus = None
 
 

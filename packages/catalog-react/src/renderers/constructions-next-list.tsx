@@ -3,6 +3,7 @@ import {Accordion} from '@base-ui/react/accordion';
 import {Button, PlusIcon} from '../primitives';
 import {ConstructionsNextCard} from './constructions-next-card';
 import type {ConstructionsNextListProps} from './constructions-next.types';
+import {formatMessage, useA2uiMessages} from '../i18n';
 
 /**
  * Секция «Конструкции»: подпись, аккордеон и кнопка добавления. Раскрыта одна
@@ -16,6 +17,7 @@ export function ConstructionsNextList({
   entries,
   typeConfigs,
   condition,
+  climate,
   materialsReferenceId,
   minChars,
   showRnorm,
@@ -31,10 +33,11 @@ export function ConstructionsNextList({
   onAdd,
   entryRef,
 }: ConstructionsNextListProps) {
+  const m = useA2uiMessages();
   return (
     <div style={groupStyle}>
       <span className="a2ui-t--sub a2ui-t--overline a2ui-t--muted">
-        Конструкции · {entries.length}
+        {formatMessage(m.constructions.title, {count: entries.length})}
       </span>
 
       <Accordion.Root
@@ -49,6 +52,7 @@ export function ConstructionsNextList({
             entry={entry}
             typeConfigs={typeConfigs}
             condition={condition}
+            climate={climate}
             materialsReferenceId={materialsReferenceId}
             minChars={minChars}
             showRnorm={showRnorm}

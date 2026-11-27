@@ -82,9 +82,27 @@ export const liftReportProtocolSchema = z
     /** Краткий вывод расчёта («Итог») — раскрывается под катом (plain text). */
     content: z.string().min(1).max(60000),
     /**
+     * Имя файла протокола, собранного на клиенте (как у теплотеха): при нём и
+     * без `downloadUrl` «Скачать» отдаёт один `.md` из props — Blob'ом или
+     * через хост (MCP App: `ui/download-file`). Так протокол скачивается там,
+     * где полки chat-backend нет.
+     */
+    downloadFileName: z.string().min(1).max(120).optional(),
+    /**
+     * Содержимое скачиваемого файла (полная markdown-простыня). Без него
+     * «Скачать» отдаёт `content`. У `LiftReportNext` раскрывает протокол:
+     * под строкой — весь расчёт с формулами TeX (markdown → MathML).
+     */
+    downloadContent: z.string().min(1).max(120000).optional(),
+    /**
      * Относительный URL ручки агента (`/api/agent-resource?resource=…`) для
      * «Скачать»: рендерер отдаёт обычный `<a href>`, download-заголовки ставит
-     * сервер агента. Нет URL — нет ссылки, протокол только раскрывается.
+     * сервер агента. URL главнее Blob-полей: при нём они не нужны. Нет ни
+     * URL, ни `downloadFileName` — скачивать нечего, протокол только
+     * раскрывается.
+     * Либо ссылка на протокол в выходной полке chat-backend
+     * (`/api/artifacts/<id>/content?format=md`): тогда `.docx` — тот же путь с
+     * `format=docx` (`reportDocxUrl`).
      */
     downloadUrl: z.string().min(1).max(2000).optional(),
   })
@@ -127,6 +145,6 @@ export const liftReportNextDefinition: CatalogComponentDefinition<typeof liftRep
   name: 'LiftReportNext',
   slug: 'lift-report-next',
   description:
-    'The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single non-expanding row without `<details>`/`<pre>` (`protocol.content` is never printed on screen), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.',
+    'The same lift-calculation result card as `LiftReport` — identical props, identical data contract — rendered on the catalog primitive set shared with `ThermalReportNext` (report row, two-part data chip, status pill, serif verdict headline, sunken note, protocol card, download menu). Differences are behavioural, not contractual: the protocol is a single row without `<details>`/`<pre>` (`protocol.content` is never printed on screen) unless `protocol.downloadContent` is present — then the row folds open into the full calculation rendered from markdown with TeX formulas (`$…$`, `$$…$$`), suggestion status words for `pass`/`fail` come from the renderer instead of `statusLabel` (which is still honoured for tones the enumeration does not cover), and the accent border is reserved for the recommended suggestion. Prefer it when the surface should read as one system with `ThermalReportNext`; emit the same props as for `LiftReport`.',
   schema: liftReportPropsSchema,
 };

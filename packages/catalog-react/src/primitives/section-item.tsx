@@ -5,7 +5,9 @@ import {CardHeader} from './card-header';
 import {CardTriggerLabel} from './card-trigger-label';
 import {buttonClassName} from './button-class-name';
 import {cardClassName} from './card-class-name';
+import {renderLabelSubscripts} from './render-label-subscripts';
 import type {SectionItemProps} from './section-item.types';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Секция-раскрывашка с пометкой — элемент `Accordion`: карточкой её делает
@@ -14,7 +16,9 @@ import type {SectionItemProps} from './section-item.types';
  * обоих состояний.
  *
  * Сводка стоит внутри кнопки-заголовка и видна только в свёрнутом виде: в
- * раскрытом те же значения стоят полями. Пометка и действие живут рядом с
+ * раскрытом те же значения стоят полями. Собирается она из `shortLabel`
+ * полей — той же плоской нотации, что и подписи, — и потому идёт через
+ * `renderLabelSubscripts`. Пометка и действие живут рядом с
  * `Accordion.Header`, а не внутри — кнопка внутри заголовка попала бы в его
  * доступное имя.
  */
@@ -28,6 +32,7 @@ export function SectionItem({
   sectionRef,
   children,
 }: SectionItemProps) {
+  const m = useA2uiMessages();
   return (
     <Accordion.Item ref={sectionRef} value={value} className={cardClassName()}>
       <CardHeader
@@ -42,7 +47,7 @@ export function SectionItem({
                   уступает сводка — она длиннее и переносится осмысленно. */}
               <CardTriggerLabel title={<span style={titleStyle}>{title}</span>} />
               <span className="a2ui-t--sub a2ui-t--muted">
-                {summary === '' ? 'не заполнено' : summary}
+                {summary === '' ? m.common.notFilled : renderLabelSubscripts(summary)}
               </span>
             </Accordion.Trigger>
           </Accordion.Header>

@@ -36,6 +36,7 @@ export const CATALOG_COMPONENT_NAMES = [
   'FlexTable',
   'LatexFormula',
   'ChoiceCard',
+  'AttachmentChoiceCard',
   'FormCard',
   'ConstructionsEditor',
   'ConstructionsEditorNext',
@@ -51,6 +52,9 @@ export const CATALOG_COMPONENT_NAMES = [
   'InsolationReport',
   'LiftReport',
   'LiftReportNext',
+  'ArtifactCard',
+  'VerificationReport',
+  'ProposalCard',
 ] as const;
 
 export type CatalogComponentName = (typeof CATALOG_COMPONENT_NAMES)[number];

@@ -1,11 +1,15 @@
 import React from 'react';
 import type {ConstructionLayer} from '@ai37/a2ui-catalog-schemas';
 import {Button, Field, Form, Lookup, NumberField} from '../primitives';
+import {ConstructionsNextKindField} from './constructions-next-kind-field';
 import {ConstructionsNextLambdaField} from './constructions-next-lambda-field';
 import {ConstructionsNextLayerRemove} from './constructions-next-layer-remove';
 import type {ConstructionsNextLayerProps} from './constructions-next.types';
+import {layerKindFromOption} from './layer-kind-from-option';
+import {layerNeedsThickness} from './layer-needs-thickness';
 import {layersEqual} from './layers-equal';
 import {readOptionLambda} from './read-option-lambda';
+import {useA2uiMessages} from '../i18n';
 
 /**
  * Форма правки/добавления слоя: локальная копия в state с момента открытия,
@@ -15,6 +19,12 @@ import {readOptionLambda} from './read-option-lambda';
  *
  * Каждое изменение копии уходит в `onDraftChange`: карточка считает по нему
  * превью Rпр для чипа. Это не коммит и state редактора не меняет.
+ *
+ * Вид слоя — селектором (`ConstructionsNextKindField`); спец-запись
+ * справочника (зазор, тонкий слой) ставит тот же вид сразу при выборе
+ * (`layerKindFromOption`). У вентилируемого зазора и тонкого слоя толщина не
+ * нужна — поле остаётся с плейсхолдером «не нужна»; нижняя граница 1 мм
+ * сохраняется: схема принимает только положительную толщину либо `null`.
  */
 export function ConstructionsNextLayerForm({
   layer,
@@ -28,6 +38,7 @@ export function ConstructionsNextLayerForm({
   onRemove,
   onDraftChange,
 }: ConstructionsNextLayerProps) {
+  const m = useA2uiMessages();
   const [draft, setDraft] = React.useState<ConstructionLayer>(layer);
 
   const updateDraft = (next: ConstructionLayer) => {
@@ -46,15 +57,14 @@ export function ConstructionsNextLayerForm({
 
   return (
     <div style={formStyle}>
-      {/* Одна сетка на три поля: в широком контейнере материал, толщина и λ
-          встают строкой, в узком материал забирает строку себе, а числа идут
-          парой под ним. */}
+      {/* Одна сетка: в широком контейнере материал забирает строку, вид,
+          толщина и λ встают второй строкой; в узком всё идёт столбцом. */}
       <Form columns={3}>
-        <Field wide label="Материал">
+        <Field wide label={m.constructions.material}>
           <Lookup
             name={rowName}
             referenceId={materialsReferenceId}
-            placeholder="Материал из справочника или свой"
+            placeholder={m.constructions.materialPlaceholder}
             text={draft.material}
             minChars={minChars}
             onTextChange={text =>
@@ -72,29 +82,37 @@ export function ConstructionsNextLayerForm({
               const lambdaA = readOptionLambda(option, 'lambdaA');
               const lambdaB = readOptionLambda(option, 'lambdaB');
               const hasLambda = lambdaA !== undefined || lambdaB !== undefined;
+              // Спец-запись справочника (зазор, тонкий слой) — это выбор вида,
+              // строка прил. М возвращает строку к материалу.
+              const kind = layerKindFromOption(option);
 
               // λ из опции вытесняет ручную: resolveLayerLambda предпочитает
               // lambdaManual, оставить её — значит молча игнорировать справочник.
               updateDraft({
                 ...draft,
                 material: option.label,
+                kind,
                 materialKey: option.value,
                 lambdaA,
                 lambdaB,
-                lambdaManual: hasLambda ? undefined : draft.lambdaManual,
+                lambdaManual: hasLambda || kind !== undefined ? undefined : draft.lambdaManual,
               });
             }}
           />
         </Field>
-        <Field label="Толщина, мм">
+        <ConstructionsNextKindField layer={draft} onChange={updateDraft} />
+        <Field label={m.constructions.thickness}>
           <NumberField
             value={draft.thicknessMm}
             min={1}
+            {...(layerNeedsThickness(draft)
+              ? {}
+              : {placeholder: m.constructions.thicknessNotNeeded})}
             compact
             onValueChange={value => updateDraft({...draft, thicknessMm: value})}
           />
         </Field>
-        <Field label="λ, Вт/(м·°C)">
+        <Field label={m.constructions.lambda}>
           <ConstructionsNextLambdaField
             layer={draft}
             condition={condition}
@@ -105,10 +123,10 @@ export function ConstructionsNextLayerForm({
 
       <div style={actionsStyle}>
         <Button variant="filled" size="sm" onClick={handleApply}>
-          {mode === 'new' ? 'Добавить' : 'Применить'}
+          {mode === 'new' ? m.common.add : m.common.apply}
         </Button>
         <Button size="sm" onClick={onCancel}>
-          Отмена
+          {m.common.cancel}
         </Button>
         <ConstructionsNextLayerRemove mode={mode} onRemove={onRemove} />
       </div>

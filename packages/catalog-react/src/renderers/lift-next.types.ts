@@ -1,11 +1,13 @@
 import type React from 'react';
 import type {
   LiftEditorField,
+  LiftEditorFieldNote,
   LiftEditorFieldSource,
   LiftEditorMethodConfig,
   LiftEditorSectionSources,
 } from '@ai37/a2ui-catalog-schemas';
-import type {LiftEditorDraft, LiftFieldOption, LiftFieldValues, LiftSectionKey} from './lift-editor.types';
+import type {AddItemState} from './add-item-state.types';
+import type {LiftEditorDraft, LiftFieldNotes, LiftFieldOption, LiftFieldValues, LiftSectionKey} from './lift-editor.types';
 import type {OnApplyRecommendation} from './recommend.types';
 
 /** Значение поля редактора: числовое поле отдаёт `null`, остальные — строку. */
@@ -53,7 +55,8 @@ export interface LiftNextControl {
    * секциям ведёт «Далее».
    */
   blocked: boolean;
-  canAddLift: boolean;
+  /** Состояние кнопки «Добавить лифт»: видна, отключена или её нет. */
+  addLiftState: AddItemState;
   setOpenSections: (next: LiftSectionKey[]) => void;
   changeMethod: (method: string) => void;
   changeValue: (key: LiftSectionKey, name: string, value: LiftNextFieldValue) => void;
@@ -81,6 +84,8 @@ export interface LiftNextFieldsProps {
   values: LiftFieldValues;
   /** Значения здания: источник рядов и правил со `scope: 'building'`. */
   building: LiftFieldValues;
+  /** Подписи правил (только секции лифта). */
+  notes?: LiftFieldNotes;
   advancedLabel: string;
   sources: LiftEditorSectionSources;
   onChange: (name: string, value: LiftNextFieldValue) => void;
@@ -91,6 +96,7 @@ export interface LiftNextFieldProps {
   value: unknown;
   options: readonly LiftFieldOption[];
   sources: LiftEditorSectionSources;
+  note?: LiftEditorFieldNote | undefined;
   onChange: (name: string, value: LiftNextFieldValue) => void;
 }
 
@@ -105,6 +111,8 @@ export interface LiftNextFieldNoteProps {
   /** Источник значения; `undefined` — поле правлено или источника не было. */
   source: LiftEditorFieldSource | undefined;
   hint: string | undefined;
+  /** Подпись правила: заменяет и источник, и `hint`. */
+  note?: LiftEditorFieldNote | undefined;
 }
 
 export interface LiftNextAdvancedProps {
@@ -123,7 +131,7 @@ export interface LiftNextAdvancedSummaryProps {
 export interface LiftNextAddButtonProps {
   perLift: boolean;
   label: string;
-  disabled: boolean;
+  state: AddItemState;
   onClick: () => void;
 }
 

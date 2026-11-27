@@ -13,8 +13,17 @@ export function useA2uiBaseStyles() {
   return undefined;
 }
 
-/** Общий стиль текстовых инпутов/селектов форм каталога. */
+/**
+ * Общий стиль текстовых инпутов/селектов форм каталога.
+ *
+ * `width: 100%` и `border-box` — часть стиля, а не забота места вызова.
+ * Сейчас оба вызова оборачивают контрол в grid, где `justify-self: stretch`
+ * растягивает его сам, но стоит положить инпут в flex-строку рядом с соседом —
+ * и он упрётся в него своей интринсик-шириной, а padding вылезет за колонку.
+ */
 export const inputStyle: React.CSSProperties = {
+  width: '100%',
+  boxSizing: 'border-box',
   padding: '8px 10px',
   borderRadius: 10,
   border: `1px solid ${tokens.borderStrong}`,
@@ -35,12 +44,13 @@ export const fieldLabelStyle: React.CSSProperties = {
   color: tokens.textMuted,
 };
 
-// border-box: иначе padding инпута вылезает за колонку.
-export const controlStyle: React.CSSProperties = {
-  ...inputStyle,
-  width: '100%',
-  boxSizing: 'border-box',
-};
+/**
+ * Псевдоним `inputStyle`. Раньше добавлял `width`/`box-sizing` поверх него —
+ * теперь это в самом `inputStyle`, и копия оставлена только как алиас: две
+ * почти одинаковые константы уже однажды разошлись, и место вызова взяло ту,
+ * в которой правки не было.
+ */
+export const controlStyle: React.CSSProperties = inputStyle;
 
 /** Кнопка коммита формы внутри карточки («Применить»/«Добавить»/«Сохранить»). */
 export const commitButtonStyle: React.CSSProperties = {

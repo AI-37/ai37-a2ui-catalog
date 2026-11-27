@@ -1,0 +1,32 @@
+{
+  "component": "ConstructionsEditor",
+  "props": {
+    "constructions": [
+      {
+        "id": "wall",
+        "type": "steny",
+        "layers": [
+          {
+            "material": "Пена монтажная",
+            "thicknessMm": null,
+            "kind": "foam"
+          }
+        ]
+      }
+    ],
+    "typeConfigs": [
+      {
+        "type": "steny",
+        "label": "Наружные стены",
+        "hasLayers": true
+      }
+    ],
+    "cityReferenceId": "cities",
+    "materialsReferenceId": "sp50-materials",
+    "minChars": 2,
+    "addLabel": "Добавить конструкцию",
+    "submitLabel": "Рассчитать",
+    "nextLabel": "Далее",
+    "submitAction": "constructions:apply"
+  }
+}

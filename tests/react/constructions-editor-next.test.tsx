@@ -324,3 +324,488 @@ describe('ConstructionsEditorNext', () => {
     expect(actions).toHaveLength(1);
   });
 });
+
+/**
+ * Случай со стенда теплотеха 2026-09-14: перекрытие над подвалом со всеми
+ * заполненными слоями, но без выбранной разновидности показывало зелёное
+ * «готова», а «Рассчитать» возвращало в чат «выберите подтип перекрытия»
+ * (change constructions-missing-subtype-invalid). Слои здесь заполнены
+ * намеренно: иначе карточка была бы невалидна по старой причине и тест не
+ * отличил бы новую.
+ */
+describe('ConstructionsEditorNext: незаполненная разновидность', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})})),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const FLOOR_NAME = 'Пол 1 этажа, перекрытие над подвалом';
+
+  /**
+   * Та же фикстура: слои перекрытия дозаполнены (λ утеплителя — из справочника
+   * demo), разновидность снимается или остаётся по аргументу.
+   */
+  function floorConstructions({subtype}: {subtype?: string}) {
+    const messages = patchedMessages();
+    const update = messages.find(message => 'updateComponents' in message) as any;
+    const constructions = update.updateComponents.components[0].constructions as any[];
+    return constructions.map(entry => {
+      if (entry.id !== 'c-floor-1') return entry;
+      const layers = entry.layers.map((layer: any) =>
+        layer.thicknessMm === null
+          ? {...layer, thicknessMm: 100, materialKey: 'm-eps', lambdaA: 0.031, lambdaB: 0.034}
+          : layer,
+      );
+      const {subtype: _dropped, ...rest} = entry;
+      return {...rest, ...(subtype ? {subtype} : {}), name: FLOOR_NAME, layers};
+    });
+  }
+
+  function floorCard() {
+    return screen
+      .getByRole('button', {name: new RegExp(`^${FLOOR_NAME}`)})
+      .closest('.a2ui-card');
+  }
+
+  it('свёрнутая карточка помечена рамкой и чипом «проверить»', () => {
+    renderSurface({constructions: floorConstructions({})});
+
+    const card = floorCard();
+    expect(card).not.toBeNull();
+    expect(card!.className).toContain('a2ui-card--invalid');
+    // Причина названа общим «проверить»: счёт «N слоёв без λ» соврал бы —
+    // слои заполнены полностью.
+    expect(card!.textContent).toContain('проверить');
+    expect(card!.textContent).not.toContain('без λ');
+  });
+
+  it('та же карточка с выбранной разновидностью — «готова» и без пометки рамки', () => {
+    renderSurface({constructions: floorConstructions({subtype: 'podval_vent'})});
+
+    const card = floorCard();
+    expect(card!.className).not.toContain('a2ui-card--invalid');
+    expect(card!.textContent).toContain('готова');
+  });
+
+  it('раскрытая карточка называет, что разновидность не выбрана', () => {
+    renderSurface({constructions: floorConstructions({})});
+    hideConditions();
+    openCard(new RegExp(`^${FLOOR_NAME}`));
+
+    expect(screen.getByText(/разновидность не выбрана/)).toBeInTheDocument();
+  });
+
+  it('выбранная разновидность печатается в шапке, как прежде', () => {
+    renderSurface({constructions: floorConstructions({subtype: 'podval_vent'})});
+    hideConditions();
+    openCard(new RegExp(`^${FLOOR_NAME}`));
+
+    expect(screen.queryByText(/разновидность не выбрана/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Цокольное перекрытие \(подполье вентилируемое\)/)).toBeInTheDocument();
+  });
+
+  it('тип без разновидностей: ни текста, ни разделителя перед ним', () => {
+    renderSurface();
+    hideConditions();
+    openCard(/^Наружная стена/);
+
+    expect(screen.queryByText(/разновидность не выбрана/)).not.toBeInTheDocument();
+    expect(screen.getByText('Наружные стены')).toBeInTheDocument();
+  });
+});
+
+describe('ConstructionsEditorNext: коэффициент однородности r', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})})),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const wallWithR = {
+    id: 'c-wall-1',
+    type: 'steny',
+    name: 'Наружная стена',
+    layers: [{material: 'Кирпич', thicknessMm: 380, lambdaB: 0.81}],
+    r: 0.9,
+  };
+
+  it('поле r в форме шапки: до «Сохранить» ничего не меняется, после — чип, шапка и черновик', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    // Пустое поле подсказывает, что примет система, но значением не становится.
+    expect(screen.getByLabelText('r (однородность)')).toHaveAttribute('placeholder', '1');
+    fireEvent.change(screen.getByLabelText('r (однородность)'), {target: {value: '0.75'}});
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    expect(actions).toHaveLength(0);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    // 4.09 · 0.75 = 3.06 — стена перестаёт проходить.
+    expect(screen.getByText('Rпр 3.06 < 3.19')).toBeInTheDocument();
+    expect(screen.getByText(/проходит 1 из 3/)).toBeInTheDocument();
+    expect(screen.getByText(/r = 0\.75/)).toBeInTheDocument();
+    expect(actions).toHaveLength(1);
+    const draft = actions[0]!.context as {constructions: Array<{r?: number}>};
+    expect(draft.constructions[0]!.r).toBe(0.75);
+  });
+
+  it('у изделия (окно) поля r нет', () => {
+    renderSurface();
+    openCard(/^Окно двухкамерное/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    expect(screen.getByLabelText('Название')).toBeInTheDocument();
+    expect(screen.queryByLabelText('r (однородность)')).not.toBeInTheDocument();
+  });
+
+  it('присланный r печатается в шапке и учтён в чипе; очищенное поле снимает ключ', async () => {
+    const {surface} = renderSurface({
+      draftAction: 'constructions:draft',
+      constructions: [wallWithR],
+    });
+    const actions = subscribeActions(surface);
+
+    // (1/8.7 + 0.38/0.81 + 1/23) · 0.9 = 0.56
+    expect(screen.getByText('Rпр 0.56 < 3.19')).toBeInTheDocument();
+    openCard(/^Наружная стена/);
+    expect(screen.getByText(/r = 0\.90/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+    fireEvent.change(screen.getByLabelText('r (однородность)'), {target: {value: ''}});
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    expect(screen.getByText('Rпр 0.63 < 3.19')).toBeInTheDocument();
+    expect(screen.queryByText(/r = /)).not.toBeInTheDocument();
+    const draft = actions[0]!.context as {constructions: Array<Record<string, unknown>>};
+    expect(draft.constructions[0]).not.toHaveProperty('r');
+  });
+});
+
+describe('ConstructionsEditorNext: температура помещения и поправка nt', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})})),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const TV_LABEL = /температура помещения/;
+  const TOT_LABEL = /температура с холодной стороны/;
+
+  it('плейсхолдеры температур — значения здания: пустое поле значит «как у здания»', () => {
+    renderSurface();
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    expect(screen.getByLabelText(TV_LABEL)).toHaveAttribute('placeholder', '20');
+    expect(screen.getByLabelText(TOT_LABEL)).toHaveAttribute('placeholder', '-2.2');
+    expect(screen.getByLabelText(TV_LABEL)).toHaveValue('');
+  });
+
+  it('tв* лестничной клетки: чип nt, норма по нему, шапка и черновик', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    fireEvent.change(screen.getByLabelText(TV_LABEL), {target: {value: '16'}});
+    // До «Сохранить» ничего не меняется — как у типа, названия и r.
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+    expect(actions).toHaveLength(0);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    // nt = (16 − (−2,2))/(20 − (−2,2)) = 0,82; норма 3,19 · 0,82 = 2,62.
+    expect(screen.getByText('nt 0.82')).toBeInTheDocument();
+    expect(screen.getByText('Rпр 4.09 ≥ 2.62')).toBeInTheDocument();
+    expect(screen.getByText(/t.*в \+16 °C/)).toBeInTheDocument();
+    const draft = actions[0]!.context as {constructions: Array<{tvRoom?: number}>};
+    expect(draft.constructions[0]!.tvRoom).toBe(16);
+  });
+
+  it('tот* перекрытия над подвалом опускает норму, а не Rпр', async () => {
+    renderSurface();
+    openCard(/^Пол по грунту/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    fireEvent.change(screen.getByLabelText(TOT_LABEL), {target: {value: '8'}});
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    // nt = (20 − 8)/(20 − (−2,2)) = 0,54; норма 4,20 · 0,54 = 2,27.
+    expect(screen.getByText('nt 0.54')).toBeInTheDocument();
+    expect(screen.getByText('Rпр 0.21 < 2.27')).toBeInTheDocument();
+  });
+
+  it('без заданной температуры чипа nt нет', () => {
+    renderSurface();
+    expect(screen.queryByText(/^nt /)).not.toBeInTheDocument();
+    expect(screen.getByText('Rпр 4.09 ≥ 3.19')).toBeInTheDocument();
+  });
+
+  it('у изделия поля температур есть: nt правит норму любого типа таблицы 3', () => {
+    renderSurface();
+    openCard(/^Окно двухкамерное/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+
+    expect(screen.getByLabelText(TV_LABEL)).toBeInTheDocument();
+    expect(screen.getByLabelText(TOT_LABEL)).toBeInTheDocument();
+    // r у изделия по-прежнему нет — множитель Rпр, а не нормы.
+    expect(screen.queryByLabelText('r (однородность)')).not.toBeInTheDocument();
+  });
+
+  it('очищенное поле снимает ключ, чип nt уходит', async () => {
+    const {surface} = renderSurface({
+      draftAction: 'constructions:draft',
+      constructions: [
+        {
+          id: 'c-wall-1',
+          type: 'steny',
+          name: 'Наружная стена',
+          layers: [{material: 'Кирпич', thicknessMm: 380, lambdaB: 0.81}],
+          tvRoom: 16,
+        },
+      ],
+    });
+    const actions = subscribeActions(surface);
+    expect(screen.getByText('nt 0.82')).toBeInTheDocument();
+
+    openCard(/^Наружная стена/);
+    fireEvent.click(screen.getByRole('button', {name: 'Изменить тип и название'}));
+    fireEvent.change(screen.getByLabelText(TV_LABEL), {target: {value: ''}});
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Сохранить'}));
+    });
+
+    expect(screen.queryByText(/^nt /)).not.toBeInTheDocument();
+    const draft = actions[0]!.context as {constructions: Array<Record<string, unknown>>};
+    expect(draft.constructions[0]).not.toHaveProperty('tvRoom');
+  });
+});
+
+/**
+ * Вид слоя `thin` и толщина у `vent-gap`/`thin` (change
+ * constructions-layer-kind-thin): строка без толщины — полная, вид виден в
+ * сводке, селектор вида в форме, спец-запись справочника ставит вид сразу.
+ */
+describe('ConstructionsEditorNext: вид слоя thin и толщина зазоров', () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+
+  const respondWith = (options: unknown[]) => {
+    fetchMock.mockImplementation(() => Promise.resolve({ok: true, json: async () => ({options})}));
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fetchMock = vi.fn(() => Promise.resolve({ok: true, json: async () => ({options: []})}));
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  const thinFixture = JSON.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), 'fixtures', 'valid', 'constructions-editor-thin.json'),
+      'utf8',
+    ),
+  ).props as {constructions: unknown[]; typeConfigs: unknown[]};
+
+  const renderThin = () =>
+    renderSurface({
+      constructions: thinFixture.constructions,
+      typeConfigs: thinFixture.typeConfigs,
+      draftAction: 'constructions:draft',
+    });
+
+  /** Кнопка-раскрывашка карточки по началу заголовка. */
+  const cardButton = (name: RegExp) => screen.getByRole('button', {name});
+
+  it('облицовка вентфасада без толщины: вид под названием, «без толщины» без предупреждения, карточка готова', () => {
+    renderThin();
+    hideConditions();
+
+    const card = cardButton(/^Наружная стена тип 1/).closest('.a2ui-card');
+    expect(card!.className).not.toContain('a2ui-card--invalid');
+    expect(card!.textContent).toContain('готова');
+
+    openCard(/^Наружная стена тип 1/);
+    const row = screen.getByRole('button', {name: /^Навесной вентилируемый фасад/});
+    expect(row.textContent).toContain('вентилируемый зазор');
+    expect(row.textContent).toContain('без толщины');
+    expect(row.textContent).toContain('Rs — в итоговом расчёте');
+    expect(row.querySelector('.a2ui-t--warning')).toBeNull();
+    expect(screen.queryByText('толщина не задана')).toBeNull();
+  });
+
+  it('тонкие слои без толщины: «тонкий слой», «не учитывается», карточка не подсвечена', () => {
+    renderThin();
+    hideConditions();
+
+    const card = cardButton(/^Стена тамбура/).closest('.a2ui-card');
+    expect(card!.className).not.toContain('a2ui-card--invalid');
+
+    openCard(/^Стена тамбура/);
+    const adhesive = screen.getAllByRole('button', {name: /^Адгезивный слой/})[0]!;
+    expect(adhesive.textContent).toContain('тонкий слой');
+    expect(adhesive.textContent).toContain('без толщины');
+    expect(adhesive.textContent).toContain('не учитывается');
+    expect(adhesive.querySelector('.a2ui-t--warning')).toBeNull();
+
+    // Тонкий слой с толщиной печатает её как обычно.
+    const paint = screen.getByRole('button', {name: /^Акриловая краска/});
+    expect(paint.textContent).toContain('2 мм');
+    expect(paint.textContent).toContain('тонкий слой');
+  });
+
+  it('материал без толщины по-прежнему предупреждает: замкнутому зазору и материалу толщина нужна', () => {
+    renderSurface({
+      constructions: [
+        {
+          id: 'w',
+          type: 'steny',
+          name: 'Стена с пустыми строками',
+          layers: [
+            {material: 'Кирпич', thicknessMm: null, lambdaManual: 0.7},
+            {material: 'Замкнутый зазор', thicknessMm: null, kind: 'closed-gap'},
+          ],
+        },
+      ],
+    });
+    hideConditions();
+    openCard(/^Стена с пустыми строками/);
+
+    expect(screen.getAllByText('толщина не задана')).toHaveLength(2);
+    expect(screen.queryByText('без толщины')).toBeNull();
+  });
+
+  it('селектор «Вид слоя»: «Тонкий слой» снимает λ, толщина не нужна, «Применить» уезжает с kind', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    hideConditions();
+    openCard(/^Наружная стена/);
+
+    // Фибролит: свой материал с ручной λ 0,09 и толщиной 30.
+    fireEvent.click(screen.getByRole('button', {name: /Фибролит/}));
+    const kindSelect = screen.getByRole('combobox', {name: 'Вид слоя'});
+    expect(kindSelect.textContent).toContain('Материал');
+
+    // Base UI Select: клик открывает список, пункт выбирается фокусом + Enter
+    // (клик по пункту в jsdom не срабатывает — нужна pointer-последовательность).
+    await act(async () => {
+      fireEvent.click(kindSelect);
+    });
+    await act(async () => {
+      const option = screen.getByRole('option', {name: 'Тонкий слой'});
+      option.focus();
+      fireEvent.keyDown(option, {key: 'Enter'});
+    });
+
+    expect(screen.getByText('не учитывается')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('не нужна')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+    });
+
+    expect(actions).toHaveLength(1);
+    const draft = actions[0]!.context as {
+      constructions: Array<{layers: Array<{kind?: string; lambdaManual?: number; thicknessMm: number | null}>}>;
+    };
+    const layer = draft.constructions[0]!.layers[3]!;
+    expect(layer.kind).toBe('thin');
+    expect(layer.lambdaManual).toBeUndefined();
+    expect(layer.thicknessMm).toBe(30);
+    expect(screen.getByRole('button', {name: /Фибролит.*тонкий слой/})).toBeInTheDocument();
+  });
+
+  it('селектор «Тонкий слой» снимает materialKey, λА и λБ у слоя из справочника (design, решение 2)', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    hideConditions();
+    openCard(/^Наружная стена/);
+
+    // Кирпич: слой из справочника — materialKey, λБ 0,81 из фикстуры.
+    fireEvent.click(screen.getByRole('button', {name: /^Кладка из глиняного/}));
+    const kindSelect = screen.getByRole('combobox', {name: 'Вид слоя'});
+    await act(async () => {
+      fireEvent.click(kindSelect);
+    });
+    await act(async () => {
+      const option = screen.getByRole('option', {name: 'Тонкий слой'});
+      option.focus();
+      fireEvent.keyDown(option, {key: 'Enter'});
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+    });
+
+    const draft = actions[0]!.context as {
+      constructions: Array<{layers: Array<Record<string, unknown>>}>;
+    };
+    const layer = draft.constructions[0]!.layers[0]!;
+    expect(layer).toMatchObject({material: 'Кладка из глиняного обыкновенного кирпича', kind: 'thin'});
+    // Снятые поля уезжают как undefined (так же делает свободный ввод
+    // материала) — в JSON action'а их нет.
+    expect(layer.materialKey).toBeUndefined();
+    expect(layer.lambdaA).toBeUndefined();
+    expect(layer.lambdaB).toBeUndefined();
+    expect(layer.lambdaManual).toBeUndefined();
+  });
+
+  it('спец-запись справочника ставит вид сразу: строка не подсвечена как материал без λ', async () => {
+    const {surface} = renderSurface({draftAction: 'constructions:draft'});
+    const actions = subscribeActions(surface);
+    hideConditions();
+    openCard(/^Наружная стена/);
+    respondWith([{value: 'thin', label: 'Тонкий слой (плёнка, клей, сетка)'}]);
+
+    fireEvent.click(screen.getByRole('button', {name: /Фибролит/}));
+    await typeAndFlush(materialInput(), 'тонк');
+    fireEvent.keyDown(materialInput(), {key: 'ArrowDown'});
+    fireEvent.keyDown(materialInput(), {key: 'Enter'});
+
+    expect(screen.getByRole('combobox', {name: 'Вид слоя'}).textContent).toContain('Тонкий слой');
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', {name: 'Применить'}));
+    });
+    const draft = actions[0]!.context as {
+      constructions: Array<{layers: Array<{kind?: string; materialKey?: string}>}>;
+    };
+    expect(draft.constructions[0]!.layers[3]).toMatchObject({kind: 'thin', materialKey: 'thin'});
+  });
+});
