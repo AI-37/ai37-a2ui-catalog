@@ -345,3 +345,20 @@ def test_proposal_source_links_alone_are_not_a_source() -> None:
 
     with pytest.raises(ValidationError):
         ProposalSource.model_validate({"links": [{"label": "Голосовое сообщение 1"}]})
+
+
+@pytest.mark.parametrize(
+    "skip",
+    [
+        {"label": "Без файла"},
+        {"value": "nofile"},
+        {"label": "", "value": "nofile"},
+        {},
+    ],
+)
+def test_attachment_choice_card_rejects_incomplete_skip(skip: dict[str, str]) -> None:
+    """`skip` необязателен, но если прислан — только целиком (label и value)."""
+    payload = load_fixture("valid", "attachment-choice-card-signature.json")
+    payload["props"]["skip"] = skip
+    with pytest.raises(ValidationError):
+        validate_component_payload(payload["component"], payload["props"])

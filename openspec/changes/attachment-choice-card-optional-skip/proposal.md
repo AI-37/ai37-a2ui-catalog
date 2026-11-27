@@ -20,7 +20,7 @@
   `attachment-choice-card-skip-button.tsx` с ранним `return null`. Attach-кнопка, disabled-логика и payload
   не менялись.
 - Фикстура `fixtures/valid/attachment-choice-card-attach-only.json` (тексты теплотеха), превью в demo.
-- Версия пакетов 0.41.0 → 0.42.0.
+- Версия пакетов 0.50.0 → 0.51.0.
 
 ## Impact
 
